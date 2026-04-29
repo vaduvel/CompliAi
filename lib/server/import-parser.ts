@@ -83,13 +83,21 @@ const SECTOR_ALIASES: Record<string, OrgSector> = {
   energy: "energy",
   transport: "transport",
   logistica: "transport",
+  logistic: "transport",
+  "transport si logistica": "transport",
+  "transporturi si logistica": "transport",
   bancar: "banking",
   banking: "banking",
   financiar: "finance",
+  financiare: "finance",
   finance: "finance",
+  fintech: "finance",
+  "servicii financiare": "finance",
   sanatate: "health",
   health: "health",
   medical: "health",
+  clinica: "health",
+  clinic: "health",
   "digital-infrastructure": "digital-infrastructure",
   digital: "digital-infrastructure",
   it: "digital-infrastructure",
@@ -130,9 +138,18 @@ function normalizeEmployeeCount(raw: string): OrgEmployeeCount | null {
 }
 
 function normalizeSector(raw: string): OrgSector | null {
-  const lower = raw.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ")
+  const lower = normalizeText(raw).replace(/[_-]+/g, " ").replace(/\s+/g, " ")
   if (VALID_SECTORS.includes(lower as OrgSector)) return lower as OrgSector
-  return SECTOR_ALIASES[lower] ?? null
+  const exact = SECTOR_ALIASES[lower]
+  if (exact) return exact
+  if (lower.includes("sanat") || lower.includes("clinic") || lower.includes("medical")) return "health"
+  if (lower.includes("transport") || lower.includes("logistic")) return "transport"
+  if (lower.includes("financ") || lower.includes("fintech") || lower.includes("ifn")) return "finance"
+  if (lower.includes("banc")) return "banking"
+  if (lower.includes("comert") || lower.includes("retail")) return "retail"
+  if (lower.includes("product") || lower.includes("manufactur")) return "manufacturing"
+  if (lower.includes("consult") || lower.includes("servicii profesionale")) return "professional-services"
+  return null
 }
 
 // ── CUI normalization ────────────────────────────────────────────────────────
@@ -145,11 +162,22 @@ export function normalizeCUI(raw: string): string | null {
 // ── Fuzzy column mapping ─────────────────────────────────────────────────────
 
 function normalizeHeader(header: string): string {
-  return header
-    .toLowerCase()
+  return normalizeText(header)
     .trim()
     .replace(/[^a-z0-9\s]/g, "")
     .replace(/\s+/g, " ")
+}
+
+function normalizeText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[șş]/g, "s")
+    .replace(/[ȘŞ]/g, "S")
+    .replace(/[țţ]/g, "t")
+    .replace(/[ȚŢ]/g, "T")
+    .toLowerCase()
+    .trim()
 }
 
 export type ColumnMapping = Record<ImportColumnId, number | null>
@@ -272,7 +300,8 @@ export function parseImportFile(
   if (isExcel) {
     workbook = XLSX.read(buffer, { type: "buffer" })
   } else {
-    workbook = XLSX.read(buffer, { type: "buffer", raw: true })
+    const csvText = buffer.toString("utf8").replace(/^\uFEFF/, "")
+    workbook = XLSX.read(csvText, { type: "string", raw: true })
   }
 
   const sheetName = workbook.SheetNames[0]

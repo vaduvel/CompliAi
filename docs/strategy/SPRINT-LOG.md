@@ -562,3 +562,31 @@ ea7036f fix(v3): wire document share tokens for approval flow
 5. Pilot kickoff joi 7 mai 15:00
 
 **Decision Gate 5 iun 2026**: post-pilot retro cu Diana → GO/NO-GO launch 22 iun.
+
+---
+
+## 2026-04-29 — DPO live-browser acceptance hardening (post import firme noi)
+
+Context: Sonnet a testat ca Diana Popescu, cu 3 firme noi importate din CSV (`Medica Plus`, `TransRapid`, `FinCore`) plus seed-ul DPO Complet. Blocantul `/shared/[token]` 500 era rezolvat, dar testul a arătat că Diana vedea ușor doar share de profil readiness, nu un CTA evident pentru document-specific approval.
+
+### Fixuri livrate
+- Adăugat CTA vizibil `Trimite la client` pe documentele aprobabile din `Dosar` / `Rapoarte` și `Documente generate`.
+- CTA generează magic link cu `documentId` + `documentTitle`, copiază linkul și deschide pagina `/shared/[token]` cu `Aprob / Respinge / Comentariu`.
+- Reparat consumul răspunsului `/api/reports/share-token` în UI profile share (`token` string vs shape vechi `{ token }`).
+- `/shared/[token]` afișează label `Aprobare document` când payload-ul conține `documentId`.
+- Import CSV: normalizare diacritice pentru headers și valori (`Nr. angajați`, `Sănătate`, `Transport și logistică`, `Servicii financiare`).
+- Import CSV: sector aliases extinse pentru `health`, `transport`, `finance` din limbaj românesc natural.
+- Baseline scan după import creează `ScanRecord`, astfel `Ultima scanare` nu mai rămâne `fără scanare`.
+- KPI `Taskuri active` din portofoliu numără și finding-urile acționabile fără `remediationPlan` explicit.
+- Template library: adăugat tip `dsar-response` + generator fallback + suport approval magic link.
+- Rebrand pe suprafețe active atinse (`CompliAI` -> `CompliScan`) în document packs și email helpers.
+
+### Validare
+- `./node_modules/.bin/vitest run lib/server/import-parser.test.ts lib/server/portfolio.test.ts app/api/reports/share-token/route.test.ts` — 9/9 pass.
+- `npm test` — 245 files pass, 1267 tests pass, 1 skipped.
+- Runtime smoke `/private/tmp/dpo-deep-acceptance-smoke.mjs` — pass: portfolio urgent DSAR, monthly activities, document-specific shared page approval controls, audit pack issuer.
+- Runtime smoke `/private/tmp/dpo-ui-share-button-smoke.mjs` — pass: `Dosar` randă CTA `Trimite la client`.
+
+### Observație build
+- Build root fix livrat în `next.config.ts` prin `outputFileTracingRoot: process.cwd()`, ca Next să nu mai infereze root-ul din workspace-ul părinte.
+- `npm run build` — PASS; rămân doar warning-uri lint pre-existente.

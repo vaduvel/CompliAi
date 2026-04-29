@@ -366,7 +366,7 @@ function ProgressStep({
               ? "Pregătim baseline-ul de conformitate pentru fiecare firmă (ANAF, E-Factura, Website)."
               : results.length > 0
                 ? `${successful.length} importate, ${failed.length} erori`
-                : "Se creează organizațiile și se rulează applicability..."}
+                : "Se creează organizațiile și se rulează aplicabilitatea..."}
           </p>
           {anafResults.length > 0 && scanningCount === 0 && (
             <p className="mt-1 text-xs text-eos-text-muted">

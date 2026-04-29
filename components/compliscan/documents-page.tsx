@@ -8,6 +8,7 @@ import { ArrowRight, BookOpen, BriefcaseBusiness, FolderOpen, Loader2, Sparkles 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { CookieBannerCard } from "@/components/compliscan/cookie-banner-card"
+import { DocumentShareAction } from "@/components/compliscan/document-share-action"
 import { HrRegesReconciliationCard } from "@/components/compliscan/hr-reges-reconciliation-card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -57,7 +58,7 @@ const PREPARED_PACK_FALLBACKS: Record<
     generatorLabel: "Generează prima fișă",
     loadingLabel: "Încărcăm pachetul HR pregătit pentru fișe de post.",
     returnEvidenceNote:
-      "CompliAI a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă.",
+      "CompliScan a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă.",
   },
   "hr-procedures": {
     title: "Pachet minim proceduri interne HR",
@@ -67,7 +68,7 @@ const PREPARED_PACK_FALLBACKS: Record<
     generatorLabel: "Generează regulamentul",
     loadingLabel: "Încărcăm pachetul HR pregătit pentru regulamentul intern.",
     returnEvidenceNote:
-      "CompliAI a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
+      "CompliScan a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
   },
   "reges-correction": {
     title: "Pachet minim corecție REGES",
@@ -77,7 +78,7 @@ const PREPARED_PACK_FALLBACKS: Record<
     generatorLabel: "Generează brief-ul",
     loadingLabel: "Încărcăm pachetul pregătit pentru corecția REGES.",
     returnEvidenceNote:
-      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR, snapshotul intern și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
+      "CompliScan a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR, snapshotul intern și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
   },
   "contracts-baseline": {
     title: "Pachet minim baseline contractual",
@@ -87,7 +88,7 @@ const PREPARED_PACK_FALLBACKS: Record<
     generatorLabel: "Generează template-ul",
     loadingLabel: "Încărcăm pachetul pregătit pentru baseline-ul contractual.",
     returnEvidenceNote:
-      "CompliAI a pregătit pachetul contractual: matricea de template-uri, checklistul de clauze și planul de adoptare au fost revizuite. Următorul pas este validarea juridică și punerea în uz a template-urilor pentru relațiile comerciale reale.",
+      "CompliScan a pregătit pachetul contractual: matricea de template-uri, checklistul de clauze și planul de adoptare au fost revizuite. Următorul pas este validarea juridică și punerea în uz a template-urilor pentru relațiile comerciale reale.",
   },
 }
 
@@ -249,7 +250,7 @@ export function DocumentsPageSurface() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-eos-primary">
-                  CompliAI a pregătit pentru tine
+                  CompliScan a pregătit pentru tine
                 </p>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BriefcaseBusiness className="size-4 text-eos-primary" />
@@ -415,10 +416,11 @@ export function DocumentsPageSurface() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-4">
+                  <CardContent className="flex flex-wrap items-center gap-2 pt-4">
                     <Button asChild variant="outline" size="sm">
                       <Link href={dashboardRoutes.policies}>Vezi în Politici</Link>
                     </Button>
+                    <DocumentShareAction document={document} />
                   </CardContent>
                 </Card>
               ))}

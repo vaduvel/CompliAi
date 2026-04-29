@@ -15,6 +15,7 @@ export type DocumentType =
   | "privacy-policy"
   | "cookie-policy"
   | "dpa"
+  | "dsar-response"
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
@@ -108,6 +109,7 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "privacy-policy": 24,
   "cookie-policy": 24,
   dpa: 12,
+  "dsar-response": 6,
   "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
@@ -152,6 +154,10 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   dpa: {
     title: "Acord de Prelucrare a Datelor (DPA)",
     legalBasis: "GDPR Art. 28",
+  },
+  "dsar-response": {
+    title: "Răspuns DSAR către persoana vizată",
+    legalBasis: "GDPR Art. 12, 15–22",
   },
   "retention-policy": {
     title: "Politică și Matrice de Retenție a Datelor",
@@ -384,6 +390,23 @@ Cerințe:
 - Transferuri internaționale — clauze contractuale standard
 - Durata și rezilierea acordului
 - Nu inventa altă dată pentru câmpurile de actualizare sau generare
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "dsar-response": `
+Generează un draft de răspuns DSAR în română pentru persoana vizată.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Include identificarea operatorului, referința cererii și tipul dreptului vizat
+- Explică pașii de verificare a identității și termenul legal de răspuns
+- Structurează răspunsul în secțiuni: confirmare primire, evaluare solicitare, date/sisteme verificate, răspuns propus, drept de reclamație ANSPDCP
+- Include placeholders pentru date care trebuie completate de consultant: [NUME PERSOANĂ], [DATA CERERII], [REFERINȚĂ INTERNĂ]
+- Marchează clar că este DRAFT și necesită validare umană înainte de transmitere
 - Format Markdown cu titluri clare
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
@@ -871,6 +894,35 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       "## Sub-procesatori, audit și încetare",
       "Sub-procesatorii trebuie autorizați și documentați, operatorul trebuie să poată obține informații de audit rezonabile, iar la încetarea relației datele trebuie returnate sau șterse conform instrucțiunilor operatorului și obligațiilor legale.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "dsar-response": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Operator:** ${input.orgName}`,
+      `**Pregătit de:** ${preparedBy}`,
+      `**Contact consultant / DPO:** ${input.dpoEmail ?? "[Completează email consultant]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      `**Status:** DRAFT — necesită validare înainte de transmitere`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Confirmare primire cerere",
+      "Confirmăm primirea solicitării privind exercitarea drepturilor persoanei vizate. Completați aici data cererii, identitatea solicitantului și referința internă DSAR.",
+      "",
+      "## Verificare identitate și termen",
+      "Înainte de transmiterea răspunsului final, consultantul trebuie să confirme identitatea solicitantului și termenul aplicabil. Termenul standard este de 30 de zile, cu posibilitatea de prelungire în cazuri complexe, documentată separat.",
+      "",
+      "## Evaluarea solicitării",
+      "Descrieți dreptul vizat (acces, rectificare, ștergere, restricționare, opoziție sau portabilitate), sistemele verificate și eventualele limitări legale aplicabile.",
+      "",
+      "## Răspuns propus",
+      "Completați răspunsul concret către persoana vizată, inclusiv datele puse la dispoziție, acțiunile efectuate sau motivul documentat al refuzului parțial/total.",
+      "",
+      "## Drept de reclamație",
+      "Persoana vizată are dreptul de a depune o plângere la ANSPDCP dacă apreciază că răspunsul primit nu respectă GDPR.",
       "",
       reviewWarning,
     ].join("\n"),
@@ -1446,6 +1498,13 @@ export const DOCUMENT_TYPES: Array<{
     description: "Contract obligatoriu cu procesatorii de date conform GDPR Art. 28.",
     free: false,
     legalBasis: "GDPR Art. 28",
+  },
+  {
+    id: "dsar-response",
+    label: "Răspuns DSAR",
+    description: "Draft de răspuns către persoana vizată pentru cereri de acces, ștergere, rectificare sau opoziție.",
+    free: false,
+    legalBasis: "GDPR Art. 12, 15–22",
   },
   {
     id: "retention-policy",

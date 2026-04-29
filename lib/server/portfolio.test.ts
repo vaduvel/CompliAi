@@ -170,6 +170,26 @@ describe("lib/server/portfolio", () => {
     )
   })
 
+  it("numără finding-urile acționabile ca taskuri active chiar dacă nu au remediationPlan explicit", () => {
+    const bundle = structuredClone(baseBundle)
+    bundle.remediationPlan = []
+    bundle.state!.findings = [
+      {
+        id: "import-cookie-gap",
+        severity: "high",
+        category: "GDPR",
+        findingStatus: "open",
+        title: "Cookie banner fără opțiune reală de respingere",
+        detail: "Website-ul are tracking, dar nu există dovadă de refuz consimțământ.",
+        evidenceRequired: "Screenshot banner cookie cu Accept / Respinge / Setări.",
+      },
+    ]
+
+    const rows = buildPortfolioOverviewRows([bundle])
+
+    expect(rows[0]?.compliance?.totalTasks).toBe(1)
+  })
+
   it("construiește alert rows sortate și cu framework derivat", () => {
     const rows = buildPortfolioAlertRows([baseBundle])
 

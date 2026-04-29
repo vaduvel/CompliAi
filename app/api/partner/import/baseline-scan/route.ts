@@ -9,8 +9,8 @@
 import { NextResponse } from "next/server"
 
 import { evaluateApplicability } from "@/lib/compliance/applicability"
-import type { OrgProfile } from "@/lib/compliance/applicability"
 import type { FullIntakeAnswers } from "@/lib/compliance/intake-engine"
+import type { ScanRecord } from "@/lib/compliance/types"
 import {
   buildInitialFindings,
   buildInitialIntakeAnswers,
@@ -68,6 +68,7 @@ export async function POST(request: Request) {
 
     let prefill = state.orgProfilePrefill ?? null
     let updatedProfile = state.orgProfile
+    const nowISO = new Date().toISOString()
 
     // Store website in profile if provided and not already set
     if (body.website && updatedProfile && !updatedProfile.website) {
@@ -190,6 +191,21 @@ export async function POST(request: Request) {
         state.findings = [...state.findings, ...newFindings]
       }
     }
+
+    const baselineScan: ScanRecord = {
+      id: `baseline-import-${body.orgId}-${Date.now()}`,
+      documentName: "Baseline import portofoliu",
+      contentPreview:
+        "Scan automat rulat după importul firmei în portofoliu: ANAF, profil organizație, website și intake GDPR.",
+      createdAtISO: nowISO,
+      analyzedAtISO: nowISO,
+      findingsCount: state.findings.length,
+      sourceKind: "manifest",
+      extractionMethod: "manual",
+      extractionStatus: "completed",
+      analysisStatus: "completed",
+    }
+    state.scans = [baselineScan, ...(state.scans ?? [])].slice(0, 100)
 
     await writeStateForOrg(body.orgId, state)
 

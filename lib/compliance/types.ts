@@ -22,6 +22,7 @@ export type GeneratedDocumentKind =
   | "privacy-policy"
   | "cookie-policy"
   | "dpa"
+  | "dsar-response"
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"

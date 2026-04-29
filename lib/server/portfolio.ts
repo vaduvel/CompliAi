@@ -202,7 +202,7 @@ export function buildPortfolioOverviewRows(bundles: PortfolioOrgBundle[]): Portf
         !isFindingOperationallyClosed(state, finding.id) &&
         (finding.severity === "critical" || finding.severity === "high")
     ).length
-    const totalTasks = remediationPlan.filter((task) => isPortfolioTaskOpen(task, state.taskState, state)).length
+    const totalTasks = countOpenPortfolioTasks(state, remediationPlan)
 
     return {
       orgId: membership.orgId,
@@ -518,6 +518,27 @@ function deriveFindingDueDate(finding: ScanFinding): string | undefined {
 
 function isPortfolioFindingTaskCandidate(finding: ScanFinding) {
   return Boolean(deriveFindingDueDate(finding) || finding.evidenceRequired || finding.resolution?.closureEvidence)
+}
+
+function countOpenPortfolioTasks(state: ComplianceState, remediationPlan: RemediationAction[]) {
+  const coveredFindingIds = new Set<string>()
+  const remediationTaskCount = remediationPlan.filter((task) => {
+    const open = isPortfolioTaskOpen(task, state.taskState, state)
+    if (open) {
+      for (const findingId of task.relatedFindingIds ?? []) coveredFindingIds.add(findingId)
+    }
+    return open
+  }).length
+
+  const findingTaskCount = state.findings.filter((finding) =>
+    isFindingActive(finding) &&
+    !isFindingOperationallyClosed(state, finding.id) &&
+    (state.taskState ?? {})[finding.id]?.status !== "done" &&
+    !coveredFindingIds.has(finding.id) &&
+    isPortfolioFindingTaskCandidate(finding)
+  ).length
+
+  return remediationTaskCount + findingTaskCount
 }
 
 function extractDocumentVendorSignals(state: ComplianceState | null): Array<{

@@ -1557,7 +1557,7 @@ export function SettingsPageSurface() {
                   <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-semibold text-eos-error">GDPR Art. 17</span>
                 </div>
                 <p className="mt-1 text-sm text-eos-text-tertiary">
-                  Trimite o solicitare echipei CompliAI pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
+                  Trimite o solicitare echipei CompliScan pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
                 </p>
               </div>
               <div className="px-5 py-5 space-y-4">

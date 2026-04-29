@@ -47,7 +47,8 @@ function formatExpiry(iso: string) {
   })
 }
 
-function recipientLabel(type: string) {
+function recipientLabel(type: string, documentId?: string | null) {
+  if (documentId) return "Aprobare document"
   if (type === "counsel") return "Brief juridic"
   if (type === "partner") return "Profil partener"
   return "Raport contabil"
@@ -227,7 +228,7 @@ export default async function SharedCompliancePage({
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-eos-primary/25 bg-eos-primary/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
             <ShieldCheck className="size-3" strokeWidth={2} />
-            {consultant.cabinetName} · {recipientLabel(payload.recipientType)}
+            {consultant.cabinetName} · {recipientLabel(payload.recipientType, payload.documentId)}
           </span>
         </div>
       </header>

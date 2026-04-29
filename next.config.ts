@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   experimental: {
     devtoolSegmentExplorer: false,
   },
+  outputFileTracingRoot: process.cwd(),
   outputFileTracingIncludes: {
     "/api/reports/pdf": [
       "./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",

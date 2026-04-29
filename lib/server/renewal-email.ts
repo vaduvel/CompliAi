@@ -1,5 +1,5 @@
 // lib/server/renewal-email.ts
-// Email de reînnoire abonament — CompliAI Etapa 1, TASK 3
+// Email de reînnoire abonament — CompliScan Etapa 1, TASK 3
 //
 // Subiect: [Firma ta] — 12 luni de conformitate. Ce se întâmplă dacă nu reînnoiești.
 // Tonul e factual, nu urgentizant artificial — lăsăm datele să vorbească.
@@ -9,7 +9,7 @@
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_ADDRESS =
-  process.env.ALERT_EMAIL_FROM ?? "CompliAI <onboarding@resend.dev>"
+  process.env.ALERT_EMAIL_FROM ?? "CompliScan <onboarding@resend.dev>"
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.compliscan.ro"
 
 export type RenewalEmailData = {
@@ -61,12 +61,12 @@ function buildRenewalHtml(data: RenewalEmailData, appUrl: string): string {
 </head>
 <body style="font-family:system-ui,-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#0f172a;background:#fff">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:28px;border-radius:0 0 8px 8px">
 
     <h2 style="margin:0 0 8px;font-size:20px;color:#0f172a;line-height:1.4">
-      În ultimele 12 luni, CompliAI a acumulat pentru ${data.orgName}:
+      În ultimele 12 luni, CompliScan a acumulat pentru ${data.orgName}:
     </h2>
 
     ${metricsRows}

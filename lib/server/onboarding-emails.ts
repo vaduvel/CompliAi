@@ -10,7 +10,7 @@
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_ADDRESS =
-  process.env.ALERT_EMAIL_FROM ?? "CompliAI <onboarding@resend.dev>"
+  process.env.ALERT_EMAIL_FROM ?? "CompliScan <onboarding@resend.dev>"
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.compliscan.ro"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -26,12 +26,12 @@ type EmailTemplate = {
 
 const TEMPLATES: Record<OnboardingEmailType, EmailTemplate> = {
   welcome: {
-    subject: "Bine ai venit în CompliAI — completează profilul în 2 minute",
+    subject: "Bine ai venit în CompliScan — completează profilul în 2 minute",
     html: ({ orgName, appUrl }) => `
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#0f172a">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 12px">Bine ai venit, ${orgName}!</h2>
@@ -47,12 +47,12 @@ const TEMPLATES: Record<OnboardingEmailType, EmailTemplate> = {
   },
 
   "day2-first-doc": {
-    subject: "30 de secunde pentru primul tău document CompliAI",
+    subject: "30 de secunde pentru primul tău document CompliScan",
     html: ({ orgName, appUrl }) => `
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#0f172a">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 12px">Generează primul document, ${orgName}</h2>
@@ -73,11 +73,11 @@ const TEMPLATES: Record<OnboardingEmailType, EmailTemplate> = {
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#0f172a">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 12px">Verifică furnizorii tăi, ${orgName}</h2>
-    <p style="color:#475569">Dacă ești eligibil NIS2, fiecare furnizor tehnic fără DPA semnat este un risc activ. CompliAI poate importa furnizorii din facturile ANAF automat.</p>
+    <p style="color:#475569">Dacă ești eligibil NIS2, fiecare furnizor tehnic fără DPA semnat este un risc activ. CompliScan poate importa furnizorii din facturile ANAF automat.</p>
     <a href="${appUrl}/dashboard/nis2" style="display:inline-block;margin-top:16px;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
       Importă furnizori →
     </a>
@@ -93,15 +93,15 @@ const TEMPLATES: Record<OnboardingEmailType, EmailTemplate> = {
 <!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#0f172a">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
-    <h2 style="margin:0 0 12px">10 zile cu CompliAI, ${orgName}</h2>
+    <h2 style="margin:0 0 12px">10 zile cu CompliScan, ${orgName}</h2>
     <p style="color:#475569">Intră în dashboard să vezi scorul tău de conformitate și toate findings-urile deschise. Găsești acolo și Audit Pack-ul complet — gata de descărcat.</p>
     <a href="${appUrl}/dashboard" style="display:inline-block;margin-top:8px;background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
       Vezi scorul tău →
     </a>
-    <p style="margin-top:16px;color:#475569">Trial-ul Pro expiră în curând. Dacă CompliAI ți-a fost util, poți continua cu planul Pro — €99/lună.</p>
+    <p style="margin-top:16px;color:#475569">Trial-ul Pro expiră în curând. Dacă CompliScan ți-a fost util, poți continua cu planul Pro — €99/lună.</p>
     <a href="${appUrl}/pricing" style="display:inline-block;margin-top:8px;background:#f59e0b;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
       Continuă cu Pro →
     </a>

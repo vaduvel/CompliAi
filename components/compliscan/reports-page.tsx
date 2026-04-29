@@ -7,6 +7,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
+import { DocumentShareAction } from "@/components/compliscan/document-share-action"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
@@ -327,11 +328,12 @@ function PartnerCounselPack() {
       })
       if (!res.ok) throw new Error("Eroare server")
       const data = (await res.json()) as {
-        token?: { token: string; expiresAtISO: string }
+        token?: string | { token?: string; expiresAtISO?: string }
       }
-      if (!data.token) throw new Error("Token gol")
+      const tokenValue = typeof data.token === "string" ? data.token : data.token?.token
+      if (!tokenValue) throw new Error("Token gol")
 
-      const link = `${window.location.origin}/shared/${data.token.token}`
+      const link = `${window.location.origin}/shared/${tokenValue}`
       setShareLink(link)
       await navigator.clipboard.writeText(link)
       toast.success(`Link securizat copiat — expiră în 72h`)
@@ -424,7 +426,9 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   "pay-gap-report": "Raport Pay Transparency",
   "privacy-policy": "Politică de confidențialitate",
   "nis2-incident-response": "Plan IR NIS2",
+  dpa: "Acord DPA",
   "dpa-agreement": "Acord DPA",
+  "dsar-response": "Răspuns DSAR",
   "data-processing-record": "Registru Prelucrări",
   "ropa": "Registru RoPA",
 }
@@ -496,6 +500,7 @@ function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) 
                     )}
                   </div>
                 </div>
+                <DocumentShareAction document={doc} />
               </div>
             )
           })}
