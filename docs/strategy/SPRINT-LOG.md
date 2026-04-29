@@ -9,6 +9,29 @@
 
 ---
 
+## ✅ Update 29 apr 2026 (DPO Pilot Trust Pack v1)
+
+**Pack creat pentru pilot DPO Complet:** separă documentele de încredere din `security-contractual-pack.md` în fișiere scurte, trimisibile, cu status clar `pilot-ready draft`.
+
+- Folder repo:
+  - `docs/strategy/pilot/trust-pack-dpo-complet-2026-04-29/`
+- Fișiere:
+  - `00-README.md`
+  - `01-DPA-CompliScan-DPO-Complet.md`
+  - `02-Subprocessors.md`
+  - `03-Security-and-Hosting.md`
+  - `04-Backup-Retention-Deletion.md`
+  - `05-AI-Processing-Terms.md`
+  - `06-Client-Facing-Explainer.md`
+  - `07-Offboarding-Test-Report.md`
+- ZIP:
+  - `/Users/vaduvageorge/Downloads/compliscan-dpo-pilot-trust-pack-2026-04-29.zip`
+  - SHA-256: `b89e9a7c858a6d49c36796541f335bdbd2b40b8a95056d90e824048ad6c6d1ec`
+
+**Verdict:** nu sunt acte juridice finale semnate, dar sunt documentele potrivite pentru pilot responsabil: DPA template, subprocessori, hosting/security, backup/retenție/ștergere, AI processing, explicație client final și offboarding test report.
+
+---
+
 ## ✅ Update 28 apr 2026 (DPO Production Trust Hardening)
 
 **Sprint închis runtime:** ultimul pachet de încredere pentru pilot DPO real controlat: contractual, subprocessori, storage production, template import real și evidence delete hardening.

@@ -6,6 +6,10 @@
 
 🔐 **SHA-256**: `54fbf2003a5f405b0ea10d78e6b0d810b22b920592fa279891653ade3e71c743`
 
+📦 **Pilot Trust Pack DPO Complet v1**: `/Users/vaduvageorge/Downloads/compliscan-dpo-pilot-trust-pack-2026-04-29.zip`
+
+🔐 **SHA-256**: `b89e9a7c858a6d49c36796541f335bdbd2b40b8a95056d90e824048ad6c6d1ec`
+
 📋 **Începe cu**: [`RELEASE-READY-CHECKLIST.md`](./RELEASE-READY-CHECKLIST.md) — singura listă de care ai nevoie ca founder pentru launch.
 
 📓 **Status zilnic**: [`SPRINT-LOG.md`](./SPRINT-LOG.md) — jurnal de execuție continuu.
