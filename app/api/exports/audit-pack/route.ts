@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     }
     const payload = await buildDashboardPayload(state, workspaceOverride)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
-    const auditPack = buildAuditPack({
+    const baseAuditPack = buildAuditPack({
       state: payload.state,
       remediationPlan: payload.remediationPlan,
       workspace: payload.workspace,
@@ -81,6 +81,16 @@ export async function GET(request: Request) {
           logoUrl: whiteLabel.logoUrl ?? null,
         }
       : null
+    const issuedBy = branding?.partnerName || payload.workspace.workspaceLabel || session.orgName
+    const auditPack = {
+      ...baseAuditPack,
+      issuer: {
+        issuedBy,
+        cabinetName: issuedBy,
+        consultantName: payload.workspace.workspaceOwner || null,
+        source: branding?.partnerName ? "white_label" as const : "workspace" as const,
+      },
+    }
     const dateLabel = auditPack.generatedAt.slice(0, 10)
     const fileName = `audit-pack-v2-1-${payload.workspace.orgName
       .toLowerCase()

@@ -9,6 +9,26 @@
 
 ---
 
+## ✅ Update 29 apr 2026 (DPO deep acceptance P0/P1 fix)
+
+**Răspuns la raportul “DPO Consultant Deep Acceptance”:** am închis blocajele care încă opreau pilotul controlat: pagina publică de magic link, urgent DSAR count, monthly report activities, email branding și issuer în Audit Pack.
+
+- Fix cod:
+  - `/shared/[token]` nu mai depinde de Audit Pack/readiness builder greu; pagina publică folosește profil minim sigur și randează approve/reject/comment fără 500.
+  - `/api/partner/portfolio` expune `urgentDsarCount` la top-level, în `summary` și per client.
+  - `dsarSummary.urgent` include și DSAR-urile depășite, nu doar cele cu deadline viitor.
+  - `/api/partner/reports/monthly` acceptă `clientOrgId` și returnează `activities` reale din `workDone`, plus HTML client-facing.
+  - Emailurile active verificate nu mai folosesc brand vechi `CompliAI`; fallback `ALERT_EMAIL_FROM` local a fost actualizat la CompliScan.
+  - Audit Pack JSON/ZIP include `issuer` / `issuedBy` / `cabinetName`, iar bundle manifest include aceeași trasabilitate de cabinet.
+- Validare:
+  - `npm test` → **244 files passed**, **1265 tests passed**, 1 skipped ✅
+  - `npm run build` → PASS ✅
+  - Runtime smoke DPO deep acceptance pe `127.0.0.1:3000` → PASS: seed, urgent DSAR, monthly activities, shared page 200, DPO Complet white-label, approval controls, zero legacy brand pe shared, Audit Pack issuer DPO Complet ✅
+
+**Verdict:** blocker-ele P0/P1 din raportul Sonnet sunt închise. Următorul retest live trebuie să verifice UX-ul vizual din browser, nu API-ul de bază.
+
+---
+
 ## ✅ Update 29 apr 2026 (DPO browser acceptance fixes)
 
 **Răspuns la raportul live browser Sonnet:** am închis blocker-ele reale care făceau scenariul Diana să pară gol sau inconsistent în UI/API.

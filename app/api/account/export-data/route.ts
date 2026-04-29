@@ -28,13 +28,13 @@ export async function GET(request: Request) {
     const exportData = {
       _meta: {
         exportedAt: new Date().toISOString(),
-        format: "CompliAI GDPR Art. 20 Data Export",
+        format: "CompliScan GDPR Art. 20 Data Export",
         version: "1.0",
         orgId: session.orgId,
         orgName: session.orgName ?? null,
         userEmail: session.email,
         description:
-          "Acesta este exportul complet al datelor tale personale din CompliAI, " +
+          "Acesta este exportul complet al datelor tale personale din CompliScan, " +
           "conform GDPR Art. 20 (Dreptul la portabilitatea datelor).",
       },
       profile: {

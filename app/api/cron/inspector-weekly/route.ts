@@ -16,8 +16,8 @@ import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { runInspectorSimulation } from "@/lib/compliance/inspector-mode"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
-const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Inspector <onboarding@resend.dev>"
-const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliai.ro"
+const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Inspector <onboarding@resend.dev>"
+const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"
 
 function buildInspectorEmailHtml(
   orgName: string,
@@ -44,7 +44,7 @@ function buildInspectorEmailHtml(
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🔍 CompliAI · Inspector Mode</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan · Inspector Mode</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 8px;color:#0f172a">${orgName}</h2>
@@ -143,7 +143,7 @@ export async function POST(request: Request) {
 
         const ok = await sendEmail(
           prefs.emailAddress,
-          `[CompliAI] Inspector: ${result.overallVerdict === "partial" ? "Parțial pregătit" : "Nepregătit"} · ${org.name}`,
+          `[CompliScan] Inspector: ${result.overallVerdict === "partial" ? "Parțial pregătit" : "Nepregătit"} · ${org.name}`,
           html
         )
 

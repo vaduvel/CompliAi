@@ -25,6 +25,12 @@ export type AuditPackBaselineStatus = "validated" | "missing"
 export type AuditPackV2 = {
   version: "2.1"
   generatedAt: string
+  issuer: {
+    issuedBy: string
+    cabinetName: string
+    consultantName: string | null
+    source: "workspace" | "white_label"
+  }
   workspace: {
     id: string
     name: string

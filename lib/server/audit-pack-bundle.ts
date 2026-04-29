@@ -230,6 +230,7 @@ export async function buildAuditPackBundle(auditPack: AuditPackV2): Promise<Audi
           manifestVersion: "1.1",
           hashAlgorithm: "sha256",
           generatedAt: auditPack.generatedAt,
+          issuer: auditPack.issuer,
           workspace: auditPack.workspace,
           preparedBy: preparedByName,
           bundleEvidenceSummary: auditPack.bundleEvidenceSummary,

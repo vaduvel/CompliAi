@@ -11,6 +11,7 @@ import {
 import { jsonError } from "@/lib/server/api-response"
 import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { readNis2State } from "@/lib/server/nis2-store"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 import {
   getPartnerAccountPlanStatus,
   hasLegacyPartnerOrgPlan,
@@ -54,9 +55,10 @@ export async function GET(request: Request) {
     const rawState =
       (await readFreshStateForOrg(session.orgId, session.orgName)) ??
       normalizeComplianceState(initialComplianceState)
-    const [state, nis2State] = await Promise.all([
+    const [state, nis2State, whiteLabel] = await Promise.all([
       Promise.resolve(rawState),
       readNis2State(session.orgId),
+      getWhiteLabelConfig(session.orgId).catch(() => null),
     ])
     const workspaceOverride = {
       ...(await getOrgContext({ request })),
@@ -67,7 +69,7 @@ export async function GET(request: Request) {
     }
     const payload = await buildDashboardPayload(state, workspaceOverride)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
-    const auditPack = buildAuditPack({
+    const baseAuditPack = buildAuditPack({
       state: payload.state,
       remediationPlan: payload.remediationPlan,
       workspace: payload.workspace,
@@ -75,6 +77,17 @@ export async function GET(request: Request) {
       snapshot,
       nis2State,
     })
+    const issuedBy =
+      whiteLabel?.partnerName?.trim() || payload.workspace.workspaceLabel || session.orgName
+    const auditPack = {
+      ...baseAuditPack,
+      issuer: {
+        issuedBy,
+        cabinetName: issuedBy,
+        consultantName: payload.workspace.workspaceOwner || null,
+        source: whiteLabel?.partnerName?.trim() ? "white_label" as const : "workspace" as const,
+      },
+    }
     const bundle = await buildAuditPackBundle(auditPack)
 
     return new Response(new Uint8Array(bundle.buffer), {

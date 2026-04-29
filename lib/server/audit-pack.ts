@@ -69,6 +69,7 @@ export function buildAuditPack({
   return {
     version: "2.1",
     generatedAt,
+    issuer: buildDefaultIssuer(workspace),
     workspace: toAuditPackWorkspace(workspace),
     executiveSummary: {
       complianceScore: snapshot?.summary.complianceScore ?? null,
@@ -235,6 +236,15 @@ export function buildAuditPack({
       validatedBaseline,
       compliancePack: effectiveCompliancePack,
     },
+  }
+}
+
+function buildDefaultIssuer(workspace: WorkspaceContext): AuditPackV2["issuer"] {
+  return {
+    issuedBy: workspace.workspaceOwner || workspace.orgName,
+    cabinetName: workspace.workspaceLabel || workspace.orgName,
+    consultantName: workspace.workspaceOwner || null,
+    source: "workspace",
   }
 }
 

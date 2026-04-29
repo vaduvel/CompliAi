@@ -35,6 +35,7 @@ type ClientReportEntry = {
   validatedEvidence: number
   pendingEvidence: number
   auditReadiness: "audit_ready" | "review_required"
+  activities: string[]
   workDone: string[]
   openFindingTitles: string[]
   nextActions: string[]
@@ -45,6 +46,7 @@ type ClientFacingReport = {
   orgName: string
   month: string
   html: string
+  activities: string[]
   summary: {
     score: number
     riskLabel: string
@@ -297,6 +299,7 @@ function buildMonthlyActivity(state: ComplianceState) {
     auditReadiness: openFindings.length === 0 && Boolean(state.validatedBaselineSnapshotId)
       ? "audit_ready" as const
       : "review_required" as const,
+    activities: workDone,
     workDone,
     openFindingTitles: openFindings
       .slice()
@@ -421,6 +424,7 @@ export async function POST(request: Request) {
                 validatedEvidence: 0,
                 pendingEvidence: 0,
                 auditReadiness: "review_required",
+                activities: [],
                 workDone: [],
                 openFindingTitles: [],
                 nextActions: ["Completează onboarding-ul clientului și rulează primul scan."],
@@ -462,6 +466,7 @@ export async function POST(request: Request) {
           orgName: client.orgName,
           month,
           html: buildClientFacingMonthlyHtml(client, month, branding),
+          activities: client.activities,
           summary: {
             score: client.score,
             riskLabel: client.riskLabel,

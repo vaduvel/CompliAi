@@ -153,11 +153,11 @@ export async function buildDashboardPayload(
     total: openDsar.length,
     urgent: openDsar.filter((r) => {
       const ms = new Date(r.deadlineISO).getTime() - nowMs
-      return ms >= 0 && ms <= 5 * 86_400_000
+      return ms <= 5 * 86_400_000
     }).length,
     dueToday: openDsar.filter((r) => {
       const ms = new Date(r.deadlineISO).getTime() - nowMs
-      return ms >= 0 && ms <= 86_400_000
+      return ms <= 86_400_000
     }).length,
   }
 

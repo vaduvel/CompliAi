@@ -21,8 +21,8 @@ import { readNis2State } from "@/lib/server/nis2-store"
 import type { WorkspaceContext } from "@/lib/compliance/types"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
-const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Audit <onboarding@resend.dev>"
-const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliai.ro"
+const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Audit <onboarding@resend.dev>"
+const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"
 
 type AuditPackResult = {
   readiness: "audit_ready" | "review_required"
@@ -39,7 +39,7 @@ function buildAuditPackReadyEmailHtml(orgName: string, result: AuditPackResult):
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI · Audit Pack lunar generat</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan · Audit Pack lunar generat</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 8px;color:#0f172a">${orgName}</h2>
@@ -53,7 +53,7 @@ function buildAuditPackReadyEmailHtml(orgName: string, result: AuditPackResult):
     </a>
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0">
     <p style="color:#94a3b8;font-size:12px;margin:0">
-      Email lunar automat CompliAI &mdash;
+      Email lunar automat CompliScan &mdash;
       <a href="${APP_URL}/dashboard/settings" style="color:#6366f1">Gestionează notificările</a>
     </p>
   </div>
@@ -69,7 +69,7 @@ function buildAuditPackGapsEmailHtml(orgName: string, result: AuditPackResult): 
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI · Audit Pack lunar — acțiuni necesare</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan · Audit Pack lunar — acțiuni necesare</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 8px;color:#0f172a">${orgName}</h2>
@@ -84,7 +84,7 @@ function buildAuditPackGapsEmailHtml(orgName: string, result: AuditPackResult): 
     </a>
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0">
     <p style="color:#94a3b8;font-size:12px;margin:0">
-      Email lunar automat CompliAI &mdash;
+      Email lunar automat CompliScan &mdash;
       <a href="${APP_URL}/dashboard/settings" style="color:#6366f1">Gestionează notificările</a>
     </p>
   </div>
@@ -210,8 +210,8 @@ export async function POST(request: Request) {
           ? buildAuditPackReadyEmailHtml(org.name, packResult)
           : buildAuditPackGapsEmailHtml(org.name, packResult)
         const subject = isReady
-          ? `[CompliAI] Audit Pack ${monthLabel} gata · ${org.name}`
-          : `[CompliAI] Audit Pack ${monthLabel} — acțiuni necesare · ${org.name}`
+          ? `[CompliScan] Audit Pack ${monthLabel} gata · ${org.name}`
+          : `[CompliScan] Audit Pack ${monthLabel} — acțiuni necesare · ${org.name}`
 
         const ok = await sendEmail(prefs.emailAddress, subject, html)
         results.push({ orgId: org.id, sent: ok, readiness: packResult.readiness })

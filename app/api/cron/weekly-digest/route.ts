@@ -19,7 +19,7 @@ import { buildDigestEmail, type WeeklyDigest, type DigestFinding } from "@/lib/s
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
-const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
+const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Digest <onboarding@resend.dev>"
 
 async function sendDigestEmail(
   to: string,
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         const html = buildDigestEmail(digest)
         const { ok } = await sendDigestEmail(
           prefs.emailAddress,
-          `[CompliAI] Digest săptămânal · ${org.name}`,
+          `[CompliScan] Digest săptămânal · ${org.name}`,
           html
         )
 

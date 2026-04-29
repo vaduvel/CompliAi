@@ -6,6 +6,8 @@ import { AlertTriangle, CheckCircle2, Clock, ShieldCheck, XCircle } from "lucide
 
 import { SharedApprovalPanel } from "@/components/compliscan/shared-approval-panel"
 import { V3ScoreRing } from "@/components/compliscan/v3"
+import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import type { ComplianceState, DashboardSummary } from "@/lib/compliance/types"
 import { resolveSignedShareToken } from "@/lib/server/share-token-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
@@ -15,7 +17,6 @@ import {
   isSharedDocumentApproved,
   isSharedDocumentRejected,
 } from "@/lib/server/shared-approval"
-import { buildPublicReadinessProfile } from "@/lib/server/public-readiness-profile"
 import { getWhiteLabelConfig, type WhiteLabelConfig } from "@/lib/server/white-label"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -82,6 +83,34 @@ function buildConsultantProfile(config: WhiteLabelConfig, orgName: string) {
   }
 }
 
+type SharedReadinessProfile = {
+  state: ComplianceState
+  score: number
+  riskLabel: DashboardSummary["riskLabel"]
+  auditReadiness: "audit_ready" | "review_required"
+}
+
+async function buildSharedReadinessProfile(rawState: ComplianceState): Promise<SharedReadinessProfile> {
+  const state = normalizeComplianceState(rawState)
+  const summary = computeDashboardSummary(state)
+  const openBusinessFindings = state.findings.filter(
+    (finding) =>
+      finding.findingStatus !== "resolved" &&
+      finding.findingStatus !== "dismissed" &&
+      finding.findingStatus !== "under_monitoring"
+  ).length
+
+  return {
+    state,
+    score: summary.score,
+    riskLabel: summary.riskLabel,
+    auditReadiness:
+      state.validatedBaselineSnapshotId && openBusinessFindings === 0
+        ? "audit_ready"
+        : "review_required",
+  }
+}
+
 // ── Empty/error state ────────────────────────────────────────────────────────
 
 function ErrorState({ title, message }: { title: string; message: string }) {
@@ -142,13 +171,7 @@ export default async function SharedCompliancePage({
     )
   }
 
-  const profile = await buildPublicReadinessProfile(rawState, {
-    orgId: payload.orgId,
-    orgName,
-    workspaceLabel: orgName,
-    workspaceOwner: consultant.consultantName,
-    workspaceInitials: initialsFromName(orgName),
-  })
+  const profile = await buildSharedReadinessProfile(rawState)
   const state = profile.state
   const score = profile.score
   const tone = scoreTone(score)
@@ -266,7 +289,7 @@ export default async function SharedCompliancePage({
               >
                 {label}
               </p>
-              {profile.auditPack.executiveSummary.auditReadiness !== "audit_ready" ? (
+              {profile.auditReadiness !== "audit_ready" ? (
                 <p className="mt-3 text-[12px] leading-[1.6] text-eos-text-muted">
                   Profilul rămâne în review până când baseline-ul, dovezile și controalele cerute
                   de Audit Pack sunt validate.

@@ -29,6 +29,10 @@ export async function GET(request: Request) {
     const totalClients = clients.length
     const clientsWithData = clients.filter((c) => c.compliance?.hasData)
     const criticalCount = clients.filter((c) => (c.compliance?.criticalFindings ?? 0) > 0).length
+    const urgentDsarCount = clients.reduce(
+      (sum, c) => sum + (c.compliance?.urgentDsarCount ?? 0),
+      0
+    )
     const avgScore = clientsWithData.length > 0
       ? Math.round(clientsWithData.reduce((sum, c) => sum + (c.compliance?.score ?? 0), 0) / clientsWithData.length)
       : 0
@@ -36,6 +40,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       totalClients,
       criticalCount,
+      urgentDsarCount,
       avgScore,
       urgentFindings: alertRows.slice(0, 10),
       clientScores: clients.map((c) => ({
@@ -45,12 +50,14 @@ export async function GET(request: Request) {
         alertCount: c.compliance?.openAlerts ?? 0,
         criticalFindings: c.compliance?.criticalFindings ?? 0,
         activeDsarCount: c.compliance?.activeDsarCount ?? 0,
+        urgentDsarCount: c.compliance?.urgentDsarCount ?? 0,
         hasData: c.compliance?.hasData ?? false,
       })),
       summary: {
         totalAlerts: alertRows.length,
         criticalAlerts: alertRows.filter((a) => a.severity === "critical").length,
         highAlerts: alertRows.filter((a) => a.severity === "high").length,
+        urgentDsarCount,
       },
     })
   } catch (error) {
