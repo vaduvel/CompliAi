@@ -243,7 +243,7 @@ export function buildComplianceResponse(
     fiscalStatus,
     commitments,
     disclaimer:
-      "Generat de CompliAI. Informațiile sunt orientative și nu constituie consultanță juridică. Verificați cu un specialist înainte de depunere oficială.",
+      "Generat de CompliScan. Informațiile sunt orientative și nu constituie consultanță juridică. Verificați cu un specialist înainte de depunere oficială.",
   }
 }
 
@@ -349,7 +349,7 @@ export function buildComplianceResponseHtml(data: ComplianceResponseData): strin
     <div>
       <p style="margin:0;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.1em">Compliance Response Pack</p>
       <h1 style="margin:4px 0 0;font-size:22px;font-weight:800;color:#111">${data.orgName || "Organizație"}</h1>
-      <p style="margin:4px 0 0;font-size:12px;color:#6b7280">Generat la ${data.generatedAtLabel} · CompliAI</p>
+      <p style="margin:4px 0 0;font-size:12px;color:#6b7280">Generat la ${data.generatedAtLabel} · CompliScan</p>
       <p style="margin:4px 0 0;font-size:11px;color:#9ca3af">Document de răspuns pentru cereri de due diligence sau chestionare de conformitate</p>
     </div>
     <div style="text-align:center;min-width:110px;border:2px solid ${scoreColor};border-radius:10px;padding:10px 16px">

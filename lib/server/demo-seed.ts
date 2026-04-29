@@ -425,11 +425,11 @@ function buildNis2ComplianceState(): ComplianceState {
       sourceDocument: "demo-nis2-assessment",
       legalReference: "OUG 155/2024 Art. 21(2)(b)",
       impactSummary: "Lipsa planului IR crește timpul de recuperare și atrage sancțiuni.",
-      remediationHint: "Generați Planul IR din CompliAI Generator, adaptați și aprobați.",
+      remediationHint: "Generați Planul IR din CompliScan Generator, adaptați și aprobați.",
       resolution: {
         problem: "Lipsă plan formal de răspuns la incidente",
         impact: "Neconformitate NIS2 + risc operațional crescut la incident real",
-        action: "Generați Planul IR din CompliAI Generator, adaptați, test tabletop",
+        action: "Generați Planul IR din CompliScan Generator, adaptați, test tabletop",
         closureEvidence: "Plan IR semnat + test tabletop efectuat și documentat",
       },
     },
@@ -449,7 +449,7 @@ function buildNis2ComplianceState(): ComplianceState {
       resolution: {
         problem: "Furnizori tehnici fără DPA semnat",
         impact: "Risc GDPR Art.28 + risc NIS2 supply chain",
-        action: "Generați DPA template din CompliAI, trimiteți Microsoft + AWS",
+        action: "Generați DPA template din CompliScan, trimiteți Microsoft + AWS",
         closureEvidence: "DPA semnat + dată semnare în registrul furnizorilor",
       },
     },
@@ -889,7 +889,7 @@ function buildPartnerState(): ComplianceState {
       resolution: {
         problem: "DPA template neactualizat",
         impact: "Risc la audit ANSPDCP pentru clienți gestionați",
-        action: "Regenerați DPA template din CompliAI Generator",
+        action: "Regenerați DPA template din CompliScan Generator",
         closureEvidence: "DPA actualizat semnat cu cel puțin 1 client",
       },
     },
@@ -1046,7 +1046,7 @@ function buildPartnerState(): ComplianceState {
     aiSystems: [
       {
         id: "demo-partner-ai-1",
-        name: "CompliAI Assistant",
+        name: "CompliScan Assistant",
         vendor: "CompliScan",
         purpose: "document-assistant",
         modelType: "LLM compliance assistant",

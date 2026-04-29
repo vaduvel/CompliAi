@@ -166,7 +166,7 @@ export function draftExplanation(discrepancy: ETVADiscrepancy, orgName: string):
     `${orgName}`,
     ``,
     `---`,
-    `Generat de CompliAI — nu constituie aviz juridic. Verificați cu un specialist fiscal.`,
+    `Generat de CompliScan — nu constituie aviz juridic. Verificați cu un specialist fiscal.`,
   ]
     .filter((line) => line !== undefined)
     .join("\n")

@@ -142,7 +142,7 @@ Prin prezenta notificare, **${orgName || "[DENUMIRE ORGANIZAȚIE]"}** confirmă 
 
 ---
 
-*Document generat de CompliAI · ${date} · Document informativ, nu constituie consiliere juridică*
+*Document generat de CompliScan · ${date} · Document informativ, nu constituie consiliere juridică*
 *Verificați cerințele complete pe https://nis2.dnsc.ro înainte de trimitere*
 `
 }

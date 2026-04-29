@@ -187,7 +187,7 @@ describe("canonical runtime audit", () => {
     const reportsPayload = await reportsResponse.json()
     expect(reportsResponse.status).toBe(200)
     expect(Array.isArray(reportsPayload.report.topActions)).toBe(true)
-    expect(reportsPayload.report.disclaimer).toMatch(/CompliAI/i)
+    expect(reportsPayload.report.disclaimer).toMatch(/CompliScan/i)
     expect(reportsPayload.html).toContain("Raport Executiv de Conformitate")
 
     const settingsSummaryResponse = await getSettingsSummary(

@@ -47,7 +47,7 @@ export function buildDnscRescueFinding(
       "",
       "Înregistrarea tardivă este preferabilă lipsei totale de acțiune și poate demonstra buna-credință / atitudine proactivă la un eventual control.",
       "",
-      "NIS2 / OUG 155/2024 impune notificarea DNSC și înscrierea în registrul entităților. CompliAI nu garantează rezultate juridice — verifică cu un consultant specializat.",
+      "NIS2 / OUG 155/2024 impune notificarea DNSC și înscrierea în registrul entităților. CompliScan nu garantează rezultate juridice — verifică cu un consultant specializat.",
     ].join("\n"),
     category: "NIS2",
     severity,
@@ -57,13 +57,13 @@ export function buildDnscRescueFinding(
     sourceDocument: "Registru DNSC",
     legalReference: "NIS2 Art. 27 / OUG 155/2024 Art. 22",
     remediationHint:
-      "Finalizează înregistrarea DNSC prin portalul oficial. Folosește Expertul de Înregistrare din CompliAI pentru draft-ul notificării.",
+      "Finalizează înregistrarea DNSC prin portalul oficial. Folosește Expertul de Înregistrare din CompliScan pentru draft-ul notificării.",
     resolution: makeResolution(
       `Entitate NIS2 ${entityLabel} fără înregistrare DNSC confirmată (status: ${registrationStatus})`,
       "Lipsa înregistrării expune organizația la sancțiuni administrative și la un control neașteptat fără documentație pregătită.",
       "Finalizează înregistrarea DNSC. Documentează data transmiterii și arhivează confirmarea.",
       {
-        generatedAsset: "Draft notificare DNSC generat de CompliAI prin Expertul de Înregistrare",
+        generatedAsset: "Draft notificare DNSC generat de CompliScan prin Expertul de Înregistrare",
         humanStep:
           "Transmite formularul completat pe portalul DNSC (registru.dnsc.ro) și arhivează confirmarea / numărul de înregistrare.",
         closureEvidence: "Screenshot confirmare DNSC sau număr de înregistrare primit",

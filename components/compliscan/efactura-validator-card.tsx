@@ -116,7 +116,7 @@ export function EFacturaValidatorCard({
   async function handleCopyRepairSummary() {
     if (!repairResult) return
     const summaryLines = [
-      `XML-ul ${repairResult.documentName} a fost reparat în CompliAI la ${new Date(repairResult.createdAtISO).toLocaleString("ro-RO")}.`,
+      `XML-ul ${repairResult.documentName} a fost reparat în CompliScan la ${new Date(repairResult.createdAtISO).toLocaleString("ro-RO")}.`,
       repairResult.appliedFixes.length > 0
         ? `Corecții aplicate: ${repairResult.appliedFixes.map((fix) => `${fix.errorCode} (${fix.field})`).join(", ")}.`
         : "Nu au fost aplicate corecții automate sigure; corecția a rămas manuală.",
@@ -288,7 +288,7 @@ export function EFacturaValidatorCard({
                       <p className="text-sm font-medium text-eos-text">Corectii pregatite pentru XML</p>
                       <p className="mt-1 text-xs text-eos-text-muted">
                         {repairResult.appliedFixes.length > 0
-                          ? `${repairResult.appliedFixes.length} fixuri aplicate automat. XML-ul nu este retransmis de CompliAI; îl revezi și îl trimiți tu mai departe.`
+                          ? `${repairResult.appliedFixes.length} fixuri aplicate automat. XML-ul nu este retransmis de CompliScan; îl revezi și îl trimiți tu mai departe.`
                           : "Nu am găsit fixuri automate sigure pentru XML-ul curent. Corecția rămâne manuală în ERP sau în exportul XML."}
                       </p>
                     </div>

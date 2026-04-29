@@ -77,7 +77,7 @@ export function Nis2RescueBanner() {
           </p>
 
           <p className="text-xs text-eos-text-muted">
-            CompliAI nu garantează rezultate juridice. Verifică situația cu un consultant specializat
+            CompliScan nu garantează rezultate juridice. Verifică situația cu un consultant specializat
             în securitate cibernetică sau drept IT.
           </p>
 

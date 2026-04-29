@@ -18,6 +18,7 @@ import {
 import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { buildWebsitePrefillSignals } from "@/lib/server/website-prefill-signals"
+import { buildRomanianPrivacyFindings } from "@/lib/compliance/romanian-privacy-findings"
 import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
@@ -180,7 +181,10 @@ export async function POST(request: Request) {
       console.log("[baseline-scan] efacturaActive (from ANAF):", efacturaActive)
       const nis2State = await readNis2State(body.orgId)
       const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
-      const findings = buildInitialFindings(mergedAnswers, { supplementalFindings: nis2Findings })
+      const romanianPrivacyFindings = buildRomanianPrivacyFindings(updatedProfile, nowISO)
+      const findings = buildInitialFindings(mergedAnswers, {
+        supplementalFindings: [...nis2Findings, ...romanianPrivacyFindings],
+      })
 
       console.log("[baseline-scan] Generated findings:", findings.length, "for org:", body.orgId)
 
@@ -189,6 +193,31 @@ export async function POST(request: Request) {
         const existingIds = new Set(state.findings.map((f) => f.id))
         const newFindings = findings.filter((f) => !existingIds.has(f.id))
         state.findings = [...state.findings, ...newFindings]
+      }
+
+      if (romanianPrivacyFindings.some((finding) => finding.id === "intake-gdpr-training-tracker")) {
+        const hasDefaultTraining = (state.gdprTrainingRecords ?? []).some(
+          (record) => record.id === "gdpr-training-baseline-required"
+        )
+        if (!hasDefaultTraining) {
+          const due = new Date(nowISO)
+          due.setDate(due.getDate() + 30)
+          state.gdprTrainingRecords = [
+            {
+              id: "gdpr-training-baseline-required",
+              title: "Training GDPR inițial pentru angajați",
+              audience: "all_staff",
+              participantCount: 0,
+              status: "evidence_required",
+              dueAtISO: due.toISOString(),
+              evidenceNote:
+                "Creat automat la baseline pentru că organizația are angajați. Diana completează participanții și atașează dovada comunicării.",
+              createdAtISO: nowISO,
+              updatedAtISO: nowISO,
+            },
+            ...(state.gdprTrainingRecords ?? []),
+          ]
+        }
       }
     }
 

@@ -167,7 +167,7 @@ ${table}
 
 Acest registru trebuie actualizat de fiecare dată când se inițiază o nouă activitate de prelucrare sau când se modifică semnificativ o activitate existentă.
 
-Document generat de CompliAI — ${now}
+Document generat de CompliScan — ${now}
 `
 }
 

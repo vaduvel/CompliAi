@@ -39,7 +39,7 @@ function buildEF005CockpitNote(state: FiscalOperationalExplainability) {
 
   return [
     `${target} a fost verificată înainte de transmitere.`,
-    "XML validat / reparat în CompliAI la [data și ora], apoi transmis în SPV ANAF la [data și ora].",
+    "XML validat / reparat în CompliScan la [data și ora], apoi transmis în SPV ANAF la [data și ora].",
     "Confirmare ANAF: [număr mesaj / status ok / status respinsă].",
     "Urma păstrată: [screenshot SPV / recipisă / export ERP].",
   ].join(" ")
@@ -81,7 +81,7 @@ export function buildFiscalStatusInterpreterGuide(
       title: "Pregătești transmiterea și păstrezi dovada corectă",
       explanation: state.description,
       steps: [
-        "Verifică XML-ul înainte de upload. Dacă există îndoieli, rulează validatorul și repair-ul în CompliAI.",
+        "Verifică XML-ul înainte de upload. Dacă există îndoieli, rulează validatorul și repair-ul în CompliScan.",
         "Transmite XML-ul către SPV ANAF din ERP sau din fluxul tău fiscal.",
         "Confirmă în SPV că factura a fost primită și păstrează numărul mesajului sau statusul final.",
         "Revino în cockpit cu nota completată și dovada transmisiei.",

@@ -53,6 +53,21 @@ export type HrRegistryReconciliationRecord = {
   updatedAtISO: string
 }
 
+export type GdprTrainingAudience = "all_staff" | "management" | "new_hires" | "specific_roles"
+
+export type GdprTrainingRecord = {
+  id: string
+  title: string
+  audience: GdprTrainingAudience
+  participantCount: number
+  status: "planned" | "completed" | "evidence_required"
+  dueAtISO?: string
+  completedAtISO?: string
+  evidenceNote?: string
+  createdAtISO: string
+  updatedAtISO: string
+}
+
 export type WorkspaceContext = {
   orgId: string
   orgName: string
@@ -107,7 +122,7 @@ export type FindingResolution = {
   problem: string          // Ce problemă concretă a detectat sistemul
   impact: string           // Ce se întâmplă dacă nu e rezolvat
   action: string           // Acțiunea concretă recomandată
-  generatedAsset?: string  // Asset generat de CompliAI (document, raport, template)
+  generatedAsset?: string  // Asset generat de CompliScan (document, raport, template)
   humanStep?: string       // Pasul uman obligatoriu (ce trebuie să facă persoana)
   closureEvidence?: string // Dovada care confirmă că problema e rezolvată
   revalidation?: string    // Când și cum se reverificată conformitatea
@@ -584,6 +599,7 @@ export type ComplianceState = {
   // ── Fix #7: Async site scan jobs ─────────────────────────────────────────
   siteScanJobs?: Record<string, SiteScanJob>
   hrRegistryReconciliations?: Record<string, HrRegistryReconciliationRecord>
+  gdprTrainingRecords?: GdprTrainingRecord[]
   // ── Partner workspace ────────────────────────────────────────────────────
   partnerWorkspace?: {
     orgName?: string

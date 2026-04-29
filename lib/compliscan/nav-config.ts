@@ -1,4 +1,14 @@
-import { Landmark, ShieldCheck } from "lucide-react"
+import {
+  BookOpen,
+  CalendarClock,
+  FileSearch,
+  GraduationCap,
+  Landmark,
+  Send,
+  ShieldAlert,
+  ShieldCheck,
+  UsersRound,
+} from "lucide-react"
 
 import {
   dashboardPrimaryNavItems,
@@ -25,6 +35,65 @@ const MODULE_NAV_ITEMS: DashboardNavItem[] = [
     href: dashboardRoutes.nis2,
     icon: ShieldCheck,
     matchers: [dashboardRoutes.nis2, dashboardRoutes.nis2Maturity, dashboardRoutes.nis2Dnsc],
+  },
+]
+
+const DPO_NAV_ITEMS: DashboardNavItem[] = [
+  {
+    id: "dsar",
+    label: "DSAR",
+    href: dashboardRoutes.dsar,
+    icon: UsersRound,
+    matchers: [dashboardRoutes.dsar],
+  },
+  {
+    id: "ropa",
+    label: "RoPA Art. 30",
+    href: dashboardRoutes.ropa,
+    icon: FileSearch,
+    matchers: [dashboardRoutes.ropa],
+  },
+  {
+    id: "vendor-review",
+    label: "DPA furnizori",
+    href: dashboardRoutes.vendorReview,
+    icon: ShieldCheck,
+    matchers: [dashboardRoutes.vendorReview],
+  },
+  {
+    id: "breach",
+    label: "Breach ANSPDCP",
+    href: dashboardRoutes.breach,
+    icon: ShieldAlert,
+    matchers: [dashboardRoutes.breach, "/dashboard/incidente", dashboardRoutes.nis2],
+  },
+  {
+    id: "calendar",
+    label: "Calendar termene",
+    href: dashboardRoutes.calendar,
+    icon: CalendarClock,
+    matchers: [dashboardRoutes.calendar],
+  },
+  {
+    id: "magic-links",
+    label: "Aprobări client",
+    href: dashboardRoutes.magicLinks,
+    icon: Send,
+    matchers: [dashboardRoutes.magicLinks, dashboardRoutes.approvals],
+  },
+  {
+    id: "cabinet-templates",
+    label: "Template-uri",
+    href: dashboardRoutes.cabinetTemplates,
+    icon: BookOpen,
+    matchers: [dashboardRoutes.cabinetTemplates],
+  },
+  {
+    id: "training",
+    label: "Training GDPR",
+    href: dashboardRoutes.training,
+    icon: GraduationCap,
+    matchers: [dashboardRoutes.training],
   },
 ]
 
@@ -80,9 +149,9 @@ export function getSidebarNavSections({
         items: ORG_NAV_FULL,
       },
       {
-        id: "module",
-        label: "Module conformitate",
-        items: MODULE_NAV_ITEMS,
+        id: "dpo",
+        label: "Instrumente DPO",
+        items: DPO_NAV_ITEMS,
       },
     ]
   }

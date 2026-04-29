@@ -801,7 +801,7 @@ function ValidationLevelBlock({ level }: { level: ValidationLevel }) {
 }
 
 // ── V3 P0.0 / V4.3.3 Resolution Path ─────────────────────────────────────────
-// V4.3: distincție vizuală CompliAI / Tu / Dovadă + progress indicator
+// V4.3: distincție vizuală CompliScan / Tu / Dovadă + progress indicator
 
 type StepKind = "auto" | "human" | "evidence" | "info"
 
@@ -813,14 +813,14 @@ const RESOLUTION_STEPS: Array<{
   { key: "problem",        label: "Problemă detectată", kind: "info" },
   { key: "impact",         label: "Impact dacă nu acționezi", kind: "info" },
   { key: "action",         label: "Acțiunea exactă", kind: "human" },
-  { key: "generatedAsset", label: "CompliAI face", kind: "auto" },
+  { key: "generatedAsset", label: "CompliScan face", kind: "auto" },
   { key: "humanStep",      label: "Tu faci", kind: "human" },
   { key: "closureEvidence",label: "Dovada de închidere", kind: "evidence" },
   { key: "revalidation",   label: "Revalidare", kind: "info" },
 ]
 
 const STEP_KIND_CONFIG: Record<StepKind, { label: string; dot: string; text: string }> = {
-  auto:     { label: "CompliAI", dot: "bg-eos-primary",  text: "text-eos-primary" },
+  auto:     { label: "CompliScan", dot: "bg-eos-primary",  text: "text-eos-primary" },
   human:    { label: "Tu faci",  dot: "bg-eos-warning",   text: "text-eos-warning" },
   evidence: { label: "Dovadă",   dot: "bg-eos-success",   text: "text-eos-success" },
   info:     { label: "",         dot: "bg-eos-text-muted", text: "text-eos-text-muted" },

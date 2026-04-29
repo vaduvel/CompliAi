@@ -65,6 +65,7 @@ export const initialComplianceState: ComplianceState = {
   validatedBaselineSnapshotId: undefined,
   events: [],
   hrRegistryReconciliations: {},
+  gdprTrainingRecords: [],
 }
 
 export function normalizeComplianceState(state: ComplianceState): ComplianceState {
@@ -90,6 +91,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const snapshotHistory = normalizeSnapshotHistory(state.snapshotHistory)
   const events = normalizeEvents(state.events)
   const hrRegistryReconciliations = normalizeHrRegistryReconciliations(state.hrRegistryReconciliations)
+  const gdprTrainingRecords = Array.isArray(state.gdprTrainingRecords)
+    ? state.gdprTrainingRecords
+    : []
   const resolvedFindingIds = getOperationallyClosedFindingIds({
     ...state,
     alerts: rawAlerts,
@@ -108,6 +112,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     snapshotHistory,
     events,
     hrRegistryReconciliations,
+    gdprTrainingRecords,
   })
   const alerts = applyTaskResolutionToAlerts({
     ...state,
@@ -127,6 +132,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     snapshotHistory,
     events,
     hrRegistryReconciliations,
+    gdprTrainingRecords,
   })
 
   const unresolvedFindings = findings.filter((finding) => !resolvedFindingIds.has(finding.id))
@@ -177,6 +183,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     driftRecords,
     snapshotHistory,
     hrRegistryReconciliations,
+    gdprTrainingRecords,
     validatedBaselineSnapshotId:
       typeof state.validatedBaselineSnapshotId === "string" &&
       snapshotHistory.some((snapshot) => snapshot.snapshotId === state.validatedBaselineSnapshotId)
@@ -199,6 +206,7 @@ function normalizeGeneratedDocuments(
         item.documentType === "privacy-policy" ||
         item.documentType === "cookie-policy" ||
         item.documentType === "dpa" ||
+        item.documentType === "dsar-response" ||
         item.documentType === "retention-policy" ||
         item.documentType === "nis2-incident-response" ||
         item.documentType === "ai-governance" ||

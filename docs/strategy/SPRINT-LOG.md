@@ -590,3 +590,25 @@ Context: Sonnet a testat ca Diana Popescu, cu 3 firme noi importate din CSV (`Me
 ### Observație build
 - Build root fix livrat în `next.config.ts` prin `outputFileTracingRoot: process.cwd()`, ca Next să nu mai infereze root-ul din workspace-ul părinte.
 - `npm run build` — PASS; rămân doar warning-uri lint pre-existente.
+
+---
+
+## 2026-04-29 — DPO cockpit hardening după finding-urile Sonnet
+
+Context: testul realist “Diana în carne și oase” a confundat inițial DPO cu full compliance officer, dar a scos câteva gap-uri reale pentru DPO: instrumente GDPR ascunse, breach ANSPDCP greu de găsit, Legea 190/2018 absentă în baseline, training GDPR fără tracker și branding vechi în suprafețe active.
+
+### Fixuri livrate
+- Sidebar partner/org nu mai arată “Module conformitate” generic pentru Diana; are secțiune `Instrumente DPO` cu DSAR, RoPA Art. 30, DPA furnizori, Breach ANSPDCP, Calendar termene, Aprobări client, Template-uri și Training GDPR.
+- Adăugat `/dashboard/breach` ca workspace DPO pentru incidente cu date personale și notificare ANSPDCP 72h, plus redirect `/dashboard/incidente`.
+- Adăugat alias API DPO-friendly `/api/breach-notification` și `/api/incidents`, peste store-ul stabil de incidente existent.
+- Adăugat `/dashboard/training` + `/api/gdpr/training` pentru tracker minim de training GDPR: audiență, participanți, status, termen și dovadă.
+- Baseline scan pe firme importate injectează finding-uri românești: `Legea 190/2018 — CNP/date sensibile` și `Training GDPR angajați fără evidență`.
+- Pentru firme cu angajați, baseline creează automat o intrare `Training GDPR inițial pentru angajați` în tracker.
+- Rebrand `CompliAI` -> `CompliScan` pe suprafețele active din `app/components/lib` (rămân doar fixture/test names și fallback defensive replace în bundle).
+
+### Validare
+- `./node_modules/.bin/vitest run lib/compliance/romanian-privacy-findings.test.ts lib/server/import-parser.test.ts lib/server/portfolio.test.ts app/api/nis2/incidents/route.test.ts app/api/nis2/incidents/[id]/route.test.ts app/api/reports/share-token/route.test.ts` — 34/34 pass.
+- `npm test` — 246 files pass, 1269 tests pass, 1 skipped.
+- `npm run build` — PASS.
+- Runtime smoke DPO deep acceptance — PASS: monthly activities, document-specific shared page, audit pack issuer, zero legacy brand pe shared/audit.
+- Runtime smoke authenticated: `/dashboard/breach`, `/dashboard/training`, `/api/breach-notification`, `/api/gdpr/training` — 200, fără `CompliAI`, fără 500.

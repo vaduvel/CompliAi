@@ -17,7 +17,7 @@ describe("lib/compliscan/nav-config", () => {
     expect(sections.map((section) => section.label)).toEqual([
       "Portofoliu",
       "Firma activa",
-      "Module conformitate",
+      "Instrumente DPO",
     ])
     expect(sections[0]?.items[0]).toEqual(
       expect.objectContaining({
@@ -34,8 +34,14 @@ describe("lib/compliscan/nav-config", () => {
       "/portfolio/reports",
     ])
     expect(sections[2]?.items.map((item) => item.href)).toEqual([
-      "/dashboard/fiscal",
-      "/dashboard/nis2",
+      "/dashboard/dsar",
+      "/dashboard/ropa",
+      "/dashboard/vendor-review",
+      "/dashboard/breach",
+      "/dashboard/calendar",
+      "/dashboard/magic-links",
+      "/dashboard/cabinet/templates",
+      "/dashboard/training",
     ])
   })
 

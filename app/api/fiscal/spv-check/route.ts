@@ -52,7 +52,7 @@ function spvMessageToFinding(msg: SpvMessage, orgName: string, nowISO: string): 
       ? "Factura a fost respinsă de ANAF. Corectează eroarea și retrimite din programul de facturare."
       : `Semnal ${msg.tip} detectat în SPV. Verifică și acționează conform regulilor ANAF.`,
     remediationHint: isRejected
-      ? "Corectează eroarea XML/UBL în programul de facturare și retrimite factura. Confirmă manual în CompliAI după rezolvare."
+      ? "Corectează eroarea XML/UBL în programul de facturare și retrimite factura. Confirmă manual în CompliScan după rezolvare."
       : "Verifică mesajul în SPV și acționează dacă este necesar.",
   }
 }

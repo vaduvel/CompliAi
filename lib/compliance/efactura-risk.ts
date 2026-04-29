@@ -121,7 +121,7 @@ function buildSignalFinding(signal: EFacturaInvoiceSignal, nowISO: string): Scan
     signal.status === "rejected"
       ? "Corectează datele facturii și retransmite spre ANAF SPV. Verifică CUI, TVA și câmpurile obligatorii UBL CIUS-RO."
       : signal.status === "xml-error"
-        ? "Corectează structura XML conform CIUS-RO:1.0.1 și retransmite. Folosește validatorul e-Factura din CompliAI."
+        ? "Corectează structura XML conform CIUS-RO:1.0.1 și retransmite. Folosește validatorul e-Factura din CompliScan."
         : signal.status === "processing-delayed"
           ? "Verifică starea facturii în portalul SPV ANAF. Dacă e blocată, contactează ANAF sau retransmite."
           : "Transmite factura spre SPV ANAF. Verifică că fișierul XML este valid înainte de upload."
@@ -153,7 +153,7 @@ function buildSignalFinding(signal: EFacturaInvoiceSignal, nowISO: string): Scan
       {
         generatedAsset:
           signal.status === "xml-error"
-            ? "Raport de erori XML generat de validatorul e-Factura CompliAI"
+            ? "Raport de erori XML generat de validatorul e-Factura CompliScan"
             : undefined,
         humanStep: "Accesează portalul ANAF SPV, verifică starea facturii și retransmite dacă e necesar.",
         closureEvidence: "Confirmare ANAF SPV cu status 'ok' sau numărul mesajului de acceptare",

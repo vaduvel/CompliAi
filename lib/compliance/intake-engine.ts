@@ -621,7 +621,7 @@ export function buildInitialFindings(
           resolution: {
             problem: "Activitate B2C fără politică de confidențialitate dedicată consumatorilor.",
             impact: "Risc de amendă GDPR și pierderea încrederii clienților.",
-            action: "Generează politica de confidențialitate B2C din CompliAI.",
+            action: "Generează politica de confidențialitate B2C din CompliScan.",
             humanStep: "Verifică dacă politica acoperă toate fluxurile de date (comenzi, cont, marketing).",
             closureEvidence: "Politica publicată pe site + dovada implementării.",
           },
@@ -646,7 +646,7 @@ export function buildInitialFindings(
             resolution: {
               problem: "Fișe de post lipsă sau neactualizate.",
               impact: "Risc de sancțiune la control ITM.",
-              action: "Generează template fișe de post din CompliAI.",
+              action: "Generează template fișe de post din CompliScan.",
               generatedAsset: "Fișă de Post (generată AI)",
               humanStep: "Adaptează fișele la rolurile reale din firmă.",
               closureEvidence: "Fișele semnate și arhivate.",
@@ -669,7 +669,7 @@ export function buildInitialFindings(
             resolution: {
               problem: "REGES / evidență contracte neactualizată.",
               impact: "Sancțiuni de la ITM pentru neconformitate (5.000-10.000 RON/angajat).",
-              action: "Generează Brief Corecție REGES din CompliAI și trimite-l contabilului.",
+              action: "Generează Brief Corecție REGES din CompliScan și trimite-l contabilului.",
               generatedAsset: "Brief Corecție REGES/Revisal (generat AI)",
               humanStep: "Contabilul sau HR-ul verifică Revisal-ul și confirmă conformitatea.",
               closureEvidence: "Export REGES actualizat.",
@@ -687,7 +687,7 @@ export function buildInitialFindings(
           "GDPR",
           "medium",
           {
-            remediationHint: "Generează regulament intern din CompliAI.",
+            remediationHint: "Generează regulament intern din CompliScan.",
             suggestedDocumentType: "hr-internal-procedures",
             resolution: {
               problem: "Lipsa regulamentului intern / procedurilor pentru angajați.",
@@ -714,12 +714,12 @@ export function buildInitialFindings(
           "GDPR",
         "high",
         {
-          remediationHint: "Generează politica GDPR din CompliAI.",
+          remediationHint: "Generează politica GDPR din CompliScan.",
           suggestedDocumentType: "privacy-policy",
           resolution: {
             problem: "Lipsește politica de confidențialitate.",
             impact: "Încălcarea obligației de informare GDPR — risc de amendă.",
-              action: "Generează politica de confidențialitate din CompliAI.",
+              action: "Generează politica de confidențialitate din CompliScan.",
               humanStep: "Verifică dacă acoperă toate categoriile de date procesate.",
               closureEvidence: "Politica publicată și accesibilă persoanelor vizate.",
             },
@@ -740,7 +740,7 @@ export function buildInitialFindings(
             resolution: {
               problem: "Nu există proces definit pentru cereri DSAR.",
               impact: "Risc de depășire termen 30 zile și plângeri la ANSPDCP.",
-              action: "Creează procedura DSAR din template CompliAI.",
+              action: "Creează procedura DSAR din template CompliScan.",
               humanStep: "Desemnează persoana responsabilă de cererile DSAR.",
               closureEvidence: "Procedura documentată + persoana desemnată.",
             },
@@ -762,7 +762,7 @@ export function buildInitialFindings(
           "GDPR",
           isPartialRopa ? "medium" : "high",
           {
-            remediationHint: "Completează registrul RoPA în CompliAI și confirmă activitățile reale de prelucrare.",
+            remediationHint: "Completează registrul RoPA în CompliScan și confirmă activitățile reale de prelucrare.",
             suggestedDocumentType: "ropa",
             resolution: {
               problem: isPartialRopa
@@ -771,7 +771,7 @@ export function buildInitialFindings(
               impact: isPartialRopa
                 ? "Auditul nu poate demonstra ce prelucrări există azi și cine primește datele."
                 : "Lipsește o evidență centrală a prelucrărilor de date personale, cu risc GDPR și audit slab.",
-              action: "Completează sau actualizează registrul RoPA direct din CompliAI.",
+              action: "Completează sau actualizează registrul RoPA direct din CompliScan.",
               generatedAsset: "Registru de Prelucrări (RoPA)",
               humanStep: "Confirmă că activitățile, categoriile de date, temeiurile și destinatarii reflectă situația reală.",
               closureEvidence: "Registrul RoPA completat, confirmat și salvat la dosar.",
@@ -789,12 +789,12 @@ export function buildInitialFindings(
           "GDPR",
           "medium",
           {
-            remediationHint: "Generează politica și matricea de retenție din CompliAI.",
+            remediationHint: "Generează politica și matricea de retenție din CompliScan.",
             suggestedDocumentType: "retention-policy",
             resolution: {
               problem: "Duratele de retenție și regula de ștergere nu sunt definite clar.",
               impact: "Risc GDPR prin păstrarea excesivă a datelor și lipsa unei urme clare de ștergere.",
-              action: "Generează politica și matricea de retenție din CompliAI.",
+              action: "Generează politica și matricea de retenție din CompliScan.",
               humanStep: "Confirmă duratele reale pe categorii de date și procesul de ștergere.",
               closureEvidence: "Matricea de retenție salvată și confirmată.",
             },
@@ -816,11 +816,11 @@ export function buildInitialFindings(
           "high",
           {
             suggestedDocumentType: "ai-governance",
-            remediationHint: "Generează politica de utilizare AI din CompliAI.",
+            remediationHint: "Generează politica de utilizare AI din CompliScan.",
             resolution: {
               problem: "Lipsește politica internă de utilizare AI.",
               impact: "Neconformitate AI Act Art.4 + risc de scurgere date confidențiale.",
-              action: "Generează politica AI din CompliAI.",
+              action: "Generează politica AI din CompliScan.",
               humanStep: "Adaptează la tool-urile AI folosite efectiv.",
               closureEvidence: "Politica publicată și comunicată angajaților.",
             },
@@ -862,7 +862,7 @@ export function buildInitialFindings(
           "GDPR",
           "high",
           {
-            remediationHint: "Începe un vendor review în CompliAI pentru fiecare furnizor.",
+            remediationHint: "Începe un vendor review în CompliScan pentru fiecare furnizor.",
             resolution: {
               problem: "Furnizori externi activi fără DPA sau documentație.",
               impact: "Expunere la transfer date fără temei legal — risc amendă GDPR.",
@@ -914,7 +914,7 @@ export function buildInitialFindings(
           resolution: {
             problem: "Site-ul nu are privacy policy publicată.",
             impact: "Colectare date fără informare — risc amendă GDPR.",
-              action: "Generează privacy policy din CompliAI și publică pe site.",
+              action: "Generează privacy policy din CompliScan și publică pe site.",
               humanStep: "Verifică să acopere: analytics, formulare, cookies, newsletter.",
               closureEvidence: "Privacy policy live pe site + link accesibil.",
             },

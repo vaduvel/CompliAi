@@ -19,7 +19,7 @@ const CONTEXT_LABELS: Record<FeedbackContext, string> = {
   after_document: "Documentul a fost util?",
   after_task_close: "Pașii de remediere au fost clari?",
   after_applicability: "Evaluarea legislativă reflectă realitatea?",
-  general: "CompliAI ți-a fost util?",
+  general: "CompliScan ți-a fost util?",
 }
 
 export function FeedbackPrompt({ context, label, onDismiss }: FeedbackPromptProps) {

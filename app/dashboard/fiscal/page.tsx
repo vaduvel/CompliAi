@@ -183,7 +183,7 @@ export default function FiscalPage() {
 
   const fromCockpitHintText =
     tabParam === "validator"
-      ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliAI când revii în finding cu confirmarea retransmiterii și statusul SPV."
+      ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliScan când revii în finding cu confirmarea retransmiterii și statusul SPV."
       : tabParam === "status"
         ? "Urmează protocolul fiscal de mai jos, apoi revino în cockpit cu nota pregătită și dovada finală din SPV."
         : tabParam === "transmitere"
