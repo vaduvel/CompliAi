@@ -55,6 +55,8 @@ export type PortfolioOverviewClientSummary = {
     nis2RescueNeeded: boolean
     efacturaRiskCount: number
     criticalFindings: number
+    openFindings: number
+    gdprFindings: number
     totalTasks: number
     lastScanAtISO: string | null
     activeDsarCount: number
@@ -196,11 +198,16 @@ export function buildPortfolioOverviewRows(bundles: PortfolioOrgBundle[]): Portf
     }
 
     const lastScanAtISO = getLastScanAtISO(state)
-    const criticalFindings = state.findings.filter(
+    const activeOpenFindings = state.findings.filter(
       (finding) =>
-        isFindingActive(finding) &&
-        !isFindingOperationallyClosed(state, finding.id) &&
-        (finding.severity === "critical" || finding.severity === "high")
+        isFindingActive(finding) && !isFindingOperationallyClosed(state, finding.id)
+    )
+    const openFindings = activeOpenFindings.length
+    const criticalFindings = activeOpenFindings.filter(
+      (finding) => finding.severity === "critical" || finding.severity === "high"
+    ).length
+    const gdprFindings = activeOpenFindings.filter(
+      (finding) => finding.category === "GDPR"
     ).length
     const totalTasks = countOpenPortfolioTasks(state, remediationPlan)
 
@@ -225,6 +232,8 @@ export function buildPortfolioOverviewRows(bundles: PortfolioOrgBundle[]): Portf
           nis2.assessment !== null && (nis2.dnscRegistrationStatus ?? "not-started") !== "confirmed",
         efacturaRiskCount: countEfacturaRisks(state),
         criticalFindings,
+        openFindings,
+        gdprFindings,
         totalTasks,
         lastScanAtISO,
         activeDsarCount: countActiveDsar(dsar),

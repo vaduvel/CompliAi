@@ -51,10 +51,12 @@ export function LoadingScreen({ variant = "page" }: { variant?: "page" | "sectio
 
 export function ErrorScreen({
   message,
+  hint,
   onRetry,
   variant = "section",
 }: {
   message?: string
+  hint?: string
   onRetry?: () => void
   variant?: "page" | "section"
 }) {
@@ -71,7 +73,7 @@ export function ErrorScreen({
           {message ?? "Tabloul de bord nu a putut fi încărcat."}
         </p>
         <p className="text-xs text-eos-text-muted">
-          Verifica conexiunea si incearca din nou.
+          {hint ?? "Verifică conexiunea și încearcă din nou."}
         </p>
         {onRetry && (
           <button
@@ -79,7 +81,7 @@ export function ErrorScreen({
             onClick={onRetry}
             className="mt-1 rounded-eos-sm border border-eos-border bg-eos-surface px-4 py-2 text-sm text-eos-text transition-colors hover:bg-eos-surface-variant"
           >
-            Incearca din nou
+            Încearcă din nou
           </button>
         )}
       </div>

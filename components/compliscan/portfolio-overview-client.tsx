@@ -28,6 +28,7 @@ import { V3FindingRow, V3FrameworkTag, V3RiskPill, type V3SeverityTone } from "@
 import { toast } from "sonner"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { membershipRoleLabel } from "@/lib/compliscan/membership-role-labels"
 import { PARTNER_ACCOUNT_PLAN_LABELS, type PartnerAccountPlan } from "@/lib/shared/plan-constants"
 import type { PortfolioOverviewClientSummary } from "@/lib/server/portfolio"
 import { BATCH_ACTION_LABELS, type BatchActionType, type BatchResult } from "@/lib/compliance/batch-actions"
@@ -161,8 +162,8 @@ function ClientRow({
             title={
               <span className="flex flex-wrap items-center gap-2">
                 {client.orgName}
-                <span className="rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.05em] text-eos-text-tertiary">
-                  {client.role}
+                <span className="rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tracking-[0.02em] text-eos-text-tertiary">
+                  {membershipRoleLabel(client.role)}
                 </span>
               </span>
             }
@@ -170,7 +171,10 @@ function ClientRow({
             meta={
               hasData && c ? (
                 <span className="flex flex-wrap items-center gap-3">
-                  <span>{c.criticalFindings} findings critice</span>
+                  <span>
+                    {c.openFindings} {c.openFindings === 1 ? "caz deschis" : "cazuri deschise"}
+                    {c.criticalFindings > 0 ? ` · ${c.criticalFindings} critice` : ""}
+                  </span>
                   <span>·</span>
                   <span>{c.totalTasks} taskuri</span>
                   <span>·</span>
@@ -182,8 +186,13 @@ function ClientRow({
               hasData && c ? (
                 <div className="flex flex-wrap items-center gap-1.5">
                   <V3RiskPill tone={riskTone}>{riskLabel} · {c.score}%</V3RiskPill>
-                  {c.gdprProgress >= 0 && <V3FrameworkTag label="GDPR" count={c.criticalFindings > 0 ? c.criticalFindings : undefined} tone={c.criticalFindings > 0 ? "critical" : "neutral"} />}
-                  {c.highRisk > 0 && <V3FrameworkTag label="AI" count={c.highRisk} tone="high" />}
+                  {c.gdprFindings > 0 && (
+                    <V3FrameworkTag
+                      label="GDPR"
+                      count={c.gdprFindings}
+                      tone={c.criticalFindings > 0 ? "critical" : "high"}
+                    />
+                  )}
                   {c.nis2RescueNeeded && <V3FrameworkTag label="NIS2" tone="high" />}
                   {c.efacturaRiskCount > 0 && <V3FrameworkTag label="e-Factura" count={c.efacturaRiskCount} tone="high" />}
                 </div>
@@ -651,9 +660,7 @@ export function PortfolioOverviewClient() {
             Triage cross-client. Intri în firmă doar când trebuie să execuți.
             {activeClients.length > 0 && (
               <>
-                {" "}<strong className="text-eos-text">{activeClients.length} firme active</strong>
-                {alertClients.length > 0 && <>, <strong className="text-eos-error">{alertClients.length} cu alerte critice</strong></>}
-                {"."}
+                {" "}<strong className="text-eos-text">{activeClients.length} firme active</strong>{"."}
               </>
             )}
           </>

@@ -496,6 +496,7 @@ export default function FindingDetailPage() {
       setNextReviewDateISO(payload.finding?.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
       setRevalidationConfirmed(false)
       setEvidenceCompleteness(payload.evidenceCompleteness)
+      setLifecycle(payload.lifecycle ?? null)
       setPendingApprovalId(null)
       if (options?.redirectTo) {
         router.push(options.redirectTo)
@@ -559,7 +560,20 @@ export default function FindingDetailPage() {
   }
 
   if (loading) return <LoadingScreen variant="section" />
-  if (error || !finding) return <ErrorScreen message={error ?? "Finding inexistent."} variant="section" />
+  if (error || !finding) {
+    const isMissing = !error || /inexistent|not found|404/i.test(error)
+    return (
+      <ErrorScreen
+        message={isMissing ? "Cazul nu mai există sau a fost arhivat." : error ?? "Cazul nu a putut fi încărcat."}
+        hint={
+          isMissing
+            ? "Vezi inbox-ul De rezolvat sau Dosarul pentru cazurile rezolvate."
+            : "Verifică conexiunea și încearcă din nou."
+        }
+        variant="section"
+      />
+    )
+  }
 
   const status = (finding.findingStatus ?? "open") as "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   const statusCfg = getFindingStatusPresentation(finding.findingStatus)

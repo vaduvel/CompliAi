@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner"
 import { BATCH_ACTION_LABELS, type BatchActionType } from "@/lib/compliance/batch-actions"
 import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { membershipRoleLabel } from "@/lib/compliscan/membership-role-labels"
 
 // ── Types (mirrors /api/partner/clients/[orgId] response) ─────────────────────
 
@@ -334,7 +335,7 @@ export function ClientContextPanel({
           </div>
           <div>
             <h1 className="text-lg font-semibold text-eos-text">{data.orgName}</h1>
-            <p className="text-xs text-eos-text-tertiary capitalize">{data.role}</p>
+            <p className="text-xs text-eos-text-tertiary">{membershipRoleLabel(data.role)}</p>
           </div>
         </div>
 
