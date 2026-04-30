@@ -66,6 +66,7 @@ export const initialComplianceState: ComplianceState = {
   events: [],
   hrRegistryReconciliations: {},
   gdprTrainingRecords: [],
+  dpiaRecords: [],
 }
 
 export function normalizeComplianceState(state: ComplianceState): ComplianceState {
@@ -94,6 +95,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const gdprTrainingRecords = Array.isArray(state.gdprTrainingRecords)
     ? state.gdprTrainingRecords
     : []
+  const dpiaRecords = Array.isArray(state.dpiaRecords)
+    ? state.dpiaRecords
+    : []
   const dpoMigrationImports = Array.isArray(state.dpoMigrationImports)
     ? state.dpoMigrationImports
     : []
@@ -116,6 +120,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     events,
     hrRegistryReconciliations,
     gdprTrainingRecords,
+    dpiaRecords,
     dpoMigrationImports,
   })
   const alerts = applyTaskResolutionToAlerts({
@@ -137,6 +142,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     events,
     hrRegistryReconciliations,
     gdprTrainingRecords,
+    dpiaRecords,
     dpoMigrationImports,
   })
 
@@ -189,6 +195,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     snapshotHistory,
     hrRegistryReconciliations,
     gdprTrainingRecords,
+    dpiaRecords,
     dpoMigrationImports,
     validatedBaselineSnapshotId:
       typeof state.validatedBaselineSnapshotId === "string" &&
@@ -213,6 +220,7 @@ function normalizeGeneratedDocuments(
         item.documentType === "cookie-policy" ||
         item.documentType === "dpa" ||
         item.documentType === "dsar-response" ||
+        item.documentType === "dpia" ||
         item.documentType === "retention-policy" ||
         item.documentType === "nis2-incident-response" ||
         item.documentType === "ai-governance" ||

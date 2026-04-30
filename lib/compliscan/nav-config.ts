@@ -8,6 +8,7 @@ import {
   Send,
   ShieldAlert,
   ShieldCheck,
+  ScanLine,
   Sparkles,
   UsersRound,
 } from "lucide-react"
@@ -61,6 +62,13 @@ const DPO_NAV_ITEMS: DashboardNavItem[] = [
     href: dashboardRoutes.vendorReview,
     icon: ShieldCheck,
     matchers: [dashboardRoutes.vendorReview],
+  },
+  {
+    id: "dpia",
+    label: "DPIA Art. 35",
+    href: dashboardRoutes.dpia,
+    icon: ScanLine,
+    matchers: [dashboardRoutes.dpia],
   },
   {
     id: "breach",

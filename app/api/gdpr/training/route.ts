@@ -22,6 +22,19 @@ function normalizeParticipantCount(value: unknown): number {
   return Math.min(Math.round(n), 100000)
 }
 
+function normalizeParticipantNames(value: unknown): string[] {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/\r?\n|[,;]+/)
+      : []
+  return raw
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 1000)
+}
+
 function isIsoLike(value: unknown): value is string {
   return typeof value === "string" && !Number.isNaN(Date.parse(value))
 }
@@ -75,10 +88,23 @@ export async function POST(request: Request) {
       title,
       audience: normalizeAudience(body.audience),
       participantCount: normalizeParticipantCount(body.participantCount),
+      participantNames: normalizeParticipantNames(body.participantNames),
       status: body.status === "completed" ? "completed" : body.status === "evidence_required" ? "evidence_required" : "planned",
       dueAtISO: isIsoLike(body.dueAtISO) ? body.dueAtISO : undefined,
       completedAtISO: isIsoLike(body.completedAtISO) ? body.completedAtISO : undefined,
       evidenceNote: typeof body.evidenceNote === "string" ? body.evidenceNote.trim() : undefined,
+      evidenceFileName: typeof body.evidenceFileName === "string" ? body.evidenceFileName.trim() || undefined : undefined,
+      evidenceFileType: typeof body.evidenceFileType === "string" ? body.evidenceFileType.trim() || undefined : undefined,
+      evidenceFileSizeBytes: normalizeParticipantCount(body.evidenceFileSizeBytes),
+      certificateTitle: typeof body.certificateTitle === "string" ? body.certificateTitle.trim() || undefined : undefined,
+      evidenceValidatedAtISO:
+        body.status === "completed" && (body.evidenceNote || body.evidenceFileName)
+          ? nowISO
+          : undefined,
+      evidenceValidatedBy:
+        body.status === "completed" && (body.evidenceNote || body.evidenceFileName)
+          ? session.email
+          : undefined,
       createdAtISO: nowISO,
       updatedAtISO: nowISO,
     }
@@ -144,6 +170,10 @@ export async function PATCH(request: Request) {
           title: typeof body.title === "string" && body.title.trim() ? body.title.trim() : current.title,
           audience: body.audience ? normalizeAudience(body.audience) : current.audience,
           participantCount: body.participantCount === undefined ? current.participantCount : normalizeParticipantCount(body.participantCount),
+          participantNames:
+            body.participantNames === undefined
+              ? current.participantNames
+              : normalizeParticipantNames(body.participantNames),
           status,
           dueAtISO: body.dueAtISO === null ? undefined : isIsoLike(body.dueAtISO) ? body.dueAtISO : current.dueAtISO,
           completedAtISO:
@@ -158,6 +188,36 @@ export async function PATCH(request: Request) {
               : body.evidenceNote === null
                 ? undefined
                 : current.evidenceNote,
+          evidenceFileName:
+            typeof body.evidenceFileName === "string"
+              ? body.evidenceFileName.trim()
+              : body.evidenceFileName === null
+                ? undefined
+                : current.evidenceFileName,
+          evidenceFileType:
+            typeof body.evidenceFileType === "string"
+              ? body.evidenceFileType.trim()
+              : body.evidenceFileType === null
+                ? undefined
+                : current.evidenceFileType,
+          evidenceFileSizeBytes:
+            body.evidenceFileSizeBytes === undefined
+              ? current.evidenceFileSizeBytes
+              : normalizeParticipantCount(body.evidenceFileSizeBytes),
+          certificateTitle:
+            typeof body.certificateTitle === "string"
+              ? body.certificateTitle.trim()
+              : body.certificateTitle === null
+                ? undefined
+                : current.certificateTitle,
+          evidenceValidatedAtISO:
+            status === "completed" && (body.evidenceNote || body.evidenceFileName || current.evidenceNote || current.evidenceFileName)
+              ? current.evidenceValidatedAtISO ?? nowISO
+              : current.evidenceValidatedAtISO,
+          evidenceValidatedBy:
+            status === "completed" && (body.evidenceNote || body.evidenceFileName || current.evidenceNote || current.evidenceFileName)
+              ? current.evidenceValidatedBy ?? session.email
+              : current.evidenceValidatedBy,
           updatedAtISO: nowISO,
         }
         const nextRecords = [...records]
@@ -176,7 +236,7 @@ export async function PATCH(request: Request) {
                 metadata: {
                   status: updated.status,
                   participantCount: updated.participantCount,
-                  evidenceAttached: Boolean(updated.evidenceNote),
+                  evidenceAttached: Boolean(updated.evidenceNote || updated.evidenceFileName),
                 },
               },
               eventActor(session)

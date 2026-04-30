@@ -47,6 +47,7 @@ const DOCUMENT_TYPE_OPTIONS: Array<{ value: DocumentType; label: string }> = [
   { value: "privacy-policy", label: "Privacy Policy" },
   { value: "cookie-policy", label: "Cookie Policy" },
   { value: "dpa", label: "DPA (Data Processing Agreement)" },
+  { value: "dpia", label: "DPIA (GDPR Art. 35)" },
   { value: "dsar-response", label: "DSAR Response" },
   { value: "retention-policy", label: "Retention Policy" },
   { value: "nis2-incident-response", label: "NIS2 Incident Response" },

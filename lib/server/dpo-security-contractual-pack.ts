@@ -23,7 +23,7 @@ export type DpoSecurityContractualPack = {
   contractualDocuments: Array<{
     id: string
     title: string
-    status: "signature_ready_template" | "operational_policy" | "production_policy"
+    status: "signature_ready" | "operational_policy" | "production_policy" | "client_ready_policy"
     purpose: string
     owner: string
     clientFacingSummary: string
@@ -55,7 +55,7 @@ export type DpoSecurityContractualPack = {
   legalTerms: Array<{
     id: string
     title: string
-    status: "signature_ready_template" | "production_policy"
+    status: "signature_ready" | "production_policy" | "client_ready_policy"
     clauses: string[]
   }>
   evidenceDeletionPolicy: {
@@ -108,22 +108,22 @@ export function buildDpoSecurityContractualPack(
       {
         id: "dpa-controller-processor",
         title: "DPA CompliScan ↔ cabinet DPO",
-        status: "signature_ready_template",
+        status: "signature_ready",
         purpose:
           "Stabilește rolurile, scopurile, categoriile de date, măsurile tehnice și obligațiile de asistență pentru cabinet.",
         owner: "CompliScan + cabinet DPO",
         clientFacingSummary:
-          "Template semnabil pentru pilot/producție: cabinetul îl revizuiește, completează datele societății și îl semnează înainte de clienți reali.",
+          "Document semnabil client-ready: cabinetul completează datele societății și îl semnează înainte de clienți reali.",
       },
       {
         id: "subprocessors-list",
         title: "Listă subprocessori și servicii tehnice",
-        status: "operational_policy",
+        status: "client_ready_policy",
         purpose:
           "Arată ce servicii pot procesa date în numele platformei și ce rămâne configurabil de client.",
         owner: "CompliScan",
         clientFacingSummary:
-          "Lista trebuie revizuită la activarea producției și atașată DPA-ului semnat.",
+          "Listă atașabilă DPA-ului semnat; include provider exact, regiune, date procesate, AI/training și mod EU-only.",
       },
       {
         id: "security-brief",
@@ -133,7 +133,7 @@ export function buildDpoSecurityContractualPack(
           "Descrie controalele minime pentru acces, audit trail, export, ștergere, backup și incident response.",
         owner: "CompliScan",
         clientFacingSummary:
-          "Brief de securitate pentru pilot controlat, nu certificare externă.",
+          "Brief de securitate client-facing pentru pilot/producție controlată; nu este certificare externă.",
       },
       {
         id: "ai-processing-brief",
@@ -143,7 +143,7 @@ export function buildDpoSecurityContractualPack(
           "Clarifică modul AI ON/OFF, provider boundary și faptul că documentele client-facing cer validare umană.",
         owner: "CompliScan + cabinet DPO",
         clientFacingSummary:
-          "Pentru clienți sensibili, cabinetul poate lucra template-only cu AI OFF.",
+          "Pentru clienți sensibili, cabinetul poate lucra template-only cu AI OFF; AI ON se activează explicit per workspace.",
       },
     ],
     subprocessors: [
@@ -256,7 +256,7 @@ export function buildDpoSecurityContractualPack(
       {
         id: "dpa-signable-terms",
         title: "DPA final semnabil",
-        status: "signature_ready_template",
+        status: "signature_ready",
         clauses: [
           "CompliScan acționează ca processor pentru cabinetul DPO; cabinetul rămâne controller/processor conform contractelor sale cu clienții.",
           "Scopul procesării: organizare workflow, approvals, evidence ledger, raport lunar, export Audit Pack.",

@@ -16,6 +16,7 @@ export type DocumentType =
   | "cookie-policy"
   | "dpa"
   | "dsar-response"
+  | "dpia"
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
@@ -110,6 +111,7 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "cookie-policy": 24,
   dpa: 12,
   "dsar-response": 6,
+  dpia: 12,
   "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
@@ -158,6 +160,10 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   "dsar-response": {
     title: "Răspuns DSAR către persoana vizată",
     legalBasis: "GDPR Art. 12, 15–22",
+  },
+  dpia: {
+    title: "DPIA — Analiză de impact privind protecția datelor",
+    legalBasis: "GDPR Art. 35",
   },
   "retention-policy": {
     title: "Politică și Matrice de Retenție a Datelor",
@@ -408,6 +414,22 @@ Cerințe:
 - Include placeholders pentru date care trebuie completate de consultant: [NUME PERSOANĂ], [DATA CERERII], [REFERINȚĂ INTERNĂ]
 - Marchează clar că este DRAFT și necesită validare umană înainte de transmitere
 - Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    dpia: `
+Generează un draft DPIA (Data Protection Impact Assessment) în română conform GDPR Art. 35.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Include secțiuni pentru: descrierea prelucrării, scopuri, necesitate, proporționalitate, categorii de date, persoane vizate, destinatari, transferuri, legătura cu RoPA, riscuri pentru drepturile persoanelor, măsuri de mitigare, risc rezidual și decizia consultantului
+- Evidențiază dacă există categorii speciale de date, decizii automate sau prelucrare la scară largă
+- Include checklist final: RoPA actualizat, măsuri aprobate, owner desemnat, dovadă atașată, revizie DPO finală
+- Marchează clar că este DRAFT și necesită validare profesională înainte de utilizare oficială
+- Format Markdown cu titluri clare și tabele
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
     "retention-policy": `
@@ -951,6 +973,50 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       "## Drept de reclamație",
       "Persoana vizată are dreptul de a depune o plângere la ANSPDCP dacă apreciază că răspunsul primit nu respectă GDPR.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    dpia: [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Pregătit de:** ${preparedBy}`,
+      `**Contact consultant / DPO:** ${input.dpoEmail ?? "[Completează email consultant]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      `**Status:** DRAFT — necesită validare profesională`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## 1. Descrierea prelucrării",
+      "Descrieți operațiunea, sistemele implicate, scopurile și legătura cu intrarea RoPA relevantă.",
+      "",
+      "## 2. Necesitate și proporționalitate",
+      "- De ce este necesară prelucrarea?",
+      "- Ce date sunt strict necesare?",
+      "- Există alternative mai puțin intruzive?",
+      "",
+      "## 3. Riscuri pentru persoanele vizate",
+      "| Risc | Impact | Probabilitate | Nivel |",
+      "| --- | --- | --- | --- |",
+      "| Acces neautorizat | Date expuse | Medie | High |",
+      "| Retenție excesivă | Drepturi afectate | Medie | Medium |",
+      "",
+      "## 4. Măsuri de mitigare",
+      "- minimizare date",
+      "- control acces pe roluri",
+      "- logare acces",
+      "- retenție limitată",
+      "- procedură DSAR corelată",
+      "",
+      "## 5. Risc rezidual și decizie",
+      "Completați nivelul riscului rezidual, owner-ul măsurilor și decizia consultantului DPO.",
+      "",
+      "## Checklist final",
+      "- [ ] RoPA actualizat",
+      "- [ ] Măsurile sunt aprobate de management",
+      "- [ ] Dovada implementării este atașată în Dosar",
+      "- [ ] Consultantul DPO a revizuit și aprobat DPIA",
       "",
       reviewWarning,
     ].join("\n"),
@@ -1540,6 +1606,13 @@ export const DOCUMENT_TYPES: Array<{
     description: "Draft de răspuns către persoana vizată pentru cereri de acces, ștergere, rectificare sau opoziție.",
     free: false,
     legalBasis: "GDPR Art. 12, 15–22",
+  },
+  {
+    id: "dpia",
+    label: "DPIA",
+    description: "Analiză de impact Art. 35: risc, măsuri, legătură RoPA și decizie DPO.",
+    free: false,
+    legalBasis: "GDPR Art. 35",
   },
   {
     id: "retention-policy",

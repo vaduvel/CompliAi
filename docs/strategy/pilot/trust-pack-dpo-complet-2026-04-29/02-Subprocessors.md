@@ -1,10 +1,10 @@
 # Subprocessori CompliScan — pilot DPO Complet
 
-**Status:** operational policy pentru pilot  
+**Status:** client-ready subprocessor annex pentru pilot
 **Ultima actualizare:** 29 aprilie 2026  
 **Scop:** listă clară a serviciilor care pot procesa date în cadrul pilotului.
 
-Această listă trebuie revizuită și atașată DPA-ului semnat înainte de producție cu date reale sensibile.
+Această listă este pregătită ca anexă la DPA-ul semnat. Providerii/regiunile trebuie reconfirmați la activarea mediului live.
 
 ## Tabel subprocessori
 

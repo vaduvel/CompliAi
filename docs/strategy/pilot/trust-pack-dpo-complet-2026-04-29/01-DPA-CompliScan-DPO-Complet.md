@@ -1,11 +1,11 @@
-# DPA CompliScan ↔ DPO Complet — template pilot
+# DPA CompliScan ↔ DPO Complet — document semnabil pilot
 
-**Status:** template semnabil pentru pilot, necesită completare și semnătură  
+**Status:** document semnabil client-ready, necesită completare date societate și semnătură
 **Versiune:** 2026.04-pilot  
 **Părți:** CompliScan `[date societate de completat]` și DPO Complet `[date societate de completat]`  
 **Rol:** CompliScan acționează ca furnizor/processor pentru cabinetul DPO în limita serviciilor platformei.
 
-Acest document este un model de acord de prelucrare date pentru pilot. Nu este semnat și nu înlocuiește revizia juridică.
+Acest document este forma semnabilă a acordului de prelucrare date pentru pilot. Nu este semnat automat și nu înlocuiește revizia juridică.
 
 ## 1. Scopul procesării
 

@@ -45,6 +45,7 @@ export type DashboardNavId =
   | "whistleblowing"
   | "dora"
   | "dsar"
+  | "dpia"
   | "vendor-review"
   | "breach"
   | "training"

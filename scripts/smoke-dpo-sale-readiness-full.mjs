@@ -6,6 +6,10 @@ const OUT_DIR =
   process.env.OUT_DIR ||
   `/private/tmp/compliscan-dpo-sale-readiness-${new Date().toISOString().slice(0, 10)}`
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 60_000)
+const EMAIL_TEST_TO =
+  process.env.EMAIL_TEST_TO ||
+  process.env.COMPLISCAN_EMAIL_TEST_TO ||
+  "vaduvadaniel10@yahoo.com"
 
 class CookieJar {
   constructor() {
@@ -50,7 +54,18 @@ async function request(pathname, options = {}) {
   const cookie = jar.header()
   if (cookie) headers.set("cookie", cookie)
 
-  return fetchWithBody(pathname, { ...options, headers }, true)
+  const result = await fetchWithBody(pathname, { ...options, headers }, true)
+  if (
+    pathname.startsWith("/api/") &&
+    (!options.method || options.method === "GET") &&
+    result.res.status === 404 &&
+    typeof result.text === "string" &&
+    result.text.includes("Pagina nu a fost găsită")
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 1200))
+    return fetchWithBody(pathname, { ...options, headers }, true)
+  }
+  return result
 }
 
 async function publicRequest(pathname, options = {}) {
@@ -305,7 +320,69 @@ async function main() {
     "Historical personal-data breach creates ANSPDCP 72h finding"
   )
 
-  const dpaFinding = findDocumentBackedDpaFinding(state)
+  const incidents = await request("/api/nis2/incidents")
+  const personalDataIncident = (incidents.body.incidents || []).find((incident) => incident.involvesPersonalData)
+  record(Boolean(personalDataIncident), "Historical breach is visible as ANSPDCP-trackable incident", personalDataIncident?.title || "missing")
+  if (personalDataIncident?.id) {
+    const anspdcpExport = await request(`/api/breach-notification/${encodeURIComponent(personalDataIncident.id)}/export`)
+    await writeText("03c-anspdcp-export-check.txt", `status=${anspdcpExport.res.status}\ncontent-type=${anspdcpExport.res.headers.get("content-type")}\nbytes=${Buffer.isBuffer(anspdcpExport.body) ? anspdcpExport.body.length : 0}\n`)
+    record(
+      anspdcpExport.res.ok && anspdcpExport.res.headers.get("content-type")?.includes("application/pdf"),
+      "ANSPDCP 72h incident package exports as PDF",
+      anspdcpExport.res.headers.get("content-type") || `HTTP ${anspdcpExport.res.status}`
+    )
+  }
+
+  const ropaDocument = (migratedState.generatedDocuments || []).find((document) => document.documentType === "ropa")
+  const dpia = await request("/api/gdpr/dpia", {
+    method: "POST",
+    body: JSON.stringify({
+      title: `DPIA portal pacienți — ${clientName}`,
+      purpose: "Evaluarea riscului pentru programări online și istoricul consultațiilor.",
+      description: "Portal pacient cu cont, notificări și acces la rezultate medicale.",
+      dataCategories: ["date identificare", "date contact", "date sănătate"],
+      dataSubjects: ["pacienți", "aparținători"],
+      legalBasis: "GDPR Art. 6(1)(b), Art. 9(2)(h)",
+      specialCategories: true,
+      automatedDecisionMaking: false,
+      largeScaleProcessing: true,
+      linkedRopaDocumentId: ropaDocument?.id,
+      linkedRopaEntryLabel: "Programări pacienți",
+      necessityAssessment: "Portalul reduce erorile operaționale și centralizează cererile pacienților.",
+      proportionalityAssessment: "Acces limitat pe roluri, minimizare câmpuri și retenție controlată.",
+      risks: ["acces neautorizat la date medicale", "expunere accidentală rezultate"],
+      mitigationMeasures: ["MFA pentru personal", "log audit acces", "criptare storage", "review trimestrial"],
+      residualRisk: "medium",
+      owner: "Diana Popescu",
+      dueAtISO: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    }),
+  })
+  record(dpia.res.ok && dpia.body.record?.id, "Diana creates Art. 35 DPIA linked to RoPA", dpia.body.record?.id || dpia.text)
+  const dpiaId = dpia.body.record?.id
+  if (dpiaId) {
+    const dpiaReview = await request("/api/gdpr/dpia", {
+      method: "PATCH",
+      body: JSON.stringify({ id: dpiaId, status: "approved" }),
+    })
+    record(dpiaReview.res.ok && dpiaReview.body.record?.status === "approved", "DPIA moves to approved after consultant review", dpiaReview.body.record?.status || dpiaReview.text)
+    const dpiaExport = await request(`/api/gdpr/dpia/${encodeURIComponent(dpiaId)}/export`)
+    await writeText("03d-dpia-export-check.txt", `status=${dpiaExport.res.status}\ncontent-type=${dpiaExport.res.headers.get("content-type")}\nbytes=${Buffer.isBuffer(dpiaExport.body) ? dpiaExport.body.length : 0}\n`)
+    record(
+      dpiaExport.res.ok && dpiaExport.res.headers.get("content-type")?.includes("application/pdf"),
+      "DPIA exports as client dossier PDF",
+      dpiaExport.res.headers.get("content-type") || `HTTP ${dpiaExport.res.status}`
+    )
+  }
+
+  const trainingExport = await request("/api/gdpr/training/export")
+  await writeText("03e-training-export-check.txt", `status=${trainingExport.res.status}\ncontent-type=${trainingExport.res.headers.get("content-type")}\nbytes=${Buffer.isBuffer(trainingExport.body) ? trainingExport.body.length : 0}\n`)
+  record(
+    trainingExport.res.ok && trainingExport.res.headers.get("content-type")?.includes("application/pdf"),
+    "GDPR training register exports as evidence PDF",
+    trainingExport.res.headers.get("content-type") || `HTTP ${trainingExport.res.status}`
+  )
+
+  const dpaFinding = findDocumentBackedDpaFinding(migratedState)
   record(Boolean(dpaFinding), "Imported client has a real DPA/vendor finding", dpaFinding?.title || "missing")
   requireCheck(dpaFinding?.id, "No DPA finding found")
 
@@ -441,6 +518,13 @@ async function main() {
   record((monthly.body.activities || []).length > 0, "Monthly report has real activities from generated/approved DPA", (monthly.body.activities || []).join(" | "))
   record(String(monthly.body.html || "").includes(clientName), "Client-facing monthly HTML names the imported client")
   record(String(monthly.body.html || "").includes("DPO Complet"), "Client-facing monthly HTML is cabinet-branded")
+  const monthlyPdf = await request(`/api/partner/reports/monthly/pdf?clientOrgId=${encodeURIComponent(imported.orgId)}`)
+  await writeText("10b-monthly-report-pdf-check.txt", `status=${monthlyPdf.res.status}\ncontent-type=${monthlyPdf.res.headers.get("content-type")}\nbytes=${Buffer.isBuffer(monthlyPdf.body) ? monthlyPdf.body.length : 0}\n`)
+  record(
+    monthlyPdf.res.ok && monthlyPdf.res.headers.get("content-type")?.includes("application/pdf"),
+    "Monthly report exports as client-facing PDF",
+    monthlyPdf.res.headers.get("content-type") || `HTTP ${monthlyPdf.res.status}`
+  )
 
   const partnerExport = await request("/api/partner/export")
   await writeText("11-cabinet-export-after-flow.json", JSON.stringify(partnerExport.body, null, 2))
@@ -450,6 +534,21 @@ async function main() {
       JSON.stringify(partnerExport.body).includes("DPO Complet — DPA Diana real template"),
     "Cabinet export contains imported client and Diana template library"
   )
+
+  const trustPack = await request("/api/partner/trust-pack")
+  await writeText("12-trust-pack-pdf-check.txt", `status=${trustPack.res.status}\ncontent-type=${trustPack.res.headers.get("content-type")}\nbytes=${Buffer.isBuffer(trustPack.body) ? trustPack.body.length : 0}\n`)
+  record(
+    trustPack.res.ok && trustPack.res.headers.get("content-type")?.includes("application/pdf"),
+    "DPO Trust Pack exports as PDF",
+    trustPack.res.headers.get("content-type") || `HTTP ${trustPack.res.status}`
+  )
+
+  const emailTest = await request("/api/partner/email-test", {
+    method: "POST",
+    body: JSON.stringify({ to: EMAIL_TEST_TO }),
+  })
+  await writeText("13-email-test.json", JSON.stringify(emailTest.body, null, 2))
+  record(emailTest.res.ok && emailTest.body.ok, "Email live test endpoint responds", emailTest.body.message || emailTest.text)
 
   const failed = checks.filter((check) => !check.ok)
   const report = {
@@ -477,7 +576,7 @@ async function main() {
         ? `PASS — ${checks.length}/${checks.length} verificări trecute.`
         : `FAIL — ${checks.length - failed.length}/${checks.length} verificări trecute, ${failed.length} eșuate.`,
       "",
-      "Flow verificat: import client pseudonimizat → baseline scan → finding DPA real → template cabinet real → document DPA → magic link document-specific → aprobare client → evidence ledger → Dosar/monitoring → raport lunar → audit pack → export cabinet.",
+      "Flow verificat: import client pseudonimizat → baseline scan → import istoric → DPIA → training export → ANSPDCP export → finding DPA real → template cabinet real → document DPA → magic link document-specific → aprobare client → evidence ledger → Dosar/monitoring → raport lunar PDF → audit pack → trust pack → export cabinet → email test.",
       "",
     ].join("\n")
   )

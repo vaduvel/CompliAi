@@ -16,6 +16,7 @@ const VALID_TYPES = new Set<DocumentType>([
   "privacy-policy",
   "cookie-policy",
   "dpa",
+  "dpia",
   "retention-policy",
   "nis2-incident-response",
   "ai-governance",

@@ -1,14 +1,14 @@
 # CompliScan x DPO Complet — Pilot Trust Pack v1
 
 **Data:** 29 aprilie 2026  
-**Status:** pilot-ready draft, nu documentație juridică finală semnată  
+**Status:** client-ready signature pack, nu documentație juridică semnată automat
 **Scop:** pachet scurt pentru un cabinet DPO care vrea să testeze CompliScan responsabil pe 1-2 clienți reali sau pseudonimizați.
 
 Acest pack separă în documente clare conținutul care exista deja în `security-contractual-pack.md` din runtime demo-ul DPO Production Trust Hardening. Nu introduce o teză nouă de produs. Este doar forma consumabilă pentru pilot.
 
 ## Ce conține
 
-1. `01-DPA-CompliScan-DPO-Complet.md` — template contractual pentru relația CompliScan ↔ cabinet DPO.
+1. `01-DPA-CompliScan-DPO-Complet.md` — DPA semnabil pentru relația CompliScan ↔ cabinet DPO.
 2. `02-Subprocessors.md` — lista subprocessorilor, regiuni, date procesate, AI/training/EU-only.
 3. `03-Security-and-Hosting.md` — hosting, storage, acces, audit trail, magic links, RBAC.
 4. `04-Backup-Retention-Deletion.md` — backup, retenție, export, soft delete, hard delete, offboarding.
@@ -38,7 +38,7 @@ Flow verificat:
 - export complet cabinet;
 - soft delete evidence cu motiv, restore window și revalidare.
 
-## Ce NU este încă final
+## Ce rămâne acțiune umană înainte de producție
 
 - DPA-ul trebuie completat cu datele juridice reale și semnat.
 - Subprocessorii trebuie confirmați împreună cu configurarea reală de producție.
@@ -57,4 +57,4 @@ Flow verificat:
 
 ## Formulare scurtă pentru email
 
-> Am separat pachetul de încredere pentru pilot: DPA template, subprocessori, hosting/security, backup/retenție/ștergere, AI processing, explicație pentru clientul final și raport de offboarding test. Nu sunt documente juridice finale semnate, dar sunt suficiente pentru a evalua responsabil un pilot controlat pe 1-2 clienți.
+> Am separat pachetul de încredere pentru pilot: DPA semnabil, subprocessori, hosting/security, backup/retenție/ștergere, AI processing, explicație pentru clientul final și raport de offboarding test. Nu sunt documente semnate automat, dar sunt pregătite pentru revizie și semnare înainte de date reale sensibile.

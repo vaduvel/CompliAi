@@ -26,7 +26,7 @@ describe("dpo-security-contractual-pack", () => {
       ])
     )
     expect(pack.contractualDocuments.find((doc) => doc.id === "dpa-controller-processor")?.status).toBe(
-      "signature_ready_template"
+      "signature_ready"
     )
     expect(pack.subprocessors.map((item) => item.name)).toEqual(
       expect.arrayContaining(["Vercel", "Supabase", "Resend", "Mistral AI", "Google Gemini"])

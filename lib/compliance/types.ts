@@ -23,6 +23,7 @@ export type GeneratedDocumentKind =
   | "cookie-policy"
   | "dpa"
   | "dsar-response"
+  | "dpia"
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
@@ -60,10 +61,58 @@ export type GdprTrainingRecord = {
   title: string
   audience: GdprTrainingAudience
   participantCount: number
+  participantNames?: string[]
   status: "planned" | "completed" | "evidence_required"
   dueAtISO?: string
   completedAtISO?: string
   evidenceNote?: string
+  evidenceFileName?: string
+  evidenceFileType?: string
+  evidenceFileSizeBytes?: number
+  certificateTitle?: string
+  evidenceValidatedAtISO?: string
+  evidenceValidatedBy?: string
+  createdAtISO: string
+  updatedAtISO: string
+}
+
+export type DpiaRecordStatus =
+  | "draft"
+  | "in_review"
+  | "approved"
+  | "mitigations_in_progress"
+  | "completed"
+  | "archived"
+
+export type DpiaRiskLevel = "low" | "medium" | "high" | "critical"
+
+export type DpiaRecord = {
+  id: string
+  title: string
+  processingPurpose: string
+  processingDescription: string
+  dataCategories: string[]
+  dataSubjects: string[]
+  legalBasis: string
+  specialCategories: boolean
+  automatedDecisionMaking: boolean
+  largeScaleProcessing: boolean
+  linkedRopaDocumentId?: string
+  linkedRopaEntryLabel?: string
+  necessityAssessment: string
+  proportionalityAssessment: string
+  risks: string[]
+  mitigationMeasures: string[]
+  residualRisk: DpiaRiskLevel
+  status: DpiaRecordStatus
+  owner: string
+  dueAtISO?: string
+  reviewedAtISO?: string
+  approvedAtISO?: string
+  approvedBy?: string
+  evidenceNote?: string
+  evidenceFileName?: string
+  exportedAtISO?: string
   createdAtISO: string
   updatedAtISO: string
 }
@@ -635,6 +684,7 @@ export type ComplianceState = {
   siteScanJobs?: Record<string, SiteScanJob>
   hrRegistryReconciliations?: Record<string, HrRegistryReconciliationRecord>
   gdprTrainingRecords?: GdprTrainingRecord[]
+  dpiaRecords?: DpiaRecord[]
   dpoMigrationImports?: DpoMigrationImportRecord[]
   importedClientContext?: ImportedClientContext
   // ── Partner workspace ────────────────────────────────────────────────────

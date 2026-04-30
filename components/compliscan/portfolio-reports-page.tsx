@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Calendar, Check, Download, FileSearch, FolderOpen, Loader2, Paintbrush, Plus, ShieldCheck, Trash2 } from "lucide-react"
+import { Calendar, Check, Download, FileSearch, FolderOpen, Loader2, Mail, Paintbrush, Plus, ShieldCheck, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
@@ -481,7 +481,10 @@ export function PortfolioReportsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [exportingCabinet, setExportingCabinet] = useState(false)
+  const [exportingTrustPack, setExportingTrustPack] = useState(false)
+  const [testingEmail, setTestingEmail] = useState(false)
   const [generatingMonthly, setGeneratingMonthly] = useState(false)
+  const [exportingMonthlyPdf, setExportingMonthlyPdf] = useState(false)
   const [monthlyPreview, setMonthlyPreview] = useState<MonthlyPreviewPayload | null>(null)
 
   useEffect(() => {
@@ -539,6 +542,66 @@ export function PortfolioReportsPage() {
     }
   }
 
+  async function handleTrustPackExport() {
+    setExportingTrustPack(true)
+    try {
+      const response = await fetch("/api/partner/trust-pack", { cache: "no-store" })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Trust Pack-ul DPO nu a putut fi exportat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "compliscan-dpo-trust-pack.pdf"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Trust Pack DPO descărcat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul Trust Pack.")
+    } finally {
+      setExportingTrustPack(false)
+    }
+  }
+
+  async function handleEmailTest() {
+    setTestingEmail(true)
+    try {
+      const response = await fetch("/api/partner/email-test", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      })
+      const data = (await response.json().catch(() => null)) as {
+        ok?: boolean
+        channel?: "resend" | "console"
+        message?: string
+        error?: string
+      } | null
+      if (!response.ok || !data?.ok) {
+        toast.error(data?.error ?? data?.message ?? "Testul de email a eșuat.")
+        return
+      }
+      toast.success(
+        data.channel === "resend"
+          ? "Email test trimis prin Resend."
+          : "Email test logat în consolă: Resend nu este configurat local."
+      )
+    } catch {
+      toast.error("Eroare de rețea la testul de email.")
+    } finally {
+      setTestingEmail(false)
+    }
+  }
+
   async function handleGenerateMonthlyReport() {
     setGeneratingMonthly(true)
     const controller = new AbortController()
@@ -569,6 +632,35 @@ export function PortfolioReportsPage() {
     } finally {
       window.clearTimeout(timeoutId)
       setGeneratingMonthly(false)
+    }
+  }
+
+  async function handleMonthlyPdfExport() {
+    setExportingMonthlyPdf(true)
+    try {
+      const response = await fetch("/api/partner/reports/monthly/pdf", { cache: "no-store" })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Exportul PDF al raportului lunar a eșuat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "raport-lunar-dpo.pdf"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Raport lunar PDF descărcat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul PDF.")
+    } finally {
+      setExportingMonthlyPdf(false)
     }
   }
 
@@ -657,16 +749,38 @@ export function PortfolioReportsPage() {
               </p>
             </div>
           </div>
-          <Button
-            type="button"
-            variant="default"
-            disabled={exportingCabinet}
-            onClick={() => void handleCabinetExport()}
-            className="shrink-0"
-          >
-            {exportingCabinet ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-            Export cabinet
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={exportingTrustPack}
+              onClick={() => void handleTrustPackExport()}
+              className="shrink-0"
+            >
+              {exportingTrustPack ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+              Trust Pack PDF
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={testingEmail}
+              onClick={() => void handleEmailTest()}
+              className="shrink-0"
+            >
+              {testingEmail ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
+              Test email
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              disabled={exportingCabinet}
+              onClick={() => void handleCabinetExport()}
+              className="shrink-0"
+            >
+              {exportingCabinet ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+              Export cabinet
+            </Button>
+          </div>
         </div>
       </V3Panel>
 
@@ -684,7 +798,28 @@ export function PortfolioReportsPage() {
                 Preview client-facing generat din activitatea reală: documente, aprobări, respingeri, dovezi și next steps.
               </p>
             </div>
-            <V3FrameworkTag label="preview" count={monthlyPreview.generated} tone="info" />
+            <div className="flex flex-wrap items-center gap-2">
+              <V3FrameworkTag label="preview" count={monthlyPreview.generated} tone="info" />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={exportingMonthlyPdf}
+                onClick={() => void handleMonthlyPdfExport()}
+                className="gap-1.5"
+              >
+                {exportingMonthlyPdf ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                Descarcă PDF
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => window.print()}
+              >
+                Print
+              </Button>
+            </div>
           </div>
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
             {monthlyPreview.reports[0].clientEntries.map((client) => (

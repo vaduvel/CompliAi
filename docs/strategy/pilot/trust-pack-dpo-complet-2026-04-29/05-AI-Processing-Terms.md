@@ -1,6 +1,6 @@
 # AI Processing Terms — pilot DPO Complet
 
-**Status:** production policy draft pentru pilot  
+**Status:** client-ready production policy pentru pilot
 **Scop:** clarifică ce se întâmplă când AI este ON sau OFF în CompliScan.
 
 ## Principiu de bază

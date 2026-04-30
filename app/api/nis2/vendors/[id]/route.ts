@@ -78,8 +78,7 @@ export async function DELETE(
       const activeReviews = reviews.filter(
         (review) =>
           review.vendorId === id &&
-          review.status !== "closed" &&
-          review.status !== "auto-closed"
+          review.status !== "closed"
       )
       if (activeReviews.length > 0) {
         return jsonError(

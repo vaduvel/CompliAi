@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CheckCircle2, GraduationCap, Loader2, Plus } from "lucide-react"
+import { CheckCircle2, Download, GraduationCap, Loader2, Plus } from "lucide-react"
 import { toast } from "sonner"
 
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
@@ -42,10 +42,13 @@ export default function GdprTrainingPage() {
   const [summary, setSummary] = useState<TrainingResponse["summary"] | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [evidenceDrafts, setEvidenceDrafts] = useState<Record<string, { note: string; fileName: string; certificateTitle: string }>>({})
   const [form, setForm] = useState({
     title: "Training GDPR anual pentru angajați",
     audience: "all_staff" as GdprTrainingAudience,
     participantCount: "0",
+    participantNames: "",
     dueDate: todayInputValue(),
   })
 
@@ -79,6 +82,7 @@ export default function GdprTrainingPage() {
           title: form.title,
           audience: form.audience,
           participantCount: Number.parseInt(form.participantCount, 10) || 0,
+          participantNames: form.participantNames,
           status: "evidence_required",
           dueAtISO: toIsoFromInput(form.dueDate),
         }),
@@ -98,6 +102,11 @@ export default function GdprTrainingPage() {
   }
 
   async function markCompleted(record: GdprTrainingRecord) {
+    const draft = evidenceDrafts[record.id]
+    const evidenceNote =
+      draft?.note?.trim() ||
+      record.evidenceNote ||
+      "Training GDPR completat. Lista participanților / dovada comunicării este păstrată în Dosar."
     try {
       const res = await fetch("/api/gdpr/training", {
         method: "PATCH",
@@ -106,7 +115,9 @@ export default function GdprTrainingPage() {
           id: record.id,
           status: "completed",
           completedAtISO: new Date().toISOString(),
-          evidenceNote: record.evidenceNote || "Training GDPR completat. Lista participanților / dovada comunicării trebuie păstrată în Dosar.",
+          evidenceNote,
+          evidenceFileName: draft?.fileName?.trim() || record.evidenceFileName,
+          certificateTitle: draft?.certificateTitle?.trim() || record.certificateTitle,
         }),
       })
       const payload = await res.json()
@@ -121,6 +132,36 @@ export default function GdprTrainingPage() {
     }
   }
 
+  async function exportTrainingRegister() {
+    setExporting(true)
+    try {
+      const res = await fetch("/api/gdpr/training/export", { cache: "no-store" })
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null)
+        throw new Error(payload?.error ?? "Export eșuat.")
+      }
+      const blob = await res.blob()
+      const fileName =
+        res.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "registru-training-gdpr.pdf"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Registru training exportat.")
+    } catch (error) {
+      toast.error("Nu am putut exporta registrul.", {
+        description: error instanceof Error ? error.message : "Încearcă din nou.",
+      })
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <V3PageHero
@@ -132,6 +173,12 @@ export default function GdprTrainingPage() {
         }
         title="Training GDPR angajați"
         description="Tracker simplu pentru trainingurile privacy pe care consultantul DPO trebuie să le poată arăta în raport lunar sau la control: audiență, participanți, termen, dovadă."
+        actions={
+          <Button size="sm" variant="outline" disabled={exporting} onClick={() => void exportTrainingRegister()} className="gap-1.5">
+            {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+            Export PDF
+          </Button>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-4">
@@ -157,7 +204,8 @@ export default function GdprTrainingPage() {
             Adaugă training în tracker
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-[1.3fr_0.8fr_0.6fr_0.7fr_auto]">
+        <CardContent className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-[1.3fr_0.8fr_0.6fr_0.7fr_auto]">
           <input
             value={form.title}
             onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
@@ -190,6 +238,13 @@ export default function GdprTrainingPage() {
             {saving ? <Loader2 className="size-4 animate-spin" strokeWidth={2} /> : <GraduationCap className="size-4" strokeWidth={2} />}
             Salvează
           </Button>
+          </div>
+          <textarea
+            value={form.participantNames}
+            onChange={(event) => setForm((prev) => ({ ...prev, participantNames: event.target.value }))}
+            className="min-h-20 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none"
+            placeholder="Participanți / roluri acoperite, câte unul pe linie. Ex: Ana Ionescu — recepție"
+          />
         </CardContent>
       </Card>
 
@@ -219,17 +274,44 @@ export default function GdprTrainingPage() {
                   </div>
                   <p className="mt-1 text-xs text-eos-text-muted">
                     {AUDIENCE_LABELS[record.audience]} · {record.participantCount} participanți
+                    {(record.participantNames?.length ?? 0) > 0 ? ` · ${record.participantNames?.slice(0, 3).join(", ")}` : ""}
                     {record.dueAtISO ? ` · termen ${new Date(record.dueAtISO).toLocaleDateString("ro-RO")}` : ""}
                   </p>
                   {record.evidenceNote ? (
                     <p className="mt-1 text-xs text-eos-text-tertiary">{record.evidenceNote}</p>
                   ) : null}
+                  {record.evidenceFileName || record.certificateTitle ? (
+                    <p className="mt-1 font-mono text-[11px] text-eos-text-tertiary">
+                      {record.evidenceFileName ? `Dovadă: ${record.evidenceFileName}` : ""}
+                      {record.certificateTitle ? ` · Material: ${record.certificateTitle}` : ""}
+                    </p>
+                  ) : null}
                 </div>
                 {record.status !== "completed" ? (
-                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => void markCompleted(record)}>
-                    <CheckCircle2 className="size-3.5" strokeWidth={2} />
-                    Marchează completat
-                  </Button>
+                  <div className="min-w-[280px] flex-1 space-y-2 md:max-w-md">
+                    <input
+                      value={evidenceDrafts[record.id]?.fileName ?? ""}
+                      onChange={(event) => setEvidenceDrafts((prev) => ({ ...prev, [record.id]: { note: prev[record.id]?.note ?? "", certificateTitle: prev[record.id]?.certificateTitle ?? "", fileName: event.target.value } }))}
+                      className="h-8 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-2 text-xs text-eos-text outline-none"
+                      placeholder="Nume fișier dovadă: lista-prezenta.pdf"
+                    />
+                    <input
+                      value={evidenceDrafts[record.id]?.certificateTitle ?? ""}
+                      onChange={(event) => setEvidenceDrafts((prev) => ({ ...prev, [record.id]: { note: prev[record.id]?.note ?? "", fileName: prev[record.id]?.fileName ?? "", certificateTitle: event.target.value } }))}
+                      className="h-8 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-2 text-xs text-eos-text outline-none"
+                      placeholder="Material/certificat: GDPR awareness v2026.1"
+                    />
+                    <textarea
+                      value={evidenceDrafts[record.id]?.note ?? ""}
+                      onChange={(event) => setEvidenceDrafts((prev) => ({ ...prev, [record.id]: { fileName: prev[record.id]?.fileName ?? "", certificateTitle: prev[record.id]?.certificateTitle ?? "", note: event.target.value } }))}
+                      className="min-h-16 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-2 py-1.5 text-xs text-eos-text outline-none"
+                      placeholder="Dovadă: cine a participat, unde e lista, ce s-a comunicat."
+                    />
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => void markCompleted(record)}>
+                      <CheckCircle2 className="size-3.5" strokeWidth={2} />
+                      Validează dovada și marchează completat
+                    </Button>
+                  </div>
                 ) : null}
               </div>
             ))

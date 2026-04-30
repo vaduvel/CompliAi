@@ -1,6 +1,6 @@
 # Security and Hosting — pilot DPO Complet
 
-**Status:** production policy draft pentru pilot controlat  
+**Status:** client-ready production policy pentru pilot controlat
 **Scop:** descrie pe scurt cum sunt găzduite, protejate și urmărite datele în CompliScan.
 
 Acest document nu este certificare de securitate și nu înlocuiește un audit extern. Este un brief operațional pentru decizia de pilot.

@@ -1,6 +1,6 @@
 # Backup, Retention, Deletion and Offboarding — pilot DPO Complet
 
-**Status:** production policy draft pentru pilot  
+**Status:** client-ready production policy pentru pilot
 **Scop:** reguli minime pentru backup, retenție, ștergere și ieșirea controlată din pilot.
 
 ## Principii

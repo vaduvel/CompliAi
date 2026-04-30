@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Bell, FileText } from "lucide-react"
+import { Bell, Download, FileText, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
@@ -218,6 +218,7 @@ export function AnspdcpNotificationPanel({
     notifyDataSubjects: notif?.notifyDataSubjects ?? false,
   })
   const [saving, setSaving] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     setLocalNotification(notif)
@@ -301,6 +302,37 @@ export function AnspdcpNotificationPanel({
       return
     }
     if (submitted) toast.success("Notificare ANSPDCP marcată ca trimisă")
+  }
+
+  async function handleExportPackage() {
+    setExporting(true)
+    try {
+      const response = await fetch(`/api/breach-notification/${encodeURIComponent(incident.id)}/export`, {
+        cache: "no-store",
+      })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Dosarul ANSPDCP nu a putut fi exportat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        `dosar-anspdcp-${incident.id}.pdf`
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Dosar ANSPDCP exportat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul dosarului ANSPDCP.")
+    } finally {
+      setExporting(false)
+    }
   }
 
   const statusColors: Record<string, string> = {
@@ -474,6 +506,16 @@ export function AnspdcpNotificationPanel({
             </Button>
           </Link>
         ) : null}
+        <Button
+          size="sm"
+          variant="outline"
+          className="min-w-[220px] flex-1 gap-1.5 border-eos-warning/30 text-eos-warning hover:bg-eos-warning-soft"
+          disabled={exporting}
+          onClick={() => void handleExportPackage()}
+        >
+          {exporting ? <Loader2 className="size-3.5 animate-spin" /> : <Download className="size-3.5" strokeWidth={2} />}
+          Descarcă dosar ANSPDCP
+        </Button>
       </div>
     </div>
   )
