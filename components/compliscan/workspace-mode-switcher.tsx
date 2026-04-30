@@ -86,7 +86,7 @@ export function WorkspaceModeSwitcher({
             {workspaceMode === "org" ? `Execuție · ${currentOrgName}` : "Execuție în firmă"}
           </span>
           {workspaceMode !== "org" && (
-            <span className="font-mono text-[10px] text-eos-text-tertiary">—</span>
+            <span className="text-[10px] font-medium text-eos-text-tertiary">Selectează</span>
           )}
         </button>
       </div>

@@ -646,7 +646,7 @@ export function SettingsPageSurface() {
                   type="button"
                   onClick={() => setActiveTab(tab.value)}
                   className={[
-                    "inline-flex min-h-[56px] min-w-[152px] flex-col items-start whitespace-normal border-b-2 px-4 py-3 text-left transition-colors",
+                    "inline-flex min-h-[56px] w-[156px] shrink-0 flex-col items-start whitespace-normal border-b-2 px-4 py-3 text-left transition-colors",
                     activeTab === tab.value
                       ? "border-b-2 border-eos-primary text-eos-text"
                       : "border-transparent text-eos-text-tertiary hover:text-eos-text-muted",

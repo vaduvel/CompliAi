@@ -345,16 +345,16 @@ export function ClientContextPanel({
               <ScoreRing score={c.score} />
               <div className="absolute flex flex-col items-center">
                 <span className={`text-lg font-bold leading-none ${scoreColor(c.score)}`}>{c.score}</span>
-                <span className="text-[9px] text-eos-text-tertiary">scor</span>
+                <span className="text-[9px] text-eos-text-tertiary">readiness</span>
               </div>
             </div>
             <div className="space-y-1">
               <p className={`text-sm font-semibold ${scoreColor(c.score)}`}>{c.riskLabel}</p>
               <p className="text-xs text-eos-text-tertiary">
-                {c.openAlerts} alerte · {c.scannedDocuments} documente
+                {data.openFindings.length} {data.openFindings.length === 1 ? "caz deschis" : "cazuri deschise"} · {c.openAlerts} alerte · {c.scannedDocuments} documente
               </p>
               <p className="text-xs text-eos-text-tertiary">
-                GDPR {c.gdprProgress}% · {c.aiSystemsCount} sisteme AI
+                Acoperire GDPR: {c.gdprProgress}% · {c.aiSystemsCount} sisteme AI
               </p>
             </div>
           </div>
