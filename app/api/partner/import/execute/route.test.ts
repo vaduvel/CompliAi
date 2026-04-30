@@ -167,4 +167,42 @@ describe("POST /api/partner/import/execute", () => {
     expect(payload.code).toBe("PARTNER_TRIAL_LIMIT_REACHED")
     expect(mocks.createOrganizationForExistingUserMock).not.toHaveBeenCalled()
   })
+
+  it("nu importă rândurile cu CUI deja existent în portofoliu", async () => {
+    mocks.readStateForOrgMock.mockResolvedValueOnce({
+      orgProfile: { cui: "RO12345678" },
+      findings: [],
+      generatedDocuments: [],
+    })
+
+    const response = await POST(
+      new Request("http://localhost/api/partner/import/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rows: [
+            {
+              orgName: "Client Duplicat SRL",
+              cui: "RO12345678",
+              sector: "professional-services",
+              employeeCount: "10-49",
+              email: "ceo@client.ro",
+            },
+          ],
+        }),
+      })
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.imported).toBe(0)
+    expect(payload.failed).toBe(1)
+    expect(payload.results[0]).toEqual(
+      expect.objectContaining({
+        ok: false,
+        error: "CUI deja existent în portofoliu.",
+      })
+    )
+    expect(mocks.createOrganizationForExistingUserMock).not.toHaveBeenCalled()
+  })
 })

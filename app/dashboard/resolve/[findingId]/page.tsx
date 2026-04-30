@@ -1036,16 +1036,17 @@ export default function FindingDetailPage() {
           {!hasGenerator ? (
             <>
               {recipe.workflowLink ? (
-                <a href={recipe.workflowLink.href} target="_blank" rel="noopener noreferrer">
-                  <Button
-                    data-testid="open-workflow-link"
-                    className="gap-1.5"
-                    variant="outline"
-                  >
+                <Button
+                  asChild
+                  data-testid="open-workflow-link"
+                  className="gap-1.5"
+                  variant="outline"
+                >
+                  <Link href={recipe.workflowLink.href}>
                     <FileText className="size-3.5" strokeWidth={2} />
-                    {recipe.workflowLink.label} (tab nou)
-                  </Button>
-                </a>
+                    {recipe.workflowLink.label}
+                  </Link>
+                </Button>
               ) : null}
               <Button
                 data-testid="mark-finding-resolved"

@@ -2412,7 +2412,7 @@ function getWorkflowLink(
       }
     case "GDPR-020":
       return {
-        href: `/dashboard/dosar?${new URLSearchParams({
+        href: `/dashboard/documente?${new URLSearchParams({
           focus: "contracts-baseline",
           findingId: record.id,
           returnTo: `/dashboard/resolve/${record.id}`,
@@ -2421,7 +2421,7 @@ function getWorkflowLink(
       }
     case "GDPR-021":
       return {
-        href: `/dashboard/dosar?${new URLSearchParams({
+        href: `/dashboard/documente?${new URLSearchParams({
           focus: "job-descriptions",
           findingId: record.id,
           returnTo: `/dashboard/resolve/${record.id}`,
@@ -2430,7 +2430,7 @@ function getWorkflowLink(
       }
     case "GDPR-022":
       return {
-        href: `/dashboard/dosar?${new URLSearchParams({
+        href: `/dashboard/documente?${new URLSearchParams({
           focus: "hr-procedures",
           findingId: record.id,
           returnTo: `/dashboard/resolve/${record.id}`,
@@ -2439,7 +2439,7 @@ function getWorkflowLink(
       }
     case "GDPR-023":
       return {
-        href: `/dashboard/dosar?${new URLSearchParams({
+        href: `/dashboard/documente?${new URLSearchParams({
           focus: "reges-correction",
           findingId: record.id,
           returnTo: `/dashboard/resolve/${record.id}`,

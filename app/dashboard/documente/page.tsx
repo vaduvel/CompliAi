@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation"
+import { DocumentsPageSurface } from "@/components/compliscan/documents-page"
 
 export default function LegacyDocumentsPage() {
-  redirect("/dashboard/dosar")
+  return <DocumentsPageSurface />
 }

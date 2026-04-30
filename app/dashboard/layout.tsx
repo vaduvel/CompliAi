@@ -35,7 +35,9 @@ export default async function DashboardLayout({
     session && !isDemoSession(session)
       ? await loadOnboardingGateStateForOrg(session.orgId)
       : await loadOnboardingGateState()
-  const userMode = session && !isDemoSession(session) ? await resolveUserMode(session) : null
+  // Demo partner sessions still need their real mode so Diana can move between
+  // portfolio triage and client execution while we skip only the onboarding gate.
+  const userMode = session ? await resolveUserMode(session) : null
   const onboardingDone = Boolean(userMode && onboardingGate.hasCompletedOnboarding)
 
   if (session && !isDemoSession(session)) {

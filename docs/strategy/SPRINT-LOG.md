@@ -9,6 +9,35 @@
 
 ---
 
+## ✅ Update 30 apr 2026 (DPO Full Workflow Closure)
+
+**Răspuns la testul “Diana importă firmă nouă și lucrează cap-coadă”:** am închis blocajele care opreau flow-ul real `import -> baseline -> prioritate -> finding -> pachet de lucru -> dovadă -> monitorizare -> Dosar`.
+
+- Doc nou:
+  - `docs/strategy/pilot/dpo-live-browser-flow-report-2026-04-30.md`
+  - Raport live browser pentru Medica Plus SRL, importată ca firmă nouă în portofoliul DPO Complet.
+  - Include update post-fix și backlog parcat din auditul Sonnet pe rest framework-uri.
+- Fix cod:
+  - Demo partner sessions păstrează `userMode`, astfel încât Diana vede switcherul `Portofoliu · triaj` / `Execuție · client`.
+  - `/portfolio/client/[orgId]` afișează finding-urile active reale, nu doar finding-uri cu alertă separată deschisă.
+  - Importul duplicat este blocat la `execute`, nu doar avertizat în preview: duplicate nume/CUI existente sau duplicate în același fișier devin `failed`.
+  - Workflow link-urile REGES/HR/contracte merg către `/dashboard/documente`, unde există pachetul de lucru, nu către Dosar.
+  - `/dashboard/documente` randează din nou `DocumentsPageSurface`, nu redirect către `/dashboard/dosar`.
+  - Cockpit-ul REGES deschide pachetul în aceeași experiență, revine cu dovada precompletată și permite trecerea cazului în monitorizare.
+  - DSAR process pack nu mai folosește text generic “generat cu ajutorul AI”; disclaimerul este determinist și potrivit pentru AI OFF.
+- Retest live browser:
+  - Medica Plus SRL: portofoliu cu last scan, drilldown cu `Findings deschise: 10`, dashboard client cu 14 cazuri active.
+  - REGES: cockpit -> pachet documente -> reconciliere -> evidence note -> monitorizare -> Dosar, validat cap-coadă.
+  - Duplicate import Medica Plus SRL: `imported: 0`, `failed: 1`, mesaj duplicate clar.
+- Validare:
+  - `./node_modules/.bin/vitest run app/api/partner/import/execute/route.test.ts 'app/api/partner/clients/[orgId]/route.test.ts' lib/compliance/dsar-drafts.test.ts tests/finding-kernel.test.ts app/api/hr/pack/route.test.ts app/api/contracts/pack/route.test.ts` → PASS: 6 fișiere, 186 teste ✅
+  - `./node_modules/.bin/next lint` → PASS cu warning-uri istorice ✅
+  - `npm run build` → PASS după oprirea dev serverului și rebuild `.next` din zero ✅
+
+**Verdict:** pilot DPO controlat = DA pentru wedge-ul testat. Diana poate importa o firmă nouă și poate închide un flow operational DPO până în Dosar. Nu promitem încă migrare completă a istoricului cabinetului: DSAR log vechi, RoPA istoric, vendor register, training tracker istoric și email approvals rămân sprint gradual de migrare.
+
+---
+
 ## ✅ Update 29 apr 2026 (DPO migration/import audit)
 
 **Clarificare dupa drift-ul spre full-framework testing:** am separat strict ce tine de Diana DPO consultant de ce tine de CISO/NIS2, fiscal, HR, DORA sau viitorul compliance officer intern.

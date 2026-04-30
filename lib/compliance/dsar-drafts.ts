@@ -81,7 +81,7 @@ export function generateDsarProcessPack(params: { orgName: string }): DsarProces
 
 - ${orgName} păstrează la dosar: registrul cazului, dovada verificării identității, răspunsul final și urmele de execuție relevante.
 
-⚠️ Acest pachet a fost generat cu ajutorul AI și trebuie confirmat de un responsabil uman înainte de folosire oficială.`,
+⚠️ Document de lucru pregătit de CompliScan. Necesită revizie și validare profesională înainte de folosire oficială.`,
       },
       {
         id: "dsar-register",

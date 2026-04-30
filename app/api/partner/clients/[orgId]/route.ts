@@ -13,6 +13,8 @@ import {
   listUserMemberships,
 } from "@/lib/server/auth"
 import { normalizeComplianceState, computeDashboardSummary } from "@/lib/compliance/engine"
+import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
+import { isFindingActive } from "@/lib/compliscan/finding-cockpit"
 import { readNis2State } from "@/lib/server/nis2-store"
 import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { safeListReviews } from "@/lib/server/vendor-review-store"
@@ -57,10 +59,7 @@ export async function GET(
         aiSystemsCount: state.aiSystems.length,
       }
       openFindings = state.findings
-        .filter((f) => {
-          const alert = state.alerts.find((a) => a.findingId === f.id && a.open)
-          return alert !== undefined
-        })
+        .filter((f) => isFindingActive(f) && !isFindingOperationallyClosed(state, f.id))
         .slice(0, 10)
         .map((f) => ({
           id: f.id,
