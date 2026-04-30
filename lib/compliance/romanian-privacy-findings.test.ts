@@ -33,4 +33,15 @@ describe("buildRomanianPrivacyFindings", () => {
 
     expect(findings.map((finding) => finding.id)).toContain("intake-gdpr-training-tracker")
   })
+
+  it("declanșează Legea 190/2018 pentru servicii profesionale cu date HR/CNP", () => {
+    const findings = buildRomanianPrivacyFindings(
+      profile({ sector: "professional-services", employeeCount: "10-49" }),
+      "2026-04-29T10:00:00.000Z"
+    )
+
+    const lege190 = findings.find((finding) => finding.id === "intake-lege190-cnp-sensitive-data")
+    expect(lege190?.severity).toBe("high")
+    expect(lege190?.evidenceRequired).toContain("anexă CNP")
+  })
 })

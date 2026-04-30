@@ -3,6 +3,7 @@ import { buildAuditQualityGates } from "@/lib/compliance/audit-quality-gates"
 import { toAuditPackWorkspace } from "@/lib/compliance/audit-pack"
 import { getControlFamily, getControlFamilyReusePolicySummary } from "@/lib/compliance/control-families"
 import { normalizeDriftLifecycleStatus } from "@/lib/compliance/drift-lifecycle"
+import { buildFindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import { resolveFindingIdFromTaskId } from "@/lib/compliance/task-ids"
 import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
 import type {
@@ -53,6 +54,14 @@ export function buildAuditPack({
     remediationPlan: auditRemediationPlan,
     snapshot,
   })
+  const findingLifecycle = state.findings.map((finding) =>
+    buildFindingLifecycleView({
+      finding,
+      generatedDocuments: state.generatedDocuments,
+      taskState: state.taskState,
+      events: state.events,
+    })
+  )
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
   const openBusinessFindings = countOpenBusinessFindings(state, auditRemediationPlan)
   const missingControlEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
@@ -229,6 +238,7 @@ export function buildAuditPack({
         metadata: event.metadata ?? null,
       })),
     traceabilityMatrix,
+    findingLifecycle,
     nis2Report: buildNis2Report(nis2State),
     nis2Package: buildNis2Package(nis2State, generatedAt),
     appendix: {

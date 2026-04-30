@@ -41,11 +41,35 @@ describe("POST /api/auth/select-workspace", () => {
     })
     mocks.createSessionTokenMock.mockReturnValue("new-signed-token")
     mocks.createWorkspacePreferenceTokenMock.mockReturnValue("workspace-pref")
+    mocks.listUserMembershipsMock.mockResolvedValue([
+      {
+        membershipId: "membership-owner",
+        orgId: "org-cabinet",
+        orgName: "Cabinet Elena",
+        role: "owner",
+        status: "active",
+      },
+      {
+        membershipId: "membership-1",
+        orgId: "org-1",
+        orgName: "Client activ SRL",
+        role: "partner_manager",
+        status: "active",
+      },
+    ])
+    mocks.resolveUserForMembershipMock.mockResolvedValue({
+      id: "user-1",
+      orgId: "org-cabinet",
+      email: "partner@site.ro",
+      orgName: "Cabinet Elena",
+      role: "owner",
+      membershipId: "membership-owner",
+    })
     mocks.readSessionFromRequestMock.mockReturnValue({
       userId: "user-1",
       orgId: "org-1",
       email: "partner@site.ro",
-      orgName: "Cabinet Elena",
+      orgName: "Client activ SRL",
       role: "partner_manager",
       membershipId: "membership-1",
       workspaceMode: "org",
@@ -96,9 +120,35 @@ describe("POST /api/auth/select-workspace", () => {
     const payload = await response.json()
     expect(payload.ok).toBe(true)
     expect(payload.workspaceMode).toBe("portfolio")
+    expect(payload.orgId).toBe("org-cabinet")
+    expect(payload.role).toBe("owner")
     expect(mocks.createSessionTokenMock).toHaveBeenCalledWith(
-      expect.objectContaining({ workspaceMode: "portfolio" })
+      expect.objectContaining({
+        workspaceMode: "portfolio",
+        orgId: "org-cabinet",
+        role: "owner",
+        membershipId: "membership-owner",
+      })
     )
+  })
+
+  it("revine in portfolio pe workspace-ul cabinetului cand sesiunea curenta este pe client", async () => {
+    mocks.resolveUserModeMock.mockResolvedValue("partner")
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/select-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceMode: "portfolio" }),
+      })
+    )
+
+    expect(response.status).toBe(200)
+    expect(mocks.resolveUserForMembershipMock).toHaveBeenCalledWith("user-1", "membership-owner")
+    expect(mocks.createWorkspacePreferenceTokenMock).toHaveBeenCalledWith({
+      orgId: "org-cabinet",
+      workspaceMode: "portfolio",
+    })
   })
 
   it("blocheaza portfolio pentru user non-partner", async () => {

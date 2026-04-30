@@ -69,6 +69,7 @@ function buildConsultantProfile(config: WhiteLabelConfig, orgName: string) {
     envValue("COMPLISCAN_CABINET_NAME") ||
     "Cabinet DPO"
   const consultantName =
+    config.signerName?.trim() ||
     envValue("COMPLISCAN_CONSULTANT_NAME") ||
     "Consultant DPO"
 

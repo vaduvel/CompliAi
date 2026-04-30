@@ -127,6 +127,30 @@ describe("document generator fallback", () => {
     expect(document.content).not.toContain("{{counterpartyName}}")
   })
 
+  it("uses cabinet templates deterministically even when an AI provider is configured", async () => {
+    process.env.GEMINI_API_KEY = "test-key"
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{"candidates":[]}', { status: 200 }))
+    vi.stubGlobal("fetch", fetchMock)
+
+    const { generateDocument } = await importGeneratorModule()
+    const document = await generateDocument({
+      documentType: "dpa",
+      orgName: "Clinica Diana SRL",
+      counterpartyName: "Stripe Payments Europe",
+      preparedBy: "DPO Complet SRL",
+      cabinetTemplateContent: [
+        "# DPA Cabinet Diana — {{orgName}} × {{counterpartyName}}",
+        "",
+        "Clauză cabinet Diana păstrată integral.",
+      ].join("\n"),
+    })
+
+    expect(document.llmUsed).toBe(false)
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(document.content).toContain("Clinica Diana SRL × Stripe Payments Europe")
+    expect(document.content).toContain("Clauză cabinet Diana păstrată integral.")
+  })
+
   it("returns a valid ropa fallback when Gemini is unavailable", async () => {
     delete process.env.GEMINI_API_KEY
 

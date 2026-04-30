@@ -41,6 +41,7 @@ import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { getCloseGatingRequirements } from "@/lib/compliscan/finding-kernel"
 import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
 import { supportsDocumentAdoption, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
+import type { FindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import type { DocumentType } from "@/lib/server/document-generator"
 
 const GENERATOR_PROGRESS_TOAST_ID = "resolve-document-progress"
@@ -83,6 +84,7 @@ type FindingDetailResponse = {
   finding: FindingDetail
   linkedGeneratedDocument?: LinkedGeneratedDocument | null
   documentFlowState?: "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
+  lifecycle?: FindingLifecycleView
   feedbackMessage?: string
   pendingApproval?: boolean
   actionId?: string
@@ -92,6 +94,18 @@ type FindingDetailResponse = {
     percentage: number
     items: EvidenceCompletenessItem[]
   }
+}
+
+const LIFECYCLE_STAGE_LABELS: Record<FindingLifecycleView["completedStages"][number], string> = {
+  detected: "Detectat",
+  triaged: "Triat",
+  in_progress: "Lucrat",
+  sent_to_client: "Trimis client",
+  client_decided: "Feedback client",
+  evidence_attached: "Dovadă",
+  evidence_validated: "Validat",
+  resolved: "Închis",
+  monitoring: "Dosar",
 }
 
 function getExecutionClassLabel(recipe: ReturnType<typeof buildCockpitRecipe>) {
@@ -133,6 +147,7 @@ export default function FindingDetailPage() {
   const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
   const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
   const [evidenceCompleteness, setEvidenceCompleteness] = useState<FindingDetailResponse["evidenceCompleteness"]>(undefined)
+  const [lifecycle, setLifecycle] = useState<FindingLifecycleView | null>(null)
   const [pendingApprovalId, setPendingApprovalId] = useState<string | null>(null)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
   const [manualReviewCycleId, setManualReviewCycleId] = useState<string | null>(null)
@@ -152,6 +167,7 @@ export default function FindingDetailPage() {
     setRevalidationConfirmed(false)
     setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
     setEvidenceCompleteness(data.evidenceCompleteness)
+    setLifecycle(data.lifecycle ?? null)
     if (data.pendingApproval && data.actionId) {
       setPendingApprovalId(data.actionId)
     }
@@ -846,6 +862,48 @@ export default function FindingDetailPage() {
           <V3Stepper steps={v3Steps} />
         </div>
       )}
+
+      {lifecycle ? (
+        <V3Panel
+          eyebrow="Finding lifecycle"
+          title="Detectat → lucrat → dovadă → Dosar, fără pași ascunși"
+          action={<V3FrameworkTag label={lifecycle.statusLabel} tone={lifecycle.dossierReady ? "ok" : "info"} />}
+        >
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(LIFECYCLE_STAGE_LABELS).map(([stage, label]) => {
+              const done = lifecycle.completedStages.includes(stage as FindingLifecycleView["completedStages"][number])
+              return (
+                <span
+                  key={stage}
+                  className={[
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em]",
+                    done
+                      ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
+                      : "border-eos-border bg-white/[0.02] text-eos-text-tertiary",
+                  ].join(" ")}
+                >
+                  {done ? <CheckCircle2 className="size-3" strokeWidth={2} /> : <XCircle className="size-3" strokeWidth={2} />}
+                  {label}
+                </span>
+              )
+            })}
+          </div>
+          <div className="mt-4 rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] px-3.5 py-3">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+              Următorul pas
+            </p>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-eos-text-muted">
+              {lifecycle.nextAction}
+            </p>
+            {lifecycle.evidence.sources.length > 0 ? (
+              <p className="mt-2 text-[12px] leading-relaxed text-eos-text-tertiary">
+                Dovadă: {lifecycle.evidence.sources.slice(0, 2).join(" · ")}
+                {lifecycle.evidence.sources.length > 2 ? ` · +${lifecycle.evidence.sources.length - 2}` : ""}
+              </p>
+            ) : null}
+          </div>
+        </V3Panel>
+      ) : null}
 
       {finding.reopenedFromISO && status === "open" ? (
         <div className="relative overflow-hidden rounded-eos-lg border border-eos-warning/25 bg-eos-warning-soft/30 px-5 py-3">

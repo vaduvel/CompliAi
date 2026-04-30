@@ -211,27 +211,27 @@ async function resolveActiveTemplateForSession({
   userMode?: UserMode
   documentType: DocumentType
 }) {
+  const mode = await resolveUserMode({ userId, userMode }).catch(() => null)
+  if (mode === "partner") {
+    const memberships = await listUserMemberships(userId).catch(() => [])
+    const cabinetMemberships = memberships.filter(
+      (membership) =>
+        membership.status === "active" &&
+        membership.orgId !== orgId &&
+        membership.role === "owner"
+    )
+
+    for (const membership of cabinetMemberships) {
+      const inheritedTemplate = await getActiveTemplateForType(
+        membership.orgId,
+        documentType
+      )
+      if (inheritedTemplate) return inheritedTemplate
+    }
+  }
+
   const currentOrgTemplate = await getActiveTemplateForType(orgId, documentType)
   if (currentOrgTemplate) return currentOrgTemplate
-
-  const mode = await resolveUserMode({ userId, userMode }).catch(() => null)
-  if (mode !== "partner") return null
-
-  const memberships = await listUserMemberships(userId).catch(() => [])
-  const cabinetMemberships = memberships.filter(
-    (membership) =>
-      membership.status === "active" &&
-      membership.orgId !== orgId &&
-      membership.role === "owner"
-  )
-
-  for (const membership of cabinetMemberships) {
-    const inheritedTemplate = await getActiveTemplateForType(
-      membership.orgId,
-      documentType
-    )
-    if (inheritedTemplate) return inheritedTemplate
-  }
 
   return null
 }

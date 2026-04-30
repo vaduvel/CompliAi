@@ -8,6 +8,7 @@ import {
   Send,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
   UsersRound,
 } from "lucide-react"
 
@@ -81,6 +82,20 @@ const DPO_NAV_ITEMS: DashboardNavItem[] = [
     href: dashboardRoutes.magicLinks,
     icon: Send,
     matchers: [dashboardRoutes.magicLinks, dashboardRoutes.approvals],
+  },
+  {
+    id: "generator",
+    label: "Generator documente",
+    href: dashboardRoutes.generator,
+    icon: Sparkles,
+    matchers: [dashboardRoutes.generator],
+  },
+  {
+    id: "reports",
+    label: "Rapoarte client",
+    href: dashboardRoutes.reports,
+    icon: FileSearch,
+    matchers: [dashboardRoutes.reports],
   },
   {
     id: "cabinet-templates",

@@ -720,13 +720,31 @@ function findValue(raw: Record<string, string>, aliases: string[]): string | und
     const normalizedKey = normalizeKey(key)
     if (
       normalizedAliases.some(
-        (alias) => normalizedKey === alias || normalizedKey.includes(alias) || alias.includes(normalizedKey)
+        (alias) =>
+          normalizedKey === alias ||
+          normalizedKey.includes(alias) ||
+          (!isUnsafeReverseHeaderMatch(normalizedKey) && alias.includes(normalizedKey))
       )
     ) {
       return value.trim()
     }
   }
   return undefined
+}
+
+function isUnsafeReverseHeaderMatch(normalizedKey: string) {
+  const tokenCount = normalizedKey.split(/\s+/).filter(Boolean).length
+  if (tokenCount > 1) return false
+
+  return [
+    "data",
+    "date",
+    "nr",
+    "numar",
+    "no",
+    "id",
+    "tip",
+  ].includes(normalizedKey)
 }
 
 function normalizeKey(value: string) {

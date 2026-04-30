@@ -91,6 +91,7 @@ describe("POST /api/dsar", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.requireFreshRoleMock.mockResolvedValue(SESSION)
+    mocks.readDsarStateMock.mockResolvedValue({ requests: [], updatedAtISO: "2026-03-20T10:00:00.000Z" })
     mocks.createDsarMock.mockResolvedValue(SAMPLE_DSAR)
     mocks.updateDsarMock.mockResolvedValue({ ...SAMPLE_DSAR, draftResponseGenerated: true })
     mocks.generateDsarDraftMock.mockReturnValue({
@@ -121,7 +122,35 @@ describe("POST /api/dsar", () => {
       requesterName: "Ion Popescu",
       requesterEmail: "ion@exemplu.ro",
       requestType: "access",
+      receivedAtISO: expect.any(String),
     }))
+  })
+
+  it("nu dubleaza cererea DSAR la retry in aceeasi fereastra de 5 minute", async () => {
+    mocks.readDsarStateMock.mockResolvedValueOnce({
+      requests: [SAMPLE_DSAR],
+      updatedAtISO: "2026-03-20T10:00:00.000Z",
+    })
+
+    const res = await POST(
+      new Request("http://localhost/api/dsar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requesterName: "Ion Popescu",
+          requesterEmail: "ion@exemplu.ro",
+          requestType: "access",
+          receivedAtISO: "2026-03-20T10:03:00.000Z",
+        }),
+      })
+    )
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.deduplicated).toBe(true)
+    expect(body.request.id).toBe("dsar-abc123")
+    expect(mocks.createDsarMock).not.toHaveBeenCalled()
+    expect(mocks.updateDsarMock).not.toHaveBeenCalled()
   })
 
   it("respinge tip cerere invalid", async () => {

@@ -175,6 +175,21 @@ function buildClientAuditPackHtml(
   const ownerActionRows = buildOwnerActionRows(auditPack)
   const externalUseGuidance = buildBulletList(buildExternalUseGuidance(auditPack))
   const statusLegend = buildStatusLegend()
+  const findingLifecycleRows =
+    auditPack.findingLifecycle.length === 0
+      ? `<tr><td colspan="6" class="empty-cell">Nu există finding-uri în lifecycle pentru acest dosar.</td></tr>`
+      : auditPack.findingLifecycle
+          .map(
+            (item) => `<tr>
+              <td><strong>${escapeHtml(item.title)}</strong><div class="muted small">${escapeHtml(item.category)} · ${escapeHtml(item.severity)}</div></td>
+              <td><span class="chip ${item.dossierReady ? "success" : item.clientDecision === "rejected" ? "danger" : "warning"}">${escapeHtml(item.statusLabel)}</span></td>
+              <td>${escapeHtml(formatFindingLifecycleStage(item.currentStage))}</td>
+              <td>${item.evidence.validated ? "validată" : item.evidence.attached ? "atașată" : "lipsă"}</td>
+              <td>${escapeHtml(item.clientDecision === "none" ? "n/a" : item.clientDecision)}</td>
+              <td>${escapeHtml(item.nextAction)}</td>
+            </tr>`
+          )
+          .join("")
 
   const controlsRows = auditPack.controlsMatrix
     .map(
@@ -808,6 +823,26 @@ function buildClientAuditPackHtml(
       </section>
 
       <section class="section card">
+        <h2>Finding lifecycle</h2>
+        <p class="muted">Traseul operational detectat → lucrat → client → dovadă → Dosar. Această secțiune este sursa rapidă pentru întrebarea „ce s-a rezolvat și ce mai blochează clientul?”.</p>
+        <table class="table" style="margin-top:14px;">
+          <thead>
+            <tr>
+              <th>Finding</th>
+              <th>Status</th>
+              <th>Etapă</th>
+              <th>Dovadă</th>
+              <th>Client</th>
+              <th>Următorul pas</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${findingLifecycleRows}
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section card">
         <h2>Controls matrix</h2>
         <table class="table">
           <thead>
@@ -914,6 +949,21 @@ function emptyState(message: string) {
 
 function formatAuditReadiness(value: AuditPackV2["executiveSummary"]["auditReadiness"]) {
   return value === "audit_ready" ? "pregătit pentru audit" : "necesită review"
+}
+
+function formatFindingLifecycleStage(value: AuditPackV2["findingLifecycle"][number]["currentStage"]) {
+  const labels: Record<AuditPackV2["findingLifecycle"][number]["currentStage"], string> = {
+    detected: "detectat",
+    triaged: "triat",
+    in_progress: "în lucru",
+    sent_to_client: "trimis clientului",
+    client_decided: "feedback client capturat",
+    evidence_attached: "dovadă atașată",
+    evidence_validated: "dovadă validată",
+    resolved: "rezolvat",
+    monitoring: "în Dosar / monitorizare",
+  }
+  return labels[value]
 }
 
 function formatRemediationMode(value: AuditPackV2["controlsMatrix"][number]["remediationMode"]) {

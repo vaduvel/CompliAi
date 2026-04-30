@@ -16,6 +16,7 @@ import {
   computeDashboardSummary,
 } from "@/lib/compliance/engine"
 import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
+import { buildFindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 import { readDsarState, type DsarOrgState } from "@/lib/server/dsar-store"
 import { readNis2State, type Nis2OrgState } from "@/lib/server/nis2-store"
@@ -289,11 +290,27 @@ function buildMonthlyActivity(
     nis2?: Nis2OrgState | null
   }
 ) {
+  const lifecycleViews = state.findings.map((finding) =>
+    buildFindingLifecycleView({
+      finding,
+      generatedDocuments: state.generatedDocuments,
+      taskState: state.taskState,
+      events: state.events,
+    })
+  )
   const openFindings = state.findings.filter((finding) => isOpenMonthlyFinding(state, finding))
-  const validatedEvidence = Object.values(state.taskState).filter(
+  const validatedEvidenceFromTasks = Object.values(state.taskState).filter(
     (task) => task.attachedEvidenceMeta?.quality?.status === "sufficient"
   ).length
+  const validatedEvidenceFromFindings = lifecycleViews.filter((view) => view.evidence.validated).length
+  const validatedEvidence = Math.max(validatedEvidenceFromTasks, validatedEvidenceFromFindings)
   const workDone = buildWorkDoneItems(state, external)
+  const closedFindingWork = lifecycleViews
+    .filter((view) => view.dossierReady || view.currentStage === "resolved")
+    .map((view) => state.findings.find((finding) => finding.id === view.findingId))
+    .filter((finding): finding is ScanFinding => Boolean(finding))
+    .slice(0, 3)
+    .map((finding) => `${finding.title} închis, dovada validată și păstrată în Dosar.`)
   const nextActions = openFindings
     .slice()
     .sort(compareMonthlyFindings)
@@ -307,8 +324,8 @@ function buildMonthlyActivity(
     auditReadiness: openFindings.length === 0 && Boolean(state.validatedBaselineSnapshotId)
       ? "audit_ready" as const
       : "review_required" as const,
-    activities: workDone,
-    workDone,
+    activities: [...new Set([...closedFindingWork, ...workDone])].slice(0, 8),
+    workDone: [...new Set([...closedFindingWork, ...workDone])].slice(0, 8),
     openFindingTitles: openFindings
       .slice()
       .sort(compareMonthlyFindings)

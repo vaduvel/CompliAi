@@ -38,11 +38,37 @@ export async function POST(request: Request) {
     if (!requesterEmail?.trim()) return jsonError("Email-ul solicitantului este obligatoriu.", 400, "MISSING_FIELD")
     if (!VALID_TYPES.includes(requestType)) return jsonError("Tip cerere invalid.", 400, "INVALID_TYPE")
 
+    const requestedReceivedAtISO = typeof receivedAtISO === "string" && receivedAtISO.trim()
+      ? receivedAtISO.trim()
+      : new Date().toISOString()
+    const existingState = await readDsarState(session.orgId)
+    const duplicate = existingState.requests.find(
+      (request) =>
+        request.requesterEmail.trim().toLowerCase() === requesterEmail.trim().toLowerCase() &&
+        request.requestType === requestType &&
+        isDuplicateWindow(request.receivedAtISO, requestedReceivedAtISO)
+    )
+
+    if (duplicate) {
+      const draft = generateDsarDraft({
+        requestType: duplicate.requestType,
+        requesterName: duplicate.requesterName,
+        orgName: session.orgName || session.orgId,
+      })
+
+      return NextResponse.json({
+        request: duplicate,
+        draft,
+        deduplicated: true,
+        message: "Cererea DSAR există deja în registru pentru această fereastră de timp.",
+      })
+    }
+
     const dsar = await createDsar(session.orgId, {
       requesterName: requesterName.trim(),
       requesterEmail: requesterEmail.trim(),
       requestType,
-      receivedAtISO,
+      receivedAtISO: requestedReceivedAtISO,
       notes,
     })
 
@@ -89,4 +115,11 @@ export async function POST(request: Request) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Nu am putut crea cererea DSAR.", 500, "DSAR_CREATE_FAILED")
   }
+}
+
+function isDuplicateWindow(leftISO: string, rightISO: string) {
+  const left = new Date(leftISO).getTime()
+  const right = new Date(rightISO).getTime()
+  if (!Number.isFinite(left) || !Number.isFinite(right)) return false
+  return Math.abs(left - right) <= 5 * 60 * 1000
 }

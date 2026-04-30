@@ -27,6 +27,7 @@ import type { ScanFinding } from "@/lib/compliance/types"
 import { materializeFindingTruth } from "@/lib/compliscan/finding-truth"
 import { getEvidenceSummary } from "@/lib/compliscan/evidence-validator"
 import { buildEvidenceLinks, getEvidenceCompleteness } from "@/lib/compliscan/evidence-linker"
+import { buildFindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import { createPendingAction } from "@/lib/server/approval-queue"
 import { resolvePolicy } from "@/lib/server/autonomy-resolver"
 import type { RiskLevel } from "@/lib/server/approval-queue"
@@ -107,6 +108,12 @@ export async function GET(
       evidenceSummary,
       evidenceLinks,
       evidenceCompleteness,
+      lifecycle: buildFindingLifecycleView({
+        finding: runtimeFinding,
+        generatedDocuments: allDocs,
+        taskState: state.taskState,
+        events: state.events,
+      }),
     })
   } catch {
     return jsonError("Eroare la citirea finding-ului.", 500)
@@ -276,6 +283,12 @@ export async function PATCH(
           linkedGeneratedDocument?.approvalStatus
         ),
         suggestedDocumentType: updatedFindings[findingIdx]?.suggestedDocumentType ?? null,
+        lifecycle: buildFindingLifecycleView({
+          finding: updatedFindings[findingIdx],
+          generatedDocuments,
+          taskState: state.taskState,
+          events: state.events,
+        }),
         feedbackMessage:
           "Caz redeschis. Contextul rezolvării anterioare rămâne disponibil, iar cockpitul pornește din nou pe aceeași urmă.",
       })
@@ -700,6 +713,12 @@ export async function PATCH(
         generatedDocuments.find((document) => document.sourceFindingId === findingId)?.approvalStatus
       ),
       suggestedDocumentType: updatedFindings[findingIdx]?.suggestedDocumentType ?? null,
+      lifecycle: buildFindingLifecycleView({
+        finding: updatedFindings[findingIdx],
+        generatedDocuments,
+        taskState: updatedState.taskState,
+        events: updatedState.events,
+      }),
       feedbackMessage,
     })
   } catch (error) {

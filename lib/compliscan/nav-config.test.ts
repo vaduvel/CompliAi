@@ -40,6 +40,8 @@ describe("lib/compliscan/nav-config", () => {
       "/dashboard/breach",
       "/dashboard/calendar",
       "/dashboard/magic-links",
+      "/dashboard/generator",
+      "/dashboard/reports",
       "/dashboard/cabinet/templates",
       "/dashboard/migration",
       "/dashboard/training",

@@ -484,3 +484,30 @@ Verdict:
 - Asta nu inseamna inca “inlocuim tot Privacy Manager + Drive + Word + istoricul cabinetului”.
 - Inseamna ca avem primul workflow complet vandabil si demonstrabil runtime.
 - Urmatorul sprint sanatos este “DPO Cabinet Migration Replacement”: import istoric documente/Drive/Word, RoPA istoric, vendor register, training tracker, DSAR log vechi si approvals email istorice.
+
+## Update final 30 apr 2026 — Finding lifecycle inchis in hard-gate
+
+Dupa ridicarea bar-ului la `finding detectat -> rezolvat -> dovada -> Dosar -> raport`, hard-gate-ul a fost extins si rerulat.
+
+Ce s-a adaugat in produs:
+
+- API-ul de finding returneaza `lifecycle` cu pasii canonici: detectat, triat, lucrat, trimis client, feedback client, dovada, validat, inchis, Dosar.
+- Cockpit-ul finding-ului afiseaza vizual acest traseu si next action-ul.
+- Audit Pack-ul include sectiune `Finding lifecycle`, nu doar evidence ledger separat.
+- Raportul lunar include finding-ul inchis cu dovada validata si pastrat in Dosar.
+- Template-ul cabinetului are prioritate in partner mode si este folosit determinist, fara parafrazare AI.
+
+Rezultat final validat:
+
+- `npm run smoke:dpo-sale-readiness` -> 51/51 PASS.
+- Targeted regression -> 13 fisiere / 92 teste PASS.
+- `npm run lint` -> PASS.
+- `npm run build` -> PASS.
+
+Verdict actualizat:
+
+Diana poate testa in pilot controlat un workflow complet DPO Cabinet OS pentru un client nou/pseudonimizat:
+
+`import client -> scan -> finding DPA real -> template cabinet -> document -> magic link -> aprobare client -> evidence -> validare consultant -> rezolvare -> monitorizare/Dosar -> raport lunar -> Audit Pack -> export cabinet`.
+
+Nu declaram inca "full cabinet migration 100%" fara pilot real de 30 zile si productie Supabase/Stripe live, dar pentru flow-ul vandabil DPO, hard-gate-ul runtime este verde.

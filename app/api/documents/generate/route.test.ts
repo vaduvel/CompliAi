@@ -293,8 +293,7 @@ describe("POST /api/documents/generate", () => {
     )
 
     expect(res.status).toBe(200)
-    expect(mocks.getActiveTemplateForTypeMock).toHaveBeenNthCalledWith(1, "client-org", "dpa")
-    expect(mocks.getActiveTemplateForTypeMock).toHaveBeenNthCalledWith(2, "cabinet-org", "dpa")
+    expect(mocks.getActiveTemplateForTypeMock).toHaveBeenNthCalledWith(1, "cabinet-org", "dpa")
     expect(mocks.generateDocumentMock).toHaveBeenCalledWith(
       expect.objectContaining({
         cabinetTemplateName: "DPO Complet DPA",
@@ -305,6 +304,88 @@ describe("POST /api/documents/generate", () => {
       expect.objectContaining({
         documentType: "dpa",
         title: "Acord DPA",
+      })
+    )
+  })
+
+  it("preferă template-ul cabinetului peste template-ul default al clientului în partner mode", async () => {
+    mocks.requireFreshRoleMock.mockResolvedValueOnce({
+      orgId: "client-org",
+      userId: "user-1",
+      email: "diana@dpocomplet.ro",
+      role: "partner_manager",
+      userMode: "partner",
+    })
+    mocks.resolveUserModeMock.mockResolvedValueOnce("partner")
+    mocks.listUserMembershipsMock.mockResolvedValueOnce([
+      {
+        membershipId: "membership-cabinet",
+        orgId: "cabinet-org",
+        orgName: "DPO Complet SRL",
+        role: "owner",
+        createdAtISO: "2026-04-28T10:00:00.000Z",
+        status: "active",
+      },
+      {
+        membershipId: "membership-client",
+        orgId: "client-org",
+        orgName: "Clinica Diana Flow SRL",
+        role: "partner_manager",
+        createdAtISO: "2026-04-28T10:00:00.000Z",
+        status: "active",
+      },
+    ])
+    mocks.getActiveTemplateForTypeMock.mockImplementation(async (orgId: string) => {
+      if (orgId === "cabinet-org") {
+        return {
+          id: "tpl-diana",
+          orgId: "cabinet-org",
+          documentType: "dpa",
+          name: "DPA Diana cabinet",
+          content: "Clauză cabinet Diana păstrată integral.",
+          uploadedAtISO: "2026-04-28T10:00:00.000Z",
+          updatedAtISO: "2026-04-28T10:00:00.000Z",
+          active: true,
+          detectedVariables: [],
+          sizeBytes: 42,
+        }
+      }
+      return {
+        id: "default-client-dpa",
+        orgId: "client-org",
+        documentType: "dpa",
+        name: "DPA furnizor — default client",
+        content: "Template default client.",
+        uploadedAtISO: "2026-01-01T00:00:00.000Z",
+        updatedAtISO: "2026-01-01T00:00:00.000Z",
+        active: true,
+        detectedVariables: [],
+        sizeBytes: 24,
+      }
+    })
+    mocks.generateDocumentMock.mockResolvedValue({
+      documentType: "dpa",
+      title: "Acord DPA",
+      content: "Clauză cabinet Diana păstrată integral.",
+      generatedAtISO: "2026-04-28T10:00:00.000Z",
+      llmUsed: false,
+    })
+
+    const res = await POST(
+      makeRequest({
+        documentType: "dpa",
+        orgName: "Clinica Diana Flow SRL",
+        counterpartyName: "Stripe Payments Europe",
+      })
+    )
+
+    expect(res.status).toBe(200)
+    expect(mocks.getActiveTemplateForTypeMock).toHaveBeenCalledTimes(1)
+    expect(mocks.getActiveTemplateForTypeMock).toHaveBeenCalledWith("cabinet-org", "dpa")
+    expect(mocks.generateDocumentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cabinetTemplateName: "DPA Diana cabinet",
+        cabinetTemplateContent: "Clauză cabinet Diana păstrată integral.",
       })
     )
   })

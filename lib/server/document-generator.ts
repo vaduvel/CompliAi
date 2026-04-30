@@ -76,8 +76,8 @@ export type DocumentGenerationInput = {
   /**
    * S1.1 — Custom template upload cabinet.
    * Markdown content cu variabile {{ORG_NAME}}, {{ORG_CUI}} etc. Daca exista,
-   * folosit ca template-ul de baza pentru fallback (in loc de skeleton intern)
-   * si trimis la Gemini ca structura de urmat. NULL = folosim CompliScan default.
+ * folosit ca template-ul de baza pentru fallback (in loc de skeleton intern).
+ * Template-ul cabinetului este sursa de adevar, nu un prompt optional pentru AI.
    */
   cabinetTemplateContent?: string
   /** Numele template-ului cabinet (informativ in metadata generated document). */
@@ -1433,6 +1433,13 @@ export async function generateDocument(
 ): Promise<GeneratedDocument> {
   const now = new Date().toISOString()
   const title = getGeneratedDocumentTitle(input)
+
+  // DPO Cabinet OS: când Diana folosește template-ul ei, documentul trebuie să
+  // păstreze exact clauzele cabinetului. Nu îl trecem prin AI, ca să evităm
+  // parafrazări sau omisiuni în livrabile client-facing.
+  if (input.cabinetTemplateContent?.trim()) {
+    return buildFallbackDocument(input)
+  }
 
   // S1.3 — AI ON/OFF toggle per client.
   // Cand cabinet-ul a dezactivat AI pentru acest client (ex: client sensibil),

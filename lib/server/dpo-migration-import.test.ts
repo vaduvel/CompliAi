@@ -154,6 +154,28 @@ describe("DPO migration import", () => {
     expect(state?.findings.some((finding) => finding.id.startsWith("anspdcp-breach-"))).toBe(true)
   })
 
+  it("nu confundă coloana Data cu categorii date sau persoane vizate în breach log", async () => {
+    const id = orgId("dpo-breach-mapping")
+    await applyDpoMigrationImport({
+      orgId: id,
+      orgName: "Clinica Test Mapping SRL",
+      actor: testActor(),
+      kind: "breach-log",
+      fileName: "breach.csv",
+      buffer: csv([
+        "Incident,Data,Severitate,Date personale,Categorii date,Persoane vizate,Masuri",
+        "Email pacient trimis greșit,29.04.2026,high,da,date sănătate; CNP,12,contactat pacientul",
+      ]),
+    })
+
+    const nis2 = await readNis2State(id)
+    const notification = nis2.incidents[0].anspdcpNotification
+
+    expect(notification?.dataCategories).toEqual(["date sănătate", "CNP"])
+    expect(notification?.estimatedDataSubjects).toBe(12)
+    expect(notification?.dataCategories).not.toContain("29.04.2026")
+  })
+
   it("importă aprobări istorice fără să le marcheze fals ca magic-link native", async () => {
     const id = orgId("dpo-approval")
     await applyDpoMigrationImport({

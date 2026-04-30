@@ -9,6 +9,31 @@
 
 ---
 
+## ✅ Update 30 apr 2026 (DPO Cabinet OS — Finding lifecycle hardening)
+
+**Răspuns la bar-ul nou “finding detectat -> rezolvat -> dovadă -> Dosar -> raport”:** am legat lifecycle-ul finding-ului în API, cockpit, Audit Pack și raport lunar, astfel încât Diana nu mai vede doar “document generat”, ci traseul complet al riscului.
+
+- Fix cod:
+  - `lib/compliance/finding-lifecycle.ts` definește traseul canonic: detectat, triat, lucrat, trimis client, feedback client, dovadă, validat, închis, Dosar.
+  - `app/api/findings/[id]/route.ts` returnează `lifecycle` la GET/PATCH, inclusiv după confirmare, rezolvare și monitorizare.
+  - `app/dashboard/resolve/[findingId]/page.tsx` afișează panelul `Detectat → lucrat → dovadă → Dosar`, cu pași completați, pași lipsă, next action și dovezi.
+  - `lib/server/audit-pack.ts` + `lib/server/audit-pack-client.ts` includ secțiunea `Finding lifecycle`, ca auditorul/clientul să vadă de ce un finding este sau nu pregătit pentru dosar.
+  - `app/api/cron/partner-monthly-report/route.ts` include findings închise cu dovadă validată în activitatea lunară client-facing.
+  - `app/api/dsar/route.ts` previne duplicatele DSAR la retry în interval scurt, ca registrul să nu fie corupt de click-uri repetate.
+  - `app/api/documents/generate/route.ts` preferă template-ul cabinetului în partner mode peste template-ul default al clientului.
+  - `lib/server/document-generator.ts` folosește template-urile cabinetului determinist, fără parafrazare AI, ca formulările Dianei să rămână intacte.
+- Reguli de produs:
+  - Template activ cabinet = sursă de adevăr juridic; AI nu are voie să rescrie clauzele cabinetului.
+  - În DPO mode expunem instrumentele Dianei, nu toate framework-urile: DSAR, RoPA, DPA furnizori, Breach ANSPDCP, Calendar, Aprobări, Generator, Rapoarte, Template-uri, Migrare, Training.
+  - Raportul lunar și Audit Pack-ul trebuie să spună aceeași stare ca finding-ul din cockpit.
+- Validare:
+  - `npm run smoke:dpo-sale-readiness` -> **51/51 PASS** ✅
+  - `./node_modules/.bin/vitest run ...` targeted matrix -> **13 fișiere / 92 teste PASS** ✅
+  - `npm run lint` -> PASS, doar warning-uri istorice ✅
+  - `npm run build` -> PASS ✅
+
+**Verdict:** primul workflow vandabil DPO nu mai este doar `import -> document -> approval`. Este acum `import -> finding real -> lucru -> document/template cabinet -> magic link -> client approval -> evidence -> validare consultant -> închidere -> Dosar -> raport lunar -> Audit Pack`. Acesta este bar-ul corect pentru pilotul Diana.
+
 ## ✅ Update 30 apr 2026 (DPO Cabinet OS — Migration Hub)
 
 **Răspuns la întrebarea “poate Diana să își mute și istoricul, nu doar un client nou?”:** am adăugat un DPO Migration Hub v1 pentru registrele reale pe care un cabinet le are deja în Excel/Word/Drive.
