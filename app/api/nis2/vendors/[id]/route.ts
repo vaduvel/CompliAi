@@ -11,6 +11,7 @@ import { buildVendorRiskFindings } from "@/lib/compliance/vendor-risk"
 import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
+import { safeListReviews } from "@/lib/server/vendor-review-store"
 
 export async function PATCH(
   request: Request,
@@ -66,6 +67,30 @@ export async function DELETE(
     const session = await requireFreshRole(request, DELETE_ROLES, "ștergerea furnizorului")
 
     const { id } = await params
+    const url = new URL(request.url)
+    const force = url.searchParams.get("force") === "true"
+
+    // Guard: refuza stergerea daca exista vendor review-uri active care
+    // ar deveni orfane (Diana ar pierde audit trail-ul). Cabinetul poate
+    // forta cu ?force=true daca a confirmat in UI.
+    if (!force) {
+      const reviews = await safeListReviews(session.orgId)
+      const activeReviews = reviews.filter(
+        (review) =>
+          review.vendorId === id &&
+          review.status !== "closed" &&
+          review.status !== "auto-closed"
+      )
+      if (activeReviews.length > 0) {
+        return jsonError(
+          `Furnizorul are ${activeReviews.length} ${activeReviews.length === 1 ? "review activ" : "review-uri active"}. Închide-le sau confirmă ștergerea forțată.`,
+          409,
+          "VENDOR_HAS_ACTIVE_REVIEWS",
+          { activeReviews: activeReviews.length }
+        )
+      }
+    }
+
     const deleted = await deleteVendor(session.orgId, id)
     if (!deleted) return jsonError("Furnizorul nu a fost găsit.", 404, "NOT_FOUND")
 

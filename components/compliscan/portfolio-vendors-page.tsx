@@ -1,7 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Building2, GitPullRequestArrow } from "lucide-react"
+import { ArrowRight, Building2, GitPullRequestArrow } from "lucide-react"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
@@ -109,8 +110,15 @@ export function PortfolioVendorsPage() {
               Nu există furnizori în portofoliu
             </h3>
             <p className="mx-auto mt-1 max-w-md text-[13px] text-eos-text-muted">
-              Adaugă vendor reviews sau completează registrul NIS2 în firmele din portofoliu.
+              Furnizorii se adaugă în firma client, în secțiunea NIS2 / Furnizori. De acolo apar agregat aici.
             </p>
+            <Link
+              href="/portfolio"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 py-1.5 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-primary/35 hover:text-eos-primary"
+            >
+              Alege o firmă din portofoliu
+              <ArrowRight className="size-3.5" strokeWidth={2} />
+            </Link>
           </div>
         ) : (
           <div className="space-y-2">
