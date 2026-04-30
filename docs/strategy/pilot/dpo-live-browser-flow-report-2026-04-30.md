@@ -395,3 +395,70 @@ Acestea NU sunt blocante pentru wedge-ul DPO testat mai sus. Le pastram ca backl
 Nu deschidem toate framework-urile public in acelasi timp. Motorul poate impinge mai multe masini, dar pentru vanzare pilotam pe o masina intreaga:
 
 `DPO Delivery & Evidence Layer` -> apoi extindem la urmatorul ICP cu propriul browser test cap-coada.
+
+---
+
+## Update runtime — DPO Sale Readiness Full Workflow (30 apr 2026)
+
+Motiv:
+
+Daniel a ridicat corect standardul: nu ajunge ca aplicatia “sa suporte” multe lucruri; trebuie ca Diana sa poata duce un workflow real complet fara sa simta ca plateste inca un tool pe jumatate.
+
+Smoke nou:
+
+- `scripts/smoke-dpo-sale-readiness-full.mjs`
+- Comanda: `npm run smoke:dpo-sale-readiness`
+
+Flow verificat:
+
+1. Diana porneste din cabinetul `DPO Complet SRL`.
+2. Importa un client nou pseudonimizat: `Clinica Diana Flow <id> SRL`.
+3. Ruleaza baseline scan dupa import.
+4. Sistemul genereaza 12 findings, inclusiv:
+   - `Legea 190/2018 — CNP/date sensibile fara anexa operationala`;
+   - `DPA lipsa pentru furnizori care proceseaza date personale`.
+5. Diana importa/activeaza template-ul ei real DPA, cu variabile in stil cabinet:
+   - `{{orgName}}`;
+   - `{{orgCui}}`;
+   - `{{counterpartyName}}`;
+   - `{{dpoEmail}}`;
+   - `{{preparedBy}}`;
+   - `{{documentDate}}`.
+6. Genereaza DPA pentru `Clinica Diana Flow × Stripe Payments Europe`.
+7. Documentul substituie corect clientul, CUI-ul, procesatorul si clauza cabinet Diana.
+8. Diana creeaza magic link document-specific.
+9. Clientul deschide pagina shared white-label `DPO Complet`.
+10. Clientul aproba prin magic link.
+11. Aprobarea intra in:
+    - `adoptionStatus: signed`;
+    - evidence task `client-approval-*.json`;
+    - event ledger `document.shared_approved`.
+12. Diana valideaza documentul pe finding.
+13. Diana rezolva finding-ul cu documentul aprobat.
+14. Diana trimite documentul la Dosar / monitoring.
+15. Audit Pack exporta clientul importat si include dovada DPA aprobata.
+16. Raportul lunar client-facing include activitatea reala:
+    - document generat;
+    - document aprobat prin magic link.
+17. Exportul cabinetului include clientul nou si biblioteca de template-uri Diana.
+
+Rezultat:
+
+- `npm run smoke:dpo-sale-readiness` -> 42/42 PASS.
+- `npm run build` -> PASS.
+- targeted tests -> 4 fisiere / 18 teste PASS.
+
+Fixuri incluse:
+
+- Generatorul de documente substituie acum si variabile reale de cabinet in camelCase, nu doar uppercase strict.
+- Raportul lunar include si evenimentele `document.generated`, nu doar approve/reject/comment.
+
+Verdict:
+
+- Pentru primul workflow vandabil DPO, Diana poate lucra cap-coada:
+
+`import client -> scan -> finding real -> template real -> document real -> approval client -> evidence -> Dosar -> raport lunar -> audit pack`
+
+- Asta nu inseamna inca “inlocuim tot Privacy Manager + Drive + Word + istoricul cabinetului”.
+- Inseamna ca avem primul workflow complet vandabil si demonstrabil runtime.
+- Urmatorul sprint sanatos este “DPO Cabinet Migration Replacement”: import istoric documente/Drive/Word, RoPA istoric, vendor register, training tracker, DSAR log vechi si approvals email istorice.

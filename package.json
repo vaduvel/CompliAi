@@ -20,6 +20,7 @@
     "verify:supabase:rls": "node scripts/verify-supabase-rls.mjs",
     "migrate:fs-to-supabase": "node scripts/migrate-fs-to-supabase.mjs",
     "migrate:fs-to-supabase:apply": "node scripts/migrate-fs-to-supabase.mjs --apply",
+    "smoke:dpo-sale-readiness": "node scripts/smoke-dpo-sale-readiness-full.mjs",
     "verify:release-ready": "node scripts/verify-release-ready.mjs",
     "verify:release-ready:strict": "node scripts/verify-release-ready.mjs --strict"
   },

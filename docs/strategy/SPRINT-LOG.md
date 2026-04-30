@@ -9,6 +9,35 @@
 
 ---
 
+## ✅ Update 30 apr 2026 (DPO Sale Readiness Full Workflow)
+
+**Răspuns la întrebarea “cine plătește pentru jumătate de workflow?”:** nu mai validăm doar bucăți separate. Am adăugat un hard-gate runtime care dovedește lanțul complet pentru Diana pe client nou importat:
+
+`import client pseudonimizat -> baseline scan -> finding DPA real -> template cabinet real -> document DPA -> magic link document-specific -> aprobare client -> evidence ledger -> Dosar/monitoring -> raport lunar -> audit pack -> export cabinet`.
+
+- Fix cod:
+  - `lib/server/document-generator.ts` substituie acum variabilele din template-uri cabinet în format real de cabinet, nu doar uppercase strict: `{{orgName}}`, `{{orgCui}}`, `{{counterpartyName}}`, `{{dpoEmail}}`, `{{preparedBy}}`, `{{documentDate}}` etc.
+  - `app/api/cron/partner-monthly-report/route.ts` include și evenimentele `document.generated`, astfel încât raportul lunar reflectă generarea documentelor reale, nu doar approve/reject.
+  - `scripts/smoke-dpo-sale-readiness-full.mjs` + `npm run smoke:dpo-sale-readiness` verifică flow-ul complet de vânzare DPO, cu client nou importat.
+- Runtime smoke:
+  - Client importat: `Clinica Diana Flow <id> SRL`, sector `health`, 50-249 angajați.
+  - Baseline scan: 12 findings, inclusiv Legea 190/2018 / CNP-date sensibile.
+  - Finding real: `DPA lipsă pentru furnizori care procesează date personale`.
+  - Template real: DPA cabinet cu variabile camelCase și clauză Diana.
+  - Document real: DPA `Clinica Diana Flow × Stripe Payments Europe`.
+  - Magic link document-specific: pagina shared 200, white-label DPO Complet, aprobare client salvată.
+  - Evidence: `client-approval-*.json` sufficient, event `document.shared_approved`.
+  - Dosar: finding trecut `under_monitoring`, document `approved_as_evidence`.
+  - Raport lunar: activitate reală document generat + aprobat, HTML client-facing cu DPO Complet.
+  - Audit Pack: exportă pentru clientul importat și include dovada DPA aprobată.
+  - Export cabinet: include clientul importat + biblioteca de template-uri Diana.
+- Validare:
+  - `npm run smoke:dpo-sale-readiness` -> **42/42 PASS** ✅
+  - `npm run test -- lib/server/document-generator.test.ts 'app/api/shared/[token]/approve/route.test.ts' 'app/api/shared/[token]/reject/route.test.ts' app/api/documents/generate/route.test.ts` -> **4 files / 18 tests PASS** ✅
+  - `npm run build` -> PASS, doar warning-uri istorice ✅
+
+**Verdict:** pentru wedge-ul `Delivery & Evidence Layer DPO`, Diana poate muta un workflow real complet în CompliScan. Asta este vandabil ca prim workflow complet. Următorul nivel, separat, este migrarea completă a cabinetului: Privacy Manager/Drive/Word/istoric, import documente vechi, RoPA istoric, vendor register complet, training tracker și aprobări email istorice.
+
 ## ✅ Update 30 apr 2026 (DPO Full Workflow Closure)
 
 **Răspuns la testul “Diana importă firmă nouă și lucrează cap-coadă”:** am închis blocajele care opreau flow-ul real `import -> baseline -> prioritate -> finding -> pachet de lucru -> dovadă -> monitorizare -> Dosar`.

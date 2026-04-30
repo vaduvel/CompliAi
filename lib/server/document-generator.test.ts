@@ -97,6 +97,36 @@ describe("document generator fallback", () => {
     expect(validation.status).toBe("valid")
   })
 
+  it("substitutes cabinet template variables written in Diana-style camelCase", async () => {
+    delete process.env.GEMINI_API_KEY
+
+    const { generateDocument } = await importGeneratorModule()
+    const document = await generateDocument({
+      documentType: "dpa",
+      orgName: "Clinica Diana SRL",
+      orgCui: "RO123456",
+      counterpartyName: "Stripe Payments Europe",
+      dpoEmail: "diana@dpocomplet.ro",
+      preparedBy: "DPO Complet SRL",
+      cabinetTemplateContent: [
+        "# DPA — {{orgName}} × {{counterpartyName}}",
+        "",
+        "**Cabinet:** {{preparedBy}}",
+        "**CUI:** {{orgCui}}",
+        "**Contact DPO:** {{dpoEmail}}",
+        "Clauză cabinet Diana păstrată integral.",
+      ].join("\n"),
+    })
+
+    expect(document.llmUsed).toBe(false)
+    expect(document.content).toContain("Clinica Diana SRL × Stripe Payments Europe")
+    expect(document.content).toContain("DPO Complet SRL")
+    expect(document.content).toContain("RO123456")
+    expect(document.content).toContain("diana@dpocomplet.ro")
+    expect(document.content).not.toContain("{{orgName}}")
+    expect(document.content).not.toContain("{{counterpartyName}}")
+  })
+
   it("returns a valid ropa fallback when Gemini is unavailable", async () => {
     delete process.env.GEMINI_API_KEY
 

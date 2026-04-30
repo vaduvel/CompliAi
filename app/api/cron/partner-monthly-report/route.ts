@@ -322,6 +322,7 @@ function buildWorkDoneItems(state: ComplianceState) {
         "document.shared_approved",
         "document.shared_rejected",
         "document.shared_commented",
+        "document.generated",
         "document_generated",
         "ai.off_configured",
       ].includes(event.type)

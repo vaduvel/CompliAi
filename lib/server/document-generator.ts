@@ -750,9 +750,22 @@ Cerințe:
  * Înlocuiește `{{VAR_NAME}}` cu valori din mapping. Variabilele lipsă rămân
  * vizibile (NU le ștergem — semnalează cabinet că template-ul cere date noi).
  */
+function normalizeTemplateVariableName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+}
+
 function applyTemplateVariables(content: string, vars: Record<string, string>): string {
-  return content.replace(/\{\{\s*([A-Z][A-Z0-9_]*)\s*\}\}/g, (match, name: string) => {
-    const value = vars[name]
+  const normalizedVars = new Map<string, string>()
+  for (const [key, value] of Object.entries(vars)) {
+    normalizedVars.set(normalizeTemplateVariableName(key), value)
+  }
+
+  return content.replace(/\{\{\s*([A-Za-zÀ-ž_][A-Za-zÀ-ž0-9_]*)\s*\}\}/g, (match, name: string) => {
+    const value = normalizedVars.get(normalizeTemplateVariableName(name))
     if (typeof value === "string" && value.trim().length > 0) {
       return value
     }
@@ -781,14 +794,29 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
   if (input.cabinetTemplateContent && input.cabinetTemplateContent.trim().length > 0) {
     const substituted = applyTemplateVariables(input.cabinetTemplateContent, {
       ORG_NAME: input.orgName,
+      orgName: input.orgName,
+      companyName: input.orgName,
       ORG_CUI: input.orgCui ?? "",
+      orgCui: input.orgCui ?? "",
+      cui: input.orgCui ?? "",
       ORG_WEBSITE: websiteHost ?? "",
+      orgWebsite: websiteHost ?? "",
       ORG_SECTOR: input.orgSector ?? "",
+      orgSector: input.orgSector ?? "",
       DPO_EMAIL: input.dpoEmail ?? "",
+      dpoEmail: input.dpoEmail ?? "",
       PREPARED_BY: preparedBy,
+      preparedBy,
       DOCUMENT_TITLE: title,
+      documentTitle: title,
       DOCUMENT_DATE: formattedDate,
+      documentDate: formattedDate,
       DATE_LABEL: preferredDateLabel,
+      dateLabel: preferredDateLabel,
+      COUNTERPARTY_NAME: input.counterpartyName ?? "",
+      counterpartyName: input.counterpartyName ?? "",
+      COUNTERPARTY_REFERENCE_URL: input.counterpartyReferenceUrl ?? "",
+      counterpartyReferenceUrl: input.counterpartyReferenceUrl ?? "",
     })
     const expiry = calculateExpiryDates(input.documentType, now)
     return {
