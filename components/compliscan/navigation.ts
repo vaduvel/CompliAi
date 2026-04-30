@@ -53,6 +53,7 @@ export type DashboardNavId =
   | "approvals"
   | "magic-links"
   | "cabinet-templates"
+  | "dpo-migration"
   | "review-cycles"
   | "scheduled-reports"
   | "agenti"

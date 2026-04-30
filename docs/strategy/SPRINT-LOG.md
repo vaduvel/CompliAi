@@ -9,6 +9,33 @@
 
 ---
 
+## ✅ Update 30 apr 2026 (DPO Cabinet OS — Migration Hub)
+
+**Răspuns la întrebarea “poate Diana să își mute și istoricul, nu doar un client nou?”:** am adăugat un DPO Migration Hub v1 pentru registrele reale pe care un cabinet le are deja în Excel/Word/Drive.
+
+- Fix cod:
+  - `app/dashboard/migration/page.tsx` adaugă suprafața UI `Migrare istoric` în Instrumente DPO.
+  - `app/api/dpo/migration/import/route.ts` acceptă `.xlsx/.xls/.csv` pentru import istoric DPO.
+  - `lib/server/dpo-migration-import.ts` mapează DSAR log, RoPA Art. 30, vendor/DPA register, training GDPR, breach/ANSPDCP log, aprobări istorice și arhive evidence.
+  - `lib/compliance/types.ts` + `lib/compliance/engine.ts` persistă `dpoMigrationImports` în state-ul clientului.
+  - `app/api/cron/partner-monthly-report/route.ts` include evenimentele `dpo.migration_imported`, deci raportul lunar arată și activitatea de migrare.
+  - Navigația DPO include `Migrare istoric`, fără să expună generic toate framework-urile.
+- Reguli de produs:
+  - DSAR, RoPA, vendor/DPA, training și breach log intră structurat unde avem model operațional.
+  - Aprobările vechi email/Word sunt marcate explicit ca **istoric importat**, nu ca magic-link nativ.
+  - Arhivele evidence sunt urmărite ca arhivă/import, fără promisiune falsă că sunt automat validate.
+- Hard-gate runtime:
+  - `npm run smoke:dpo-sale-readiness` testează acum și migrarea istoricului cabinetului înainte de flow-ul document/evidence.
+  - Importă DSAR istoric, RoPA istoric, vendor/DPA, training GDPR și breach ANSPDCP pentru un client nou.
+  - Confirmă că RoPA apare ca draft de revizie, training-ul intră în state, iar breach-ul cu date personale creează finding ANSPDCP 72h.
+- Validare:
+  - `./node_modules/.bin/vitest run lib/server/dpo-migration-import.test.ts lib/compliscan/nav-config.test.ts` -> **14/14 PASS** ✅
+  - `./node_modules/.bin/vitest run lib/server/document-generator.test.ts app/api/documents/generate/route.test.ts` -> **10/10 PASS** ✅
+  - `npm run build` -> PASS, doar warning-uri istorice ✅
+  - `BASE_URL=http://localhost:3000 npm run smoke:dpo-sale-readiness` -> **51/51 PASS** ✅
+
+**Verdict:** DPO Cabinet OS acoperă acum primul traseu complet vandabil: import portofoliu + import istoric esențial + client nou + template real + finding real + dovadă + raport lunar + audit pack + export cabinet. Următorul prag nu mai este “există flow?”, ci test manual Diana/noi pe date reale/pseudonimizate și polish UI pentru migrare.
+
 ## ✅ Update 30 apr 2026 (DPO Sale Readiness Full Workflow)
 
 **Răspuns la întrebarea “cine plătește pentru jumătate de workflow?”:** nu mai validăm doar bucăți separate. Am adăugat un hard-gate runtime care dovedește lanțul complet pentru Diana pe client nou importat:

@@ -3,23 +3,40 @@
 Status: operational truth pentru pilot DPO Complet.
 Scope: strict DPO consultant / cabinet DPO. Nu include full NIS2, DORA, fiscal, pay transparency sau compliance officer intern.
 
+## Update 30 apr 2026 — Migration Hub v1 implementat
+
+Gap-ul de migrare istorică nu mai este doar plan. `DPO Migration Hub v1` este implementat în cod și inclus în hard-gate-ul `npm run smoke:dpo-sale-readiness`.
+
+Acum Diana poate importa structurat, pentru un client pilot:
+
+- registru DSAR istoric;
+- RoPA Art. 30 istoric ca draft de revizie;
+- vendor/DPA register istoric;
+- training tracker GDPR;
+- breach/incident log cu date personale, inclusiv finding ANSPDCP 72h;
+- aprobări istorice email/Word ca dovadă istorică, fără să fie prezentate fals drept magic-link nativ;
+- arhive evidence ca import/arhivă urmărită.
+
+Validare runtime: `smoke:dpo-sale-readiness` -> 51/51 PASS, inclusiv import istoric + document DPA + magic link + evidence + Dosar + raport lunar + audit pack + export cabinet.
+
 ## Raspuns scurt
 
 Diana poate importa portofoliul de firme si poate incepe munca DPO pentru o firma noua in CompliScan.
 
-Diana NU poate importa inca tot istoricul cabinetului ca date structurate cap-coada. Poate incarca multe documente ca dovezi / template-uri / arhiva, dar unele registre istorice raman ne-migrate structural: DSAR log vechi, RoPA vechi, vendor/DPA register, training log, breach log, email approvals.
+Diana poate importa acum istoricul operational esential al cabinetului ca date structurate sau ca arhiva urmarita. Nu promitem inca clasificare automata pentru un Drive intreg aruncat ca ZIP, dar registrele principale ale muncii DPO sunt acoperite v1.
 
 Verdict pentru pilot:
 
 - DA: import portofoliu + scan + workflow nou pentru 1-2 clienti.
 - DA: import template-uri cabinet .docx/.md/.txt.
 - DA: atasare dovezi importante pe task-uri/finding-uri.
-- PARTIAL: import istoric complet al cabinetului.
-- NU promitem in pilot: "migreaza tot cabinetul, toate folderele, tot istoricul, perfect structurat".
+- DA v1: import istoric DSAR / RoPA / vendor-DPA / training / breach / aprobari istorice.
+- PARTIAL: clasificare automata a unui Drive/ZIP complet si legare automata perfecta la toate finding-urile.
+- NU promitem in pilot: "arunca tot Drive-ul si il clasificam perfect fara confirmare DPO".
 
 Mesaj corect pentru Diana:
 
-> Nu iti schimbam stack-ul din prima. Importam portofoliul, template-urile si dovezile critice pentru clientii pilot. Restul istoricului il pastram ca arhiva/export, apoi il structuram gradual unde merita.
+> Importam portofoliul, template-urile si registrele tale esentiale. Ce putem mapa sigur intra structurat; ce vine ca dovada istorica ramane marcat clar ca istoric/arhiva, fara promisiuni false.
 
 ## Ce foloseste Diana azi
 
@@ -68,12 +85,12 @@ Acestea sunt gap-uri de migrare, nu de thesis. Sunt exact ce trebuie construit c
 
 | Obiect Diana | Status azi | De ce conteaza |
 |---|---|---|
-| DSAR log istoric din Excel | PARTIAL | Poti crea cereri noi, dar nu exista bulk import DSAR CSV cu deduplicare si mapare campuri. |
-| RoPA istoric complet | PARTIAL | Poti uploada template/dovada, dar nu exista import RoPA structurat pe activitati, scop, temei, categorii, destinatari, retentie. |
-| Vendor/DPA register istoric | PARTIAL | Vendor review exista, dar nu exista import simplu DPO pentru lista furnizori + DPA status + transferuri + expirari. |
-| Training tracker istoric | PARTIAL | API training exista, dar nu exista import CSV/XLS pentru participanti, data training, dovada, recertificare. |
-| Breach/incident log istoric | PARTIAL | CompliScan poate avea incident flows, dar nu exista import istoric simplu pentru incidente GDPR/ANSPDCP. |
-| Email approvals vechi | NU structurat | Pot fi atasate ca PDF/EML/ZIP dovezi, dar nu devin automat approval events semnate/hash-chain. |
+| DSAR log istoric din Excel | DA v1 | Bulk import CSV/XLS cu deduplicare pe email + tip + data. |
+| RoPA istoric complet | DA v1 | Import structurat ca document RoPA draft, cu activitati/scop/temei/categorii/destinatari/retentie/masuri. |
+| Vendor/DPA register istoric | DA v1 | Import in vendor review workbench: furnizor, DPA status, transfer, review date, dovada. |
+| Training tracker istoric | DA v1 | Import CSV/XLS in `gdprTraining`, cu data/status/dovada si tip audienta. |
+| Breach/incident log istoric | DA v1 | Import in NIS2/incident store; daca implica date personale, creeaza finding ANSPDCP 72h. |
+| Email approvals vechi | DA v1 istoric | Devin documente/dovezi istorice marcate explicit; nu sunt prezentate drept magic-link native. |
 | Foldere Drive intregi | NU structurat | Pot fi importate ca ZIP evidence/archive, dar nu exista clasificare automata per document type + legare la finding-uri. |
 | Rapoarte lunare vechi | PARTIAL | Pot fi atasate ca documente, dar nu devin activitati istorice lunare decat daca sunt importate/marcate manual. |
 | Semnaturi digitale/eIDAS | NU | CompliScan nu inlocuieste DocuSign/Namirial/CertSign; magic link inseamna aprobare trasabila, nu semnatura calificata. |
@@ -103,35 +120,27 @@ Acceptanta:
 - Daca un obiect intra doar ca arhiva, UI trebuie sa spuna "importat ca arhiva, nu structurat".
 - Nu trebuie sa existe promisiunea falsa ca toate registrele vechi devin automat entitati structurate.
 
-## Ce trebuie construit pentru migrare completa
+## Ce ramane pentru migrare completa
 
-Sprint recomandat: DPO Client Migration Wizard.
+`DPO Migration Hub v1` acopera registrele principale. Ce ramane pentru un cabinet mare nu este "import CSV", ci migrare asistata de arhiva:
 
-1. Bulk DSAR import
-   - CSV/XLS mapping: solicitant, email, tip cerere, primit la, deadline, status, dovada raspuns.
-   - Deduplicare pe email + tip + data.
-
-2. Bulk Vendor/DPA import
-   - Furnizor, procesator/subprocesator, DPA status, data semnare, expiry/review date, transfer non-UE, dovada.
-
-3. Bulk RoPA import
-   - Activitate, scop, temei legal, categorii date, persoane vizate, destinatari, retentie, masuri, transferuri.
-
-4. Bulk Training import
-   - Training title, audienta, participanti, data, status, dovada.
-
-5. Evidence archive classifier
+1. Evidence archive classifier
    - Upload ZIP/Drive export.
    - Clasificare asistata: DPA / RoPA / DSAR / training / policy / incident / other.
    - Diana confirma maparea inainte sa intre in dosar.
 
-6. Historical monthly reports import
+2. Historical monthly reports import
    - Rapoarte vechi atasate la client si luna.
    - Marcate clar ca "istoric importat", nu activitate generata de CompliScan.
 
-7. Approval history import
-   - Permite atasare email/PDF ca dovada istorica.
-   - Nu marca drept magic-link approval daca nu a fost facut prin CompliScan.
+3. Approval history enrichment
+   - V1 importa aprobarile ca dovada istorica.
+   - V2 poate extrage automat aprobator, data, fisier sursa si hash din email/PDF/EML, dar tot fara sa pretinda magic-link nativ.
+
+4. UI polish pentru migration QA
+   - Preview per rand cu warnings.
+   - Confirmare finala "structurat" vs "arhiva".
+   - Raport post-import pe client, pregatit pentru audit trail.
 
 ## Verdict cumparare
 
@@ -170,4 +179,3 @@ Aceasta este calea sanatoasa catre DPO-ready vandabil.
 - GDPR Complet — servicii DPO externalizat: https://gdprcomplet.ro/
 - LegalUp — servicii GDPR/DPO, documentatie, training, DSAR si incidente: https://legalup.ro/servicii-gdpr/
 - Decalex MyDPO — document management, training hub, RoPA si registre cereri: https://decalex.ro/mydpo
-

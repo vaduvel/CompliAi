@@ -4,6 +4,28 @@ Data: 2026-04-30
 Branch: `v3-unified`  
 Scop: testare ca Diana Popescu, consultant DPO, pornind de la un portofoliu real de cabinet si firme noi importate din Excel/CSV.
 
+## Update post-fix 30 apr 2026 — DPO Cabinet OS hard-gate
+
+După raportul live browser, am extins flow-ul dincolo de "firmă nouă" către "firmă nouă + istoric cabinet".
+
+Implementat:
+
+- `/dashboard/migration` — UI pentru import istoric DPO.
+- `/api/dpo/migration/import` — import `.xlsx/.xls/.csv`.
+- Import structurat pentru DSAR log, RoPA, vendor/DPA, training GDPR, breach/ANSPDCP.
+- Import approval history ca dovadă istorică, fără promisiune falsă de magic-link.
+- Monthly report include evenimentele `dpo.migration_imported`.
+
+Validare:
+
+- `npm run build` -> PASS.
+- `./node_modules/.bin/vitest run lib/server/dpo-migration-import.test.ts lib/compliscan/nav-config.test.ts` -> 14/14 PASS.
+- `BASE_URL=http://localhost:3000 npm run smoke:dpo-sale-readiness` -> 51/51 PASS.
+
+Flow validat de smoke:
+
+`import client pseudonimizat -> baseline -> Legea 190/CNP -> import DSAR istoric -> import RoPA -> import vendor/DPA -> import training -> import breach ANSPDCP -> finding DPA -> template cabinet -> document DPA -> magic link -> aprobare client -> evidence -> Dosar/monitorizare -> raport lunar -> audit pack -> export cabinet`.
+
 ## Intrebarea testului
 
 Poate Diana sa ia o firma noua din portofoliul ei existent, sa o importe in CompliScan si sa lucreze cap-coada pe ea?

@@ -94,6 +94,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const gdprTrainingRecords = Array.isArray(state.gdprTrainingRecords)
     ? state.gdprTrainingRecords
     : []
+  const dpoMigrationImports = Array.isArray(state.dpoMigrationImports)
+    ? state.dpoMigrationImports
+    : []
   const resolvedFindingIds = getOperationallyClosedFindingIds({
     ...state,
     alerts: rawAlerts,
@@ -113,6 +116,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     events,
     hrRegistryReconciliations,
     gdprTrainingRecords,
+    dpoMigrationImports,
   })
   const alerts = applyTaskResolutionToAlerts({
     ...state,
@@ -133,6 +137,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     events,
     hrRegistryReconciliations,
     gdprTrainingRecords,
+    dpoMigrationImports,
   })
 
   const unresolvedFindings = findings.filter((finding) => !resolvedFindingIds.has(finding.id))
@@ -184,6 +189,7 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     snapshotHistory,
     hrRegistryReconciliations,
     gdprTrainingRecords,
+    dpoMigrationImports,
     validatedBaselineSnapshotId:
       typeof state.validatedBaselineSnapshotId === "string" &&
       snapshotHistory.some((snapshot) => snapshot.snapshotId === state.validatedBaselineSnapshotId)

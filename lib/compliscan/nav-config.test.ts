@@ -41,6 +41,7 @@ describe("lib/compliscan/nav-config", () => {
       "/dashboard/calendar",
       "/dashboard/magic-links",
       "/dashboard/cabinet/templates",
+      "/dashboard/migration",
       "/dashboard/training",
     ])
   })

@@ -324,6 +324,7 @@ function buildWorkDoneItems(state: ComplianceState) {
         "document.shared_commented",
         "document.generated",
         "document_generated",
+        "dpo.migration_imported",
         "ai.off_configured",
       ].includes(event.type)
     )

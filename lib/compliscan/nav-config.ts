@@ -1,6 +1,7 @@
 import {
   BookOpen,
   CalendarClock,
+  FolderInput,
   FileSearch,
   GraduationCap,
   Landmark,
@@ -87,6 +88,13 @@ const DPO_NAV_ITEMS: DashboardNavItem[] = [
     href: dashboardRoutes.cabinetTemplates,
     icon: BookOpen,
     matchers: [dashboardRoutes.cabinetTemplates],
+  },
+  {
+    id: "dpo-migration",
+    label: "Migrare istoric",
+    href: dashboardRoutes.dpoMigration,
+    icon: FolderInput,
+    matchers: [dashboardRoutes.dpoMigration],
   },
   {
     id: "training",

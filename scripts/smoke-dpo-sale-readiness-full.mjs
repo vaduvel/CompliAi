@@ -119,6 +119,16 @@ async function switchToOrg(orgName) {
   return membership
 }
 
+async function uploadDpoMigration(kind, fileName, content) {
+  const form = new FormData()
+  form.set("kind", kind)
+  form.set("file", new Blob([content], { type: "text/csv" }), fileName)
+  return request("/api/dpo/migration/import", {
+    method: "POST",
+    body: form,
+  })
+}
+
 function findDocumentBackedDpaFinding(state) {
   return (state.findings || []).find(
     (finding) =>
@@ -222,6 +232,77 @@ async function main() {
   record(
     (state.findings || []).some((finding) => finding.id === "intake-lege190-cnp-sensitive-data"),
     "Romanian DPO baseline detects Legea 190/2018 / CNP-sensitive-data gap"
+  )
+
+  const dsarMigration = await uploadDpoMigration(
+    "dsar-log",
+    "diana-dsar-istoric.csv",
+    [
+      "Solicitant,Email,Tip cerere,Data primire,Status,Dovada",
+      "Maria Ionescu,maria.ionescu@example.ro,Acces Art 15,01.04.2026,raspuns trimis,Drive:/DSAR/maria.pdf",
+    ].join("\n")
+  )
+  record(dsarMigration.res.ok && dsarMigration.body.importedCount === 1, "Diana imports historical DSAR log", dsarMigration.text)
+
+  const ropaMigration = await uploadDpoMigration(
+    "ropa-register",
+    "diana-ropa-istoric.csv",
+    [
+      "Activitate,Scop,Temei,Categorii date,Persoane vizate,Destinatari,Retentie",
+      "Programări pacienți,Gestionare consultații,Art. 6(1)(b),date contact; date sănătate,pacienți,medici,5 ani",
+    ].join("\n")
+  )
+  record(ropaMigration.res.ok && ropaMigration.body.structuredCount === 1, "Diana imports historical RoPA register as review draft", ropaMigration.text)
+
+  const vendorMigration = await uploadDpoMigration(
+    "vendor-dpa-register",
+    "diana-vendori-dpa.csv",
+    [
+      "Furnizor,Serviciu,DPA,Date personale,Transfer,Review",
+      "MailTool Clinic,Newsletter,nu,da,SCC,30.09.2026",
+    ].join("\n")
+  )
+  record(vendorMigration.res.ok && vendorMigration.body.importedCount === 1, "Diana imports historical vendor/DPA register", vendorMigration.text)
+
+  const trainingMigration = await uploadDpoMigration(
+    "training-tracker",
+    "diana-training-gdpr.csv",
+    [
+      "Training,Audienta,Participanti,Data,Dovada",
+      "Training GDPR recepție,angajați,12,12.03.2026,Drive:/Training/receptie.pdf",
+    ].join("\n")
+  )
+  record(trainingMigration.res.ok && trainingMigration.body.importedCount === 1, "Diana imports historical GDPR training tracker", trainingMigration.text)
+
+  const breachMigration = await uploadDpoMigration(
+    "breach-log",
+    "diana-breach-log.csv",
+    [
+      "Incident,Data,Severitate,Date personale,Categorii date,Masuri",
+      "Email pacient trimis greșit,20.04.2026,high,da,date sănătate,contactat pacientul",
+    ].join("\n")
+  )
+  record(breachMigration.res.ok && breachMigration.body.importedCount === 1, "Diana imports historical breach log and ANSPDCP tracking", breachMigration.text)
+
+  const postMigration = await request("/api/dashboard")
+  const migratedState = postMigration.body.state || {}
+  await writeText("03b-dashboard-after-history-migration.json", JSON.stringify(migratedState, null, 2))
+  record(
+    (migratedState.dpoMigrationImports || []).length >= 5,
+    "Dashboard state keeps DPO migration import history",
+    `${(migratedState.dpoMigrationImports || []).length} imports`
+  )
+  record(
+    (migratedState.generatedDocuments || []).some((document) => document.documentType === "ropa" && String(document.title || "").includes("RoPA istoric")),
+    "Historical RoPA is visible as draft document"
+  )
+  record(
+    (migratedState.gdprTrainingRecords || []).some((record) => record.title.includes("Training GDPR recepție")),
+    "Historical training tracker is visible in client state"
+  )
+  record(
+    (migratedState.findings || []).some((finding) => String(finding.id || "").startsWith("anspdcp-breach-")),
+    "Historical personal-data breach creates ANSPDCP 72h finding"
   )
 
   const dpaFinding = findDocumentBackedDpaFinding(state)

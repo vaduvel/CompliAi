@@ -68,6 +68,29 @@ export type GdprTrainingRecord = {
   updatedAtISO: string
 }
 
+export type DpoMigrationImportKind =
+  | "dsar-log"
+  | "ropa-register"
+  | "vendor-dpa-register"
+  | "training-tracker"
+  | "breach-log"
+  | "approval-history"
+  | "evidence-archive"
+
+export type DpoMigrationImportRecord = {
+  id: string
+  kind: DpoMigrationImportKind
+  fileName: string
+  importedAtISO: string
+  importedByEmail?: string
+  rowCount: number
+  importedCount: number
+  skippedCount: number
+  structuredCount: number
+  archiveOnlyCount: number
+  notes: string[]
+}
+
 export type WorkspaceContext = {
   orgId: string
   orgName: string
@@ -600,6 +623,7 @@ export type ComplianceState = {
   siteScanJobs?: Record<string, SiteScanJob>
   hrRegistryReconciliations?: Record<string, HrRegistryReconciliationRecord>
   gdprTrainingRecords?: GdprTrainingRecord[]
+  dpoMigrationImports?: DpoMigrationImportRecord[]
   // ── Partner workspace ────────────────────────────────────────────────────
   partnerWorkspace?: {
     orgName?: string
