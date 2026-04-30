@@ -10,7 +10,18 @@ import type { OrgEmployeeCount, OrgSector } from "@/lib/compliance/applicability
 
 // ── Column definitions ───────────────────────────────────────────────────────
 
-export type ImportColumnId = "orgName" | "cui" | "sector" | "employeeCount" | "email" | "website"
+export type ImportColumnId =
+  | "orgName"
+  | "cui"
+  | "sector"
+  | "employeeCount"
+  | "email"
+  | "website"
+  | "contactName"
+  | "phone"
+  | "city"
+  | "dpoContract"
+  | "notes"
 
 type ColumnDef = {
   id: ImportColumnId
@@ -67,6 +78,46 @@ const COLUMN_DEFS: ColumnDef[] = [
     aliases: [
       "website", "website_url", "websiteurl", "site", "url", "web", "site url",
       "site web", "website url", "link", "pagina web", "adresa web", "domeniu",
+    ],
+  },
+  {
+    id: "contactName",
+    required: false,
+    aliases: [
+      "persoana contact", "persoana de contact", "contact person", "nume contact",
+      "responsabil", "reprezentant", "administrator", "manager contact",
+    ],
+  },
+  {
+    id: "phone",
+    required: false,
+    aliases: [
+      "telefon", "telefon contact", "phone", "mobile", "mobil", "numar telefon",
+      "nr telefon", "tel", "contact phone",
+    ],
+  },
+  {
+    id: "city",
+    required: false,
+    aliases: [
+      "oras", "localitate", "sediu", "judet", "city", "town", "location",
+      "municipiu",
+    ],
+  },
+  {
+    id: "dpoContract",
+    required: false,
+    aliases: [
+      "contract dpo", "abonament dpo", "contract", "status contract", "contract status",
+      "tip contract", "plan dpo",
+    ],
+  },
+  {
+    id: "notes",
+    required: false,
+    aliases: [
+      "observatii", "observatii interne", "note", "notes", "comentarii", "context",
+      "detalii", "mentiuni", "remarks",
     ],
   },
 ]
@@ -194,6 +245,11 @@ export function detectColumnMapping(headers: string[]): {
     employeeCount: null,
     email: null,
     website: null,
+    contactName: null,
+    phone: null,
+    city: null,
+    dpoContract: null,
+    notes: null,
   }
 
   const usedIndices = new Set<number>()
@@ -263,6 +319,11 @@ export type ImportRowParsed = {
   employeeCountRaw: string | null
   email: string | null
   website: string | null
+  contactName: string | null
+  phone: string | null
+  city: string | null
+  dpoContract: string | null
+  notes: string | null
   warnings: string[]
   errors: string[]
   isDuplicate: boolean
@@ -441,6 +502,11 @@ export function parseImportFile(
       employeeCountRaw,
       email,
       website,
+      contactName: getValue("contactName") || null,
+      phone: getValue("phone") || null,
+      city: getValue("city") || null,
+      dpoContract: getValue("dpoContract") || null,
+      notes: getValue("notes") || null,
       warnings,
       errors,
       isDuplicate,

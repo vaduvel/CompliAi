@@ -27,6 +27,12 @@ type ConfirmedRow = {
   employeeCount: OrgEmployeeCount | null
   email: string | null
   website: string | null
+  contactName?: string | null
+  phone?: string | null
+  city?: string | null
+  dpoContract?: string | null
+  notes?: string | null
+  raw?: Record<string, string>
   skip?: boolean
 }
 
@@ -225,6 +231,17 @@ export async function POST(request: Request) {
         if (existingState) {
           existingState.orgProfile = profile
           existingState.applicability = applicability
+          existingState.importedClientContext = {
+            source: "partner_import",
+            importedAtISO: new Date().toISOString(),
+            ...(row.contactName?.trim() ? { contactName: row.contactName.trim() } : {}),
+            ...(row.email?.trim() ? { contactEmail: row.email.trim().toLowerCase() } : {}),
+            ...(row.phone?.trim() ? { phone: row.phone.trim() } : {}),
+            ...(row.city?.trim() ? { city: row.city.trim() } : {}),
+            ...(row.dpoContract?.trim() ? { dpoContract: row.dpoContract.trim() } : {}),
+            ...(row.notes?.trim() ? { notes: row.notes.trim() } : {}),
+            ...(row.raw && Object.keys(row.raw).length > 0 ? { raw: row.raw } : {}),
+          }
           await writeStateForOrg(newOrg.orgId, existingState)
         }
 

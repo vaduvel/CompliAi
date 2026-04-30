@@ -53,6 +53,7 @@ export function MagicLinksPageSurface() {
     if (!cockpit.data) return [] as GeneratedDocumentRecord[]
     return cockpit.data.state.generatedDocuments
       .filter((doc) => supportsDocumentAdoption(doc.documentType))
+      .filter((doc) => Boolean(doc.adoptionStatus || doc.adoptionUpdatedAtISO || (doc.shareComments?.length ?? 0) > 0))
       .sort((a, b) => {
         const bDate = b.adoptionUpdatedAtISO ?? b.generatedAtISO
         const aDate = a.adoptionUpdatedAtISO ?? a.generatedAtISO

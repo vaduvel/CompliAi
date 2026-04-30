@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Bell, FileText } from "lucide-react"
@@ -207,6 +207,7 @@ export function AnspdcpNotificationPanel({
 }) {
   const router = useRouter()
   const notif = incident.anspdcpNotification
+  const [localNotification, setLocalNotification] = useState(notif)
   const [form, setForm] = useState({
     dataCategories: notif?.dataCategories.join(", ") ?? "",
     estimatedDataSubjects: notif?.estimatedDataSubjects?.toString() ?? "",
@@ -217,6 +218,19 @@ export function AnspdcpNotificationPanel({
     notifyDataSubjects: notif?.notifyDataSubjects ?? false,
   })
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    setLocalNotification(notif)
+    setForm({
+      dataCategories: notif?.dataCategories.join(", ") ?? "",
+      estimatedDataSubjects: notif?.estimatedDataSubjects?.toString() ?? "",
+      dpoContact: notif?.dpoContact ?? "",
+      consequencesDescription: notif?.consequencesDescription ?? "",
+      measuresTaken: notif?.measuresTaken ?? "",
+      anspdcpReference: notif?.anspdcpReference ?? "",
+      notifyDataSubjects: notif?.notifyDataSubjects ?? false,
+    })
+  }, [incident.id, notif])
 
   if (!incident.involvesPersonalData) return null
 
@@ -241,33 +255,40 @@ export function AnspdcpNotificationPanel({
     return evidenceParts.filter(Boolean).join(" ")
   }
 
-  const deadline72h = notif?.deadlineISO
-    ? slaLabel(notif.deadlineISO, 72 * 3_600_000)
+  const effectiveNotification = localNotification ?? notif
+  const deadline72h = effectiveNotification?.deadlineISO
+    ? slaLabel(effectiveNotification.deadlineISO, 72 * 3_600_000)
     : null
   const backToCockpitHref =
-    !returnTo && sourceFindingId && notif && (notif.status === "submitted" || notif.status === "acknowledged")
+    !returnTo && sourceFindingId && effectiveNotification && (effectiveNotification.status === "submitted" || effectiveNotification.status === "acknowledged")
       ? `/dashboard/resolve/${encodeURIComponent(sourceFindingId)}?${new URLSearchParams({
           anspdcp: "done",
-          evidenceNote: buildAnspdcpEvidenceNote(notif),
+          evidenceNote: buildAnspdcpEvidenceNote(effectiveNotification),
         }).toString()}`
       : null
 
   async function handleSubmit(submitted: boolean) {
+    if (submitted && !form.dataCategories.trim()) {
+      toast.error("Completează cel puțin categoriile de date afectate înainte de trimitere.")
+      return
+    }
+
     setSaving(true)
     const updated: AnspdcpBreachNotification = {
       required: true,
-      deadlineISO: notif?.deadlineISO ?? new Date(new Date(incident.detectedAtISO).getTime() + 72 * 3_600_000).toISOString(),
-      status: submitted ? "submitted" : (notif?.status ?? "pending"),
+      deadlineISO: effectiveNotification?.deadlineISO ?? new Date(new Date(incident.detectedAtISO).getTime() + 72 * 3_600_000).toISOString(),
+      status: submitted ? "submitted" : (effectiveNotification?.status ?? "pending"),
       dataCategories: form.dataCategories.split(",").map((s) => s.trim()).filter(Boolean),
       estimatedDataSubjects: form.estimatedDataSubjects ? parseInt(form.estimatedDataSubjects, 10) : null,
       dpoContact: form.dpoContact.trim() || undefined,
       consequencesDescription: form.consequencesDescription.trim() || undefined,
       measuresTaken: form.measuresTaken.trim() || undefined,
-      submittedAtISO: submitted ? new Date().toISOString() : notif?.submittedAtISO,
+      submittedAtISO: submitted ? new Date().toISOString() : effectiveNotification?.submittedAtISO,
       anspdcpReference: form.anspdcpReference.trim() || undefined,
       notifyDataSubjects: form.notifyDataSubjects,
-      dataSubjectsNotifiedAtISO: notif?.dataSubjectsNotifiedAtISO,
+      dataSubjectsNotifiedAtISO: effectiveNotification?.dataSubjectsNotifiedAtISO,
     }
+    setLocalNotification(updated)
     await Promise.resolve(onUpdate({ anspdcpNotification: updated }))
     setSaving(false)
     if (sourceFindingId && returnTo && (submitted || updated.status === "submitted" || updated.status === "acknowledged")) {
@@ -297,7 +318,7 @@ export function AnspdcpNotificationPanel({
     submitted: "Trimisă",
     acknowledged: "Confirmată de ANSPDCP",
   }
-  const currentStatus = notif?.status ?? "pending"
+  const currentStatus = effectiveNotification?.status ?? "pending"
 
   return (
     <div className={`space-y-3 rounded-eos-lg border px-3 py-3 ${statusColors[currentStatus]} ${emphasized ? "ring-2 ring-eos-warning/50 ring-offset-2 ring-offset-eos-bg" : ""}`}>
@@ -434,7 +455,7 @@ export function AnspdcpNotificationPanel({
           <Button
             size="sm"
             className="flex-1 gap-1.5 bg-eos-warning text-white hover:bg-eos-warning/90"
-            disabled={saving || !form.dataCategories.trim()}
+            disabled={saving}
             onClick={() => void handleSubmit(true)}
           >
             <Bell className="size-3.5" strokeWidth={2} />

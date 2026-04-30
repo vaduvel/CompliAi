@@ -221,6 +221,8 @@ function normalizeGeneratedDocuments(
         item.documentType === "hr-internal-procedures" ||
         item.documentType === "reges-correction-brief" ||
         item.documentType === "contract-template" ||
+        item.documentType === "nda" ||
+        item.documentType === "supplier-contract" ||
         item.documentType === "deletion-attestation" ||
         item.documentType === "pay-gap-report" ||
         item.documentType === "ropa"
@@ -291,6 +293,35 @@ function normalizeGeneratedDocuments(
         typeof item.adoptionEvidenceNote === "string" && item.adoptionEvidenceNote.trim()
           ? item.adoptionEvidenceNote.trim()
           : undefined
+      const shareComments = Array.isArray(item.shareComments)
+        ? item.shareComments.flatMap((comment) => {
+            if (!comment || typeof comment !== "object") return []
+            const id = typeof comment.id === "string" && comment.id.trim()
+              ? comment.id.trim()
+              : `share-comment-${Math.random().toString(36).slice(2, 8)}`
+            const authorName = typeof comment.authorName === "string" && comment.authorName.trim()
+              ? comment.authorName.trim()
+              : "Client (magic link)"
+            const commentText = typeof comment.comment === "string" && comment.comment.trim()
+              ? comment.comment.trim()
+              : null
+            const recipientType = typeof comment.recipientType === "string" && comment.recipientType.trim()
+              ? comment.recipientType.trim()
+              : "partner"
+            const createdAtISO = isValidIso(comment.createdAtISO) ? comment.createdAtISO : null
+            if (!commentText || !createdAtISO) return []
+            return [
+              {
+                id,
+                authorName,
+                comment: commentText,
+                recipientType,
+                createdAtISO,
+                channel: "public_magic_link" as const,
+              },
+            ]
+          })
+        : undefined
       const expiresAtISO = isValidIso(item.expiresAtISO) ? item.expiresAtISO : undefined
       const nextReviewDateISO = isValidIso(item.nextReviewDateISO) ? item.nextReviewDateISO : undefined
       const refreshStatus =
@@ -326,6 +357,7 @@ function normalizeGeneratedDocuments(
           adoptionStatus,
           adoptionUpdatedAtISO,
           adoptionEvidenceNote,
+          shareComments,
           expiresAtISO,
           nextReviewDateISO,
           refreshStatus,

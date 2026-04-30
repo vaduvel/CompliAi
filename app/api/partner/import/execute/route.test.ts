@@ -116,6 +116,11 @@ describe("POST /api/partner/import/execute", () => {
               sector: "professional-services",
               employeeCount: "10-49",
               email: "ceo@client.ro",
+              contactName: "Ana Client",
+              phone: "+40722111222",
+              city: "Cluj-Napoca",
+              dpoContract: "abonament lunar",
+              notes: "vine din Excel-ul Dianei",
             },
           ],
         }),
@@ -129,6 +134,20 @@ describe("POST /api/partner/import/execute", () => {
       "user-partner",
       "Client SRL",
       "partner_manager"
+    )
+    expect(mocks.writeStateForOrgMock).toHaveBeenCalledWith(
+      "org-client",
+      expect.objectContaining({
+        importedClientContext: expect.objectContaining({
+          source: "partner_import",
+          contactName: "Ana Client",
+          contactEmail: "ceo@client.ro",
+          phone: "+40722111222",
+          city: "Cluj-Napoca",
+          dpoContract: "abonament lunar",
+          notes: "vine din Excel-ul Dianei",
+        }),
+      })
     )
   })
 

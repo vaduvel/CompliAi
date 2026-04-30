@@ -43,6 +43,38 @@ const COLUMN_LABELS: Record<ImportColumnId, string> = {
   employeeCount: "Nr. angajați",
   email: "Email contact",
   website: "Website",
+  contactName: "Persoană contact",
+  phone: "Telefon",
+  city: "Oraș / Localitate",
+  dpoContract: "Contract DPO",
+  notes: "Observații",
+}
+
+function getRowPreviewValue(row: ImportRowParsed, id: ImportColumnId) {
+  switch (id) {
+    case "orgName":
+      return row.orgName
+    case "cui":
+      return row.cui ?? ""
+    case "sector":
+      return row.sector ?? row.sectorRaw ?? ""
+    case "employeeCount":
+      return row.employeeCount ?? row.employeeCountRaw ?? ""
+    case "email":
+      return row.email ?? ""
+    case "website":
+      return row.website ?? ""
+    case "contactName":
+      return row.contactName ?? ""
+    case "phone":
+      return row.phone ?? ""
+    case "city":
+      return row.city ?? ""
+    case "dpoContract":
+      return row.dpoContract ?? ""
+    case "notes":
+      return row.notes ?? ""
+  }
 }
 
 // ── Step 1: Upload ───────────────────────────────────────────────────────────
@@ -213,12 +245,7 @@ function MappingStep({
                     .filter((id) => mapping[id] !== null)
                     .map((id) => (
                       <td key={id} className="px-2 py-1.5 text-eos-text">
-                        {id === "orgName" ? row.orgName
-                          : id === "cui" ? row.cui ?? ""
-                          : id === "sector" ? row.sector ?? row.sectorRaw ?? ""
-                          : id === "employeeCount" ? row.employeeCount ?? row.employeeCountRaw ?? ""
-                          : id === "email" ? row.email ?? ""
-                          : ""}
+                        {getRowPreviewValue(row, id)}
                       </td>
                     ))}
                 </tr>
@@ -444,6 +471,11 @@ export function ImportWizard({
     employeeCount: null,
     email: null,
     website: null,
+    contactName: null,
+    phone: null,
+    city: null,
+    dpoContract: null,
+    notes: null,
   })
   const [excluded, setExcluded] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(false)
@@ -543,6 +575,12 @@ export function ImportWizard({
       employeeCount: row.employeeCount,
       email: row.email,
       website: row.website,
+      contactName: row.contactName,
+      phone: row.phone,
+      city: row.city,
+      dpoContract: row.dpoContract,
+      notes: row.notes,
+      raw: row.raw,
     }))
 
     try {

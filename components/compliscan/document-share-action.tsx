@@ -59,8 +59,15 @@ export function DocumentShareAction({
 
       const link = `${window.location.origin}/shared/${token}`
       setShareLink(link)
-      await navigator.clipboard.writeText(link).catch(() => undefined)
-      toast.success("Link de aprobare copiat. Clientul poate aproba, respinge sau comenta.")
+      const copied = await navigator.clipboard
+        ?.writeText(link)
+        .then(() => true)
+        .catch(() => false)
+      toast.success(
+        copied
+          ? "Link de aprobare copiat. Clientul poate aproba, respinge sau comenta."
+          : "Link de aprobare generat. Copiază-l din câmpul afișat."
+      )
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Nu am putut genera linkul de aprobare.")
     } finally {
@@ -97,7 +104,12 @@ export function DocumentShareAction({
           <button
             type="button"
             className="shrink-0 text-eos-text-tertiary transition-colors hover:text-eos-text"
-            onClick={() => void navigator.clipboard.writeText(shareLink).then(() => toast.info("Link copiat"))}
+            onClick={() => {
+              void navigator.clipboard
+                ?.writeText(shareLink)
+                .then(() => toast.info("Link copiat"))
+                .catch(() => toast.info("Selectează linkul și copiază-l manual."))
+            }}
             aria-label="Copiază linkul"
           >
             <Copy className="size-3.5" strokeWidth={2} />

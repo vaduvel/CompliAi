@@ -541,10 +541,17 @@ export function PortfolioReportsPage() {
 
   async function handleGenerateMonthlyReport() {
     setGeneratingMonthly(true)
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), 20_000)
     try {
       const response = await fetch("/api/partner/reports/monthly", {
         method: "POST",
         cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          currentClientFallbackOnly: reports.length === 0,
+        }),
       })
       const data = (await response.json().catch(() => null)) as MonthlyPreviewPayload & { error?: string } | null
       if (!response.ok || !data?.preview) {
@@ -553,9 +560,14 @@ export function PortfolioReportsPage() {
       }
       setMonthlyPreview(data)
       toast.success("Raport lunar generat pentru portofoliu.")
-    } catch {
-      toast.error("Eroare de rețea la generarea raportului lunar.")
+    } catch (error) {
+      toast.error(
+        error instanceof DOMException && error.name === "AbortError"
+          ? "Generarea raportului durează prea mult. Reîncearcă sau verifică statusul Supabase."
+          : "Eroare de rețea la generarea raportului lunar."
+      )
     } finally {
+      window.clearTimeout(timeoutId)
       setGeneratingMonthly(false)
     }
   }

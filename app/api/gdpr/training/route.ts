@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import type { ComplianceEvent, GdprTrainingAudience, GdprTrainingRecord } from "@/lib/compliance/types"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { mutateFreshStateForOrg, readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
-import type { GdprTrainingAudience, GdprTrainingRecord } from "@/lib/compliance/types"
 
 const AUDIENCES: GdprTrainingAudience[] = ["all_staff", "management", "new_hires", "specific_roles"]
 const STATUSES: GdprTrainingRecord["status"][] = ["planned", "completed", "evidence_required"]
@@ -37,6 +38,15 @@ function summarize(records: GdprTrainingRecord[]) {
     participantsCovered: records
       .filter((record) => record.status === "completed")
       .reduce((sum, record) => sum + record.participantCount, 0),
+  }
+}
+
+function eventActor(session: Awaited<ReturnType<typeof requireFreshRole>>) {
+  return {
+    id: session.email,
+    label: session.email,
+    role: session.role as ComplianceEvent["actorRole"],
+    source: "session" as const,
   }
 }
 
@@ -78,6 +88,23 @@ export async function POST(request: Request) {
       (state) => ({
         ...state,
         gdprTrainingRecords: [record, ...(state.gdprTrainingRecords ?? [])],
+        events: appendComplianceEvents(state, [
+          createComplianceEvent(
+            {
+              type: "gdpr.training.created",
+              entityType: "system",
+              entityId: record.id,
+              message: `Training GDPR înregistrat: ${record.title} · ${record.participantCount} participanți`,
+              createdAtISO: nowISO,
+              metadata: {
+                status: record.status,
+                audience: record.audience,
+                participantCount: record.participantCount,
+              },
+            },
+            eventActor(session)
+          ),
+        ]),
       }),
       session.orgName
     )
@@ -135,7 +162,27 @@ export async function PATCH(request: Request) {
         }
         const nextRecords = [...records]
         nextRecords[idx] = updated
-        return { ...state, gdprTrainingRecords: nextRecords }
+        return {
+          ...state,
+          gdprTrainingRecords: nextRecords,
+          events: appendComplianceEvents(state, [
+            createComplianceEvent(
+              {
+                type: "gdpr.training.updated",
+                entityType: "system",
+                entityId: updated.id,
+                message: `Training GDPR actualizat: ${updated.title} · ${updated.status}`,
+                createdAtISO: nowISO,
+                metadata: {
+                  status: updated.status,
+                  participantCount: updated.participantCount,
+                  evidenceAttached: Boolean(updated.evidenceNote),
+                },
+              },
+              eventActor(session)
+            ),
+          ]),
+        }
       },
       session.orgName
     )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -11,6 +11,9 @@ import {
   ChevronRight,
   Activity,
   CheckCircle2,
+  FileText,
+  MapPin,
+  Phone,
 } from "lucide-react"
 
 import { AccumulationCard } from "@/components/compliscan/dashboard/accumulation-card"
@@ -143,6 +146,7 @@ export default function DashboardPage() {
 
   const { data, activeDrifts, tasks, nextBestAction, openAlerts } = cockpit
   const state = data.state
+  const importedContext = state.importedClientContext ?? null
   const applicability = state.applicability ?? null
   const applicableEntries = (applicability?.entries ?? []).filter((e) => e.certainty !== "unlikely")
   const openTasks = tasks.filter((t) => t.status !== "done")
@@ -356,6 +360,62 @@ export default function DashboardPage() {
       {/* ── KPI strip — V3 ──────────────────────────────────────────────── */}
       <V3KpiStrip items={kpiItems} />
 
+      {importedContext ? (
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Context importat din fișierul cabinetului
+              </p>
+              <p className="mt-1 text-sm font-medium text-eos-text">
+                Datele pe care Diana le avea deja în Excel/Drive rămân atașate clientului.
+              </p>
+            </div>
+            <span className="rounded-full border border-eos-border bg-eos-surface-active px-2.5 py-1 font-mono text-[10px] text-eos-text-tertiary">
+              import · {new Date(importedContext.importedAtISO).toLocaleDateString("ro-RO")}
+            </span>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {importedContext.contactName || importedContext.contactEmail ? (
+              <ImportedContextChip
+                icon={<UserRound className="size-3.5" strokeWidth={2} />}
+                label="Contact client"
+                value={[importedContext.contactName, importedContext.contactEmail].filter(Boolean).join(" · ")}
+              />
+            ) : null}
+            {importedContext.phone ? (
+              <ImportedContextChip
+                icon={<Phone className="size-3.5" strokeWidth={2} />}
+                label="Telefon"
+                value={importedContext.phone}
+              />
+            ) : null}
+            {importedContext.city ? (
+              <ImportedContextChip
+                icon={<MapPin className="size-3.5" strokeWidth={2} />}
+                label="Localitate"
+                value={importedContext.city}
+              />
+            ) : null}
+            {importedContext.dpoContract ? (
+              <ImportedContextChip
+                icon={<FileText className="size-3.5" strokeWidth={2} />}
+                label="Contract DPO"
+                value={importedContext.dpoContract}
+              />
+            ) : null}
+            {importedContext.notes ? (
+              <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface-variant px-3 py-2 sm:col-span-2 xl:col-span-4">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+                  Observații cabinet
+                </p>
+                <p className="mt-1 text-[12.5px] leading-5 text-eos-text-muted">{importedContext.notes}</p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
       {/* ── Ce faci acum ─────────────────────────────────────────────────── */}
       <CompactNextAction
         task={nextBestAction}
@@ -564,6 +624,26 @@ export default function DashboardPage() {
         <AccumulationCard />
       </section>
 
+    </div>
+  )
+}
+
+function ImportedContextChip({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+}) {
+  return (
+    <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface-variant px-3 py-2">
+      <p className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+        {icon}
+        {label}
+      </p>
+      <p className="mt-1 truncate text-[12.5px] text-eos-text-muted">{value}</p>
     </div>
   )
 }

@@ -335,8 +335,11 @@ function PartnerCounselPack() {
 
       const link = `${window.location.origin}/shared/${tokenValue}`
       setShareLink(link)
-      await navigator.clipboard.writeText(link)
-      toast.success(`Link securizat copiat — expiră în 72h`)
+      const copied = await navigator.clipboard
+        ?.writeText(link)
+        .then(() => true)
+        .catch(() => false)
+      toast.success(copied ? "Link securizat copiat — expiră în 72h" : "Link securizat generat. Copiază-l din câmpul afișat.")
     } catch {
       toast.error("Nu am putut genera linkul de partajare")
     } finally {
@@ -406,7 +409,12 @@ function PartnerCounselPack() {
               <button
                 type="button"
                 className="shrink-0 text-eos-text-tertiary hover:text-eos-text-muted transition-colors"
-                onClick={() => void navigator.clipboard.writeText(shareLink).then(() => toast.info("Link copiat"))}
+                onClick={() => {
+                  void navigator.clipboard
+                    ?.writeText(shareLink)
+                    .then(() => toast.info("Link copiat"))
+                    .catch(() => toast.info("Selectează linkul și copiază-l manual."))
+                }}
               >
                 <Copy className="size-3.5" />
               </button>

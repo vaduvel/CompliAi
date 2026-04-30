@@ -270,6 +270,18 @@ export type GeneratedDocumentRecord = {
   refreshStatus?: "current" | "refresh-candidate" | "expired"  // E2 drift-linked
 }
 
+export type ImportedClientContext = {
+  source: "partner_import"
+  importedAtISO: string
+  contactName?: string
+  contactEmail?: string
+  phone?: string
+  city?: string
+  dpoContract?: string
+  notes?: string
+  raw?: Record<string, string>
+}
+
 export type AISystemPurpose =
   | "hr-screening"
   | "credit-scoring"
@@ -624,6 +636,7 @@ export type ComplianceState = {
   hrRegistryReconciliations?: Record<string, HrRegistryReconciliationRecord>
   gdprTrainingRecords?: GdprTrainingRecord[]
   dpoMigrationImports?: DpoMigrationImportRecord[]
+  importedClientContext?: ImportedClientContext
   // ── Partner workspace ────────────────────────────────────────────────────
   partnerWorkspace?: {
     orgName?: string

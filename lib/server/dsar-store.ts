@@ -78,6 +78,17 @@ function computeDeadline(receivedAtISO: string): string {
   return new Date(new Date(receivedAtISO).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
 }
 
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function isDuplicateWindow(leftISO: string, rightISO: string) {
+  const left = new Date(leftISO).getTime()
+  const right = new Date(rightISO).getTime()
+  if (!Number.isFinite(left) || !Number.isFinite(right)) return false
+  return Math.abs(left - right) <= 5 * 60 * 1000
+}
+
 export async function createDsar(
   orgId: string,
   input: Pick<DsarRequest, "requesterName" | "requesterEmail" | "requestType"> & {
@@ -88,6 +99,17 @@ export async function createDsar(
   const state = await readDsarState(orgId)
   const now = new Date().toISOString()
   const receivedAt = input.receivedAtISO ?? now
+  const duplicate = state.requests.find(
+    (request) =>
+      normalizeEmail(request.requesterEmail) === normalizeEmail(input.requesterEmail) &&
+      request.requestType === input.requestType &&
+      isDuplicateWindow(request.receivedAtISO, receivedAt)
+  )
+
+  if (duplicate) {
+    return duplicate
+  }
+
   const request: DsarRequest = {
     id: uid(),
     orgId,

@@ -17,6 +17,8 @@ import {
 } from "@/lib/compliance/engine"
 import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
+import { readDsarState, type DsarOrgState } from "@/lib/server/dsar-store"
+import { readNis2State, type Nis2OrgState } from "@/lib/server/nis2-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 
@@ -280,12 +282,18 @@ function escapeHtml(value: string) {
     .replace(/'/g, "&#39;")
 }
 
-function buildMonthlyActivity(state: ComplianceState) {
+function buildMonthlyActivity(
+  state: ComplianceState,
+  external?: {
+    dsar?: DsarOrgState | null
+    nis2?: Nis2OrgState | null
+  }
+) {
   const openFindings = state.findings.filter((finding) => isOpenMonthlyFinding(state, finding))
   const validatedEvidence = Object.values(state.taskState).filter(
     (task) => task.attachedEvidenceMeta?.quality?.status === "sufficient"
   ).length
-  const workDone = buildWorkDoneItems(state)
+  const workDone = buildWorkDoneItems(state, external)
   const nextActions = openFindings
     .slice()
     .sort(compareMonthlyFindings)
@@ -315,13 +323,20 @@ function isOpenMonthlyFinding(state: ComplianceState, finding: ScanFinding) {
     && !isFindingOperationallyClosed(state, finding.id)
 }
 
-function buildWorkDoneItems(state: ComplianceState) {
+function buildWorkDoneItems(
+  state: ComplianceState,
+  external?: {
+    dsar?: DsarOrgState | null
+    nis2?: Nis2OrgState | null
+  }
+) {
   const eventItems = state.events
     .filter((event) =>
       [
         "document.shared_approved",
         "document.shared_rejected",
         "document.shared_commented",
+        "document.shared",
         "document.generated",
         "document_generated",
         "dpo.migration_imported",
@@ -344,7 +359,59 @@ function buildWorkDoneItems(state: ComplianceState) {
       return `${document.title} pregătit pentru review.`
     })
 
-  return [...new Set([...eventItems, ...documentItems])].slice(0, 5)
+  const dsarItems = (external?.dsar?.requests ?? [])
+    .slice()
+    .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
+    .slice(0, 3)
+    .map((request) => {
+      const deadline = new Date(request.deadlineISO).toLocaleDateString("ro-RO")
+      if (request.status === "responded") {
+        return `DSAR ${request.requesterName} răspuns și arhivat.`
+      }
+      return `DSAR ${request.requesterName} înregistrat · termen ${deadline}.`
+    })
+
+  const trainingItems = (state.gdprTrainingRecords ?? [])
+    .slice()
+    .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
+    .slice(0, 3)
+    .map((record) => {
+      if (record.status === "completed") {
+        return `Training GDPR finalizat: ${record.title} · ${record.participantCount} participanți.`
+      }
+      if (record.status === "evidence_required") {
+        return `Training GDPR înregistrat: ${record.title} · dovadă necesară.`
+      }
+      return `Training GDPR planificat: ${record.title} · ${record.participantCount} participanți.`
+    })
+
+  const breachItems = (external?.nis2?.incidents ?? [])
+    .filter((incident) => incident.involvesPersonalData || incident.anspdcpNotification)
+    .slice()
+    .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
+    .slice(0, 3)
+    .map((incident) => {
+      const notification = incident.anspdcpNotification
+      if (notification?.status === "submitted") {
+        return `Breach ANSPDCP trimis: ${incident.title}.`
+      }
+      if (notification?.status === "acknowledged") {
+        return `Breach ANSPDCP confirmat: ${incident.title}.`
+      }
+      return `Breach cu date personale înregistrat: ${incident.title} · notificare ANSPDCP de urmărit.`
+    })
+
+  const importItems = state.importedClientContext
+    ? [
+        `Client importat din fișier cabinet${
+          state.importedClientContext.contactName
+            ? ` · contact ${state.importedClientContext.contactName}`
+            : ""
+        }.`,
+      ]
+    : []
+
+  return [...new Set([...eventItems, ...documentItems, ...dsarItems, ...trainingItems, ...breachItems, ...importItems])].slice(0, 8)
 }
 
 function compareMonthlyFindings(left: ScanFinding, right: ScanFinding) {
@@ -413,7 +480,11 @@ export async function POST(request: Request) {
 
         const clientEntries: ClientReportEntry[] = await Promise.all(
           clientMemberships.map(async (m) => {
-            const state = await readStateForOrg(m.orgId)
+            const [state, dsarState, nis2State] = await Promise.all([
+              readStateForOrg(m.orgId),
+              readDsarState(m.orgId).catch(() => null),
+              readNis2State(m.orgId).catch(() => null),
+            ])
             if (!state) {
               return {
                 orgId: m.orgId,
@@ -435,7 +506,10 @@ export async function POST(request: Request) {
 
             const normalized = normalizeComplianceState(state)
             const summary = computeDashboardSummary(normalized)
-            const activity = buildMonthlyActivity(normalized)
+            const activity = buildMonthlyActivity(normalized, {
+              dsar: dsarState,
+              nis2: nis2State,
+            })
 
             let scoreDelta30d: number | null = null
             try {

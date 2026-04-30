@@ -1,10 +1,12 @@
 // S2.3 — DSAR CRUD: GET list + POST create
 import { NextResponse } from "next/server"
 
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { createDsar, readDsarState, updateDsar } from "@/lib/server/dsar-store"
 import { generateDsarDraft, generateDsarProcessPack } from "@/lib/compliance/dsar-drafts"
+import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { WRITE_ROLES } from "@/lib/server/rbac"
 import type { DsarRequestType } from "@/lib/server/dsar-store"
 
@@ -51,6 +53,36 @@ export async function POST(request: Request) {
       orgName: session.orgName || session.orgId,
     })
     const updatedDsar = await updateDsar(session.orgId, dsar.id, { draftResponseGenerated: true })
+    const eventDsar = updatedDsar ?? dsar
+
+    await mutateFreshStateForOrg(
+      session.orgId,
+      (state) => ({
+        ...state,
+        events: appendComplianceEvents(state, [
+          createComplianceEvent(
+            {
+              type: "dsar.created",
+              entityType: "system",
+              entityId: eventDsar.id,
+              message: `DSAR înregistrat: ${eventDsar.requesterName} · termen ${new Date(eventDsar.deadlineISO).toLocaleDateString("ro-RO")}`,
+              createdAtISO: new Date().toISOString(),
+              metadata: {
+                requestType: eventDsar.requestType,
+                deadlineISO: eventDsar.deadlineISO,
+              },
+            },
+            {
+              id: session.userId,
+              label: session.email,
+              role: session.role,
+              source: "session",
+            }
+          ),
+        ]),
+      }),
+      session.orgName
+    ).catch(() => null)
 
     return NextResponse.json({ request: updatedDsar ?? dsar, draft }, { status: 201 })
   } catch (error) {

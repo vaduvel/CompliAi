@@ -9,6 +9,8 @@ import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { updateIncident, deleteIncident, readNis2State } from "@/lib/server/nis2-store"
 import { DELETE_ROLES, READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import type { ComplianceEvent } from "@/lib/compliance/types"
 import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
@@ -21,6 +23,15 @@ import type {
   Nis2PostIncidentTracking,
   AnspdcpBreachNotification,
 } from "@/lib/server/nis2-store"
+
+function eventActor(session: Awaited<ReturnType<typeof requireFreshRole>>) {
+  return {
+    id: session.email,
+    label: session.email,
+    role: session.role as ComplianceEvent["actorRole"],
+    source: "session" as const,
+  }
+}
 
 const VALID_STATUSES = ["open", "reported-24h", "reported-72h", "closed"] as const
 const STATUS_ORDER: Record<string, number> = {
@@ -125,13 +136,57 @@ export async function PATCH(
 
     // GOLD 6: sincronizează finding ANSPDCP în coada centrală la orice update
     const involvesPersonalData = incident.involvesPersonalData ?? current.involvesPersonalData
+    const nowISO = new Date().toISOString()
+    const eventsToAppend: ComplianceEvent[] = []
+    if (
+      involvesPersonalData &&
+      current.anspdcpNotification?.status !== "submitted" &&
+      incident.anspdcpNotification?.status === "submitted"
+    ) {
+      eventsToAppend.push(
+        createComplianceEvent(
+          {
+            type: "anspdcp.notification.submitted",
+            entityType: "system",
+            entityId: incident.id,
+            message: `Notificare ANSPDCP marcată ca trimisă: ${incident.title}`,
+            createdAtISO: nowISO,
+            metadata: {
+              severity: incident.severity,
+              submittedAtISO: incident.anspdcpNotification.submittedAtISO ?? nowISO,
+            },
+          },
+          eventActor(session)
+        )
+      )
+    }
+    if (current.status !== incident.status) {
+      eventsToAppend.push(
+        createComplianceEvent(
+          {
+            type: "incident.status.updated",
+            entityType: "system",
+            entityId: incident.id,
+            message: `Incident actualizat: ${incident.title} · ${incident.status}`,
+            createdAtISO: nowISO,
+            metadata: {
+              from: current.status,
+              to: incident.status,
+              severity: incident.severity,
+            },
+          },
+          eventActor(session)
+        )
+      )
+    }
+
     if (involvesPersonalData) {
       const finding = buildAnspdcpBreachFinding(
         incident.id,
         incident.title,
         incident.detectedAtISO,
         incident.anspdcpNotification?.status,
-        new Date().toISOString()
+        nowISO
       )
       await mutateFreshStateForOrg(
         session.orgId,
@@ -145,8 +200,9 @@ export async function PATCH(
                 ]
               : s.findings.filter((f) => f.id !== anspdcpFindingId(incident.id)),
             await readNis2State(session.orgId),
-            new Date().toISOString()
+            nowISO
           ),
+          events: eventsToAppend.length > 0 ? appendComplianceEvents(s, eventsToAppend) : s.events,
         }),
         session.orgName
       )
@@ -158,8 +214,9 @@ export async function PATCH(
           findings: mergeNis2PackageFindings(
             s.findings,
             await readNis2State(session.orgId),
-            new Date().toISOString()
+            nowISO
           ),
+          events: eventsToAppend.length > 0 ? appendComplianceEvents(s, eventsToAppend) : s.events,
         }),
         session.orgName
       )

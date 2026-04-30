@@ -20,7 +20,20 @@ export const DOCUMENT_ADOPTION_LABELS: Record<DocumentAdoptionStatus, string> = 
 }
 
 export function supportsDocumentAdoption(documentType?: GeneratedDocumentKind | null) {
-  return documentType === "dpa" || documentType === "contract-template" || documentType === "dsar-response"
+  return Boolean(
+    documentType &&
+      [
+        "privacy-policy",
+        "cookie-policy",
+        "dpa",
+        "dsar-response",
+        "retention-policy",
+        "ropa",
+        "contract-template",
+        "supplier-contract",
+        "nda",
+      ].includes(documentType)
+  )
 }
 
 export function getDocumentAdoptionProgress(status?: DocumentAdoptionStatus) {
