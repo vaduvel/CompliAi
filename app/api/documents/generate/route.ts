@@ -27,6 +27,25 @@ import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
 
+function inferCounterpartyNameFromText(value: string | undefined): string | undefined {
+  if (!value) return undefined
+
+  const patterns = [
+    /\b(?:procesator|processor|furnizor|vendor|provider|contrapartid[ăa]|prestator)\s*[:=\-–]\s*([^\n.;,]+)/i,
+    /\b(?:cu|către|catre|pentru)\s+([A-ZĂÂÎȘȚ][\p{L}\p{N}&.'’ -]{2,80}?(?:SRL|S\.R\.L\.|SA|S\.A\.|IFN|Europe|Ltd|Limited|GmbH|Cloud|Portal|Payments))/iu,
+  ]
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern)
+    const rawCandidate = match?.[1]?.trim().replace(/\s{2,}/g, " ")
+    const legalSuffixMatch = rawCandidate?.match(/^(.+?\b(?:SRL|S\.R\.L\.|SA|S\.A\.|IFN|Ltd|Limited|GmbH|LLC)\b)/i)
+    const candidate = legalSuffixMatch?.[1]?.trim() ?? rawCandidate
+    if (candidate && candidate.length >= 3) return candidate
+  }
+
+  return undefined
+}
+
 export async function POST(request: Request) {
   try {
     const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance", "reviewer"], "generarea documentelor")
@@ -52,6 +71,11 @@ export async function POST(request: Request) {
     }
 
     const whiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
+    const dataFlows = body.dataFlows?.trim() || undefined
+    const counterpartyName =
+      (typeof body.counterpartyName === "string" ? body.counterpartyName.trim() || undefined : undefined) ??
+      (documentType === "dpa" ? inferCounterpartyNameFromText(dataFlows) : undefined)
+
     const input: DocumentGenerationInput = {
       documentType: documentType as DocumentType,
       orgName,
@@ -59,8 +83,8 @@ export async function POST(request: Request) {
       orgSector: body.orgSector?.trim() || undefined,
       orgCui: body.orgCui?.trim() || undefined,
       dpoEmail: body.dpoEmail?.trim() || undefined,
-      dataFlows: body.dataFlows?.trim() || undefined,
-      counterpartyName: typeof body.counterpartyName === "string" ? body.counterpartyName.trim() || undefined : undefined,
+      dataFlows,
+      counterpartyName,
       counterpartyReferenceUrl:
         typeof body.counterpartyReferenceUrl === "string"
           ? body.counterpartyReferenceUrl.trim() || undefined

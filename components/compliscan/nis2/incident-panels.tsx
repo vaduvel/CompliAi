@@ -290,7 +290,32 @@ export function AnspdcpNotificationPanel({
       dataSubjectsNotifiedAtISO: effectiveNotification?.dataSubjectsNotifiedAtISO,
     }
     setLocalNotification(updated)
-    await Promise.resolve(onUpdate({ anspdcpNotification: updated }))
+    const shouldClosePrivacyOnlyIncident =
+      submitted &&
+      !incident.earlyWarningReport &&
+      !incident.fullReport72h &&
+      !incident.finalReport
+    const nowISO = new Date().toISOString()
+    await Promise.resolve(onUpdate({
+      anspdcpNotification: updated,
+      ...(shouldClosePrivacyOnlyIncident
+        ? {
+            status: "closed",
+            resolvedAtISO: nowISO,
+            postIncidentTracking: {
+              ...incident.postIncidentTracking,
+              isRemediated: true,
+              remediationCompletedAtISO:
+                incident.postIncidentTracking?.remediationCompletedAtISO ?? nowISO,
+              followUpValidationAtISO:
+                incident.postIncidentTracking?.followUpValidationAtISO ?? nowISO,
+              notes:
+                incident.postIncidentTracking?.notes ??
+                "Incident privacy-only închis după marcarea notificării ANSPDCP ca trimisă.",
+            },
+          }
+        : {}),
+    }))
     setSaving(false)
     if (sourceFindingId && returnTo && (submitted || updated.status === "submitted" || updated.status === "acknowledged")) {
       toast.success("Notificare ANSPDCP salvată. Revenim în cockpit.")

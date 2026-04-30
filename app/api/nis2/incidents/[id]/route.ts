@@ -54,7 +54,19 @@ function validateStageSequence(
     return "Nu poți trimite raportul final fără raportul complet (72h)."
   }
   // Validare: nu poți închide fără raport final
-  if (patch.status === "closed" && !incident.finalReport && !patch.finalReport) {
+  const closesPrivacyOnlyBreach =
+    patch.status === "closed" &&
+    incident.involvesPersonalData &&
+    (patch.anspdcpNotification?.status === "submitted" ||
+      patch.anspdcpNotification?.status === "acknowledged" ||
+      incident.anspdcpNotification?.status === "submitted" ||
+      incident.anspdcpNotification?.status === "acknowledged") &&
+    !incident.earlyWarningReport &&
+    !patch.earlyWarningReport &&
+    !incident.fullReport72h &&
+    !patch.fullReport72h
+
+  if (patch.status === "closed" && !incident.finalReport && !patch.finalReport && !closesPrivacyOnlyBreach) {
     return "Nu poți închide incidentul fără raportul final."
   }
   // Validare: status nu poate regresa

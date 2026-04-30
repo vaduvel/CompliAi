@@ -809,6 +809,8 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
   const serviceFallbackNote =
     "Draft pregătit cu CompliScan pentru revizia consultantului. Completează câmpurile operaționale înainte de utilizare oficială."
   const preparedBy = input.preparedBy?.trim() || "DPO Complet"
+  const counterpartyNameForTemplate =
+    input.counterpartyName?.trim() || (input.documentType === "dpa" ? "Procesatorul desemnat" : "")
 
   // S1.1 — Dacă cabinetul a uploadat un template activ pentru acest documentType,
   // folosim conținutul template-ului ca bază (cu variabile substituite). NU mai
@@ -835,8 +837,8 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       documentDate: formattedDate,
       DATE_LABEL: preferredDateLabel,
       dateLabel: preferredDateLabel,
-      COUNTERPARTY_NAME: input.counterpartyName ?? "",
-      counterpartyName: input.counterpartyName ?? "",
+      COUNTERPARTY_NAME: counterpartyNameForTemplate,
+      counterpartyName: counterpartyNameForTemplate,
       COUNTERPARTY_REFERENCE_URL: input.counterpartyReferenceUrl ?? "",
       counterpartyReferenceUrl: input.counterpartyReferenceUrl ?? "",
     })

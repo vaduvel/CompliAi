@@ -963,6 +963,21 @@ function VendorPicker({
   )
 }
 
+async function fetchJsonWithTimeout<T>(url: string, timeoutMs = 8000): Promise<T> {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { cache: "no-store", signal: controller.signal })
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null
+      throw new Error(payload?.error ?? `Request eșuat (${response.status})`)
+    }
+    return (await response.json()) as T
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function VendorReviewPage() {
@@ -981,16 +996,32 @@ export default function VendorReviewPage() {
   const findingId = searchParams.get("findingId")
 
   const load = useCallback(async () => {
+    setLoading(true)
     try {
-      const [reviewsRes, vendorsRes] = await Promise.all([
-        fetch("/api/vendor-review"),
-        fetch("/api/nis2/vendors"),
+      const [reviewsResult, vendorsResult] = await Promise.allSettled([
+        fetchJsonWithTimeout<{ reviews: VendorReview[]; pack?: VendorGovernancePack | null }>("/api/vendor-review"),
+        fetchJsonWithTimeout<{ vendors: Nis2Vendor[] }>("/api/nis2/vendors"),
       ])
-      const reviewsData = (await reviewsRes.json()) as { reviews: VendorReview[]; pack?: VendorGovernancePack | null }
-      const vendorsData = (await vendorsRes.json()) as { vendors: Nis2Vendor[] }
-      setReviews(reviewsData.reviews ?? [])
-      setVendorPack(reviewsData.pack ?? null)
-      setVendors(vendorsData.vendors ?? [])
+
+      if (reviewsResult.status === "fulfilled") {
+        setReviews(reviewsResult.value.reviews ?? [])
+        setVendorPack(reviewsResult.value.pack ?? null)
+      } else {
+        setReviews([])
+        setVendorPack(null)
+      }
+
+      if (vendorsResult.status === "fulfilled") {
+        setVendors(vendorsResult.value.vendors ?? [])
+      } else {
+        setVendors([])
+      }
+
+      if (reviewsResult.status === "rejected" || vendorsResult.status === "rejected") {
+        toast.warning("Vendor Review s-a încărcat parțial.", {
+          description: "Pagina rămâne utilizabilă; reîncearcă refresh dacă lipsește registrul de furnizori.",
+        })
+      }
     } catch {
       toast.error("Nu am putut încărca datele.")
     } finally {

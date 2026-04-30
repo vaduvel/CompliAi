@@ -174,6 +174,31 @@ describe("POST /api/documents/generate", () => {
     )
   })
 
+  it("deduce procesatorul DPA din descrierea fluxului cand cabinetul nu completeaza camp dedicat", async () => {
+    mocks.generateDocumentMock.mockResolvedValue({
+      documentType: "dpa",
+      title: "Acord DPA — Clinica Test × MedSoft Portal SRL",
+      content: "# DPA",
+      generatedAtISO: "2026-04-30T10:00:00.000Z",
+      llmUsed: false,
+    })
+
+    const res = await POST(
+      makeRequest({
+        documentType: "dpa",
+        orgName: "Clinica Test SRL",
+        dataFlows: "Procesator: MedSoft Portal SRL pentru portalul pacient și programări online.",
+      })
+    )
+
+    expect(res.status).toBe(200)
+    expect(mocks.generateDocumentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        counterpartyName: "MedSoft Portal SRL",
+      })
+    )
+  })
+
   it("respinge tipurile de document invalide", async () => {
     const res = await POST(
       makeRequest({

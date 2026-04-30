@@ -54,6 +54,16 @@ export function buildIncidentCockpitEvidenceNote(incident: Nis2Incident) {
   return evidenceParts.filter(Boolean).join(" ")
 }
 
+function isPrivacyOnlyBreachCompleted(incident: Nis2Incident) {
+  return (
+    incident.involvesPersonalData &&
+    (incident.anspdcpNotification?.status === "submitted" || incident.anspdcpNotification?.status === "acknowledged") &&
+    !incident.earlyWarningReport &&
+    !incident.fullReport72h &&
+    !incident.finalReport
+  )
+}
+
 // ── IncidentRow (refactored cu 3-stage stepper + post-incident) ──────────────
 
 export function IncidentRow({
@@ -77,11 +87,15 @@ export function IncidentRow({
 }) {
   const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
   const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
-  const isOpen = incident.status !== "closed"
+  const privacyBreachCompleted = isPrivacyOnlyBreachCompleted(incident)
+  const displayStatus = privacyBreachCompleted ? "closed" : incident.status
+  const isOpen = displayStatus !== "closed"
   const [showChecklist, setShowChecklist] = useState(false)
   const [showStages, setShowStages] = useState(true)
 
-  const completedStages = [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
+  const completedStages = privacyBreachCompleted
+    ? 3
+    : [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
 
   const nis2IncidentBorderL =
     incident.severity === "critical" || incident.severity === "high"
@@ -112,10 +126,10 @@ export function IncidentRow({
               {incident.severity}
             </V3Pill>
             <V3Pill variant="outline" className="text-[10px] normal-case tracking-normal">
-              {INCIDENT_STATUS_LABELS[incident.status]}
+              {INCIDENT_STATUS_LABELS[displayStatus]}
             </V3Pill>
             <V3Pill variant={completedStages === 3 ? "success" : "warning"} className="text-[10px] normal-case tracking-normal">
-              {completedStages}/3 etape
+              {privacyBreachCompleted ? "ANSPDCP trimisă" : `${completedStages}/3 etape`}
             </V3Pill>
             {incident.involvesPersonalData && (
               <V3Pill
@@ -400,7 +414,7 @@ export function IncidentsTab({
     }
   }
 
-  const openCount = incidents.filter((i) => i.status !== "closed").length
+  const openCount = incidents.filter((i) => i.status !== "closed" && !isPrivacyOnlyBreachCompleted(i)).length
   const highlightedIncident = highlightedIncidentId
     ? incidents.find((incident) => incident.id === highlightedIncidentId)
     : null

@@ -1,17 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   ChevronDown,
   ChevronRight,
-  CheckCircle2,
   Download,
   FileText,
   Loader2,
   Plus,
   Save,
-  Sparkles,
   Trash2,
   X,
 } from "lucide-react"
@@ -27,9 +25,6 @@ import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
-import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
-import type { ScanFinding } from "@/lib/compliance/types"
-import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 
 const LEGAL_BASIS_OPTIONS = [
   { value: "6(1)(a)", label: "Art. 6(1)(a) — consimțământ" },
@@ -169,6 +164,22 @@ Acest registru trebuie actualizat de fiecare dată când se inițiază o nouă a
 
 Document generat de CompliScan — ${now}
 `
+}
+
+function isBlankActivity(activity: RopaActivity): boolean {
+  return (
+    !activity.activityName.trim() &&
+    !activity.purpose.trim() &&
+    activity.dataCategories.length === 0 &&
+    !activity.legalBasis.trim() &&
+    activity.dataSubjects.length === 0 &&
+    !activity.recipients.trim() &&
+    !activity.thirdCountryTransfer &&
+    !activity.thirdCountryName.trim() &&
+    !activity.retentionPeriod.trim() &&
+    activity.securityMeasures.length === 0 &&
+    !activity.notes.trim()
+  )
 }
 
 function MultiSelectField({
@@ -487,31 +498,37 @@ export default function RopaPage() {
     )
   }
 
-  function validateActivities(): boolean {
-    return activities.every(
+  function getSavableActivities() {
+    return activities.filter((activity) => !isBlankActivity(activity))
+  }
+
+  function validateActivities(candidate = getSavableActivities()): boolean {
+    return candidate.length > 0 && candidate.every(
       (a) => a.activityName.trim() && a.legalBasis.trim()
     )
   }
 
   async function handlePreview() {
-    if (!validateActivities()) {
-      toast.error("Completează numele și baza legală pentru fiecare activitate.")
+    const savableActivities = getSavableActivities()
+    if (!validateActivities(savableActivities)) {
+      toast.error("Completează numele și baza legală pentru fiecare activitate începută.")
       return
     }
     const orgName = cockpit.data?.workspace.orgName ?? ""
-    setPreview(generateRopaMarkdown(activities, orgName))
+    setPreview(generateRopaMarkdown(savableActivities, orgName))
     setPreviewLoading(true)
     setTimeout(() => setPreviewLoading(false), 100)
   }
 
   async function handleSave() {
-    if (!validateActivities()) {
-      toast.error("Completează numele și baza legală pentru fiecare activitate.")
+    const savableActivities = getSavableActivities()
+    if (!validateActivities(savableActivities)) {
+      toast.error("Completează numele și baza legală pentru fiecare activitate începută.")
       return
     }
 
     const orgName = cockpit.data?.workspace.orgName ?? ""
-    const content = generateRopaMarkdown(activities, orgName)
+    const content = generateRopaMarkdown(savableActivities, orgName)
 
     setSaving(true)
     try {
@@ -545,7 +562,7 @@ export default function RopaPage() {
       void reloadDashboard()
 
       if (isFindingFlow && returnTo) {
-        const note = evidenceNote.trim() || `RoPA generat: ${activities.length} activități de prelucrare.`
+        const note = evidenceNote.trim() || `RoPA generat: ${savableActivities.length} activități de prelucrare.`
         const checklistParam = findingChecklist.length === FINDING_CONFIRMATION_ITEMS.length
           ? `&checklist=${findingChecklist.join(",")}`
           : ""
@@ -563,6 +580,9 @@ export default function RopaPage() {
   }
 
   if (cockpit.loading || !cockpit.data) return <LoadingScreen variant="section" />
+
+  const savableActivities = getSavableActivities()
+  const canSaveActivities = validateActivities(savableActivities)
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
@@ -601,7 +621,7 @@ export default function RopaPage() {
 
       {/* Summary */}
       <div className="flex flex-wrap items-center gap-3">
-        <Badge variant="default">{activities.length} activități</Badge>
+        <Badge variant="default">{savableActivities.length} activități pregătite</Badge>
         <Badge variant="secondary">
           {activities.filter((a) => a.thirdCountryTransfer).length} cu transfer 3rd party
         </Badge>
@@ -650,7 +670,7 @@ export default function RopaPage() {
               />
               <Button
                 onClick={() => void handleSave()}
-                disabled={saving || !validateActivities()}
+                disabled={saving || !canSaveActivities}
                 size="lg"
                 className="w-full gap-2"
               >
@@ -710,7 +730,7 @@ export default function RopaPage() {
 
               <Button
                 onClick={() => void handleSave()}
-                disabled={saving || !validateActivities() || !isFindingChecklistComplete}
+                disabled={saving || !canSaveActivities || !isFindingChecklistComplete}
                 size="lg"
                 className="w-full gap-2"
               >

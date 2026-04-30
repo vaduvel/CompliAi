@@ -35,6 +35,28 @@ function normalizeParticipantNames(value: unknown): string[] {
     .slice(0, 1000)
 }
 
+function inferParticipantNamesFromEvidence(value: unknown): string[] {
+  if (typeof value !== "string" || !value.trim()) return []
+  const normalized = value
+    .replace(/\r/g, "\n")
+    .replace(/[•*]/g, "\n")
+    .replace(/\bși\b/gi, ",")
+
+  const focused =
+    normalized.match(/(?:participan(?:ți|ti)|cursan(?:ți|ti)|angaja(?:ți|ti)|prezen(?:ți|ti))\s*[:=\-–]\s*([\s\S]+)/i)?.[1] ??
+    normalized
+
+  return focused
+    .replace(/\.\s+(?:confirmare|dovad[ăa]|certificat|training|semnat|lista)\b[\s\S]*$/i, "")
+    .split(/\n|[,;]+/)
+    .map((item) => item.trim())
+    .map((item) => item.replace(/^(?:participan(?:ți|ti)|cursan(?:ți|ti)|angaja(?:ți|ti))\s*[:=\-–]\s*/i, "").trim())
+    .filter((item) => item.length >= 3)
+    .filter((item) => !/^\d+$/.test(item))
+    .filter((item) => !/^(data|dovad[ăa]|training|certificat|confirmare)\b/i.test(item))
+    .slice(0, 1000)
+}
+
 function isIsoLike(value: unknown): value is string {
   return typeof value === "string" && !Number.isNaN(Date.parse(value))
 }
@@ -83,16 +105,22 @@ export async function POST(request: Request) {
     if (!title) return jsonError("Titlul trainingului este obligatoriu.", 400, "MISSING_TITLE")
 
     const nowISO = new Date().toISOString()
+    const evidenceNote = typeof body.evidenceNote === "string" ? body.evidenceNote.trim() : undefined
+    const explicitParticipantNames = normalizeParticipantNames(body.participantNames)
+    const inferredParticipantNames =
+      explicitParticipantNames.length > 0 ? [] : inferParticipantNamesFromEvidence(evidenceNote)
+    const participantNames = explicitParticipantNames.length > 0 ? explicitParticipantNames : inferredParticipantNames
+    const explicitParticipantCount = normalizeParticipantCount(body.participantCount)
     const record: GdprTrainingRecord = {
       id: `gdpr-training-${crypto.randomUUID()}`,
       title,
       audience: normalizeAudience(body.audience),
-      participantCount: normalizeParticipantCount(body.participantCount),
-      participantNames: normalizeParticipantNames(body.participantNames),
+      participantCount: explicitParticipantCount > 0 ? explicitParticipantCount : participantNames.length,
+      participantNames,
       status: body.status === "completed" ? "completed" : body.status === "evidence_required" ? "evidence_required" : "planned",
       dueAtISO: isIsoLike(body.dueAtISO) ? body.dueAtISO : undefined,
       completedAtISO: isIsoLike(body.completedAtISO) ? body.completedAtISO : undefined,
-      evidenceNote: typeof body.evidenceNote === "string" ? body.evidenceNote.trim() : undefined,
+      evidenceNote,
       evidenceFileName: typeof body.evidenceFileName === "string" ? body.evidenceFileName.trim() || undefined : undefined,
       evidenceFileType: typeof body.evidenceFileType === "string" ? body.evidenceFileType.trim() || undefined : undefined,
       evidenceFileSizeBytes: normalizeParticipantCount(body.evidenceFileSizeBytes),
@@ -165,15 +193,36 @@ export async function PATCH(request: Request) {
           ? (body.status as GdprTrainingRecord["status"])
           : current.status
         const nowISO = new Date().toISOString()
+        const nextEvidenceNote =
+          typeof body.evidenceNote === "string"
+            ? body.evidenceNote.trim()
+            : body.evidenceNote === null
+              ? undefined
+              : current.evidenceNote
+        const explicitParticipantNames =
+          body.participantNames === undefined ? undefined : normalizeParticipantNames(body.participantNames)
+        const inferredParticipantNames =
+          explicitParticipantNames === undefined && (!current.participantNames || current.participantNames.length === 0)
+            ? inferParticipantNamesFromEvidence(nextEvidenceNote)
+            : []
+        const nextParticipantNames: string[] =
+          explicitParticipantNames === undefined
+            ? inferredParticipantNames.length > 0
+              ? inferredParticipantNames
+              : current.participantNames ?? []
+            : explicitParticipantNames
+        const nextParticipantCount =
+          body.participantCount === undefined
+            ? current.participantCount > 0
+              ? current.participantCount
+              : nextParticipantNames.length
+            : normalizeParticipantCount(body.participantCount)
         updated = {
           ...current,
           title: typeof body.title === "string" && body.title.trim() ? body.title.trim() : current.title,
           audience: body.audience ? normalizeAudience(body.audience) : current.audience,
-          participantCount: body.participantCount === undefined ? current.participantCount : normalizeParticipantCount(body.participantCount),
-          participantNames:
-            body.participantNames === undefined
-              ? current.participantNames
-              : normalizeParticipantNames(body.participantNames),
+          participantCount: nextParticipantCount,
+          participantNames: nextParticipantNames,
           status,
           dueAtISO: body.dueAtISO === null ? undefined : isIsoLike(body.dueAtISO) ? body.dueAtISO : current.dueAtISO,
           completedAtISO:
@@ -182,12 +231,7 @@ export async function PATCH(request: Request) {
               : body.completedAtISO === null
                 ? undefined
                 : current.completedAtISO,
-          evidenceNote:
-            typeof body.evidenceNote === "string"
-              ? body.evidenceNote.trim()
-              : body.evidenceNote === null
-                ? undefined
-                : current.evidenceNote,
+          evidenceNote: nextEvidenceNote,
           evidenceFileName:
             typeof body.evidenceFileName === "string"
               ? body.evidenceFileName.trim()

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
+import { LegacyWorkspaceBridge } from "@/components/compliscan/legacy-workspace-bridge"
 import { PortfolioShell } from "@/components/compliscan/portfolio-shell"
 import {
   SESSION_COOKIE,
@@ -33,7 +34,17 @@ export default async function PortfolioLayout({
   }
 
   if (session.workspaceMode !== "portfolio") {
-    redirect("/dashboard/partner")
+    return (
+      <LegacyWorkspaceBridge
+        title="Comutăm sesiunea în Portofoliu"
+        description="Pregătim workspace-ul de cabinet ca să vezi toți clienții într-un singur loc."
+        requestBody={{ workspaceMode: "portfolio" }}
+        destinationHref="/portfolio"
+        preserveCurrentPath
+        fallbackHref="/dashboard"
+        fallbackLabel="Înapoi la dashboard"
+      />
+    )
   }
 
   const memberships = await listUserMemberships(session.userId)
