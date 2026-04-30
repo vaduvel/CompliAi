@@ -28,8 +28,12 @@ export default async function PortfolioLayout({
 
   const userMode = await resolveUserMode(session)
 
-  if (userMode !== "partner" || session.workspaceMode !== "portfolio") {
+  if (userMode !== "partner") {
     redirect("/dashboard")
+  }
+
+  if (session.workspaceMode !== "portfolio") {
+    redirect("/dashboard/partner")
   }
 
   const memberships = await listUserMemberships(session.userId)

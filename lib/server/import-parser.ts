@@ -189,8 +189,11 @@ function normalizeEmployeeCount(raw: string): OrgEmployeeCount | null {
 }
 
 function normalizeSector(raw: string): OrgSector | null {
-  const lower = normalizeText(raw).replace(/[_-]+/g, " ").replace(/\s+/g, " ")
-  if (VALID_SECTORS.includes(lower as OrgSector)) return lower as OrgSector
+  const normalized = normalizeText(raw)
+  if (VALID_SECTORS.includes(normalized as OrgSector)) return normalized as OrgSector
+  const canonicalSlug = normalized.replace(/[_\s]+/g, "-")
+  if (VALID_SECTORS.includes(canonicalSlug as OrgSector)) return canonicalSlug as OrgSector
+  const lower = normalized.replace(/[_-]+/g, " ").replace(/\s+/g, " ")
   const exact = SECTOR_ALIASES[lower]
   if (exact) return exact
   if (lower.includes("sanat") || lower.includes("clinic") || lower.includes("medical")) return "health"

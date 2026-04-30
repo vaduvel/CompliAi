@@ -368,7 +368,7 @@ export default function DashboardPage() {
                 Context importat din fișierul cabinetului
               </p>
               <p className="mt-1 text-sm font-medium text-eos-text">
-                Datele pe care Diana le avea deja în Excel/Drive rămân atașate clientului.
+                Datele importate din Excel/Drive rămân atașate clientului.
               </p>
             </div>
             <span className="rounded-full border border-eos-border bg-eos-surface-active px-2.5 py-1 font-mono text-[10px] text-eos-text-tertiary">

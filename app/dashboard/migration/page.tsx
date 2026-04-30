@@ -127,7 +127,7 @@ export default function DpoMigrationPage() {
           </span>
         }
         title="Migrare istoric cabinet"
-        description="Importă registrele Dianei din Excel/CSV: DSAR, RoPA, vendor/DPA, training, breach ANSPDCP și aprobări istorice. Ce poate fi structurat intră în registre; ce nu poate fi dovedit nativ rămâne marcat clar ca istoric."
+        description="Importă registrele cabinetului din Excel/CSV: DSAR, RoPA, vendor/DPA, training, breach ANSPDCP și aprobări istorice. Ce poate fi structurat intră în registre; ce nu poate fi dovedit nativ rămâne marcat clar ca istoric."
       />
 
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
@@ -164,7 +164,7 @@ export default function DpoMigrationPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <UploadCloud className="size-4 text-eos-primary" strokeWidth={2} />
-              Încarcă fișierul Dianei
+              Încarcă fișierul cabinetului
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">

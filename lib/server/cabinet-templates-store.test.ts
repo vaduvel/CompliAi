@@ -15,6 +15,25 @@ async function cleanup(orgId: string) {
 }
 
 describe("cabinet-templates-store", () => {
+  it("pornește cabinetele noi cu template-uri default utile pentru DPO", async () => {
+    const orgId = `test-template-defaults-${Date.now()}`
+    await cleanup(orgId)
+
+    const all = await listCabinetTemplates(orgId)
+
+    expect(all.map((template) => template.id)).toEqual([
+      "default-dsar-access-response",
+      "default-dsar-erasure-refusal",
+      "default-vendor-dpa-scc",
+      "default-anspdcp-breach-72h",
+      "default-annual-gdpr-audit-report",
+    ])
+    expect(all.some((template) => template.documentType === "dsar-response")).toBe(true)
+    expect(all.some((template) => template.documentType === "dpa")).toBe(true)
+    expect(all.some((template) => template.name.includes("Breach ANSPDCP"))).toBe(true)
+    await cleanup(orgId)
+  })
+
   it("salveaza metadata de maturitate pentru template-uri cabinet", async () => {
     const orgId = `test-template-org-a-${Date.now()}`
     await cleanup(orgId)
@@ -63,7 +82,7 @@ describe("cabinet-templates-store", () => {
     expect(updated.template.revision).toBe(2)
 
     const all = await listCabinetTemplates(orgId)
-    expect(all[0]?.status).toBe("archived")
+    expect(all.find((template) => template.id === created.template.id)?.status).toBe("archived")
     await cleanup(orgId)
   })
 

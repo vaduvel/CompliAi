@@ -55,6 +55,7 @@ export type CabinetTemplateUpdateInput = {
 const DATA_DIR = path.join(process.cwd(), ".data")
 const MAX_TEMPLATES_PER_ORG = 50
 const MAX_CONTENT_BYTES = 200 * 1024
+const DEFAULT_TEMPLATE_TIMESTAMP = "2026-01-01T00:00:00.000Z"
 
 const cache = new Map<string, CabinetTemplate[]>()
 
@@ -85,6 +86,97 @@ function sanitizeOptionalText(value: string | null | undefined, max = 240) {
 
 function normalizeVersionLabel(value: string | null | undefined, fallback: string) {
   return sanitizeOptionalText(value, 80) ?? fallback
+}
+
+function buildDefaultTemplate(
+  orgId: string,
+  input: {
+    id: string
+    documentType: DocumentType
+    name: string
+    description: string
+    content: string
+    active?: boolean
+  }
+): CabinetTemplate {
+  const active = input.active ?? true
+  return {
+    id: input.id,
+    orgId,
+    documentType: input.documentType,
+    name: input.name,
+    description: input.description,
+    versionLabel: "CompliScan default v1",
+    sourceFileName: "CompliScan default library",
+    status: active ? "active" : "draft",
+    revision: 1,
+    content: input.content,
+    uploadedAtISO: DEFAULT_TEMPLATE_TIMESTAMP,
+    updatedAtISO: DEFAULT_TEMPLATE_TIMESTAMP,
+    active,
+    detectedVariables: detectVariables(input.content),
+    sizeBytes: Buffer.byteLength(input.content, "utf8"),
+  }
+}
+
+function buildDefaultCabinetTemplates(orgId: string): CabinetTemplate[] {
+  return [
+    buildDefaultTemplate(orgId, {
+      id: "default-dsar-access-response",
+      documentType: "dsar-response",
+      name: "Răspuns DSAR — acces la date",
+      description: "Template de pornire pentru cereri Art. 15 GDPR, înainte ca biroul să urce varianta proprie.",
+      content:
+        "# Răspuns DSAR — {{ORG_NAME}}\n\n" +
+        "Solicitant: {{REQUESTER_NAME}}\n\n" +
+        "Referință cerere: {{DSAR_ID}}\n\n" +
+        "Pregătit de: {{PREPARED_BY}} · {{DPO_EMAIL}}\n\n" +
+        "Confirmăm primirea cererii de acces și descriem categoriile de date, scopurile, destinatarii, perioada de retenție și drepturile disponibile. Documentul trebuie revizuit de consultantul DPO înainte de trimitere.\n",
+    }),
+    buildDefaultTemplate(orgId, {
+      id: "default-dsar-erasure-refusal",
+      documentType: "dsar-response",
+      name: "Răspuns DSAR — refuz ștergere motivat",
+      description: "Variantă draft pentru cazurile în care ștergerea nu poate fi executată integral.",
+      active: false,
+      content:
+        "# Răspuns DSAR — refuz ștergere motivat pentru {{ORG_NAME}}\n\n" +
+        "Solicitant: {{REQUESTER_NAME}}\n\n" +
+        "Referință cerere: {{DSAR_ID}}\n\n" +
+        "Pregătit de: {{PREPARED_BY}} · {{DPO_EMAIL}}\n\n" +
+        "Explicăm temeiul pentru păstrarea anumitor date, categoriile afectate, durata de retenție și dreptul persoanei vizate de a depune plângere. Consultantul DPO trebuie să valideze motivarea legală înainte de trimitere.\n",
+    }),
+    buildDefaultTemplate(orgId, {
+      id: "default-vendor-dpa-scc",
+      documentType: "dpa",
+      name: "DPA furnizor — vendor SaaS / SCC",
+      description: "Template de pornire pentru furnizori care procesează date în numele clientului.",
+      content:
+        "# DPA furnizor — {{ORG_NAME}} × {{COUNTERPARTY_NAME}}\n\n" +
+        "Pregătit de: {{PREPARED_BY}} · {{DPO_EMAIL}}\n\n" +
+        "Acest draft acoperă obiectul prelucrării, durata, categoriile de date, subprocessori, măsuri tehnice și organizatorice, notificarea incidentelor, asistența DSAR și transferurile internaționale/SCC unde este cazul.\n",
+    }),
+    buildDefaultTemplate(orgId, {
+      id: "default-anspdcp-breach-72h",
+      documentType: "nis2-incident-response",
+      name: "Breach ANSPDCP — notificare 72h",
+      description: "Runbook și draft de notificare pentru incidente cu date personale.",
+      content:
+        "# Notificare incident date personale — {{ORG_NAME}}\n\n" +
+        "Pregătit de: {{PREPARED_BY}} · {{DPO_EMAIL}}\n\n" +
+        "Completează data detectării, natura incidentului, categoriile și numărul estimat de persoane vizate, consecințele probabile, măsurile luate și persoana de contact. Această notificare este separată de orice raportare DNSC/NIS2.\n",
+    }),
+    buildDefaultTemplate(orgId, {
+      id: "default-annual-gdpr-audit-report",
+      documentType: "ropa",
+      name: "Raport audit anual GDPR — cabinet",
+      description: "Structură minimă pentru revizia anuală: RoPA, DSAR, DPA, training, breach, dovezi.",
+      content:
+        "# Raport audit anual GDPR — {{ORG_NAME}}\n\n" +
+        "Pregătit de: {{PREPARED_BY}} · {{DPO_EMAIL}}\n\n" +
+        "Include sumar executiv, schimbări în activități de prelucrare, RoPA, cereri DSAR, furnizori și DPA-uri, training angajați, incidente, dovezi validate, riscuri rămase și recomandări pentru următoarea perioadă.\n",
+    }),
+  ]
 }
 
 function normalizeTemplate(entry: CabinetTemplate): CabinetTemplate {
@@ -142,8 +234,12 @@ export async function listCabinetTemplates(orgId: string): Promise<CabinetTempla
     return cache.get(orgId) ?? []
   }
   const fromDisk = await readDisk(orgId)
-  cache.set(orgId, fromDisk)
-  return fromDisk
+  const templates = fromDisk.length === 0 ? buildDefaultCabinetTemplates(orgId) : fromDisk
+  cache.set(orgId, templates)
+  if (fromDisk.length === 0) {
+    await writeDisk(orgId, templates)
+  }
+  return templates
 }
 
 export async function getActiveTemplateForType(

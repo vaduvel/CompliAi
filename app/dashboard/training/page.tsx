@@ -131,7 +131,7 @@ export default function GdprTrainingPage() {
           </span>
         }
         title="Training GDPR angajați"
-        description="Tracker simplu pentru trainingurile privacy pe care Diana trebuie să le poată arăta în raport lunar sau la control: audiență, participanți, termen, dovadă."
+        description="Tracker simplu pentru trainingurile privacy pe care consultantul DPO trebuie să le poată arăta în raport lunar sau la control: audiență, participanți, termen, dovadă."
       />
 
       <div className="grid gap-3 sm:grid-cols-4">

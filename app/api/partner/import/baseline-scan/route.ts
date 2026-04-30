@@ -19,6 +19,7 @@ import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { buildWebsitePrefillSignals } from "@/lib/server/website-prefill-signals"
 import { buildRomanianPrivacyFindings } from "@/lib/compliance/romanian-privacy-findings"
+import { buildImportBaselineAnswers } from "@/lib/compliance/import-baseline-profile"
 import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
@@ -140,44 +141,26 @@ export async function POST(request: Request) {
     // Partner verifies/dismisses what remains in cockpit.
     if (updatedProfile) {
       const hasWebsite = !!websiteUrl
-      const hasEmployees = updatedProfile.employeeCount !== "1-9"
       const efacturaActive = prefill?.efacturaRegistered === true
 
-      // Helper: prefer real website signal over pessimistic default
-      const sigYes = (key: keyof typeof websiteSuggestions): "yes" | undefined =>
-        websiteSuggestions[key]?.value === true ? "yes" : undefined
-
-      const conservativeAnswers: FullIntakeAnswers = {
-        // Core questions — assume positive (company does these things)
-        sellsToConsumers: "unknown",
-        hasEmployees: hasEmployees ? "yes" : "unknown",
-        processesPersonalData: sigYes("processesPersonalData") ?? "probably",
-        usesAITools: updatedProfile.usesAITools ? "yes" : "no",
-        usesExternalVendors: "probably",
-        hasSiteWithForms: sigYes("hasSiteWithForms") ?? (hasWebsite ? "probably" : "unknown"),
-        hasStandardContracts: "probably",
-        // Conditional answers — assume "no" / missing (generates findings)
-        // unless website/ANAF gave us real positive evidence.
-        hasJobDescriptions: hasEmployees ? "no" : undefined,
-        hasEmployeeRegistry: hasEmployees ? "no" : undefined,
-        hasInternalProcedures: hasEmployees ? "no" : undefined,
-        hasPrivacyPolicy: sigYes("hasPrivacyPolicy") ?? "no",
-        hasDsarProcess: "no",
-        hasRopaRegistry: "no",
-        hasVendorDpas: "no",
-        hasRetentionSchedule: "no",
-        hasAiPolicy: updatedProfile.usesAITools ? "no" : undefined,
-        hasVendorDocumentation: "no",
-        vendorsSendPersonalData: "probably",
-        hasSitePrivacyPolicy: sigYes("hasSitePrivacyPolicy") ?? (hasWebsite ? "no" : undefined),
-        hasCookiesConsent: sigYes("hasCookiesConsent") ?? (hasWebsite ? "no" : undefined),
-      }
+      const conservativeAnswers: FullIntakeAnswers = buildImportBaselineAnswers(updatedProfile, {
+        hasWebsite,
+        websiteSignals: {
+          processesPersonalData: websiteSuggestions.processesPersonalData?.value === true,
+          hasSiteWithForms: websiteSuggestions.hasSiteWithForms?.value === true,
+          hasPrivacyPolicy: websiteSuggestions.hasPrivacyPolicy?.value === true,
+          hasSitePrivacyPolicy: websiteSuggestions.hasSitePrivacyPolicy?.value === true,
+          hasCookiesConsent: websiteSuggestions.hasCookiesConsent?.value === true,
+        },
+      })
 
       // Also generate from prefill-aware engine for any ANAF-enriched suggestions
       const prefillAnswers = buildInitialIntakeAnswers(updatedProfile, prefill)
 
       // Merge: conservative answers take precedence — but they now include real signals
       const mergedAnswers = { ...prefillAnswers, ...conservativeAnswers }
+      state.intakeAnswers = mergedAnswers
+      state.intakeCompletedAtISO = nowISO
       console.log("[baseline-scan] efacturaActive (from ANAF):", efacturaActive)
       const nis2State = await readNis2State(body.orgId)
       const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
@@ -211,7 +194,7 @@ export async function POST(request: Request) {
               status: "evidence_required",
               dueAtISO: due.toISOString(),
               evidenceNote:
-                "Creat automat la baseline pentru că organizația are angajați. Diana completează participanții și atașează dovada comunicării.",
+                "Creat automat la baseline pentru că organizația are angajați. Consultantul DPO completează participanții și atașează dovada comunicării.",
               createdAtISO: nowISO,
               updatedAtISO: nowISO,
             },

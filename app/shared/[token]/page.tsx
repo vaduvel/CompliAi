@@ -70,14 +70,14 @@ function buildConsultantProfile(config: WhiteLabelConfig, orgName: string) {
     "Cabinet DPO"
   const consultantName =
     envValue("COMPLISCAN_CONSULTANT_NAME") ||
-    "Diana Popescu"
+    "Consultant DPO"
 
   return {
     cabinetName,
     consultantName,
     title: envValue("COMPLISCAN_CONSULTANT_TITLE") || "Consultant DPO",
     certification: envValue("COMPLISCAN_CONSULTANT_CERTIFICATION") || "CIPP/E",
-    email: envValue("COMPLISCAN_CONSULTANT_EMAIL") || "diana@dpocomplet.ro",
+    email: envValue("COMPLISCAN_CONSULTANT_EMAIL") || "contact@cabinet-dpo.ro",
     phone: envValue("COMPLISCAN_CONSULTANT_PHONE") || "+40 700 000 000",
     brandColor: config.brandColor || "#6366f1",
     clientName: orgName,

@@ -31,4 +31,25 @@ describe("parseImportFile", () => {
       expect.stringContaining("nu a fost recunoscut")
     )
   })
+
+  it("acceptă sectorul servicii profesionale / consultanță pentru cabinete și contabili", () => {
+    const csv = [
+      "Client,CUI,Domeniu,Nr angajati,Email",
+      "Legal Privacy Advisory SRL,RO11223344,servicii profesionale,14,office@legalprivacy.test",
+      "Audit GDPR Boutique SRL,RO44332211,consultanta,8,office@auditgdpr.test",
+      "Pro Services Hub SRL,RO55667788,professional-services,51,office@proservices.test",
+    ].join("\n")
+
+    const result = parseImportFile(Buffer.from(csv, "utf8"), "portofoliu-servicii.csv")
+
+    expect(result.mappingConfidence).toBe("high")
+    expect(result.rows.map((row) => row.sector)).toEqual([
+      "professional-services",
+      "professional-services",
+      "professional-services",
+    ])
+    expect(result.rows.flatMap((row) => row.warnings)).not.toContain(
+      expect.stringContaining("Sectorul")
+    )
+  })
 })
