@@ -93,6 +93,76 @@ export const STRIPE_TIER_REGISTRY: Record<string, TierDefinition> = {
     ],
   },
 
+  // ── IMM HR segment (HR Director firme 100-500 ang) ──────────────────────
+  "hr-business": {
+    id: "hr-business",
+    label: "HR Business",
+    priceLabelEur: 149,
+    icpSegment: "imm-hr",
+    billingScope: "org",
+    envVar: "STRIPE_PRICE_HR_BUSINESS_MONTHLY",
+    fallbackEnvVar: "STRIPE_PRICE_PRO_MONTHLY",
+    features: [
+      "1 organizație, nelimitat angajați",
+      "Calculator gap salarial M/F automat",
+      "Salary range generator (BestJobs/LinkedIn/eJobs)",
+      "Job architecture builder (level × role × band)",
+      "Employee request portal (30 cereri/lună)",
+      "Audit Pack ITM PDF descărcabil",
+    ],
+  },
+  "hr-business-pro": {
+    id: "hr-business-pro",
+    label: "HR Business — Pro",
+    priceLabelEur: 249,
+    icpSegment: "imm-hr",
+    billingScope: "org",
+    envVar: "STRIPE_PRICE_HR_BUSINESS_PRO_MONTHLY",
+    fallbackEnvVar: "STRIPE_PRICE_PRO_MONTHLY",
+    features: [
+      "Tot din HR Business",
+      "Cereri angajați nelimitate",
+      "ITM PDF white-labeled cu signature",
+      "Anti-confidentiality contract checker",
+      "Email notifications deadline + cereri",
+      "Bundle GDPR + AI Act + e-Factura",
+    ],
+  },
+
+  // ── Cabinet HR segment (consultant HR multi-client) ──────────────────────
+  "hr-cabinet": {
+    id: "hr-cabinet",
+    label: "Cabinet HR",
+    priceLabelEur: 299,
+    icpSegment: "cabinet-hr",
+    billingScope: "account",
+    envVar: "STRIPE_PRICE_HR_CABINET_MONTHLY",
+    fallbackEnvVar: "STRIPE_PRICE_PARTNER_MONTHLY",
+    features: [
+      "Până la 5 firme client",
+      "White-label complet (logo + brand color + signature)",
+      "Cross-client Pay Transparency dashboard",
+      "Bulk import salary records din ERP/Excel",
+      "Rapoarte lunare batch cu brand cabinet",
+    ],
+  },
+  "hr-cabinet-plus": {
+    id: "hr-cabinet-plus",
+    label: "Cabinet HR+",
+    priceLabelEur: 699,
+    icpSegment: "cabinet-hr",
+    billingScope: "account",
+    envVar: "STRIPE_PRICE_HR_CABINET_PLUS_MONTHLY",
+    fallbackEnvVar: "STRIPE_PRICE_PARTNER_MONTHLY",
+    features: [
+      "Până la 25 firme client",
+      "Tot ce conține Cabinet HR",
+      "Custom domain (cabinet.compliai.ro)",
+      "API access + cabinet revenue dashboard",
+      "Priority support + SLA",
+    ],
+  },
+
   // ── Cabinet DPO segment ──────────────────────────────────────────────────
   "cabinet-solo": {
     id: "cabinet-solo",
@@ -298,6 +368,8 @@ export function tierToPartnerAccountPlan(tierId: string): PartnerAccountPlan | n
     "cabinet-studio": "partner_50",
     "fiscal-solo": "partner_25",
     "fiscal-pro": "partner_50",
+    "hr-cabinet": "partner_10",
+    "hr-cabinet-plus": "partner_25",
     // Legacy direct
     partner: "partner_25",
     partner_10: "partner_10",
