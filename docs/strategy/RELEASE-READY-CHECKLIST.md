@@ -197,6 +197,7 @@ Test:
 
 ### Pre-pilot prep (4-6 mai, 3 zile)
 
+- [ ] Internal DPO OS gate: `BASE_URL=http://127.0.0.1:3001 npm run verify:dpo-os` → 60/60 PASS (vezi `docs/strategy/pilot/dpo-os-internal-readiness-gate-2026-05-01.md`)
 - [ ] Slide deck Diana — 60min kickoff (pulled from `docs/strategy/pilot/dpo-complet-demo-script-2026-05-07.md`)
 - [ ] Dry-run demo (founder simulează Diana's flow end-to-end)
 - [ ] Pre-pilot email Diana confirm (template în `docs/strategy/pilot/dpo-complet-pre-pilot-email-2026-05-02.md`)
@@ -243,10 +244,19 @@ Test:
 Inainte sa accepti production live, fă manual:
 
 ```bash
-# 1. Pornire dev local
+# 1. Pornire dev local pentru DPO gate
+COMPLISCAN_DATA_BACKEND=local COMPLISCAN_AUTH_BACKEND=local PORT=3001 npm run dev
+
+# 2. DPO OS gate intern (fără email real accidental)
+BASE_URL=http://127.0.0.1:3001 npm run verify:dpo-os
+
+# 3. DPO OS gate cu email live explicit
+BASE_URL=http://127.0.0.1:3001 EMAIL_TEST_TO=adresa@exemplu.ro npm run verify:dpo-os:email
+
+# 4. Pornire dev local pentru smoke public clasic, dacă nu rulează deja pe 3000
 npm run dev
 
-# 2. Smoke flow public
+# 5. Smoke flow public
 curl -sI http://localhost:3000/                    # 200
 curl -sI http://localhost:3000/dpo                 # 200 (landing DPO)
 curl -sI http://localhost:3000/fiscal              # 200
@@ -256,19 +266,19 @@ curl -sI http://localhost:3000/pricing             # 200
 curl -sI http://localhost:3000/waitlist            # 200
 curl -sI "http://localhost:3000/login?icp=cabinet-dpo" # 200 + violet pane
 
-# 3. Smoke flow API public (fără auth)
+# 6. Smoke flow API public (fără auth)
 curl -X POST http://localhost:3000/api/waitlist \
   -H "Content-Type: application/json" \
   -d '{"email":"smoke-test@example.com","icpSegment":"cabinet-dpo"}'
 # {"ok":true,"alreadyOnList":false,"message":"Te-am adăugat..."}
 
-# 4. Stripe checkout (în demo mode, fără STRIPE_SECRET_KEY)
+# 7. Stripe checkout (în demo mode, fără STRIPE_SECRET_KEY)
 # Browser: /dashboard/settings/abonament → click "Activează cu Stripe" → demo URL
 
-# 5. Cron drift-sweep (dacă CRON_SECRET=test)
+# 8. Cron drift-sweep (dacă CRON_SECRET=test)
 curl -H "Authorization: Bearer test" http://localhost:3000/api/cron/drift-sweep
 
-# 6. Hash chain verification (din DevTools console după login)
+# 9. Hash chain verification (din DevTools console după login)
 # fetch("/api/dashboard").then(r=>r.json()).then(d=>console.log(d.state.events?.[0]))
 # trebuie să apară selfHash + prevHash
 ```
