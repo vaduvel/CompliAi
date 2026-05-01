@@ -1,15 +1,20 @@
 import {
+  BarChart3,
   BookOpen,
   CalendarClock,
   FolderInput,
   FileSearch,
+  FileText,
   GraduationCap,
   Landmark,
+  Layers,
+  MessageSquare,
   Send,
   ShieldAlert,
   ShieldCheck,
   ScanLine,
   Sparkles,
+  Tag,
   UsersRound,
 } from "lucide-react"
 
@@ -23,6 +28,7 @@ import {
 } from "@/components/compliscan/navigation"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
+import type { IcpSegment } from "@/lib/server/white-label"
 
 const MODULE_NAV_ITEMS: DashboardNavItem[] = [
   {
@@ -128,12 +134,89 @@ const DPO_NAV_ITEMS: DashboardNavItem[] = [
   },
 ]
 
+// HR sidebar — Pay Transparency primary pentru icpSegment imm-hr / cabinet-hr
+const HR_NAV_ITEMS: DashboardNavItem[] = [
+  {
+    id: "pt-overview",
+    label: "Pay Transparency",
+    href: dashboardRoutes.payTransparency,
+    icon: BarChart3,
+    matchers: [dashboardRoutes.payTransparency],
+    description: "calculator gap + raport ITM",
+  },
+  {
+    id: "pt-job-architecture",
+    label: "Job architecture",
+    href: dashboardRoutes.payTransparencyJobArchitecture,
+    icon: Layers,
+    matchers: [dashboardRoutes.payTransparencyJobArchitecture],
+    description: "level × role × salary band",
+  },
+  {
+    id: "pt-ranges",
+    label: "Salary ranges",
+    href: dashboardRoutes.payTransparencyRanges,
+    icon: Tag,
+    matchers: [dashboardRoutes.payTransparencyRanges],
+    description: "generator anunțuri job",
+  },
+  {
+    id: "pt-requests",
+    label: "Cereri angajați",
+    href: dashboardRoutes.payTransparencyRequests,
+    icon: MessageSquare,
+    matchers: [dashboardRoutes.payTransparencyRequests],
+    description: "portal token + countdown 30 zile",
+  },
+  {
+    id: "pt-reports",
+    label: "Rapoarte ITM",
+    href: dashboardRoutes.payTransparencyReports,
+    icon: FileText,
+    matchers: [dashboardRoutes.payTransparencyReports],
+    description: "PDF descărcabil ITM-shaped",
+  },
+]
+
+const HR_SUPPORT_ITEMS: DashboardNavItem[] = [
+  {
+    id: "documente",
+    label: "Documente",
+    href: dashboardRoutes.documents,
+    icon: FolderInput,
+    matchers: [dashboardRoutes.documents],
+    description: "istoric documente",
+  },
+  {
+    id: "settings",
+    label: "Setări",
+    href: dashboardRoutes.settings,
+    icon: ShieldCheck,
+    matchers: [dashboardRoutes.settings],
+    description: "white-label + brand cabinet",
+  },
+]
+
+const HR_PORTFOLIO_ITEMS: DashboardNavItem[] = [
+  ...portfolioNavItems.map((item) => ({ ...item, workspaceModeTarget: undefined as WorkspaceMode | undefined })),
+  {
+    id: "portfolio-pay-transparency",
+    label: "Pay Transparency clienți",
+    href: "/portfolio/pay-transparency",
+    icon: BarChart3,
+    matchers: ["/portfolio/pay-transparency"],
+    description: "cross-client gap heatmap",
+  },
+]
+
 export type AdaptiveNavSection = DashboardNavSection
 
 export type AdaptiveNavContext = {
   userMode: UserMode | null
   workspaceMode: WorkspaceMode
   role: UserRole
+  // S3.4 — Pay Transparency pillar HR sidebar variant
+  icpSegment?: IcpSegment | null
 }
 
 const ORG_NAV_FULL: DashboardNavItem[] = [...dashboardPrimaryNavItems]
@@ -156,7 +239,54 @@ export function getSidebarNavSections({
   userMode,
   workspaceMode,
   role,
+  icpSegment,
 }: AdaptiveNavContext): AdaptiveNavSection[] {
+  // S3.4 — HR Pay Transparency sidebar variant (icpSegment imm-hr / cabinet-hr)
+  if (icpSegment === "cabinet-hr" && workspaceMode === "portfolio") {
+    return [
+      {
+        id: "portfolio-hr",
+        label: "Portofoliu HR",
+        items: HR_PORTFOLIO_ITEMS,
+      },
+    ]
+  }
+
+  if (icpSegment === "cabinet-hr") {
+    return [
+      {
+        id: "portfolio-hr",
+        label: "Portofoliu HR",
+        items: HR_PORTFOLIO_ITEMS.map((item) => ({ ...item, workspaceModeTarget: "portfolio" as WorkspaceMode })),
+      },
+      {
+        id: "pay-transparency",
+        label: "Pay Transparency",
+        items: HR_NAV_ITEMS,
+      },
+      {
+        id: "support",
+        label: "Suport",
+        items: HR_SUPPORT_ITEMS,
+      },
+    ]
+  }
+
+  if (icpSegment === "imm-hr") {
+    return [
+      {
+        id: "pay-transparency",
+        label: "Pay Transparency",
+        items: HR_NAV_ITEMS,
+      },
+      {
+        id: "support",
+        label: "Suport",
+        items: HR_SUPPORT_ITEMS,
+      },
+    ]
+  }
+
   if (userMode === "partner" && workspaceMode === "portfolio") {
     return [
       {
@@ -230,7 +360,13 @@ export function getMobileNavItems({
   userMode,
   workspaceMode,
   role,
+  icpSegment,
 }: AdaptiveNavContext): DashboardNavItem[] {
+  // S3.4 — HR mobile nav: Pay Transparency primary
+  if (icpSegment === "imm-hr" || icpSegment === "cabinet-hr") {
+    return HR_NAV_ITEMS
+  }
+
   if (userMode === "partner" && workspaceMode === "portfolio") {
     return PORTFOLIO_NAV_ACTIVE
   }

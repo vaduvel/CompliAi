@@ -25,6 +25,11 @@ export const dashboardRoutes = {
   fiscal: "/dashboard/fiscal",
   vendorReview: "/dashboard/vendor-review",
   payTransparency: "/dashboard/pay-transparency",
+  // Sub-pagini Pay Transparency (Sprint 1+ build)
+  payTransparencyJobArchitecture: "/dashboard/pay-transparency/job-architecture",
+  payTransparencyRanges: "/dashboard/pay-transparency/ranges",
+  payTransparencyRequests: "/dashboard/pay-transparency/requests",
+  payTransparencyReports: "/dashboard/pay-transparency/reports",
   // Dosar unificat — Wave 1 cleanup
   dosar: "/dashboard/dosar",
   // Păstrate pentru backward compat (accesibile din Dosar)

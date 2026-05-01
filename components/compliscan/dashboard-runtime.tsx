@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react"
 
 import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
+import type { IcpSegment } from "@/lib/server/white-label"
 
 export type DashboardRuntimeUser = {
   email: string
@@ -12,6 +13,8 @@ export type DashboardRuntimeUser = {
   membershipId: string | null
   userMode: UserMode | null
   workspaceMode: WorkspaceMode
+  // S3.4 — icpSegment from white-label config (pentru sidebar HR-aware)
+  icpSegment?: IcpSegment | null
 } | null
 
 export type DashboardRuntimeMembership = {
