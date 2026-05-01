@@ -146,7 +146,7 @@ function WhiteLabelSection() {
             type="text"
             value={config.partnerName}
             onChange={(e) => setConfig((c) => ({ ...c, partnerName: e.target.value }))}
-            placeholder="Ex: Consultanță Fiscal SRL"
+            placeholder="Ex: DPO Complet SRL"
             className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
           />
         </div>
@@ -158,7 +158,7 @@ function WhiteLabelSection() {
             type="text"
             value={config.tagline ?? ""}
             onChange={(e) => setConfig((c) => ({ ...c, tagline: e.target.value || null }))}
-            placeholder="Ex: Conformitate fără efort"
+            placeholder="Ex: Cabinet DPO pentru IMM-uri"
             className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
           />
         </div>
