@@ -276,8 +276,8 @@ export function tierToOrgPlan(tierId: string): OrgPlan | null {
   if (!tier) return null
   // Account-scoped tiers nu au org plan
   if (tier.billingScope === "account") return null
-  // Tier ICP solo/imm-internal → mapăm la "pro"
-  if (tier.icpSegment === "solo" || tier.icpSegment === "imm-internal") return "pro"
+  // Tier ICP solo/imm-internal/imm-hr → mapăm la "pro"
+  if (tier.icpSegment === "solo" || tier.icpSegment === "imm-internal" || tier.icpSegment === "imm-hr") return "pro"
   // Legacy "pro" rămâne pro
   if (tierId === "pro") return "pro"
   return null
