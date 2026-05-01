@@ -1,3 +1,5 @@
+import type { IcpSegment } from "@/lib/server/white-label"
+
 export type OnboardingUserMode = "solo" | "partner" | "compliance" | "viewer"
 
 export type OnboardingDestination = {
@@ -8,9 +10,26 @@ export type OnboardingDestination = {
   requiresPortfolioWorkspace: boolean
 }
 
+/**
+ * Pay Transparency HR ICP-uri (imm-hr, cabinet-hr) au destination
+ * dedicat /dashboard/pay-transparency, nu /dashboard/resolve.
+ * Fallback la userMode pentru rest of ICPs (backward compatible).
+ */
 export function resolveOnboardingDestination(
-  userMode: OnboardingUserMode | null | undefined
+  userMode: OnboardingUserMode | null | undefined,
+  icpSegment?: IcpSegment | null,
 ): OnboardingDestination {
+  // HR ICP override — Pay Transparency primary surface
+  if (icpSegment === "imm-hr" || icpSegment === "cabinet-hr") {
+    return {
+      clientHref: "/dashboard/pay-transparency",
+      serverHref: "/dashboard/pay-transparency",
+      submitLabel: "Salvează și vezi Pay Transparency",
+      summaryLabel: "modul Pay Transparency",
+      requiresPortfolioWorkspace: icpSegment === "cabinet-hr",
+    }
+  }
+
   switch (userMode) {
     case "partner":
       return {
