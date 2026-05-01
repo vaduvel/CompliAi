@@ -21,6 +21,9 @@
     "migrate:fs-to-supabase": "node scripts/migrate-fs-to-supabase.mjs",
     "migrate:fs-to-supabase:apply": "node scripts/migrate-fs-to-supabase.mjs --apply",
     "smoke:dpo-sale-readiness": "node scripts/smoke-dpo-sale-readiness-full.mjs",
+    "smoke:dpo-sale-readiness:email": "node scripts/smoke-dpo-sale-readiness-full.mjs --require-email",
+    "verify:dpo-os": "npm run smoke:dpo-sale-readiness",
+    "verify:dpo-os:email": "npm run smoke:dpo-sale-readiness:email",
     "verify:release-ready": "node scripts/verify-release-ready.mjs",
     "verify:release-ready:strict": "node scripts/verify-release-ready.mjs --strict"
   },

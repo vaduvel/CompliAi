@@ -9,6 +9,28 @@
 
 ---
 
+## ✅ Update 1 mai 2026 (DPO OS internal readiness gate — 60/60 + email explicit)
+
+**Răspuns la cerința “DPO OS 100% intern, fără live/Vercel/Stripe/Supabase”:** am formalizat gate-ul intern care decide dacă flow-ul DPO este gata de pilot, fără să atingem infrastructura de producție.
+
+- Fix cod/test:
+  - `scripts/smoke-dpo-sale-readiness-full.mjs` nu mai are fallback hardcoded către o adresă personală pentru email live.
+  - `npm run verify:dpo-os` rulează smoke-ul complet local, fără email real accidental.
+  - `npm run verify:dpo-os:email` cere explicit `EMAIL_TEST_TO` și rulează gate-ul cu email live.
+  - Artefactul `13-email-test.json` explică dacă emailul a fost trimis sau a fost sărit intenționat în modul safe.
+- Doc nou:
+  - `docs/strategy/pilot/dpo-os-internal-readiness-gate-2026-05-01.md`
+  - Definește bar-ul intern: import client, scan, import istoric, DPIA, training, breach ANSPDCP, finding real, template cabinet, DPA, magic link, evidence, Dosar, raport lunar PDF, Audit Pack, Trust Pack, export cabinet și email live explicit.
+- Ultimul gate confirmat înainte de acest polish:
+  - `BASE_URL=http://127.0.0.1:3001 OUT_DIR=/private/tmp/compliscan-dpo-pilot-full-2026-05-01 node scripts/smoke-dpo-sale-readiness-full.mjs` -> **60/60 PASS** ✅
+  - Email Resend live confirmat în inbox de fondator ✅
+- Validare post-polish:
+  - `COMPLISCAN_DATA_BACKEND=local COMPLISCAN_AUTH_BACKEND=local PORT=3001 npm run dev`
+  - `BASE_URL=http://127.0.0.1:3001 OUT_DIR=/private/tmp/compliscan-dpo-os-safe-2026-05-01 npm run verify:dpo-os` -> **60/60 PASS** ✅
+  - `npm run build` -> PASS, doar warning-uri istorice ✅
+
+**Verdict:** gate-ul nu mai este doar un script tehnic. Este criteriul intern de adevăr pentru “DPO OS pilot-ready”. Nu declară încă full replacement Privacy Manager/Drive/Word fără pilot real, dar acoperă flow-ul vandabil complet pentru Diana.
+
 ## ✅ Update 30 apr 2026 (DPO Cabinet OS — Finding lifecycle hardening)
 
 **Răspuns la bar-ul nou “finding detectat -> rezolvat -> dovadă -> Dosar -> raport”:** am legat lifecycle-ul finding-ului în API, cockpit, Audit Pack și raport lunar, astfel încât Diana nu mai vede doar “document generat”, ci traseul complet al riscului.

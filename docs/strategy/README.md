@@ -1,6 +1,15 @@
-# CompliScan — Stack documente strategice (v6.6 — DPO BROWSER ACCEPTANCE FIXES)
+# CompliScan — Stack documente strategice (v6.7 — DPO OS INTERNAL READINESS GATE)
 
-🚀 **STATUS 29 APR 2026** — toate sprint-urile programate (S0/S0.5/S1/S2A/S2B/S3) sunt DONE pe `v3-unified`, iar testul live browser DPO Consultant a primit fix pack dedicat: DSAR Lumen seed-uit în store real, Portfolio Tasks/Vendors populate, raport lunar on-demand, template-uri cabinet prepopulate, legal pages rebranduite CompliScan și Evidence Ledger coerent cu summary-ul. Doar founder-side setup + pilot rămân înainte de deploy production.
+🚀 **STATUS 1 MAI 2026** — DPO OS are gate intern pilot-ready pe `v3-unified`: import client nou, scan, import istoric, DPIA, training GDPR, breach ANSPDCP 72h, finding real, template cabinet, DPA, magic link, evidence, Dosar, raport lunar PDF, Audit Pack, Trust Pack, export cabinet și email live explicit. Ultimul runtime post-polish: **60/60 PASS** local safe; email Resend live a fost confirmat separat în inbox.
+
+🧭 **Gate intern DPO OS**: [`pilot/dpo-os-internal-readiness-gate-2026-05-01.md`](./pilot/dpo-os-internal-readiness-gate-2026-05-01.md)
+
+```bash
+BASE_URL=http://127.0.0.1:3001 npm run verify:dpo-os
+BASE_URL=http://127.0.0.1:3001 EMAIL_TEST_TO=adresa@exemplu.ro npm run verify:dpo-os:email
+```
+
+⚠️ **Limită explicită**: statusul de mai sus nu include deploy live, Stripe, cutover Supabase sau promisiunea de migrare automată a întregului Drive/Privacy Manager. Acestea rămân separate de readiness-ul intern al flow-ului DPO.
 
 📦 **Pachet DPO Production Trust Hardening**: `/Users/vaduvageorge/Downloads/compliscan-dpo-production-trust-hardening-2026-04-28.zip`
 

@@ -6,10 +6,15 @@ const OUT_DIR =
   process.env.OUT_DIR ||
   `/private/tmp/compliscan-dpo-sale-readiness-${new Date().toISOString().slice(0, 10)}`
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 60_000)
+const ARGS = new Set(process.argv.slice(2))
+const REQUIRE_EMAIL_TEST =
+  ARGS.has("--require-email") ||
+  process.env.REQUIRE_EMAIL_TEST === "1" ||
+  process.env.COMPLISCAN_REQUIRE_EMAIL_TEST === "1"
 const EMAIL_TEST_TO =
   process.env.EMAIL_TEST_TO ||
   process.env.COMPLISCAN_EMAIL_TEST_TO ||
-  "vaduvadaniel10@yahoo.com"
+  ""
 
 class CookieJar {
   constructor() {
@@ -543,12 +548,27 @@ async function main() {
     trustPack.res.headers.get("content-type") || `HTTP ${trustPack.res.status}`
   )
 
-  const emailTest = await request("/api/partner/email-test", {
-    method: "POST",
-    body: JSON.stringify({ to: EMAIL_TEST_TO }),
-  })
-  await writeText("13-email-test.json", JSON.stringify(emailTest.body, null, 2))
-  record(emailTest.res.ok && emailTest.body.ok, "Email live test endpoint responds", emailTest.body.message || emailTest.text)
+  if (!EMAIL_TEST_TO) {
+    const skippedEmail = {
+      ok: !REQUIRE_EMAIL_TEST,
+      skipped: true,
+      reason: "EMAIL_TEST_TO/COMPLISCAN_EMAIL_TEST_TO is not configured.",
+      howToRunLive: "EMAIL_TEST_TO=you@example.com npm run verify:dpo-os:email",
+    }
+    await writeText("13-email-test.json", JSON.stringify(skippedEmail, null, 2))
+    record(
+      !REQUIRE_EMAIL_TEST,
+      REQUIRE_EMAIL_TEST ? "Email live test recipient is configured" : "Email live test skipped safely",
+      skippedEmail.howToRunLive
+    )
+  } else {
+    const emailTest = await request("/api/partner/email-test", {
+      method: "POST",
+      body: JSON.stringify({ to: EMAIL_TEST_TO }),
+    })
+    await writeText("13-email-test.json", JSON.stringify(emailTest.body, null, 2))
+    record(emailTest.res.ok && emailTest.body.ok, "Email live test endpoint responds", emailTest.body.message || emailTest.text)
+  }
 
   const failed = checks.filter((check) => !check.ok)
   const report = {
@@ -576,7 +596,9 @@ async function main() {
         ? `PASS — ${checks.length}/${checks.length} verificări trecute.`
         : `FAIL — ${checks.length - failed.length}/${checks.length} verificări trecute, ${failed.length} eșuate.`,
       "",
-      "Flow verificat: import client pseudonimizat → baseline scan → import istoric → DPIA → training export → ANSPDCP export → finding DPA real → template cabinet real → document DPA → magic link document-specific → aprobare client → evidence ledger → Dosar/monitoring → raport lunar PDF → audit pack → trust pack → export cabinet → email test.",
+      REQUIRE_EMAIL_TEST
+        ? "Flow verificat: import client pseudonimizat → baseline scan → import istoric → DPIA → training export → ANSPDCP export → finding DPA real → template cabinet real → document DPA → magic link document-specific → aprobare client → evidence ledger → Dosar/monitoring → raport lunar PDF → audit pack → trust pack → export cabinet → email test live."
+        : "Flow verificat: import client pseudonimizat → baseline scan → import istoric → DPIA → training export → ANSPDCP export → finding DPA real → template cabinet real → document DPA → magic link document-specific → aprobare client → evidence ledger → Dosar/monitoring → raport lunar PDF → audit pack → trust pack → export cabinet. Emailul live se rulează explicit cu verify:dpo-os:email.",
       "",
     ].join("\n")
   )

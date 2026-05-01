@@ -2,6 +2,7 @@ import { POST as generateMonthlyPreview } from "@/app/api/partner/reports/monthl
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { buildPDFFromMarkdown } from "@/lib/server/pdf-generator"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export const runtime = "nodejs"
 
@@ -42,7 +43,7 @@ function list(items: string[] | undefined, empty: string) {
   return values.length > 0 ? values.map((item) => `- ${item}`).join("\n") : `- ${empty}`
 }
 
-function buildMarkdown(payload: MonthlyPayload, cabinetName: string) {
+function buildMarkdown(payload: MonthlyPayload, cabinetName: string, consultantLabel: string) {
   const report = payload.reports?.[0]
   const month = report?.month ?? new Date().toLocaleDateString("ro-RO", { month: "long", year: "numeric" })
   const clients = report?.clientEntries ?? []
@@ -52,7 +53,7 @@ function buildMarkdown(payload: MonthlyPayload, cabinetName: string) {
     "",
     `**Perioadă:** ${month}`,
     `**Clienți incluși:** ${clients.length}`,
-    report?.consultantEmail ? `**Consultant:** ${report.consultantEmail}` : null,
+    `**Consultant:** ${consultantLabel}`,
     "",
     "## Rezumat portofoliu",
     `- Clienți audit ready: ${clients.filter((client) => client.auditReadiness === "audit_ready").length}`,
@@ -101,15 +102,18 @@ export async function GET(request: Request) {
       return jsonError(payload.error ?? "Nu am putut genera preview-ul raportului lunar.", preview.status, "MONTHLY_PREVIEW_FAILED")
     }
 
-    const markdown = buildMarkdown(payload, session.orgName)
+    const whiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
+    const cabinetName = whiteLabel?.partnerName?.trim() || session.orgName
+    const consultantLabel = whiteLabel?.signerName?.trim() || session.email
+    const markdown = buildMarkdown(payload, cabinetName, consultantLabel)
     const pdf = await buildPDFFromMarkdown(markdown, {
-      orgName: session.orgName,
+      orgName: cabinetName,
       documentType: "Raport lunar DPO",
       generatedAt: new Date().toISOString(),
-      signerName: session.email,
+      signerName: consultantLabel,
     })
     const month = payload.reports?.[0]?.month ?? new Date().toISOString().slice(0, 10)
-    const fileName = `raport-lunar-dpo-${slug(session.orgName)}-${slug(month)}.pdf`
+    const fileName = `raport-lunar-dpo-${slug(cabinetName)}-${slug(month)}.pdf`
 
     return new Response(new Uint8Array(pdf), {
       status: 200,

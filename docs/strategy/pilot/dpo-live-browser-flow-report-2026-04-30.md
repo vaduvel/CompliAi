@@ -511,3 +511,26 @@ Diana poate testa in pilot controlat un workflow complet DPO Cabinet OS pentru u
 `import client -> scan -> finding DPA real -> template cabinet -> document -> magic link -> aprobare client -> evidence -> validare consultant -> rezolvare -> monitorizare/Dosar -> raport lunar -> Audit Pack -> export cabinet`.
 
 Nu declaram inca "full cabinet migration 100%" fara pilot real de 30 zile si productie Supabase/Stripe live, dar pentru flow-ul vandabil DPO, hard-gate-ul runtime este verde.
+
+## Update 1 mai 2026 — Gate intern finalizat pentru DPO OS pilot-ready
+
+Hard-gate-ul DPO a fost ridicat de la primul workflow vandabil la flow pilot complet:
+
+`import client -> scan -> import istoric -> DPIA -> training -> breach ANSPDCP -> finding DPA -> template cabinet -> document DPA -> magic link -> aprobare client -> evidence -> validare -> Dosar/monitoring -> raport lunar PDF -> Audit Pack -> Trust Pack -> export cabinet -> email live`.
+
+Rezultat confirmat:
+
+- `BASE_URL=http://127.0.0.1:3001 OUT_DIR=/private/tmp/compliscan-dpo-pilot-full-2026-05-01 node scripts/smoke-dpo-sale-readiness-full.mjs` -> 60/60 PASS.
+- Email Resend live confirmat in inbox.
+- Artefact principal: `/private/tmp/compliscan-dpo-pilot-full-2026-05-01/runtime-sale-readiness-report.json`.
+- Rerulare post-polish in mod local sigur: `BASE_URL=http://127.0.0.1:3001 OUT_DIR=/private/tmp/compliscan-dpo-os-safe-2026-05-01 npm run verify:dpo-os` -> 60/60 PASS.
+
+Polish operational:
+
+- `npm run verify:dpo-os` ruleaza varianta sigura, fara email real accidental.
+- `EMAIL_TEST_TO=adresa@exemplu.ro npm run verify:dpo-os:email` ruleaza gate-ul complet cu email live.
+- Document canonic nou: `docs/strategy/pilot/dpo-os-internal-readiness-gate-2026-05-01.md`.
+
+Verdict actualizat:
+
+DPO OS este intern pilot-ready pentru flow-ul complet vandabil al Dianei. Nu inseamna inca deploy live, Stripe, Supabase cutover sau promisiune de migrare automata a intregului Drive/Privacy Manager; acestea raman in afara acestei rulari, conform cerintei explicite.
