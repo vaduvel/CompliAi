@@ -44,7 +44,9 @@ export type IcpSegment =
   | "solo"
   | "cabinet-dpo"
   | "cabinet-fiscal"
+  | "cabinet-hr"
   | "imm-internal"
+  | "imm-hr"
   | "enterprise"
 
 type WhiteLabelRow = {
@@ -65,7 +67,9 @@ const ICP_SEGMENTS: readonly IcpSegment[] = [
   "solo",
   "cabinet-dpo",
   "cabinet-fiscal",
+  "cabinet-hr",
   "imm-internal",
+  "imm-hr",
   "enterprise",
 ] as const
 

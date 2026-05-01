@@ -76,6 +76,7 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        icpSegment: currentUser.icpSegment ?? null,
       })
     : []
   const mobileNavItems = currentUser
@@ -83,6 +84,7 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        icpSegment: currentUser.icpSegment ?? null,
       })
     : []
 

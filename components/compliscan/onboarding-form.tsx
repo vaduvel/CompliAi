@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Loader2,
   ShieldCheck,
+  Users,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -20,20 +21,23 @@ import {
 import { PartnerWorkspaceStep } from "@/components/compliscan/partner-workspace-step"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { resolveOnboardingDestination } from "@/lib/compliscan/onboarding-destination"
+import type { IcpSegment } from "@/lib/server/white-label"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type ModeId = "solo" | "partner" | "compliance"
 
-// S1.6 — ICP segment (Doc 06): 5 segmente Faza 1, mapate la 3 userMode-uri.
+// S1.6 — ICP segment (Doc 06): 7 segmente Faza 1+HR, mapate la 3 userMode-uri.
 type IcpSegmentId =
   | "solo"
   | "cabinet-dpo"
   | "cabinet-fiscal"
+  | "cabinet-hr"
   | "imm-internal"
+  | "imm-hr"
   | "enterprise"
 
-type ModeAccent = "primary" | "violet" | "success" | "amber" | "indigo"
+type ModeAccent = "primary" | "violet" | "success" | "amber" | "indigo" | "rose" | "pink"
 
 type OnboardingFormProps = {
   initialUserMode: ModeId | null
@@ -93,6 +97,26 @@ const ICP_OPTIONS: IcpSegmentOption[] = [
     badge: "IMM Internal",
     accent: "success",
     mapsTo: "compliance",
+  },
+  {
+    id: "imm-hr",
+    label: "HR Director / CHRO",
+    description:
+      "Pay Transparency 2026 — calculator gap salarial, salary range pentru anunțuri, employee request portal. Firme 100-500 ang.",
+    icon: Users,
+    badge: "HR Internal",
+    accent: "rose",
+    mapsTo: "compliance",
+  },
+  {
+    id: "cabinet-hr",
+    label: "Cabinet HR Consultant",
+    description:
+      "Multi-client Pay Transparency cu white-label. 5-25 firme client, rapoarte ITM lunar batch, brand cabinet.",
+    icon: Users,
+    badge: "Cabinet HR",
+    accent: "pink",
+    mapsTo: "partner",
   },
   {
     id: "enterprise",
@@ -188,6 +212,26 @@ const ACCENT_CLASSES: Record<
     badgeText: "text-indigo-300",
     progressBar: "bg-indigo-500",
   },
+  rose: {
+    border: "border-rose-500/40",
+    bg: "bg-rose-500/[0.06]",
+    text: "text-rose-300",
+    iconBox: "border-rose-500/30 bg-rose-500/10",
+    iconColor: "text-rose-300",
+    badgeBg: "bg-rose-500/15",
+    badgeText: "text-rose-300",
+    progressBar: "bg-rose-500",
+  },
+  pink: {
+    border: "border-pink-500/40",
+    bg: "bg-pink-500/[0.06]",
+    text: "text-pink-300",
+    iconBox: "border-pink-500/30 bg-pink-500/10",
+    iconColor: "text-pink-300",
+    badgeBg: "bg-pink-500/15",
+    badgeText: "text-pink-300",
+    progressBar: "bg-pink-500",
+  },
 }
 
 const PHASES: Record<ModeId | "default", { label: string }[]> = {
@@ -236,20 +280,53 @@ function getPhaseIndex(mode: ModeId | null, wizardStep: ApplicabilityWizardStep 
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+function parseIcpQueryParam(value: string | null): IcpSegmentId | null {
+  if (!value) return null
+  const valid: readonly IcpSegmentId[] = [
+    "solo",
+    "cabinet-dpo",
+    "cabinet-fiscal",
+    "cabinet-hr",
+    "imm-internal",
+    "imm-hr",
+    "enterprise",
+  ]
+  return (valid as readonly string[]).includes(value) ? (value as IcpSegmentId) : null
+}
+
 export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps) {
   const router = useRouter()
-  const [currentMode, setCurrentMode] = useState<ModeId | null>(initialUserMode)
-  const [selectedMode, setSelectedMode] = useState<ModeId | null>(initialUserMode)
-  // S1.6 — ICP segment selectat (5 carduri, mapează la 3 userMode-uri).
-  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(null)
+  const searchParams = useSearchParams()
+  // S3.4 — Auto-select ICP segment din ?icp= query param (vine de la /hr,
+  // /cabinet-hr, /dpo, /fiscal, /imm, /nis2 landings → /login → /onboarding).
+  const initialIcpFromQuery = parseIcpQueryParam(searchParams.get("icp"))
+  const initialIcpOption = initialIcpFromQuery
+    ? ICP_OPTIONS.find((opt) => opt.id === initialIcpFromQuery) ?? null
+    : null
+  const initialModeFromIcp = initialIcpOption?.mapsTo ?? null
+
+  const [currentMode, setCurrentMode] = useState<ModeId | null>(
+    initialUserMode ?? initialModeFromIcp,
+  )
+  const [selectedMode, setSelectedMode] = useState<ModeId | null>(
+    initialUserMode ?? initialModeFromIcp,
+  )
+  // S1.6 — ICP segment selectat (7 carduri, mapează la 3 userMode-uri).
+  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(
+    initialIcpFromQuery,
+  )
   const [wizardStep, setWizardStep] = useState<ApplicabilityWizardStep | null>(
-    initialUserMode ? "cui" : null
+    initialUserMode || initialModeFromIcp ? "cui" : null,
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const phaseIndex = getPhaseIndex(currentMode, wizardStep)
-  const destination = resolveOnboardingDestination(currentMode)
+  // Pass ICP la destination resolver pentru routing HR-aware
+  const destination = resolveOnboardingDestination(
+    currentMode,
+    selectedSegment as IcpSegment | null,
+  )
   const currentMeta = currentMode ? MODE_OPTIONS.find((o) => o.id === currentMode) ?? null : null
   const phases = getPhasesForMode(currentMode ?? selectedMode)
 
