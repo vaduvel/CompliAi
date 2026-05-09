@@ -12,6 +12,7 @@ import {
   Radio,
   Send,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -23,6 +24,7 @@ import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTa
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
 import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
+import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
 import { SubmitSpvTab } from "@/components/compliscan/fiscal/SubmitSpvTab"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
@@ -53,7 +55,8 @@ export default function FiscalPage() {
     tabParam === "validator" ||
     tabParam === "status" ||
     tabParam === "transmitere" ||
-    tabParam === "semnale"
+    tabParam === "semnale" ||
+    tabParam === "saft"
       ? tabParam
       : "discrepante"
 
@@ -278,6 +281,13 @@ export default function FiscalPage() {
             <Send className="size-3.5" strokeWidth={2} />
             Transmitere ANAF
           </TabsTrigger>
+          <TabsTrigger
+            value="saft"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
+          >
+            <Sparkles className="size-3.5" strokeWidth={2} />
+            SAF-T Hygiene
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discrepante">
@@ -363,6 +373,10 @@ export default function FiscalPage() {
             fromCockpit={tabParam === "transmitere" && Boolean(findingIdParam)}
             returnToFindingHref={findingIdParam ? `/dashboard/resolve/${findingIdParam}` : null}
           />
+        </TabsContent>
+
+        <TabsContent value="saft">
+          <SaftHygieneTab />
         </TabsContent>
       </Tabs>
     </div>
