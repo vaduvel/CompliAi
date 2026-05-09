@@ -27,7 +27,9 @@ const ICP_LABEL: Record<IcpSegment, string> = {
   solo: "Solo (Owner/Manager)",
   "cabinet-dpo": "Cabinet DPO",
   "cabinet-fiscal": "Cabinet Fiscal (Contabil)",
+  "cabinet-hr": "Cabinet HR (Consultant)",
   "imm-internal": "IMM Internal Compliance",
+  "imm-hr": "IMM HR Director",
   enterprise: "Enterprise (Sales-led)",
 }
 
@@ -47,10 +49,20 @@ const ICP_TONE: Record<IcpSegment, { ring: string; chip: string; chipText: strin
     chip: "bg-amber-500/10",
     chipText: "text-amber-300",
   },
+  "cabinet-hr": {
+    ring: "border-rose-500/30",
+    chip: "bg-rose-500/10",
+    chipText: "text-rose-300",
+  },
   "imm-internal": {
     ring: "border-emerald-500/30",
     chip: "bg-emerald-500/10",
     chipText: "text-emerald-300",
+  },
+  "imm-hr": {
+    ring: "border-pink-500/30",
+    chip: "bg-pink-500/10",
+    chipText: "text-pink-300",
   },
   enterprise: {
     ring: "border-indigo-500/30",

@@ -14,7 +14,9 @@ const ICP_LABEL: Record<IcpSegment, string> = {
   solo: "Proprietar / Manager IMM mic",
   "cabinet-dpo": "Cabinet DPO",
   "cabinet-fiscal": "Contabil CECCAR",
+  "cabinet-hr": "Cabinet HR (Consultant)",
   "imm-internal": "Responsabil Compliance Intern (IMM)",
+  "imm-hr": "HR Director / CHRO (IMM 100-500 ang)",
   enterprise: "CISO / Multi-framework Enterprise",
 }
 
@@ -22,7 +24,9 @@ const VALID_ICP: readonly IcpSegment[] = [
   "solo",
   "cabinet-dpo",
   "cabinet-fiscal",
+  "cabinet-hr",
   "imm-internal",
+  "imm-hr",
   "enterprise",
 ]
 

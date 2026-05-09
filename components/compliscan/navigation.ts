@@ -298,6 +298,56 @@ export const portfolioNavItems: DashboardNavItem[] = [
 
 export const mobileNavItems = [...dashboardPrimaryNavItems] as const
 
+// ── ICP-aware navigation filter (Layer 3 din IA spec) ────────────────────────
+// Filtrează nav items / sections per icpSegment + sub-flag + access mode.
+// Source of truth: lib/compliscan/icp-modules.ts (MODULES_PER_ICP).
+//
+// Pattern: additive only — NU șterge items-uri din arrays existente, doar
+// aplică filter wrapper. Codex (paralel pe DPO branch) modifică items-uri
+// fără a interfera cu acest filter.
+
+import {
+  resolveAllowedModules,
+  type AccessMode,
+  type SubFlag,
+} from "@/lib/compliscan/icp-modules"
+import type { IcpSegment } from "@/lib/server/white-label"
+
+/**
+ * Filtrează un array de DashboardNavItem după contextul user-ului.
+ * Folosit pentru sidebars: dashboardPrimaryNavItems, soloNavItems,
+ * portfolioNavItems, mobileNavItems.
+ */
+export function filterNavItemsByIcp(
+  items: ReadonlyArray<DashboardNavItem>,
+  icpSegment: IcpSegment | null,
+  subFlag: SubFlag | null = null,
+  accessMode: AccessMode = "owner",
+): DashboardNavItem[] {
+  const allowed = resolveAllowedModules(icpSegment, subFlag, accessMode)
+  return items.filter((item) => allowed.has(item.id))
+}
+
+/**
+ * Filtrează un array de DashboardNavSection după contextul user-ului.
+ * Folosit pentru: dashboardSecondaryNavSections.
+ * Sections fără items după filter sunt eliminate (no empty groups).
+ */
+export function filterNavSectionsByIcp(
+  sections: ReadonlyArray<DashboardNavSection>,
+  icpSegment: IcpSegment | null,
+  subFlag: SubFlag | null = null,
+  accessMode: AccessMode = "owner",
+): DashboardNavSection[] {
+  const allowed = resolveAllowedModules(icpSegment, subFlag, accessMode)
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => allowed.has(item.id)),
+    }))
+    .filter((section) => section.items.length > 0)
+}
+
 export function isRouteActive(pathname: string, href: string) {
   if (href === dashboardRoutes.home) return pathname === dashboardRoutes.home
   return pathname === href || pathname.startsWith(`${href}/`)
