@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/evidence-os/Button"
 import type { ETVADiscrepancy, ETVADiscrepancyType } from "@/lib/compliance/etva-discrepancy"
 import { ETVA_TYPE_LABELS, ETVA_STATUS_LABELS } from "@/lib/compliance/etva-discrepancy"
+import { P300CheckCard } from "@/components/compliscan/fiscal/P300CheckCard"
 
 const SEVERITY_TONE: Record<string, string> = {
   critical: "border-eos-error/30 bg-eos-error-soft text-eos-error",
@@ -100,6 +101,8 @@ export function DiscrepanciesTab() {
 
   return (
     <div className="space-y-4">
+      <P300CheckCard />
+
       <div className="flex items-center justify-between gap-3">
         <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
           {open.length} deschise
