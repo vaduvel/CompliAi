@@ -70,6 +70,10 @@ export function EFacturaValidatorCard({
   const [xml, setXml] = useState("")
   const [repairResult, setRepairResult] = useState<EFacturaXmlRepairRecord | null>(null)
   const [showDiff, setShowDiff] = useState(false)
+  // GAP #2 — Auto-repair disclaimer + audit log (BLOCKER LEGAL CECCAR).
+  // Conform Codului Deontologic CECCAR, contabilul e responsabil profesional
+  // pentru fiecare modificare aplicată. NICIODATĂ silent — sugestie + click apply.
+  const [ceccarApprovalConfirmed, setCeccarApprovalConfirmed] = useState(false)
   const latestValidation = validations[0] ?? null
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -93,9 +97,45 @@ export function EFacturaValidatorCard({
 
   async function handleRepair() {
     if (!xml.trim()) return
+    // GAP #2 — Blocker LEGAL CECCAR: contabilul TREBUIE să confirme că revizuiește
+    // și aprobă fiecare modificare. NICIODATĂ silent.
+    if (!ceccarApprovalConfirmed) {
+      toast.error("Confirmare obligatorie CECCAR", {
+        description:
+          "Bifează 'Am revizuit și aprob' înainte să aplici corecții — fiecare modificare e responsabilitatea ta profesională.",
+      })
+      return
+    }
     try {
       const repair = await onRepair({ documentName, xml })
       setRepairResult(repair)
+      // GAP #2 — Audit log per fix aplicat (server-side via finding event).
+      // Apel fire-and-forget la /api/compliance/events ca să trackuim
+      // timestamp + user + fix codes pentru audit pack CECCAR.
+      // Metadata: doar primitives (Record<string, string | number | boolean>).
+      if (repair && repair.appliedFixes.length > 0) {
+        const fixCodes = repair.appliedFixes.map((fix) => fix.errorCode).join(", ")
+        const entityId = `efxml-repair-${repair.documentName.replace(/[^a-z0-9]/gi, "-")}-${Date.now()}`
+        void fetch("/api/compliance/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "integration.efactura-xml-repair-applied",
+            entityType: "integration",
+            entityId,
+            message: `XML repair applied for ${documentName}: ${fixCodes}. Approved per CECCAR Code of Ethics.`,
+            metadata: {
+              documentName: repair.documentName,
+              appliedFixCount: repair.appliedFixes.length,
+              fixCodes,
+              ceccarApprovalConfirmed: true,
+              approvedAtISO: new Date().toISOString(),
+            },
+          }),
+        }).catch(() => {
+          // Audit log e fire-and-forget — nu blocă UX dacă falează
+        })
+      }
     } catch {
       // Toast-ul este emis de handlerul din suprafața Fiscal.
     }
@@ -220,12 +260,55 @@ export function EFacturaValidatorCard({
             )}
           </div>
 
+          {/* GAP #2 — Disclaimer LEGAL CECCAR (BLOCKER pentru launch).
+              Contabilul TREBUIE să bifeze înainte de orice fix automat.
+              Fiecare apply e logged în audit trail per finding event. */}
+          <div
+            data-testid="ceccar-disclaimer-banner"
+            className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4"
+          >
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-warning" />
+              <div className="flex-1 space-y-2">
+                <p className="text-sm font-semibold text-eos-text">
+                  📋 SUGESTIE — NU silent auto-repair
+                </p>
+                <p className="text-xs text-eos-text-muted">
+                  CompliScan propune corecții pe baza regulilor V001-V011 UBL CIUS-RO.
+                  <strong> Contabilul rămâne responsabil profesional</strong> conform
+                  Codului Deontologic CECCAR pentru fiecare modificare aplicată.
+                  Fiecare fix e logat în audit trail (timestamp + user + cod fix +
+                  XML before/after) pentru evidență de inspecție.
+                </p>
+                <label className="flex cursor-pointer items-start gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    data-testid="ceccar-approval-checkbox"
+                    checked={ceccarApprovalConfirmed}
+                    onChange={(e) => setCeccarApprovalConfirmed(e.target.checked)}
+                    className="mt-0.5 size-4 shrink-0 cursor-pointer rounded border-eos-border bg-eos-surface accent-eos-primary"
+                  />
+                  <span className="text-xs text-eos-text">
+                    <strong>Am revizuit și aprob</strong> fiecare modificare propusă
+                    conform Codului Deontologic CECCAR. Sunt de acord ca acțiunea
+                    să fie înregistrată în audit log cu numele meu.
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <Button
             data-testid="repair-xml"
             variant="outline"
             onClick={() => void handleRepair()}
-            disabled={!xml.trim() || repairBusy}
+            disabled={!xml.trim() || repairBusy || !ceccarApprovalConfirmed}
             className="w-full gap-1.5"
+            title={
+              !ceccarApprovalConfirmed
+                ? "Bifează confirmarea CECCAR pentru a activa propunerea de corecții"
+                : undefined
+            }
           >
             {repairBusy ? <RefreshCw className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
             Propune corectii sigure
