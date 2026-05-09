@@ -303,8 +303,7 @@ export const mobileNavItems = [...dashboardPrimaryNavItems] as const
 // Source of truth: lib/compliscan/icp-modules.ts (MODULES_PER_ICP).
 //
 // Pattern: additive only — NU șterge items-uri din arrays existente, doar
-// aplică filter wrapper. Codex (paralel pe DPO branch) modifică items-uri
-// fără a interfera cu acest filter.
+// aplică filter wrapper.
 
 import {
   resolveAllowedModules,

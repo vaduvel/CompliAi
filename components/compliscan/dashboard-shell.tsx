@@ -76,6 +76,10 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        // Layer 3 ICP filtering — null = fallback safe (no filter aplicat)
+        icpSegment: currentUser.icpSegment ?? null,
+        subFlag: currentUser.subFlag ?? null,
+        accessMode: currentUser.accessMode ?? "owner",
       })
     : []
   const mobileNavItems = currentUser
@@ -83,6 +87,9 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        icpSegment: currentUser.icpSegment ?? null,
+        subFlag: currentUser.subFlag ?? null,
+        accessMode: currentUser.accessMode ?? "owner",
       })
     : []
 

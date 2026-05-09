@@ -15,6 +15,8 @@ import {
 
 import {
   dashboardPrimaryNavItems,
+  filterNavItemsByIcp,
+  filterNavSectionsByIcp,
   portfolioNavItems,
   soloNavItems,
   type DashboardNavItem,
@@ -22,7 +24,9 @@ import {
   viewerNavItems,
 } from "@/components/compliscan/navigation"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import type { AccessMode, SubFlag } from "@/lib/compliscan/icp-modules"
 import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
+import type { IcpSegment } from "@/lib/server/white-label"
 
 const MODULE_NAV_ITEMS: DashboardNavItem[] = [
   {
@@ -134,6 +138,10 @@ export type AdaptiveNavContext = {
   userMode: UserMode | null
   workspaceMode: WorkspaceMode
   role: UserRole
+  // Layer 3 ICP filtering — optional pentru backward compat
+  icpSegment?: IcpSegment | null
+  subFlag?: SubFlag | null
+  accessMode?: AccessMode
 }
 
 const ORG_NAV_FULL: DashboardNavItem[] = [...dashboardPrimaryNavItems]
@@ -156,43 +164,72 @@ export function getSidebarNavSections({
   userMode,
   workspaceMode,
   role,
+  icpSegment = null,
+  subFlag = null,
+  accessMode = "owner",
 }: AdaptiveNavContext): AdaptiveNavSection[] {
-  if (userMode === "partner" && workspaceMode === "portfolio") {
-    return [
-      {
-        id: "portfolio",
-        label: "Portofoliu",
-        items: PORTFOLIO_NAV_ACTIVE,
-      },
-    ]
-  }
+  // Build base sections per userMode + workspaceMode + role (logic existing)
+  const baseSections: AdaptiveNavSection[] = (() => {
+    if (userMode === "partner" && workspaceMode === "portfolio") {
+      return [
+        {
+          id: "portfolio",
+          label: "Portofoliu",
+          items: PORTFOLIO_NAV_ACTIVE,
+        },
+      ]
+    }
 
-  if (userMode === "partner") {
-    return [
-      {
-        id: "portfolio",
-        label: "Portofoliu",
-        items: PORTFOLIO_NAV_ORG_TARGET,
-      },
-      {
-        id: "org",
-        label: "Firma activa",
-        items: ORG_NAV_FULL,
-      },
-      {
-        id: "dpo",
-        label: "Instrumente DPO",
-        items: DPO_NAV_ITEMS,
-      },
-    ]
-  }
+    if (userMode === "partner") {
+      return [
+        {
+          id: "portfolio",
+          label: "Portofoliu",
+          items: PORTFOLIO_NAV_ORG_TARGET,
+        },
+        {
+          id: "org",
+          label: "Firma activa",
+          items: ORG_NAV_FULL,
+        },
+        {
+          id: "dpo",
+          label: "Instrumente DPO",
+          items: DPO_NAV_ITEMS,
+        },
+      ]
+    }
 
-  if (userMode === "solo") {
+    if (userMode === "solo") {
+      return [
+        {
+          id: "org",
+          label: "Flux principal",
+          items: ORG_NAV_SOLO,
+        },
+        {
+          id: "module",
+          label: "Module conformitate",
+          items: MODULE_NAV_ITEMS,
+        },
+      ]
+    }
+
+    if (role === "viewer") {
+      return [
+        {
+          id: "org",
+          label: "Flux principal",
+          items: ORG_NAV_VIEWER,
+        },
+      ]
+    }
+
     return [
       {
         id: "org",
         label: "Flux principal",
-        items: ORG_NAV_SOLO,
+        items: ORG_NAV_FULL,
       },
       {
         id: "module",
@@ -200,48 +237,46 @@ export function getSidebarNavSections({
         items: MODULE_NAV_ITEMS,
       },
     ]
+  })()
+
+  // Layer 3: Apply ICP filter if icpSegment is set.
+  // null icpSegment = fallback safe (no filter — sidebar shows all base items).
+  // Once user completes onboarding and icpSegment is populated, filter applies.
+  if (icpSegment !== null || accessMode !== "owner") {
+    return filterNavSectionsByIcp(baseSections, icpSegment, subFlag, accessMode)
   }
 
-  if (role === "viewer") {
-    return [
-      {
-        id: "org",
-        label: "Flux principal",
-        items: ORG_NAV_VIEWER,
-      },
-    ]
-  }
-
-  return [
-    {
-      id: "org",
-      label: "Flux principal",
-      items: ORG_NAV_FULL,
-    },
-    {
-      id: "module",
-      label: "Module conformitate",
-      items: MODULE_NAV_ITEMS,
-    },
-  ]
+  return baseSections
 }
 
 export function getMobileNavItems({
   userMode,
   workspaceMode,
   role,
+  icpSegment = null,
+  subFlag = null,
+  accessMode = "owner",
 }: AdaptiveNavContext): DashboardNavItem[] {
-  if (userMode === "partner" && workspaceMode === "portfolio") {
-    return PORTFOLIO_NAV_ACTIVE
+  const baseItems: DashboardNavItem[] = (() => {
+    if (userMode === "partner" && workspaceMode === "portfolio") {
+      return PORTFOLIO_NAV_ACTIVE
+    }
+
+    if (userMode === "solo") {
+      return ORG_NAV_SOLO
+    }
+
+    if (role === "viewer") {
+      return ORG_NAV_VIEWER
+    }
+
+    return ORG_NAV_FULL
+  })()
+
+  // Layer 3: Apply ICP filter if icpSegment is set.
+  if (icpSegment !== null || accessMode !== "owner") {
+    return filterNavItemsByIcp(baseItems, icpSegment, subFlag, accessMode)
   }
 
-  if (userMode === "solo") {
-    return ORG_NAV_SOLO
-  }
-
-  if (role === "viewer") {
-    return ORG_NAV_VIEWER
-  }
-
-  return ORG_NAV_FULL
+  return baseItems
 }

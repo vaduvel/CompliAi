@@ -37,6 +37,7 @@ describe("lib/compliscan/nav-config", () => {
       "/dashboard/dsar",
       "/dashboard/ropa",
       "/dashboard/vendor-review",
+      "/dashboard/dpia",
       "/dashboard/breach",
       "/dashboard/calendar",
       "/dashboard/magic-links",
