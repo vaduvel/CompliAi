@@ -24,6 +24,7 @@ import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTa
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
 import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
+import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
 import { SubmitSpvTab } from "@/components/compliscan/fiscal/SubmitSpvTab"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
@@ -354,13 +355,16 @@ export default function FiscalPage() {
         </TabsContent>
 
         <TabsContent value="validator">
-          <EFacturaValidatorCard
-            validations={validations}
-            busy={validatorBusy}
-            repairBusy={repairBusy}
-            onValidate={handleValidateXml}
-            onRepair={handleRepairXml}
-          />
+          <div className="space-y-4">
+            <BulkZipUploadCard />
+            <EFacturaValidatorCard
+              validations={validations}
+              busy={validatorBusy}
+              repairBusy={repairBusy}
+              onValidate={handleValidateXml}
+              onRepair={handleRepairXml}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="semnale">
