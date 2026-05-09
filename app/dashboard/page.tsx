@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 import {
   ArrowRight,
   Clock3,
@@ -124,6 +125,44 @@ export default function DashboardPage() {
     if (scroll()) return
     const t = window.setTimeout(scroll, 450)
     return () => window.clearTimeout(t)
+  }, [searchParams])
+
+  // Layer 4 cross-sell — utilizatorul a încercat să acceseze direct un modul
+  // restricted pentru icpSegment-ul lui. Middleware l-a redirectat aici cu
+  // ?cross-sell=<navId>. Afișăm toast cu link la Settings → Module disponibile.
+  useEffect(() => {
+    const navId = searchParams.get("cross-sell")
+    if (!navId) return
+    const moduleLabels: Record<string, string> = {
+      dpia: "DPIA Art. 35",
+      ropa: "RoPA Art. 30",
+      dsar: "DSAR (cereri persoane vizate)",
+      breach: "Breach ANSPDCP",
+      training: "Training GDPR",
+      "vendor-review": "Vendor Risk Register",
+      "cabinet-templates": "Template-uri cabinet",
+      "magic-links": "Magic Links aprobare",
+      approvals: "Aprobări",
+      generator: "Generator documente",
+      nis2: "NIS2 — Securitate cibernetică",
+      dora: "DORA — Reziliență digitală",
+      fiscal: "Fiscal layer (e-Factura/SAF-T/e-TVA)",
+      "pay-transparency": "Pay Transparency",
+      whistleblowing: "Whistleblowing",
+      "review-cycles": "Review-uri",
+      agenti: "Agenți AI",
+      politici: "Politici interne",
+      "dpo-migration": "Migrare istoric DPO",
+    }
+    const label = moduleLabels[navId] ?? navId
+    toast.info(`Modulul ${label} nu este disponibil pe planul tău`, {
+      description: "Activează modulele suplimentare din Setări → Module disponibile.",
+      duration: 6000,
+    })
+    // Curăță query param ca să nu reapară toast-ul la refresh
+    const url = new URL(window.location.href)
+    url.searchParams.delete("cross-sell")
+    window.history.replaceState(window.history.state, "", url.toString())
   }, [searchParams])
 
   if (cockpit.error && !cockpit.loading) return <ErrorScreen message={cockpit.error} variant="section" />
