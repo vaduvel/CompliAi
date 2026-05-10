@@ -319,6 +319,6 @@ export const config = {
     "/dashboard/:path*",
     "/portfolio/:path*",
     "/onboarding",
-    "/api/((?!auth|demo|stripe/webhook|whistleblowing/submit).*)",
+    "/api/((?!auth|demo|stripe/webhook|whistleblowing/submit|free-tools/).*)",
   ],
 }
