@@ -9,6 +9,7 @@ import {
   FileCode2,
   FileText,
   Loader2,
+  PlugZap,
   Radio,
   Send,
   ShieldCheck,
@@ -26,6 +27,7 @@ import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
+import { SmartBillConnectCard } from "@/components/compliscan/fiscal/SmartBillConnectCard"
 import { SubmitSpvTab } from "@/components/compliscan/fiscal/SubmitSpvTab"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
@@ -57,7 +59,8 @@ export default function FiscalPage() {
     tabParam === "status" ||
     tabParam === "transmitere" ||
     tabParam === "semnale" ||
-    tabParam === "saft"
+    tabParam === "saft" ||
+    tabParam === "integrari"
       ? tabParam
       : "discrepante"
 
@@ -289,6 +292,13 @@ export default function FiscalPage() {
             <Sparkles className="size-3.5" strokeWidth={2} />
             SAF-T Hygiene
           </TabsTrigger>
+          <TabsTrigger
+            value="integrari"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
+          >
+            <PlugZap className="size-3.5" strokeWidth={2} />
+            Integrări
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discrepante">
@@ -381,6 +391,12 @@ export default function FiscalPage() {
 
         <TabsContent value="saft">
           <SaftHygieneTab />
+        </TabsContent>
+
+        <TabsContent value="integrari">
+          <div className="space-y-4">
+            <SmartBillConnectCard />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

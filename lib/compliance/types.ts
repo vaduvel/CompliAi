@@ -693,6 +693,27 @@ export type ComplianceState = {
     clientScale?: "1-5" | "5-20" | "20+"
     configuredAtISO: string
   }
+  // ── Bundle D: Integrări ERP (cabinet-fiscal) ─────────────────────────────
+  integrations?: {
+    smartbill?: {
+      email: string
+      token: string
+      cif: string
+      connectedAtISO: string
+      lastSyncAtISO?: string
+      lastSyncCount?: number
+      lastSyncError?: string
+    }
+    oblio?: {
+      email: string
+      accessToken: string
+      tokenExpiresAtISO: string
+      cif: string
+      connectedAtISO: string
+      lastSyncAtISO?: string
+      lastSyncCount?: number
+    }
+  }
 }
 
 export type SiteScanSummary = {
