@@ -9,6 +9,7 @@ import { resolveSignedShareToken } from "@/lib/server/share-token-store"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
+import { ClientPortalActions } from "@/components/compliscan/fiscal/ClientPortalActions"
 
 export const metadata: Metadata = {
   title: "Finding partajat — CompliScan",
@@ -211,6 +212,8 @@ export default async function SharedFindingPage({
             </ul>
           </section>
         )}
+
+        <ClientPortalActions token={token} />
 
         <footer className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-elevated p-4 text-center">
           <p className="text-[11.5px] leading-[1.55] text-eos-text-muted">

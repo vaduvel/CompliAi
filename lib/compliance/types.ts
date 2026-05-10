@@ -695,6 +695,29 @@ export type ComplianceState = {
   }
   // ── Sprint 7: ANAF retry queue (buffer pentru transmiteri eșuate temporar) ─
   anafRetryQueue?: import("@/lib/compliance/anaf-retry-queue").AnafRetryItem[]
+  // ── Sprint 7.6: Real-time SPV monitor — track seen messages ──────────────
+  spvSeenMessageIds?: string[]
+  spvLastPollAtISO?: string
+  // ── Sprint 7.7: Client portal — docs + comments per finding ──────────────
+  clientPortalDocuments?: Array<{
+    id: string
+    findingId: string
+    fileName: string
+    contentType: string
+    sizeBytes: number
+    uploadedByEmail?: string
+    uploadedAtISO: string
+    note?: string
+    storageKey: string
+  }>
+  clientPortalComments?: Array<{
+    id: string
+    findingId: string
+    authorEmail?: string
+    authorRole: "cabinet" | "client"
+    body: string
+    createdAtISO: string
+  }>
   // ── Bundle D: Integrări ERP (cabinet-fiscal) ─────────────────────────────
   integrations?: {
     smartbill?: {
