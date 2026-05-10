@@ -29,6 +29,7 @@ import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-prefer
 import type { AutonomyPolicy } from "@/lib/server/autonomy-resolver"
 import { ACTION_TYPE_LABELS } from "@/lib/server/approval-queue"
 import type { PendingActionType } from "@/lib/server/approval-queue"
+import { AIPrivacyModeCard } from "@/components/compliscan/settings/AIPrivacyModeCard"
 
 const AUTONOMY_POLICY_OPTIONS: Array<{ value: AutonomyPolicy; label: string; desc: string }> = [
   { value: "auto", label: "Automat", desc: "Se execută imediat, fără aprobare" },
@@ -670,6 +671,8 @@ export function SettingsPageSurface() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </div>
+
+            <AIPrivacyModeCard />
           </div>
         </div>
 

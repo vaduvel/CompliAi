@@ -22,6 +22,7 @@ import { readDsarState, type DsarOrgState } from "@/lib/server/dsar-store"
 import { readNis2State, type Nis2OrgState } from "@/lib/server/nis2-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 const FROM_ADDRESS =
   process.env.ALERT_EMAIL_FROM ?? "CompliScan Partner <onboarding@resend.dev>"
@@ -454,6 +455,9 @@ export async function POST(request: Request) {
     month: "long",
     year: "numeric",
   })
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
+  let errorCount = 0
 
   try {
     const allUsers = await loadUsers()
@@ -608,11 +612,27 @@ export async function POST(request: Request) {
       } catch (err) {
         captureCronError(err, { cron: "partner-monthly-report", metadata: { userId: user.id } })
         console.error(`[PartnerMonthly] Failed for user ${user.email}:`, err)
+        errorCount++
       }
     }
 
     await flushCronTelemetry()
     if (preview) {
+      await safeRecordCronRun({
+        name: "partner-monthly-report",
+        lastRunAtISO: nowISO,
+        ok: errorCount === 0,
+        durationMs: Date.now() - startMs,
+        summary: `Preview: ${previewReports.length} rapoarte generate, ${skipped} sărite, ${partners.length} parteneri.`,
+        stats: {
+          generated: previewReports.length,
+          skipped,
+          totalPartners: partners.length,
+          errors: errorCount,
+          preview: 1,
+        },
+        errorMessage: errorCount > 0 ? `${errorCount} parteneri au eșuat` : undefined,
+      })
       return NextResponse.json({
         preview: true,
         generated: previewReports.length,
@@ -621,10 +641,36 @@ export async function POST(request: Request) {
         reports: previewReports,
       })
     }
+
+    await safeRecordCronRun({
+      name: "partner-monthly-report",
+      lastRunAtISO: nowISO,
+      ok: errorCount === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} rapoarte trimise, ${skipped} sărite, ${partners.length} parteneri${errorCount > 0 ? `, ${errorCount} erori` : ""}.`,
+      stats: {
+        sent,
+        skipped,
+        totalPartners: partners.length,
+        errors: errorCount,
+      },
+      errorMessage: errorCount > 0 ? `${errorCount} parteneri au eșuat` : undefined,
+    })
+
     return NextResponse.json({ sent, skipped, totalPartners: partners.length })
   } catch (err) {
     captureCronError(err, { cron: "partner-monthly-report" })
     await flushCronTelemetry()
+    const msg = err instanceof Error ? err.message : "unknown"
+    await safeRecordCronRun({
+      name: "partner-monthly-report",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { errors: errorCount },
+      errorMessage: msg,
+    })
     return jsonError("Raportul lunar a eșuat.", 500, "PARTNER_MONTHLY_FAILED")
   }
 }

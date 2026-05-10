@@ -11,6 +11,7 @@ import { listOrganizationMembers, loadOrganizations } from "@/lib/server/auth"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadEvidenceLedgerFromSupabase } from "@/lib/server/supabase-evidence-read"
 import { sendRenewalEmail } from "@/lib/server/renewal-email"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { RenewalEmailData } from "@/lib/server/renewal-email"
 
 // Days before 1-year anniversary to send the renewal email
@@ -40,6 +41,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; email?: string; sent: boolean; reason?: string }[] = []
 
   try {
@@ -85,9 +88,52 @@ export async function POST(request: Request) {
       }
     }
 
+    const sent = results.filter((r) => r.sent).length
+    const skipped = results.filter((r) => !r.sent).length
+    const errors = results.filter(
+      (r) =>
+        !r.sent &&
+        r.reason &&
+        r.reason !== "not in renewal window" &&
+        r.reason !== "no email",
+    ).length
+
+    await safeRecordCronRun({
+      name: "renewal-reminder",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} emailuri trimise, ${skipped} sărite${errors > 0 ? `, ${errors} erori` : ""}.`,
+      stats: {
+        sent,
+        skipped,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find(
+              (r) =>
+                !r.sent &&
+                r.reason &&
+                r.reason !== "not in renewal window" &&
+                r.reason !== "no email",
+            )?.reason
+          : undefined,
+    })
+
     return NextResponse.json({ ok: true, processed: results.length, results })
   } catch (err) {
     const msg = err instanceof Error ? err.message : "unexpected error"
+    await safeRecordCronRun({
+      name: "renewal-reminder",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
     return NextResponse.json({ ok: false, error: msg }, { status: 500 })
   }
 }

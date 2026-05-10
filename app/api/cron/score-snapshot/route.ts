@@ -15,6 +15,7 @@ import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { sendEmailAlert } from "@/lib/server/email-alerts"
 import { saveScoreSnapshot, getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { ComplianceStreak } from "@/lib/compliance/types"
 
 const SCORE_DROP_THRESHOLD = -3
@@ -28,6 +29,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; score: number | null; alerted: boolean; error?: string }[] = []
   let capturedCronErrors = false
 
@@ -82,12 +85,31 @@ export async function POST(request: Request) {
 
     const saved = results.filter((r) => r.score !== null).length
     const alerted = results.filter((r) => r.alerted).length
+    const errors = results.filter((r) => r.error && r.error !== "no state").length
 
     console.log(`[ScoreSnapshot] Run completat: ${saved} salvate, ${alerted} alerte trimise`)
 
     if (capturedCronErrors) {
       await flushCronTelemetry()
     }
+
+    await safeRecordCronRun({
+      name: "score-snapshot",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${saved} score-uri salvate, ${alerted} alerte trimise${errors > 0 ? `, ${errors} erori` : ""}.`,
+      stats: {
+        saved,
+        alerted,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find((r) => r.error && r.error !== "no state")?.error
+          : undefined,
+    })
 
     return NextResponse.json({
       ok: true,
@@ -104,6 +126,16 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "score-snapshot",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la score snapshot: ${msg}`, 500, "SCORE_SNAPSHOT_FAILED")
   }

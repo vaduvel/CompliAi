@@ -24,6 +24,7 @@ import {
 } from "@/lib/compliance/efactura-signal-hardening"
 import { listAllOrgIds, readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { ensureValidToken, fetchSpvMessages, type SpvMessage } from "@/lib/anaf-spv-client"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 // ── ANAF SpvMessage → EFacturaInvoiceSignal converter ────────────────────────
 //
@@ -138,6 +139,7 @@ export async function GET(request: Request) {
 
   const orgIds = await listAllOrgIds()
   const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   let processed = 0
   let findingsGenerated = 0
   let realFetchCount = 0
@@ -182,6 +184,20 @@ export async function GET(request: Request) {
     processed++
     findingsGenerated += allNewFindings.length
   }
+
+  await safeRecordCronRun({
+    name: "efactura-spv-monthly",
+    lastRunAtISO: nowISO,
+    ok: true,
+    durationMs: Date.now() - startMs,
+    summary: `${processed} orgs procesate, ${findingsGenerated} findings (${realFetchCount} real, ${mockFallbackCount} mock).`,
+    stats: {
+      processed,
+      findingsGenerated,
+      realFetchCount,
+      mockFallbackCount,
+    },
+  })
 
   return NextResponse.json({
     processed,

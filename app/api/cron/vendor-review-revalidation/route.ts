@@ -20,6 +20,7 @@ import {
   appendAudit,
 } from "@/lib/compliance/vendor-review-engine"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -30,6 +31,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; overdueCount: number }[] = []
   let capturedCronErrors = false
 
@@ -79,6 +82,19 @@ export async function POST(request: Request) {
       await flushCronTelemetry()
     }
 
+    await safeRecordCronRun({
+      name: "vendor-review-revalidation",
+      lastRunAtISO: nowISO,
+      ok: !capturedCronErrors,
+      durationMs: Date.now() - startMs,
+      summary: `${totalOverdue} review-uri marcate overdue în ${results.length} orgs.`,
+      stats: {
+        totalOverdue,
+        orgsProcessed: results.length,
+      },
+      errorMessage: capturedCronErrors ? "One or more orgs failed (see Sentry)" : undefined,
+    })
+
     return NextResponse.json({
       ok: true,
       totalOverdue,
@@ -94,6 +110,16 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "vendor-review-revalidation",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { orgsProcessed: results.length },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la revalidare: ${msg}`, 500, "VENDOR_REVALIDATION_FAILED")
   }

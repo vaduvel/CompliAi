@@ -15,6 +15,7 @@ import { normalizeComplianceState } from "@/lib/compliance/engine"
 import { collectSupplierImports } from "@/lib/server/efactura-vendor-signals"
 import { createNotification } from "@/lib/server/notifications-store"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { ScanFinding } from "@/lib/compliance/types"
 
 function uid(prefix: string) {
@@ -30,12 +31,13 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; newVendors: number; findingsCreated: number }[] = []
   let capturedCronErrors = false
 
   try {
     const organizations = await loadOrganizations()
-    const nowISO = new Date().toISOString()
 
     for (const org of organizations.slice(0, 50)) {
       try {
@@ -135,12 +137,37 @@ export async function POST(request: Request) {
     if (capturedCronErrors) await flushCronTelemetry()
 
     const totalNew = results.reduce((s, r) => s + r.newVendors, 0)
+    const totalFindings = results.reduce((s, r) => s + r.findingsCreated, 0)
     console.log(`[VendorSyncMonthly] ${totalNew} furnizori noi detectați, ${results.length} organizații procesate`)
+
+    await safeRecordCronRun({
+      name: "vendor-sync-monthly",
+      lastRunAtISO: nowISO,
+      ok: !capturedCronErrors,
+      durationMs: Date.now() - startMs,
+      summary: `${totalNew} furnizori noi detectați, ${totalFindings} findings create în ${results.length} orgs.`,
+      stats: {
+        orgsProcessed: results.length,
+        totalNew,
+        totalFindings,
+      },
+      errorMessage: capturedCronErrors ? "One or more orgs failed (see Sentry)" : undefined,
+    })
 
     return NextResponse.json({ ok: true, results })
   } catch (error) {
     captureCronError(error, { cron: "/api/cron/vendor-sync-monthly", step: "critical" })
     await flushCronTelemetry()
+    const msg = error instanceof Error ? error.message : "unknown"
+    await safeRecordCronRun({
+      name: "vendor-sync-monthly",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { orgsProcessed: results.length },
+      errorMessage: msg,
+    })
     return jsonError("Eroare la vendor sync monthly.", 500, "VENDOR_SYNC_FAILED")
   }
 }

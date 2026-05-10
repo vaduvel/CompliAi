@@ -25,6 +25,7 @@ import {
   type MonthlyStatusItem,
 } from "@/lib/server/monthly-digest"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan <onboarding@resend.dev>"
 const APP_BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://app.compliscan.ro").replace(/\/+$/, "")
@@ -182,6 +183,8 @@ export async function POST(request: Request) {
   }
 
   const generatedAt = new Date().toISOString()
+  const nowISO = generatedAt
+  const startMs = Date.now()
   const results: { orgId: string; sent: boolean; reason?: string }[] = []
 
   try {
@@ -275,7 +278,38 @@ export async function POST(request: Request) {
     }
 
     const sent = results.filter((r) => r.sent).length
+    const errors = results.filter(
+      (r) =>
+        !r.sent &&
+        r.reason &&
+        r.reason !== "email disabled" &&
+        r.reason !== "no state",
+    ).length
     console.log(`[MonthlyDigest] ${sent}/${results.length} emailuri trimise`)
+
+    await safeRecordCronRun({
+      name: "monthly-digest",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} emailuri trimise, ${results.length - sent} sărite${errors > 0 ? `, ${errors} erori` : ""}.`,
+      stats: {
+        sent,
+        skipped: results.length - sent,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find(
+              (r) =>
+                !r.sent &&
+                r.reason &&
+                r.reason !== "email disabled" &&
+                r.reason !== "no state",
+            )?.reason
+          : undefined,
+    })
 
     return NextResponse.json({
       ok: true,
@@ -287,6 +321,16 @@ export async function POST(request: Request) {
   } catch (error) {
     captureCronError(error, { cron: "/api/cron/monthly-digest", step: "critical" })
     await flushCronTelemetry()
+    const msg = error instanceof Error ? error.message : "unknown"
+    await safeRecordCronRun({
+      name: "monthly-digest",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
     return jsonError("Eroare la monthly digest.", 500, "MONTHLY_DIGEST_FAILED")
   }
 }

@@ -9,6 +9,7 @@ import type { ETVADiscrepancy, ETVADiscrepancyType } from "@/lib/compliance/etva
 import { ETVA_TYPE_LABELS, ETVA_STATUS_LABELS } from "@/lib/compliance/etva-discrepancy"
 import { P300CheckCard } from "@/components/compliscan/fiscal/P300CheckCard"
 import { AnafTemplatesTrigger } from "@/components/compliscan/fiscal/AnafTemplatesDrawer"
+import { FalseConformanceCheckCard } from "@/components/compliscan/fiscal/FalseConformanceCheckCard"
 
 const SEVERITY_TONE: Record<string, string> = {
   critical: "border-eos-error/30 bg-eos-error-soft text-eos-error",
@@ -103,6 +104,8 @@ export function DiscrepanciesTab() {
   return (
     <div className="space-y-4">
       <P300CheckCard />
+
+      <FalseConformanceCheckCard />
 
       <div className="flex items-center justify-between gap-3">
         <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">

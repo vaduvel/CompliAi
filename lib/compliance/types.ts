@@ -739,6 +739,10 @@ export type ComplianceState = {
       lastSyncCount?: number
     }
   }
+  // ── AI assistant privacy mode (cabinete cu secret profesional CECCAR) ────
+  // "local-only" = forțează Gemma 4 prin Ollama; refuză Gemini/Mistral.
+  // "cloud-allowed" (default) = preferă Gemma local, fallback cloud când nu rulează.
+  aiPrivacyMode?: "local-only" | "cloud-allowed"
 }
 
 export type SiteScanSummary = {

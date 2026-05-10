@@ -15,6 +15,7 @@ import { readNis2State } from "@/lib/server/nis2-store"
 import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { runInspectorSimulation } from "@/lib/compliance/inspector-mode"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Inspector <onboarding@resend.dev>"
 const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"
@@ -98,12 +99,13 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; verdict: string | null; sent: boolean }[] = []
   let capturedCronErrors = false
 
   try {
     const organizations = await loadOrganizations()
-    const nowISO = new Date().toISOString()
 
     for (const org of organizations.slice(0, 50)) {
       try {
@@ -162,12 +164,41 @@ export async function POST(request: Request) {
     if (capturedCronErrors) await flushCronTelemetry()
 
     const sent = results.filter((r) => r.sent).length
+    const ready = results.filter((r) => r.verdict === "ready").length
+    const partial = results.filter((r) => r.verdict === "partial").length
+    const notReady = results.filter((r) => r.verdict && r.verdict !== "ready" && r.verdict !== "partial").length
     console.log(`[InspectorWeekly] ${sent} alerte, ${results.length - sent} sărite`)
+
+    await safeRecordCronRun({
+      name: "inspector-weekly",
+      lastRunAtISO: nowISO,
+      ok: !capturedCronErrors,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} alerte trimise (${partial} partial, ${notReady} nepregătiți), ${ready} ready, ${results.length - sent} sărite.`,
+      stats: {
+        sent,
+        ready,
+        partial,
+        notReady,
+        total: results.length,
+      },
+      errorMessage: capturedCronErrors ? "One or more orgs failed (see Sentry)" : undefined,
+    })
 
     return NextResponse.json({ ok: true, sent, total: results.length })
   } catch (error) {
     captureCronError(error, { cron: "/api/cron/inspector-weekly", step: "critical" })
     await flushCronTelemetry()
+    const msg = error instanceof Error ? error.message : "unknown"
+    await safeRecordCronRun({
+      name: "inspector-weekly",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
     return jsonError("Eroare la inspector weekly.", 500, "INSPECTOR_WEEKLY_FAILED")
   }
 }

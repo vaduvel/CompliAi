@@ -20,6 +20,7 @@ import { buildAuditPack } from "@/lib/server/audit-pack"
 import { readNis2State } from "@/lib/server/nis2-store"
 import type { WorkspaceContext } from "@/lib/compliance/types"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Audit <onboarding@resend.dev>"
 const APP_URL = process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"
@@ -165,6 +166,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; sent: boolean; readiness?: string; reason?: string }[] = []
   let capturedCronErrors = false
 
@@ -230,12 +233,42 @@ export async function POST(request: Request) {
 
     const sent = results.filter((r) => r.sent).length
     const ready = results.filter((r) => r.readiness === "audit_ready").length
+    const errors = results.filter((r) => r.reason && !r.sent && r.reason !== "email disabled" && r.reason !== "no state").length
     console.log(`[AuditPackMonthly] ${sent} trimise (${ready} ready, ${sent - ready} cu gaps), ${results.length - sent} sărite`)
+
+    await safeRecordCronRun({
+      name: "audit-pack-monthly",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} trimise (${ready} ready, ${sent - ready} cu gaps), ${results.length - sent} sărite.`,
+      stats: {
+        sent,
+        ready,
+        skipped: results.length - sent,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find((r) => !r.sent && r.reason && r.reason !== "email disabled" && r.reason !== "no state")?.reason
+          : undefined,
+    })
 
     return NextResponse.json({ ok: true, sent, ready, total: results.length })
   } catch (error) {
     captureCronError(error, { cron: "/api/cron/audit-pack-monthly", step: "critical" })
     await flushCronTelemetry()
+    const msg = error instanceof Error ? error.message : "unknown"
+    await safeRecordCronRun({
+      name: "audit-pack-monthly",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
     return jsonError("Eroare la audit pack monthly.", 500, "AUDIT_PACK_MONTHLY_FAILED")
   }
 }
