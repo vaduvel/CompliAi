@@ -76,18 +76,24 @@ export function EFacturaValidatorCard({
   const [ceccarApprovalConfirmed, setCeccarApprovalConfirmed] = useState(false)
   const latestValidation = validations[0] ?? null
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const onValidateRef = useRef(onValidate)
+  useEffect(() => {
+    onValidateRef.current = onValidate
+  }, [onValidate])
 
-  // A4 — Live validation on paste: auto-validate with 800ms debounce
+  // A4 — Live validation on paste: auto-validate with 800ms debounce.
+  // onValidate accesat prin ref ca să evităm re-rulări la fiecare re-render
+  // al părintelui (când referința funcției se schimbă).
   useEffect(() => {
     if (xml.trim().length < 50) return
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      void onValidate({ documentName, xml })
+      void onValidateRef.current({ documentName, xml })
     }, 800)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [xml, documentName, onValidate])
+  }, [xml, documentName])
 
   async function handleFileChange(file: File | null) {
     if (!file) return

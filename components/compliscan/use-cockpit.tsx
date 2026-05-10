@@ -734,12 +734,17 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
         }
         if (!response.ok) throw new Error(payload.error || "Validarea XML a esuat.")
         applyDashboardPayload(payload)
-        toast.success(payload.validation?.valid ? "XML validat" : "XML cu probleme", {
-          description:
-            payload.validation?.valid
-              ? "Factura trece validarea structurala de baza."
-              : "Corecteaza erorile si valideaza din nou inainte de transmitere.",
-        })
+        const isValid = payload.validation?.valid ?? false
+        const description = isValid
+          ? "Factura trece validarea structurala de baza."
+          : "Corecteaza erorile si valideaza din nou inainte de transmitere."
+        // id deduplică toast-urile — re-validarea înlocuiește toast-ul curent
+        // (apelăm direct toast.success/error ca să nu rupem `this` binding)
+        if (isValid) {
+          toast.success("XML validat", { id: "efactura-validation", description })
+        } else {
+          toast.error("XML cu probleme", { id: "efactura-validation", description })
+        }
         return payload.validation ?? null
       } catch (err) {
         const message = err instanceof Error ? err.message : "Eroare la validarea XML."

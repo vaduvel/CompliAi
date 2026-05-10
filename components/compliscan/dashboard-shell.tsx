@@ -361,7 +361,9 @@ export function DashboardShell({
         </main>
       </div>
 
-      <FloatingAssistant pathname={pathname} />
+      {/* Pe /dashboard/fiscal montăm asistentul fiscal dedicat (Gemma 4 + context fiscal),
+          deci ascundem generic-ul ca să evităm 2 panouri simultan. */}
+      {!pathname.startsWith("/dashboard/fiscal") && <FloatingAssistant pathname={pathname} />}
       <MobileBottomNav
         items={mobileNavItems}
         activeHref={pathname}

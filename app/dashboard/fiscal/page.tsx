@@ -133,13 +133,19 @@ export default function FiscalPage() {
       if (payload.validation) {
         setValidations((current) => [payload.validation!, ...current.filter((item) => item.id !== payload.validation!.id)].slice(0, 10))
       }
-      toast.success(payload.validation?.valid ? "XML validat" : "XML cu probleme", {
-        description:
-          payload.message ||
-          (payload.validation?.valid
-            ? "Factura trece validarea structurală de bază."
-            : "Corectează XML-ul și validează din nou înainte de transmitere."),
-      })
+      const isValid = payload.validation?.valid ?? false
+      const description =
+        payload.message ||
+        (isValid
+          ? "Factura trece validarea structurală de bază."
+          : "Corectează XML-ul și validează din nou înainte de transmitere.")
+      // id deduplică toast-urile — re-validarea înlocuiește toast-ul curent
+      // în loc să-l stivuiască peste cele existente.
+      if (isValid) {
+        toast.success("XML validat", { id: "efactura-validation", description })
+      } else {
+        toast.error("XML cu probleme", { id: "efactura-validation", description })
+      }
       return payload.validation ?? null
     } catch (error) {
       const message = error instanceof Error ? error.message : "Eroare la validarea XML."
