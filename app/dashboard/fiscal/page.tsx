@@ -27,6 +27,7 @@ import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
 import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
+import { FiscalAssistantTrigger } from "@/components/compliscan/fiscal/FiscalAssistantPanel"
 import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
 import { SagaImportCard } from "@/components/compliscan/fiscal/SagaImportCard"
@@ -202,6 +203,7 @@ export default function FiscalPage() {
 
   return (
     <div className="space-y-6">
+      <FiscalAssistantTrigger />
       <V3PageHero
         breadcrumbs={[{ label: "Firma mea" }, { label: "Fiscal", current: true }]}
         title="Monitorizezi conformitatea fiscala"
