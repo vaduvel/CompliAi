@@ -693,6 +693,8 @@ export type ComplianceState = {
     clientScale?: "1-5" | "5-20" | "20+"
     configuredAtISO: string
   }
+  // ── Sprint 7: ANAF retry queue (buffer pentru transmiteri eșuate temporar) ─
+  anafRetryQueue?: import("@/lib/compliance/anaf-retry-queue").AnafRetryItem[]
   // ── Bundle D: Integrări ERP (cabinet-fiscal) ─────────────────────────────
   integrations?: {
     smartbill?: {
