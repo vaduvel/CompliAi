@@ -34,6 +34,11 @@ const routes = [
     changeFrequency: "monthly" as const,
   },
   {
+    path: "/calculator-amenzi-anaf",
+    priority: 0.85,
+    changeFrequency: "monthly" as const,
+  },
+  {
     path: "/terms",
     priority: 0.4,
     changeFrequency: "yearly" as const,
