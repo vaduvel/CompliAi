@@ -32,6 +32,7 @@ import {
   FindingHeroAction,
 } from "@/components/compliscan/finding-cockpit-shared"
 import { DocumentAdoptionCard } from "@/components/compliscan/document-adoption-card"
+import { ShareFindingButton } from "@/components/compliscan/fiscal/ShareFindingButton"
 import {
   getFindingAgeLabel,
   isFindingResolvedLike,
@@ -860,13 +861,18 @@ export default function FindingDetailPage() {
           </>
         }
         actions={
-          <Link
-            href={dashboardRoutes.resolve}
-            className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={2} />
-            De rezolvat
-          </Link>
+          <div className="flex items-center gap-2">
+            {finding.category === "E_FACTURA" && (
+              <ShareFindingButton findingId={finding.id} findingTitle={finding.title} />
+            )}
+            <Link
+              href={dashboardRoutes.resolve}
+              className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+            >
+              <ArrowLeft className="size-3.5" strokeWidth={2} />
+              De rezolvat
+            </Link>
+          </div>
         }
       />
 
