@@ -25,7 +25,8 @@ const CATEGORY_LABELS: Record<TaxpayerCategory, string> = {
 // ── Tipuri de încălcare ──────────────────────────────────────────────────────
 
 export type ViolationType =
-  | "efactura_nedepusa"           // factură netransmisă în SPV (5 zile)
+  | "efactura_nedepusa"           // factură netransmisă în SPV (5 zile calendaristice B2B)
+  | "efactura_b2c_nedepusa"       // factură B2C netransmisă în 5 zile LUCRĂTOARE (din 1 ian 2025)
   | "efactura_intarziere"         // factură depusă cu întârziere
   | "efactura_xml_eroare"         // XML respins repetat (>3 ori)
   | "saft_d406_nedepusa"          // declarație D406 lipsă
@@ -129,7 +130,8 @@ export type ViolationInput = {
 }
 
 const VIOLATION_LABELS: Record<ViolationType, string> = {
-  efactura_nedepusa: "Factură netransmisă în SPV (>5 zile)",
+  efactura_nedepusa: "Factură B2B netransmisă în SPV (>5 zile calendaristice)",
+  efactura_b2c_nedepusa: "Factură B2C netransmisă în SPV (>5 zile lucrătoare — din 1 ian 2025)",
   efactura_intarziere: "Factură transmisă cu întârziere",
   efactura_xml_eroare: "XML respins repetat (>3 ori)",
   saft_d406_nedepusa: "D406 SAF-T nedepus",
@@ -142,6 +144,8 @@ const VIOLATION_LABELS: Record<ViolationType, string> = {
 const VIOLATION_RECOMMENDATIONS: Record<ViolationType, string> = {
   efactura_nedepusa:
     "Transmite imediat în SPV. Pentru recurența: implementează cron auto-validare lunar și conectează ERP cu webhook e-Factura.",
+  efactura_b2c_nedepusa:
+    "B2C are termen mai scurt (5 zile lucrătoare, NU calendaristice — OUG 120/2021 modif. OUG 69/2024). Marchează facturile B2C la emitere și activează alertă pe ziua 3 lucrătoare.",
   efactura_intarziere:
     "Stabilește SLA intern de 3 zile lucrătoare per emisă; CompliScan trimite alertă pe ziua 4.",
   efactura_xml_eroare:
@@ -164,6 +168,7 @@ function pickRange(
 ): FineRange {
   switch (type) {
     case "efactura_nedepusa":
+    case "efactura_b2c_nedepusa":
     case "efactura_intarziere":
     case "efactura_xml_eroare":
       return EFACTURA_FINES[category]

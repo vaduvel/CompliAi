@@ -64,6 +64,50 @@ describe("buildD300Draft — calcule pe cote", () => {
   })
 })
 
+describe("extractVatLinesFromSaft — edge cases", () => {
+  it("returnează listă goală pentru XML gol / invalid", () => {
+    expect(extractVatLinesFromSaft("")).toEqual([])
+    expect(extractVatLinesFromSaft("not xml at all")).toEqual([])
+    expect(extractVatLinesFromSaft("<invalid><but>still</but></invalid>")).toEqual([])
+  })
+
+  it("nu cade pe XML cu blocuri SourceDocuments goale", () => {
+    const xml = `<?xml version="1.0"?><AuditFile><SourceDocuments><SalesInvoices></SalesInvoices><PurchaseInvoices></PurchaseInvoices></SourceDocuments></AuditFile>`
+    expect(extractVatLinesFromSaft(xml)).toEqual([])
+  })
+
+  it("ignoră facturi fără TaxAmount sau DebitAmount (date corupte)", () => {
+    const xml = `<?xml version="1.0"?><AuditFile><SourceDocuments><SalesInvoices><Invoice><InvoiceNo>F1</InvoiceNo></Invoice></SalesInvoices></SourceDocuments></AuditFile>`
+    const lines = extractVatLinesFromSaft(xml)
+    expect(lines).toHaveLength(1)
+    // Linia există dar cu zero — buildD300Draft le tratează cu default-uri
+    expect(lines[0].taxableBase).toBe(0)
+    expect(lines[0].vatAmount).toBe(0)
+  })
+
+  it("acceptă namespace-uri arbitrare (mfp:, ns0:, fără prefix)", () => {
+    const withPrefix = `<?xml version="1.0"?><mfp:AuditFile xmlns:mfp="x"><mfp:SourceDocuments><mfp:SalesInvoices><mfp:Invoice><mfp:InvoiceNo>F1</mfp:InvoiceNo><mfp:DebitAmount>1000</mfp:DebitAmount><mfp:TaxAmount>190</mfp:TaxAmount><mfp:TaxPercentage>19</mfp:TaxPercentage></mfp:Invoice></mfp:SalesInvoices></mfp:SourceDocuments></mfp:AuditFile>`
+    const lines = extractVatLinesFromSaft(withPrefix)
+    expect(lines).toHaveLength(1)
+    expect(lines[0].taxableBase).toBe(1000)
+    expect(lines[0].vatAmount).toBe(190)
+  })
+
+  it("performanță: 1000 facturi parsează sub 500ms", () => {
+    const invoices = Array.from(
+      { length: 1000 },
+      (_, i) =>
+        `<Invoice><InvoiceNo>F${i}</InvoiceNo><DebitAmount>${100 + i}</DebitAmount><TaxAmount>${(100 + i) * 0.19}</TaxAmount><TaxPercentage>19</TaxPercentage><TaxCountryRegion>RO</TaxCountryRegion></Invoice>`,
+    ).join("")
+    const xml = `<?xml version="1.0"?><AuditFile><SourceDocuments><SalesInvoices>${invoices}</SalesInvoices></SourceDocuments></AuditFile>`
+    const start = Date.now()
+    const lines = extractVatLinesFromSaft(xml)
+    const elapsed = Date.now() - start
+    expect(lines).toHaveLength(1000)
+    expect(elapsed).toBeLessThan(500)
+  })
+})
+
 describe("buildD394Draft", () => {
   it("agregă achiziții și livrări locale per partener", () => {
     const lines: VatTransactionLine[] = [

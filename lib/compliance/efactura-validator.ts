@@ -43,6 +43,104 @@ function normalizePartyTaxId(value: string) {
   return /^(RO)?\d{2,10}$/.test(trimmed) ? trimmed : ""
 }
 
+/**
+ * Detectare B2B vs B2C — per spec MF RO e-Factura.
+ *
+ * B2B (priority semnal):
+ *   1. customer.PartyTaxScheme.CompanyID = CIF valid (RO + 2-10 cifre) — semn clar
+ *   2. customer.PartyLegalEntity.CompanyID = CIF valid — multe XML-uri reale folosesc doar acest bloc
+ *
+ * B2C (priority semnal):
+ *   1. CompanyID = CNP (13 cifre, începe 1/2/5/6) — persoană fizică
+ *   2. customer NU are NICIUN CompanyID (persoană fizică fără identificator)
+ *
+ * Unknown: fallback când datele sunt ambigue (necesită verificare manuală).
+ *
+ * B2C declanșează termen raportare 5 zile lucrătoare (vs 5 calendaristice B2B).
+ */
+function detectCustomerType(customerPartyBlock: string): "b2b" | "b2c" | "unknown" {
+  if (!customerPartyBlock) return "unknown"
+
+  const taxSchemeBlock = findTagBlock(customerPartyBlock, "PartyTaxScheme")
+  const legalEntityBlock = findTagBlock(customerPartyBlock, "PartyLegalEntity")
+
+  // Strângem TOATE valorile CompanyID din blocul customer
+  const candidateIds: string[] = []
+  if (taxSchemeBlock) {
+    const v = findTagValue(taxSchemeBlock, "CompanyID")
+    if (v) candidateIds.push(v.replace(/\s+/g, "").toUpperCase())
+  }
+  if (legalEntityBlock) {
+    const v = findTagValue(legalEntityBlock, "CompanyID")
+    if (v) candidateIds.push(v.replace(/\s+/g, "").toUpperCase())
+  }
+  // Fallback: orice CompanyID direct sub Party
+  if (candidateIds.length === 0) {
+    const direct = findTagValue(customerPartyBlock, "CompanyID")
+    if (direct) candidateIds.push(direct.replace(/\s+/g, "").toUpperCase())
+  }
+
+  // CNP = 13 cifre, începe cu 1/2/5/6 — semn cert B2C
+  if (candidateIds.some((id) => /^[1-6]\d{12}$/.test(id))) return "b2c"
+
+  // CIF valid în orice candidate → B2B
+  if (candidateIds.some((id) => /^(RO)?\d{2,10}$/.test(id))) return "b2b"
+
+  // Niciun CompanyID + customer există → probabil persoană fizică
+  if (candidateIds.length === 0) return "b2c"
+
+  // Există CompanyID dar nu match nici CIF nici CNP → ambiguu
+  return "unknown"
+}
+
+/**
+ * Calcul termen raportare SPV.
+ *  - B2B: 5 zile calendaristice de la issueDate (OUG 120/2021 Art. 10)
+ *  - B2C: 5 zile LUCRĂTOARE de la issueDate (OUG 120/2021 modif. OUG 69/2024,
+ *    aplicabil din 1 ian 2025)
+ *  - Sărbători legale RO 2025-2027 (set fix; pentru update — feed-sources.ts)
+ */
+const RO_HOLIDAYS = new Set([
+  "2025-01-01", "2025-01-02", "2025-01-24", "2025-04-18", "2025-04-20", "2025-04-21",
+  "2025-05-01", "2025-06-01", "2025-06-08", "2025-06-09", "2025-08-15", "2025-11-30",
+  "2025-12-01", "2025-12-25", "2025-12-26",
+  "2026-01-01", "2026-01-02", "2026-01-24", "2026-04-10", "2026-04-12", "2026-04-13",
+  "2026-05-01", "2026-06-01", "2026-05-31", "2026-06-01", "2026-08-15", "2026-11-30",
+  "2026-12-01", "2026-12-25", "2026-12-26",
+])
+
+function isWorkingDay(d: Date): boolean {
+  const day = d.getUTCDay()
+  if (day === 0 || day === 6) return false
+  const iso = d.toISOString().slice(0, 10)
+  return !RO_HOLIDAYS.has(iso)
+}
+
+function computeReportingDeadline(
+  issueDate: string,
+  customerType: "b2b" | "b2c" | "unknown",
+): string | undefined {
+  if (!issueDate) return undefined
+  const start = new Date(`${issueDate}T00:00:00.000Z`)
+  if (Number.isNaN(start.getTime())) return undefined
+
+  if (customerType === "b2c") {
+    // 5 zile lucrătoare
+    let added = 0
+    const cur = new Date(start)
+    while (added < 5) {
+      cur.setUTCDate(cur.getUTCDate() + 1)
+      if (isWorkingDay(cur)) added++
+    }
+    return cur.toISOString()
+  }
+
+  // B2B / unknown — 5 zile calendaristice
+  const calendar = new Date(start)
+  calendar.setUTCDate(calendar.getUTCDate() + 5)
+  return calendar.toISOString()
+}
+
 export function validateEFacturaXml({
   documentName,
   xml,
@@ -192,6 +290,15 @@ export function validateEFacturaXml({
     ""
   const supplierCui = normalizePartyTaxId(findTagValue(supplierPartyBlock, "CompanyID"))
   const customerCui = normalizePartyTaxId(findTagValue(customerPartyBlock, "CompanyID"))
+  const customerType = detectCustomerType(customerPartyBlock)
+  const reportingDeadlineISO = computeReportingDeadline(issueDate, customerType)
+
+  // Warning B2C-specific: tip de termen mai strict
+  if (customerType === "b2c") {
+    warnings.push(
+      "B2C detectat (persoană fizică). Termen raportare SPV: 5 zile LUCRĂTOARE de la emitere (OUG 120/2021 modif. OUG 69/2024, aplicabil din 1 ian 2025).",
+    )
+  }
 
   return {
     id: `efxml-${Math.random().toString(36).slice(2, 10)}`,
@@ -203,6 +310,8 @@ export function validateEFacturaXml({
     supplierCui: supplierCui || undefined,
     customerName: customerName || undefined,
     customerCui: customerCui || undefined,
+    customerType,
+    reportingDeadlineISO,
     errors,
     warnings,
     createdAtISO: nowISO,

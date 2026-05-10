@@ -475,6 +475,21 @@ export type EFacturaValidationRecord = {
   supplierCui?: string
   customerName?: string
   customerCui?: string
+  /**
+   * "b2b" = client are CIF (PartyTaxScheme prezent)
+   * "b2c" = persoană fizică (fără PartyTaxScheme / CompanyID)
+   * "unknown" = nu s-a putut determina (date insuficiente)
+   *
+   * Per OUG 120/2021 modif. OUG 69/2024, facturile B2C trebuie raportate
+   * în SPV în maxim 5 zile lucrătoare de la emitere (din 1 ian 2025).
+   */
+  customerType?: "b2b" | "b2c" | "unknown"
+  /**
+   * Termen ISO calculat ca 5 zile lucrătoare de la `issueDate` pentru B2C,
+   * 5 zile calendaristice pentru B2B (echivalent OUG 120/2021 Art. 10^1).
+   * Dacă issueDate lipsește, termenul nu se calculează.
+   */
+  reportingDeadlineISO?: string
   errors: string[]
   warnings: string[]
   createdAtISO: string
