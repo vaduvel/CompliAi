@@ -142,6 +142,52 @@ function buildImmState(): ComplianceState {
         closureEvidence: "Confirmare acceptare SPV (status: VALID sau APROBAT)",
       },
     },
+    // Sprint 6 demo — finding preventiv P300 vs D300 (Bundle D)
+    {
+      id: "etva-p300-prevent-2026-02",
+      title: "RO e-TVA: Diferențe peste prag D300 vs P300 — 2026-02",
+      detail:
+        "Diferențele între D300 depus și P300 pre-completat ANAF depășesc pragul de notificare (>20% ȘI ≥5.000 RON). Bază impozabilă: 95.000 declarat vs 110.000 pre-calculat (Δ 15.000 RON, 13.6%). TVA colectat: 18.050 vs 20.900 (Δ 2.850 RON, 13.6%). Termen răspuns 20 zile: 30 aprilie 2026. Acționează preventiv ÎNAINTE ca ANAF să trimită notificarea oficială.",
+      category: "E_FACTURA",
+      severity: "high",
+      risk: "high",
+      principles: ["accountability"],
+      createdAtISO: "2026-04-08T09:00:00.000Z",
+      sourceDocument: "RO e-TVA 2026-02 (P300 pre-completat)",
+      legalReference: "OUG 70/2024 (modif. OUG 89/2025) · Cod Fiscal Art. 105",
+      remediationHint:
+        "Verifică sursele de date (facturi e-Factura, jurnale TVA), corectează D300 și depune declarație rectificativă.",
+      resolution: {
+        problem: "Diferențe D300 vs P300 peste pragul ANAF în perioada 2026-02",
+        impact:
+          "Dacă nu corectezi PREVENTIV, ANAF va trimite notificare oficială cu termen 20 zile + posibile penalități.",
+        action:
+          "Reverifică tranzacțiile, identifică sursa diferenței, depune D300 rectificativă prin SPV.",
+        humanStep: "Contabil reconciliază facturile e-Factura cu jurnalul TVA.",
+        closureEvidence: "Confirmare SPV depunere D300 rectificativă.",
+      },
+    },
+    // Sprint 6 demo — finding e-Factura processing delayed
+    {
+      id: "ef-risk-delayed-2026-04",
+      title: "e-Factura: 3 facturi în prelucrare > 48h",
+      detail:
+        'Trei facturi emise săptămâna asta sunt încă "în validare" la ANAF după 48h. Posibil hold administrativ — verifică în SPV statusul real și retransmite dacă e cazul.',
+      category: "E_FACTURA",
+      severity: "medium",
+      risk: "low",
+      principles: ["accountability"],
+      createdAtISO: "2026-04-09T14:00:00.000Z",
+      sourceDocument: "ANAF SPV cron",
+      legalReference: "OUG 120/2021 modif. 115/2023",
+      remediationHint:
+        "Conectează-te la SPV ANAF, verifică statusul real al facturilor blocate, retransmite dacă e necesar.",
+      resolution: {
+        problem: "Facturi în validare > 48h — posibil hold ANAF",
+        impact: "Risc întârziere termen 5 zile lucrătoare → amendă 15% din valoare.",
+        action: "Verifică SPV → retransmite dacă status invalid; contactează ANAF dacă persistă.",
+      },
+    },
   ]
 
   const efacturaValidations: EFacturaValidationRecord[] = [
@@ -225,6 +271,7 @@ function buildImmState(): ComplianceState {
   ]
 
   const filingRecords: FilingRecord[] = [
+    // Filings curente (Q1-Q2 2026)
     {
       id: "demo-filing-1",
       type: "d300_tva",
@@ -255,6 +302,58 @@ function buildImmState(): ComplianceState {
       period: "2026-Q1",
       status: "upcoming",
       dueISO: "2026-04-30T23:59:59.000Z",
+    },
+    // Filings istorice — pentru SAF-T hygiene scoring
+    {
+      id: "demo-filing-saft-feb",
+      type: "saft",
+      period: "2026-02",
+      status: "on_time",
+      dueISO: "2026-03-25T23:59:59.000Z",
+      filedAtISO: "2026-03-22T11:00:00.000Z",
+    },
+    {
+      id: "demo-filing-saft-jan",
+      type: "saft",
+      period: "2026-01",
+      status: "rectified",
+      dueISO: "2026-02-25T23:59:59.000Z",
+      filedAtISO: "2026-02-24T15:00:00.000Z",
+      rectificationCount: 1,
+      note: "Rectificare cota TVA pe linie 7",
+    },
+    {
+      id: "demo-filing-saft-dec",
+      type: "saft",
+      period: "2025-12",
+      status: "on_time",
+      dueISO: "2026-01-25T23:59:59.000Z",
+      filedAtISO: "2026-01-23T09:30:00.000Z",
+    },
+    {
+      id: "demo-filing-saft-nov",
+      type: "saft",
+      period: "2025-11",
+      status: "late",
+      dueISO: "2025-12-25T23:59:59.000Z",
+      filedAtISO: "2025-12-29T16:00:00.000Z",
+      note: "Server ANAF blocat 25-28 dec — reluare 29 dec",
+    },
+    {
+      id: "demo-filing-d300-jan",
+      type: "d300_tva",
+      period: "2026-01",
+      status: "on_time",
+      dueISO: "2026-02-25T23:59:59.000Z",
+      filedAtISO: "2026-02-22T13:00:00.000Z",
+    },
+    {
+      id: "demo-filing-d394-jan",
+      type: "d394_local",
+      period: "2026-01",
+      status: "on_time",
+      dueISO: "2026-02-25T23:59:59.000Z",
+      filedAtISO: "2026-02-22T13:30:00.000Z",
     },
   ]
 
@@ -374,6 +473,33 @@ function buildImmState(): ComplianceState {
   }
   stateWithFiscal.etvaDiscrepancies = etvaDiscrepancies
   stateWithFiscal.filingRecords = filingRecords
+
+  // Mock ERP integrations connected (SmartBill + Oblio)
+  stateWithFiscal.integrations = {
+    smartbill: {
+      email: "demo@cabinet-test.ro",
+      token: "sb_demo_TOKEN_redacted_PLATINUM_PLAN",
+      cif: "99000001",
+      connectedAtISO: "2026-03-01T08:00:00.000Z",
+      lastSyncAtISO: "2026-04-10T07:30:00.000Z",
+      lastSyncCount: 142,
+    },
+    oblio: {
+      email: "demo@cabinet-test.ro",
+      accessToken: "ob_demo_BEARER_redacted",
+      tokenExpiresAtISO: "2026-04-10T08:30:00.000Z",
+      cif: "99000001",
+      connectedAtISO: "2026-03-15T10:00:00.000Z",
+      lastSyncAtISO: "2026-04-09T15:00:00.000Z",
+      lastSyncCount: 38,
+    },
+  }
+
+  // Mark D406 evidence submitted (closes the registration finding)
+  stateWithFiscal.d406EvidenceSubmitted = true
+  // Add efactura signals counter
+  stateWithFiscal.efacturaSyncedAtISO = "2026-04-10T07:30:00.000Z"
+  stateWithFiscal.efacturaSignalsCount = 4
 
   return stateWithFiscal
 }
