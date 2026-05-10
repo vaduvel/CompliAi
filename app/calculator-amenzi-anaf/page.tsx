@@ -43,6 +43,49 @@ export default function CalculatorAmenziPage() {
         </div>
       </header>
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Cum sunt clasificate categoriile de contribuabili la ANAF?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "ANAF clasifică contribuabilii anual în 4 categorii — mari, medii, mici intermediari și mici/micro — pe baza cifrei de afaceri și a altor indicatori. Pragurile sunt revizuite anual prin Ordin ANAF.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Cât e amenda maximă pentru o factură netransmisă în SPV?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Conform OUG 120/2021 modificată de OUG 115/2023, amenzile pentru netransmiterea facturilor în e-Factura variază între 500 lei (contribuabil mic, prima abatere) și 10.000 lei (contribuabil mare, recurență). Fiecare factură netransmisă constituie încălcare separată.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Ce este RO e-TVA și ce amenzi atrage neRespondedul?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "RO e-TVA este declarația 300 pre-completată automat de ANAF pe baza facturilor e-Factura raportate. Dacă diferența între D300-ul depus și P300 pre-calculat depășește pragul (>20% AND ≥5.000 lei), ANAF trimite notificare cu termen 20 zile. NeRespondedul atrage 2.500-30.000 lei (OUG 70/2024 modificată de 89/2025).",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Estimările de aici sunt obligatorii / definitive?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "NU. Cifrele sunt informative, pentru orientare. Decizia ANAF este în limita prevăzută de lege și depinde de circumstanțe (bună-credință, recurență, mărime). Verifică întotdeauna cu contabilul / fiscalistul tău înainte de a lua decizii bazate pe aceste estimări.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
       <main>
         <section className="relative border-b border-eos-border px-6 py-16">
           <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-eos-primary/10 blur-3xl" />

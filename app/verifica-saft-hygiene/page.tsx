@@ -53,6 +53,50 @@ export default function VerificaSaftHygienePage() {
         </div>
       </header>
 
+      {/* JSON-LD FAQ structured data — rich snippets Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Cine este obligat să depună D406 (SAF-T)?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Începând cu ianuarie 2025, toate firmele din România sunt obligate să transmită declarația informativă D406 (SAF-T) către ANAF — lunar pentru contribuabilii mari și medii, trimestrial pentru cei mici. Bază legală: Ord. ANAF 1783/2021 + OUG 188/2022 + Cod Procedură Fiscală Art. 336.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Cât sunt amenzile pentru nedepunere D406?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Amenzile variază între 1.000 și 10.000 lei per declarație nedepusă, în funcție de categoria contribuabilului. Cod Procedură Fiscală Art. 336 alin. (1) lit. b).",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Ce înseamnă rectificare repetată în SAF-T?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "RevisionNumber > 0 în header-ul XML SAF-T indică o rectificare. Două sau mai multe rectificări consecutive pe aceeași perioadă semnalează posibile probleme sistemice în software-ul contabil și pot atrage atenția controlorilor ANAF.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Calculatorul vostru salvează datele mele?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "NU. Conținutul XML este procesat în memorie strict pentru calcul; nu salvăm fișierele și nu păstrăm metadata după ce returnăm răspunsul. Verificare și ștergere în aceeași cerere HTTP.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
       <main>
         {/* ── Hero ── */}
         <section className="relative border-b border-eos-border px-6 py-16">
