@@ -89,12 +89,39 @@ describe("checkCrossFilingConsistency", () => {
     expect(issues.some((i) => i.type === "cross_filing_mismatch")).toBe(true)
   })
 
-  it("no issues when both exist", () => {
+  it("no issues when SAF-T + D300 + D394 all exist", () => {
+    const filings: FilingRecord[] = [
+      makeSAFT({ period: "2026-02" }),
+      { id: "d1", type: "d300_tva", period: "2026-02", status: "on_time", dueISO: "2026-03-25T00:00:00.000Z" },
+      { id: "d394-1", type: "d394_local", period: "2026-02", status: "on_time", dueISO: "2026-03-25T00:00:00.000Z" },
+    ]
+    const issues = checkCrossFilingConsistency(filings)
+    expect(issues.length).toBe(0)
+  })
+
+  it("flags missing D394 when only SAF-T + D300 exist", () => {
     const filings: FilingRecord[] = [
       makeSAFT({ period: "2026-02" }),
       { id: "d1", type: "d300_tva", period: "2026-02", status: "on_time", dueISO: "2026-03-25T00:00:00.000Z" },
     ]
     const issues = checkCrossFilingConsistency(filings)
-    expect(issues.length).toBe(0)
+    expect(issues.some((i) => i.message.includes("D394"))).toBe(true)
+  })
+
+  it("flags D394 without D300 as error severity", () => {
+    const filings: FilingRecord[] = [
+      { id: "d394-x", type: "d394_local", period: "2026-02", status: "on_time", dueISO: "2026-03-25T00:00:00.000Z" },
+    ]
+    const issues = checkCrossFilingConsistency(filings)
+    const d394Issue = issues.find((i) => i.message.includes("D394 depusă"))
+    expect(d394Issue?.severity).toBe("error")
+  })
+
+  it("flags missing D390 when D300 trimestrial exists", () => {
+    const filings: FilingRecord[] = [
+      { id: "d-q1", type: "d300_tva", period: "2026-Q1", status: "on_time", dueISO: "2026-04-25T00:00:00.000Z" },
+    ]
+    const issues = checkCrossFilingConsistency(filings)
+    expect(issues.some((i) => i.message.includes("D390"))).toBe(true)
   })
 })

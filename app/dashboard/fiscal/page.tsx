@@ -26,6 +26,7 @@ import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTa
 import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
+import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
 import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
 import { SagaImportCard } from "@/components/compliscan/fiscal/SagaImportCard"
@@ -308,7 +309,10 @@ export default function FiscalPage() {
         </TabsContent>
 
         <TabsContent value="depuneri">
-          <FilingRecordsTab />
+          <div className="space-y-4">
+            <CrossFilingCheckCard />
+            <FilingRecordsTab />
+          </div>
         </TabsContent>
 
         <TabsContent value="spv">
