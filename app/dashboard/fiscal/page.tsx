@@ -26,7 +26,9 @@ import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTa
 import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
+import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
+import { SagaImportCard } from "@/components/compliscan/fiscal/SagaImportCard"
 import { SmartBillConnectCard } from "@/components/compliscan/fiscal/SmartBillConnectCard"
 import { SubmitSpvTab } from "@/components/compliscan/fiscal/SubmitSpvTab"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
@@ -396,6 +398,8 @@ export default function FiscalPage() {
         <TabsContent value="integrari">
           <div className="space-y-4">
             <SmartBillConnectCard />
+            <OblioConnectCard />
+            <SagaImportCard />
           </div>
         </TabsContent>
       </Tabs>
