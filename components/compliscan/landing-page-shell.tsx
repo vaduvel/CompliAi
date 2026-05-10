@@ -320,6 +320,101 @@ export function LandingPageShell(props: LandingPageProps) {
       <footer className="py-10">
         <div className="mx-auto max-w-6xl px-6">
           <LegalDisclaimer />
+          <div className="mt-8 grid gap-6 border-t border-eos-border-subtle pt-6 sm:grid-cols-3">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Tools gratuite
+              </p>
+              <ul className="mt-2 space-y-1 text-[12px]">
+                <li>
+                  <Link
+                    href="/verifica-saft-hygiene"
+                    className="text-eos-text-muted hover:text-eos-text"
+                  >
+                    Verifică igiena SAF-T D406
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/calculator-amenzi-anaf"
+                    className="text-eos-text-muted hover:text-eos-text"
+                  >
+                    Calculator amenzi ANAF
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/genereaza-politica-gdpr"
+                    className="text-eos-text-muted hover:text-eos-text"
+                  >
+                    Generator Politică GDPR
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/genereaza-dpa"
+                    className="text-eos-text-muted hover:text-eos-text"
+                  >
+                    Generator DPA
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Pentru cine
+              </p>
+              <ul className="mt-2 space-y-1 text-[12px]">
+                <li>
+                  <Link href="/dpo" className="text-eos-text-muted hover:text-eos-text">
+                    Cabinete DPO
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/fiscal" className="text-eos-text-muted hover:text-eos-text">
+                    Cabinete fiscale
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/imm" className="text-eos-text-muted hover:text-eos-text">
+                    IMM-uri (intern)
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/nis2" className="text-eos-text-muted hover:text-eos-text">
+                    Entități NIS2
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Cont
+              </p>
+              <ul className="mt-2 space-y-1 text-[12px]">
+                <li>
+                  <Link href="/pricing" className="text-eos-text-muted hover:text-eos-text">
+                    Prețuri
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/register" className="text-eos-text-muted hover:text-eos-text">
+                    Cont gratuit
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login" className="text-eos-text-muted hover:text-eos-text">
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/trust" className="text-eos-text-muted hover:text-eos-text">
+                    Trust
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
           <p className="mt-6 text-center text-[11px] text-eos-text-tertiary">
             © 2026 CompliScan · {" "}
             <Link href="/privacy" className="hover:text-eos-text-muted">
