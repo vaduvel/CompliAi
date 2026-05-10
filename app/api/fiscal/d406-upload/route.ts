@@ -23,6 +23,7 @@ import {
   computeSAFTHygiene,
   buildSAFTHygieneFindings,
 } from "@/lib/compliance/saft-hygiene"
+import { validateSaftAccountStructure } from "@/lib/compliance/saft-account-validator"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
 
@@ -94,13 +95,19 @@ export async function POST(request: Request) {
   // Parse metadata
   const meta = parseSaftMetadata(xml)
 
-  // Dacă parser-ul a găsit erori critice, refuzăm înregistrarea
-  if (meta.errors.length > 0) {
+  // Pre-flight validare structură plan conturi (Sprint 7.1 wired)
+  const accountFindings = validateSaftAccountStructure(xml)
+  const accountErrors = accountFindings.filter((f) => f.severity === "error")
+
+  // Dacă parser-ul a găsit erori critice SAU validatorul plan conturi
+  // a găsit erori, refuzăm înregistrarea
+  if (meta.errors.length > 0 || accountErrors.length > 0) {
     return NextResponse.json(
       {
         ok: false,
         errors: meta.errors,
         warnings: meta.warnings,
+        accountValidation: accountFindings,
         meta: {
           period: meta.period,
           cif: meta.cif,
@@ -186,6 +193,7 @@ export async function POST(request: Request) {
     hygiene,
     findings: newFindings,
     warnings: meta.warnings,
+    accountValidation: accountFindings,  // Sprint 7.1 — plan conturi pre-flight
     meta: {
       period: meta.period,
       reportingPeriodStart: meta.reportingPeriodStart,

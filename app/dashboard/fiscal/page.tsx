@@ -27,6 +27,8 @@ import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
 import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
+import { ErpSpvReconcileCard } from "@/components/compliscan/fiscal/ErpSpvReconcileCard"
+import { FrequencyCheckCard } from "@/components/compliscan/fiscal/FrequencyCheckCard"
 import { FiscalAssistantTrigger } from "@/components/compliscan/fiscal/FiscalAssistantPanel"
 import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
@@ -312,6 +314,7 @@ export default function FiscalPage() {
 
         <TabsContent value="depuneri">
           <div className="space-y-4">
+            <FrequencyCheckCard />
             <CrossFilingCheckCard />
             <FilingRecordsTab />
           </div>
@@ -405,6 +408,7 @@ export default function FiscalPage() {
           <div className="space-y-4">
             <SmartBillConnectCard />
             <OblioConnectCard />
+            <ErpSpvReconcileCard />
             <SagaImportCard />
           </div>
         </TabsContent>

@@ -22,6 +22,7 @@ import {
 } from "@/lib/compliance/anaf-retry-queue"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { systemEventActor } from "@/lib/server/event-actor"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
 type StateWithQueue = ComplianceState & {
@@ -57,6 +58,7 @@ export async function GET(request: Request) {
   }
 
   const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const orgIds = await listAllOrgIds()
 
   let totalAttempted = 0
@@ -123,6 +125,24 @@ export async function GET(request: Request) {
       console.error(`[anaf-retry-queue] org ${orgId} failed:`, err)
     }
   }
+
+  await safeRecordCronRun({
+    name: "anaf-retry-queue",
+    lastRunAtISO: nowISO,
+    ok: true,
+    durationMs: Date.now() - startMs,
+    summary:
+      totalAttempted === 0
+        ? "Niciun item due."
+        : `${totalSucceeded}/${totalAttempted} succes, ${totalRetryQueued} re-queued, ${totalFailedPermanent} failed permanent.`,
+    stats: {
+      orgsProcessed,
+      totalAttempted,
+      totalSucceeded,
+      totalRetryQueued,
+      totalFailedPermanent,
+    },
+  })
 
   return NextResponse.json({
     orgsProcessed,

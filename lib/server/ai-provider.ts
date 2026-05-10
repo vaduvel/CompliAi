@@ -344,23 +344,10 @@ export async function* streamChat(
     return
   }
 
-  // Cloud fallback — Gemini SSE (sau non-streaming dacă lipsește)
+  // Cloud fallback — Gemini real SSE streaming via streamGenerateContent
   if (GEMINI_API_KEY) {
-    // Pentru simplitate: non-streaming, emit întreg conținutul ca un singur delta
-    try {
-      const result = await callGemini({
-        prompt: messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n"),
-        temperature,
-        maxOutputTokens,
-        label,
-      })
-      yield { type: "delta", text: result.content }
-      yield { type: "done", provider: result.provider, model: result.model }
-      return
-    } catch (err) {
-      yield { type: "error", reason: err instanceof Error ? err.message : "Eroare Gemini." }
-      return
-    }
+    yield* streamGemini({ messages, temperature, maxOutputTokens, label })
+    return
   }
 
   yield {
@@ -442,6 +429,130 @@ async function* streamLocalGemma(args: {
     yield {
       type: "error",
       reason: err instanceof Error ? err.message : "Eroare la streaming local Gemma.",
+    }
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+// ── Gemini SSE streaming (streamGenerateContent endpoint) ────────────────────
+
+async function* streamGemini(args: {
+  messages: ChatMessage[]
+  temperature: number
+  maxOutputTokens: number
+  label: string
+}): AsyncIterableIterator<ChatStreamEvent> {
+  // Gemini API: separate systemInstruction din mesaje + map "assistant" → "model"
+  const systemMessages = args.messages.filter((m) => m.role === "system")
+  const turnMessages = args.messages.filter((m) => m.role !== "system")
+
+  const systemInstruction =
+    systemMessages.length > 0
+      ? { parts: [{ text: systemMessages.map((m) => m.content).join("\n\n") }] }
+      : undefined
+
+  const contents = turnMessages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }))
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 120_000)
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...(systemInstruction ? { systemInstruction } : {}),
+          contents,
+          generationConfig: {
+            temperature: args.temperature,
+            topP: 0.95,
+            maxOutputTokens: args.maxOutputTokens,
+          },
+        }),
+        signal: controller.signal,
+      },
+    )
+
+    if (!res.ok || !res.body) {
+      const errText = res.body ? await res.text().catch(() => "") : ""
+      yield {
+        type: "error",
+        reason: `Gemini stream error: HTTP ${res.status}${errText ? ` — ${errText.slice(0, 200)}` : ""}`,
+      }
+      return
+    }
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ""
+    let totalChars = 0
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+
+      // SSE format: linii `data: {json}` separate de "\n\n"
+      const events = buffer.split("\n\n")
+      buffer = events.pop() ?? ""
+
+      for (const event of events) {
+        const dataLine = event
+          .split("\n")
+          .find((l) => l.startsWith("data: "))
+        if (!dataLine) continue
+
+        const payload = dataLine.slice(6).trim()
+        if (!payload || payload === "[DONE]") continue
+
+        try {
+          const obj = JSON.parse(payload) as {
+            candidates?: Array<{
+              content?: { parts?: Array<{ text?: string }> }
+              finishReason?: string
+            }>
+            usageMetadata?: { totalTokenCount?: number }
+          }
+          const text =
+            obj.candidates?.[0]?.content?.parts
+              ?.map((p) => p.text ?? "")
+              .join("") ?? ""
+          if (text) {
+            totalChars += text.length
+            yield { type: "delta", text }
+          }
+          const finishReason = obj.candidates?.[0]?.finishReason
+          if (finishReason && finishReason !== "FINISH_REASON_UNSPECIFIED") {
+            yield {
+              type: "done",
+              provider: "gemini",
+              model: GEMINI_MODEL,
+              tokensTotal: obj.usageMetadata?.totalTokenCount,
+            }
+            return
+          }
+        } catch {
+          // Ignoră chunk JSON malformat
+        }
+      }
+    }
+
+    // Stream end fără finishReason explicit — emit done dacă am primit conținut
+    if (totalChars > 0) {
+      yield { type: "done", provider: "gemini", model: GEMINI_MODEL }
+    } else {
+      yield { type: "error", reason: "Gemini a închis stream-ul fără conținut." }
+    }
+  } catch (err) {
+    yield {
+      type: "error",
+      reason: err instanceof Error ? err.message : "Eroare la streaming Gemini.",
     }
   } finally {
     clearTimeout(timeout)

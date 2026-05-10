@@ -18,6 +18,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/evidence-os/Button"
 import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 import type { SAFTHygieneStatus, SAFTIndicator } from "@/lib/compliance/saft-hygiene"
+import { D300DraftDrawer, type DraftResponse } from "@/components/compliscan/fiscal/D300DraftDrawer"
 
 type UploadResponse = {
   ok: boolean
@@ -79,6 +80,37 @@ export function SaftHygieneTab() {
   const [xml, setXml] = useState("")
   const [fileName, setFileName] = useState("")
   const [lastUpload, setLastUpload] = useState<UploadResponse | null>(null)
+  const [draftOpen, setDraftOpen] = useState(false)
+  const [draft, setDraft] = useState<DraftResponse | null>(null)
+  const [draftBusy, setDraftBusy] = useState(false)
+
+  async function generateD300Draft() {
+    if (!xml.trim() || !lastUpload?.meta?.period) {
+      toast.error("Trebuie întâi să încarci un SAF-T valid pentru o perioadă.")
+      return
+    }
+    setDraftOpen(true)
+    setDraftBusy(true)
+    try {
+      const res = await fetch("/api/fiscal/d300-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ xml, period: lastUpload.meta.period }),
+      })
+      const data = (await res.json()) as DraftResponse
+      if (!res.ok || !data.ok) {
+        toast.error("Generare draft D300 eșuată.")
+        setDraftOpen(false)
+        return
+      }
+      setDraft(data)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Eroare.")
+      setDraftOpen(false)
+    } finally {
+      setDraftBusy(false)
+    }
+  }
 
   useEffect(() => {
     void refresh()
@@ -268,6 +300,17 @@ export function SaftHygieneTab() {
                 </>
               )}
             </Button>
+
+            {lastUpload?.ok && lastUpload?.meta?.period && (
+              <Button
+                variant="ghost"
+                onClick={() => void generateD300Draft()}
+                disabled={draftBusy}
+              >
+                <FileText className="mr-2 size-3.5" strokeWidth={2} />
+                Generează draft D300/D394 din SAF-T
+              </Button>
+            )}
           </div>
 
           <textarea
@@ -436,6 +479,17 @@ export function SaftHygieneTab() {
           </div>
         )}
       </section>
+
+      {draftOpen && (
+        <D300DraftDrawer
+          result={draft}
+          busy={draftBusy}
+          onClose={() => {
+            setDraftOpen(false)
+            setDraft(null)
+          }}
+        />
+      )}
     </div>
   )
 }

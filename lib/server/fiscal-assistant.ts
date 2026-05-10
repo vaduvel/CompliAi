@@ -106,17 +106,19 @@ export function buildAssistantContext(state: StateWithFiscal, orgName: string): 
 
   // Top findings — sortate by severity
   const severityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 }
+  // Trim la top 3 + detail truncat ca să reducem token count pentru
+  // inferența locală Gemma 4 (cold load, CPU)
   const topFindings = [...fiscalFindings]
     .sort(
       (a, b) =>
         (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0),
     )
-    .slice(0, 8)
+    .slice(0, 3)
     .map((f) => ({
       id: f.id,
       title: f.title,
       severity: f.severity,
-      detail: f.detail.slice(0, 250),
+      detail: f.detail.slice(0, 150),
       legalReference: f.legalReference,
     }))
 
@@ -194,13 +196,11 @@ export function contextToPromptText(ctx: FiscalAssistantContext): string {
     lines.push(`\n### TOP FINDINGS ACTIVE: niciun finding activ.`)
   }
 
-  lines.push(`\n### TEMPLATES RĂSPUNS ANAF DISPONIBILE`)
+  lines.push(`\n### TEMPLATES RĂSPUNS ANAF (referință scurtă)`)
   lines.push(
-    "Pentru a genera draft răspuns, folosește unul din aceste type-uri (NU inventa altele):",
+    "Tipuri disponibile: " + ctx.availableResponseTemplates.map((t) => t.type).join(", ") +
+      ". Dacă userul cere draft, recomandă-i Bibliotecă răspunsuri ANAF (există drawer dedicat în UI cu placeholders auto-completable).",
   )
-  for (const t of ctx.availableResponseTemplates) {
-    lines.push(`- ${t.type} → ${t.label}`)
-  }
 
   return lines.join("\n")
 }

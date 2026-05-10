@@ -24,6 +24,7 @@ import {
 import { makeResolution } from "@/lib/compliance/finding-resolution"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { systemEventActor } from "@/lib/server/event-actor"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 
 type StateWithFilings = ComplianceState & { filingRecords?: FilingRecord[] }
@@ -80,10 +81,19 @@ export async function GET(request: Request) {
   }
 
   const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const nowDay = new Date(nowISO).getUTCDate()
 
   // Fereastră eligibilă: zilele 10-20 ale lunii (când ANAF publică P300)
   if (nowDay < 10 || nowDay > 20) {
+    await safeRecordCronRun({
+      name: "p300-monthly-check",
+      lastRunAtISO: nowISO,
+      ok: true,
+      durationMs: Date.now() - startMs,
+      summary: `Sărit — ziua ${nowDay} e în afara ferestrei 10-20.`,
+      stats: { skipped: 1, day: nowDay },
+    })
     return NextResponse.json({
       skipped: true,
       reason: `Outside P300 publishing window (day ${nowDay}, eligible 10-20).`,
@@ -161,6 +171,21 @@ export async function GET(request: Request) {
       console.error(`[p300-monthly-check] org ${orgId} failed:`, err)
     }
   }
+
+  await safeRecordCronRun({
+    name: "p300-monthly-check",
+    lastRunAtISO: nowISO,
+    ok: true,
+    durationMs: Date.now() - startMs,
+    summary: `${promptedFindings} prompts P300 noi, ${alreadyChecked} deja verificate, ${skipped} fără D300 (${processed} procesate).`,
+    stats: {
+      processed,
+      promptedFindings,
+      alreadyChecked,
+      skipped,
+      targetPeriod,
+    },
+  })
 
   return NextResponse.json({
     processed,

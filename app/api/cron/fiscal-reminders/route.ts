@@ -26,6 +26,7 @@ import {
 } from "@/lib/server/fiscal-reminder-email"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { systemEventActor } from "@/lib/server/event-actor"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { ComplianceState, ScanFinding } from "@/lib/compliance/types"
 
 type StateWithFilings = ComplianceState & { filingRecords?: FilingRecord[] }
@@ -167,6 +168,26 @@ export async function GET(request: Request) {
       console.error(`[fiscal-reminders] org ${orgId} failed:`, err)
     }
   }
+
+  await safeRecordCronRun({
+    name: "fiscal-reminders",
+    lastRunAtISO: nowISO,
+    ok: errors === 0,
+    durationMs: Date.now() - nowMs,
+    summary: `${emailsSent} email-uri trimise, ${emailsSkipped} sărite, ${errors} erori (din ${processed} orgs).`,
+    stats: {
+      processed,
+      emailsSent,
+      emailsSkipped,
+      errors,
+      resend: channelStats.resend ?? 0,
+      console: channelStats.console ?? 0,
+    },
+    errorMessage:
+      errors > 0 && errorDetails[0]
+        ? `${errorDetails[0].reason}${errorDetails.length > 1 ? ` (+${errorDetails.length - 1} more)` : ""}`
+        : undefined,
+  })
 
   return NextResponse.json({
     processed,

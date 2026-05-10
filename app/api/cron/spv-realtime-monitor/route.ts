@@ -19,6 +19,7 @@ import { listAllOrgIds, readStateForOrg, writeStateForOrg } from "@/lib/server/m
 import { ensureValidToken, fetchSpvMessages, type SpvMessage } from "@/lib/anaf-spv-client"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { systemEventActor } from "@/lib/server/event-actor"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
 type StateWithSpvSeen = ComplianceState & {
@@ -49,6 +50,7 @@ export async function GET(request: Request) {
   }
 
   const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const orgIds = await listAllOrgIds()
   let processed = 0
   let totalNewMessages = 0
@@ -122,6 +124,23 @@ export async function GET(request: Request) {
       console.error(`[spv-realtime-monitor] org ${orgId} failed:`, err)
     }
   }
+
+  await safeRecordCronRun({
+    name: "spv-realtime-monitor",
+    lastRunAtISO: nowISO,
+    ok: errors === 0,
+    durationMs: Date.now() - startMs,
+    summary:
+      totalNewMessages === 0
+        ? `${processed} orgs verificate, nicio mesaj nou.`
+        : `${totalNewMessages} mesaje noi (${criticalCount} critice) din ${processed} orgs.`,
+    stats: {
+      processed,
+      totalNewMessages,
+      criticalCount,
+      errors,
+    },
+  })
 
   return NextResponse.json({
     processed,

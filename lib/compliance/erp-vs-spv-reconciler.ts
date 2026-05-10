@@ -190,7 +190,7 @@ export function buildErpSpvDisparityFindings(
     risk: d.severity === "critical" ? "high" : "low",
     principles: ["accountability"],
     createdAtISO: nowISO,
-    sourceDocument: `e-Factura ${d.series}${d.number}`,
+    sourceDocument: `e-Factura ${d.series}${d.invoiceNumber}`,
     legalReference: "OUG 120/2021 modif. OUG 115/2023 · Cod Procedură Fiscală Art. 105",
     remediationHint:
       d.type === "erp_says_sent_spv_says_missing"

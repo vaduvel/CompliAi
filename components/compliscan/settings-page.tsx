@@ -632,6 +632,44 @@ export function SettingsPageSurface() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </div>
+
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-eos-text-muted">Echipa cabinetului</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
+                    Adaugă colegi cu roluri (compliance, reviewer, viewer). Multi-seat pentru cabinete cu 2-15 oameni.
+                  </p>
+                </div>
+                <CalendarClock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <Link
+                href="/dashboard/settings/team"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-eos-primary transition hover:text-eos-primary"
+              >
+                Gestionează echipa
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-eos-text-muted">Cron-uri & observabilitate</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
+                    Joburi automate (reminder fiscal, P300, ANAF retry, SPV monitor). Last-run + status pentru audit.
+                  </p>
+                </div>
+                <CalendarClock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <Link
+                href="/dashboard/settings/cron-status"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-eos-primary transition hover:text-eos-primary"
+              >
+                Vezi status cron-uri
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
           </div>
         </div>
 
