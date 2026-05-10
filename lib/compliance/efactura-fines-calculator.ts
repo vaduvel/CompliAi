@@ -1,8 +1,20 @@
 // Pure-function lib pentru calcul amenzi e-Factura, SAF-T D406, e-TVA, și
 // neraportare ANAF SPV. Bază legală:
-//   - OUG 120/2021 (e-Factura) modif. OUG 115/2023
+//   - OUG 120/2021 (e-Factura) modif. OUG 115/2023, OUG 69/2024, OUG 89/2025
 //   - Cod Procedură Fiscală Art. 336 (SAF-T D406)
-//   - OUG 70/2024 + 89/2025 (RO e-TVA)
+//   - OUG 70/2024 + 89/2025 (RO e-TVA), OUG 13/2026 (eliminare notificare conformare)
+//
+// **Update 2026 (validat cu surse independente, mai 2026):**
+//   - Termenul B2B + B2C + B2G unificat la 5 zile lucrătoare (din 1 ian 2026, OUG 89/2025)
+//   - Notificarea de conformare RO e-TVA ELIMINATĂ oficial prin OUG 13/2026
+//     (M.Of. 181/9 mar 2026). Sancțiunea etva_neresponded se aplică DOAR pentru
+//     notificări primite înainte de 2026-03-09. Pentru perioade post-elim:
+//     decontul P300 precompletat ÎNCĂ se livrează ca data feed informativ
+//     (NU declanșează obligație de răspuns).
+//   - PFA / persoane fizice cu CNP: obligație e-Factura de la 1 iun 2026
+//     (postpus prin OG 6/2026); registrare obligatorie via Form 082 până la 26 mai 2026.
+//   - 15% penalitate bilaterală pe valoarea facturii (art. 10 alin. 3 OUG 120/2021)
+//     atunci când B2B nu folosește e-Factura — pe lângă amenda fixă.
 //
 // Pragurile aici sunt INFORMATIVE — pentru orientare. Decizia ANAF este
 // întotdeauna în limita prevăzută de lege și depinde de circumstanțe.
@@ -25,13 +37,15 @@ const CATEGORY_LABELS: Record<TaxpayerCategory, string> = {
 // ── Tipuri de încălcare ──────────────────────────────────────────────────────
 
 export type ViolationType =
-  | "efactura_nedepusa"           // factură netransmisă în SPV (5 zile calendaristice B2B)
-  | "efactura_b2c_nedepusa"       // factură B2C netransmisă în 5 zile LUCRĂTOARE (din 1 ian 2025)
-  | "efactura_intarziere"         // factură depusă cu întârziere
+  | "efactura_nedepusa"           // factură netransmisă în SPV (5 zile lucrătoare din 1 ian 2026)
+  | "efactura_b2c_nedepusa"       // factură B2C netransmisă (echivalent cu efactura_nedepusa post-2026)
+  | "efactura_b2b_15pct"          // 15% bilateral B2B atunci când nu se folosește e-Factura
+  | "efactura_intarziere"         // factură depusă cu întârziere (după 5 zile lucrătoare)
   | "efactura_xml_eroare"         // XML respins repetat (>3 ori)
+  | "pfa_cnp_neinregistrat"       // PFA/CNP neregistrat în Registrul e-Factura via Form 082
   | "saft_d406_nedepusa"          // declarație D406 lipsă
   | "saft_d406_intarziere"        // D406 depus cu întârziere
-  | "etva_neresponded"            // notificare conformare RO e-TVA neResponded
+  | "etva_neresponded"            // [legacy] notificare conformare RO e-TVA neResponded — eliminat 9 mar 2026
   | "spv_neactivat"               // neînregistrare SPV
   | "registru_facturi_neactualizat" // jurnal vânzări/cumpărări neactualizat
 
@@ -130,24 +144,30 @@ export type ViolationInput = {
 }
 
 const VIOLATION_LABELS: Record<ViolationType, string> = {
-  efactura_nedepusa: "Factură B2B netransmisă în SPV (>5 zile calendaristice)",
-  efactura_b2c_nedepusa: "Factură B2C netransmisă în SPV (>5 zile lucrătoare — din 1 ian 2025)",
+  efactura_nedepusa: "Factură netransmisă în SPV (>5 zile lucrătoare — regulă unificată din 1 ian 2026)",
+  efactura_b2c_nedepusa: "Factură B2C netransmisă în SPV (>5 zile lucrătoare)",
+  efactura_b2b_15pct: "Penalitate bilaterală 15% pe valoarea facturii (B2B fără e-Factura)",
   efactura_intarziere: "Factură transmisă cu întârziere",
   efactura_xml_eroare: "XML respins repetat (>3 ori)",
+  pfa_cnp_neinregistrat: "PFA / persoană fizică (CNP) neînregistrat în Registrul e-Factura (Form 082)",
   saft_d406_nedepusa: "D406 SAF-T nedepus",
   saft_d406_intarziere: "D406 SAF-T cu întârziere",
-  etva_neresponded: "Notificare RO e-TVA neResponded (>20 zile)",
+  etva_neresponded: "[Legacy] Notificare RO e-TVA neResponded — eliminată 9 mar 2026 (OUG 13/2026)",
   spv_neactivat: "Cont SPV neactivat",
   registru_facturi_neactualizat: "Jurnal vânzări/cumpărări neactualizat",
 }
 
 const VIOLATION_RECOMMENDATIONS: Record<ViolationType, string> = {
   efactura_nedepusa:
-    "Transmite imediat în SPV. Pentru recurența: implementează cron auto-validare lunar și conectează ERP cu webhook e-Factura.",
+    "Din 1 ian 2026 (OUG 89/2025) termenul e 5 zile LUCRĂTOARE pentru toate B2B/B2C/B2G. Activează alertă pe ziua 3 lucrătoare; cron auto-validare lunar; webhook ERP.",
   efactura_b2c_nedepusa:
-    "B2C are termen mai scurt (5 zile lucrătoare, NU calendaristice — OUG 120/2021 modif. OUG 69/2024). Marchează facturile B2C la emitere și activează alertă pe ziua 3 lucrătoare.",
+    "B2C are același termen 5 zile lucrătoare ca B2B din 1 ian 2026. Marchează facturile B2C la emitere — sunt în general urmărite separat pentru tracking dovadă livrare.",
+  efactura_b2b_15pct:
+    "Pe LÂNGĂ amenda fixă: 15% pe valoarea facturii — penalitate bilaterală (atât emitent cât și beneficiar) când B2B nu folosește e-Factura. Conform Art. 10 alin. 3 OUG 120/2021.",
   efactura_intarziere:
     "Stabilește SLA intern de 3 zile lucrătoare per emisă; CompliScan trimite alertă pe ziua 4.",
+  pfa_cnp_neinregistrat:
+    "PFA / CNP individuali: depune Form 082 prin SPV până la 26 mai 2026 (Ordin ANAF 378/2026). Obligație e-Factura activă din 1 iun 2026 (OG 6/2026). Fără registrare = sancțiune VAT non-deductibility + amendă.",
   efactura_xml_eroare:
     "Folosește validatorul UBL CIUS-RO ÎNAINTE de transmitere; auto-repair pentru codurile V001-V011 frecvente.",
   saft_d406_nedepusa:
@@ -155,7 +175,7 @@ const VIOLATION_RECOMMENDATIONS: Record<ViolationType, string> = {
   saft_d406_intarziere:
     "Implementează checklist închidere contabilă cu deadline T+25; folosește SAF-T Hygiene Calculator pentru pre-validare.",
   etva_neresponded:
-    "Activează cron lunar de comparare D300 vs P300; CompliScan generează finding preventiv ÎNAINTE de notificarea oficială ANAF.",
+    "[LEGACY — eliminat 9 mar 2026 prin OUG 13/2026] Notificarea de conformare e-TVA a fost ELIMINATĂ. Decontul P300 precompletat încă se livrează ca data feed informativ, dar NU mai există obligație de răspuns 20-zile sau sancțiune. Tot util: cron lunar D300 vs P300 pentru a depista diferențe ÎNAINTE de un audit potențial.",
   spv_neactivat:
     "Activează SPV imediat la registrul comerțului; fără SPV nu poți primi notificări ANAF și ești în default.",
   registru_facturi_neactualizat:
@@ -169,8 +189,12 @@ function pickRange(
   switch (type) {
     case "efactura_nedepusa":
     case "efactura_b2c_nedepusa":
+    case "efactura_b2b_15pct":
     case "efactura_intarziere":
     case "efactura_xml_eroare":
+      return EFACTURA_FINES[category]
+    case "pfa_cnp_neinregistrat":
+      // Pragurile pentru PFA mici — categoria mic intermediar
       return EFACTURA_FINES[category]
     case "saft_d406_nedepusa":
     case "saft_d406_intarziere":

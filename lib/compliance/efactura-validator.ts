@@ -94,12 +94,18 @@ function detectCustomerType(customerPartyBlock: string): "b2b" | "b2c" | "unknow
 }
 
 /**
- * Calcul termen raportare SPV.
- *  - B2B: 5 zile calendaristice de la issueDate (OUG 120/2021 Art. 10)
- *  - B2C: 5 zile LUCRĂTOARE de la issueDate (OUG 120/2021 modif. OUG 69/2024,
- *    aplicabil din 1 ian 2025)
- *  - Sărbători legale RO 2025-2027 (set fix; pentru update — feed-sources.ts)
+ * Calcul termen raportare SPV — actualizat pentru 2026.
+ *
+ *  - **De la 1 ianuarie 2026 (OUG 89/2025 "trenuleț")**: termenul e
+ *    **5 zile LUCRĂTOARE** atât pentru B2B cât și pentru B2C, de la issueDate.
+ *    (Înainte: B2B era 5 zile calendaristice.)
+ *  - Pentru facturi emise ÎNAINTE de 2026-01-01: păstrăm 5 zile calendaristice
+ *    pentru B2B (legacy backward-compat).
+ *  - B2C: 5 zile lucrătoare (neschimbat) — OUG 120/2021 modif. OUG 69/2024.
+ *
+ *  Sărbători legale RO 2025-2026 incluse (set fix; pentru update — feed-sources.ts)
  */
+const NEW_DEADLINE_RULE_FROM_ISO = "2026-01-01"
 const RO_HOLIDAYS = new Set([
   "2025-01-01", "2025-01-02", "2025-01-24", "2025-04-18", "2025-04-20", "2025-04-21",
   "2025-05-01", "2025-06-01", "2025-06-08", "2025-06-09", "2025-08-15", "2025-11-30",
@@ -116,6 +122,16 @@ function isWorkingDay(d: Date): boolean {
   return !RO_HOLIDAYS.has(iso)
 }
 
+function addWorkingDays(start: Date, count: number): Date {
+  const cur = new Date(start)
+  let added = 0
+  while (added < count) {
+    cur.setUTCDate(cur.getUTCDate() + 1)
+    if (isWorkingDay(cur)) added++
+  }
+  return cur
+}
+
 function computeReportingDeadline(
   issueDate: string,
   customerType: "b2b" | "b2c" | "unknown",
@@ -124,18 +140,16 @@ function computeReportingDeadline(
   const start = new Date(`${issueDate}T00:00:00.000Z`)
   if (Number.isNaN(start.getTime())) return undefined
 
-  if (customerType === "b2c") {
-    // 5 zile lucrătoare
-    let added = 0
-    const cur = new Date(start)
-    while (added < 5) {
-      cur.setUTCDate(cur.getUTCDate() + 1)
-      if (isWorkingDay(cur)) added++
-    }
-    return cur.toISOString()
+  // Din 1 ianuarie 2026 (OUG 89/2025) regula e UNIFICATĂ: 5 zile lucrătoare
+  // pentru toate categoriile (B2B + B2C + unknown).
+  const newRulesActive = issueDate >= NEW_DEADLINE_RULE_FROM_ISO
+
+  if (newRulesActive || customerType === "b2c") {
+    return addWorkingDays(start, 5).toISOString()
   }
 
-  // B2B / unknown — 5 zile calendaristice
+  // Legacy (facturi emise înainte de 2026-01-01) pentru B2B/unknown:
+  // 5 zile calendaristice (OUG 120/2021 Art. 10 înainte de modif. OUG 89/2025).
   const calendar = new Date(start)
   calendar.setUTCDate(calendar.getUTCDate() + 5)
   return calendar.toISOString()
@@ -293,10 +307,19 @@ export function validateEFacturaXml({
   const customerType = detectCustomerType(customerPartyBlock)
   const reportingDeadlineISO = computeReportingDeadline(issueDate, customerType)
 
-  // Warning B2C-specific: tip de termen mai strict
-  if (customerType === "b2c") {
+  // Warning regulă 2026: 5 zile lucrătoare unificat
+  const isPost2026 = issueDate && issueDate >= NEW_DEADLINE_RULE_FROM_ISO
+  if (isPost2026 && customerType === "b2c") {
     warnings.push(
-      "B2C detectat (persoană fizică). Termen raportare SPV: 5 zile LUCRĂTOARE de la emitere (OUG 120/2021 modif. OUG 69/2024, aplicabil din 1 ian 2025).",
+      "B2C detectat. Din 1 ian 2026 (OUG 89/2025): 5 zile LUCRĂTOARE de la emitere — regulă unificată cu B2B.",
+    )
+  } else if (isPost2026) {
+    warnings.push(
+      "Din 1 ian 2026 (OUG 89/2025): termenul de transmitere SPV este 5 zile LUCRĂTOARE (nu calendaristice ca înainte). Aplică pentru toate facturile B2B/B2C/B2G.",
+    )
+  } else if (customerType === "b2c") {
+    warnings.push(
+      "B2C detectat. Termen raportare SPV: 5 zile LUCRĂTOARE de la emitere (OUG 120/2021 modif. OUG 69/2024, din 1 ian 2025).",
     )
   }
 

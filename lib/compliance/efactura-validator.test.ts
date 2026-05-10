@@ -61,7 +61,7 @@ describe("efactura-validator", () => {
     expect(result.customerCui).toBe("RO87654321")
   })
 
-  it("detectează B2B când clientul are PartyTaxScheme cu CIF valid", () => {
+  it("B2B post-2026 (issueDate ≥ 2026-01-01): folosește 5 zile lucrătoare unificat (OUG 89/2025)", () => {
     const xmlB2B = VALID_XML.replace(
       "<cac:PartyLegalEntity>\n        <cbc:RegistrationName>Client Test SRL</cbc:RegistrationName>\n        <cbc:CompanyID>RO87654321</cbc:CompanyID>\n      </cac:PartyLegalEntity>",
       `<cac:PartyTaxScheme>
@@ -79,8 +79,34 @@ describe("efactura-validator", () => {
       nowISO: "2026-03-20T10:00:00.000Z",
     })
     expect(result.customerType).toBe("b2b")
-    // 5 zile calendaristice: 2026-03-15 + 5 = 2026-03-20
+    // Issue 2026-03-15 (duminică) → 5 zile lucrătoare = 16 (lu) 17 (ma) 18 (mi) 19 (jo) 20 (vi)
     expect(result.reportingDeadlineISO).toBe("2026-03-20T00:00:00.000Z")
+    expect(result.warnings.some((w) => w.includes("OUG 89/2025"))).toBe(true)
+  })
+
+  it("B2B legacy (issueDate < 2026-01-01): 5 zile calendaristice", () => {
+    // Issue date pre-2026 → legacy regime
+    const xmlB2B = VALID_XML
+      .replace("<cbc:IssueDate>2026-03-15</cbc:IssueDate>", "<cbc:IssueDate>2025-12-29</cbc:IssueDate>")
+      .replace(
+        "<cac:PartyLegalEntity>\n        <cbc:RegistrationName>Client Test SRL</cbc:RegistrationName>\n        <cbc:CompanyID>RO87654321</cbc:CompanyID>\n      </cac:PartyLegalEntity>",
+        `<cac:PartyTaxScheme>
+        <cbc:CompanyID>RO87654321</cbc:CompanyID>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Client Test SRL</cbc:RegistrationName>
+        <cbc:CompanyID>RO87654321</cbc:CompanyID>
+      </cac:PartyLegalEntity>`,
+      )
+    const result = validateEFacturaXml({
+      documentName: "b2b-legacy.xml",
+      xml: xmlB2B,
+      nowISO: "2026-01-05T10:00:00.000Z",
+    })
+    expect(result.customerType).toBe("b2b")
+    // 5 zile calendaristice: 2025-12-29 + 5 = 2026-01-03
+    expect(result.reportingDeadlineISO).toBe("2026-01-03T00:00:00.000Z")
   })
 
   it("detectează B2C când customer-ul nu are PartyTaxScheme (persoană fizică)", () => {
