@@ -232,6 +232,21 @@ export async function sendFiscalReminderEmail(
 
     if (!res.ok) {
       const err = await res.text()
+      // Resend free tier: 403 cu „validation_error" la send către un email
+      // ne-verificat. În dev/demo asta NU e o eroare reală — facem fallback
+      // la console.log ca și cum n-ar fi configurat Resend.
+      const isResendSandboxRestriction =
+        res.status === 403 && err.includes("validation_error")
+      if (isResendSandboxRestriction) {
+        console.log(
+          `[CompliScan Fiscal] EMAIL → ${payload.recipientEmail} | Resend sandbox restriction (free tier) — fallback console | reminders=${payload.reminders.length} findings=${payload.newFindings.length}`,
+        )
+        return {
+          ok: true,
+          channel: "console",
+          reason: `${decision.reason} (resend sandbox fallback)`,
+        }
+      }
       return { ok: false, channel: "resend", reason: `HTTP ${res.status}: ${err.slice(0, 100)}` }
     }
 

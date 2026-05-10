@@ -67,6 +67,7 @@ export async function GET(request: Request) {
   let emailsSkipped = 0
   let errors = 0
   const channelStats: Record<string, number> = { resend: 0, console: 0 }
+  const errorDetails: Array<{ orgId: string; reason: string }> = []
 
   for (const orgId of orgIds) {
     try {
@@ -127,6 +128,7 @@ export async function GET(request: Request) {
         }
       } else {
         errors++
+        errorDetails.push({ orgId, reason: `${result.channel}: ${result.reason ?? "unknown"}` })
       }
 
       // Audit event
@@ -160,6 +162,8 @@ export async function GET(request: Request) {
       processed++
     } catch (err) {
       errors++
+      const reason = err instanceof Error ? err.message : String(err)
+      errorDetails.push({ orgId, reason: `exception: ${reason.slice(0, 200)}` })
       console.error(`[fiscal-reminders] org ${orgId} failed:`, err)
     }
   }
@@ -170,6 +174,7 @@ export async function GET(request: Request) {
     emailsSkipped,
     errors,
     channelStats,
+    errorDetails,
     timestamp: nowISO,
   })
 }
