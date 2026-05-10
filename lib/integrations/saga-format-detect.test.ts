@@ -35,9 +35,39 @@ describe("detectSagaExport", () => {
   it("detectează UBL e-Factura din pattern de filename Saga", () => {
     const xml = `<?xml version="1.0"?><Invoice></Invoice>`
     const r = detectSagaExport("factura12_FACT_RO12345678.xml", xml)
-    expect(r.type).toBe("saga_efactura_xml")
+    expect(r.type).toBe("saga_efactura_ubl")
     expect(r.isSagaSpecific).toBe(true)
     expect(r.confidence).toBe("medium")
+  })
+
+  it("detectează SAGA NATIVE invoice din filename canonic F_<cif>_<num>_<data>.xml", () => {
+    const xml = `<?xml version="1.0"?>
+      <Factura><Antet>
+        <FurnizorNume>SC Demo SRL</FurnizorNume>
+        <FurnizorCIF>12345678</FurnizorCIF>
+        <ClientNume>Client SRL</ClientNume>
+        <ClientCIF>87654321</ClientCIF>
+        <FacturaNumar>001</FacturaNumar>
+        <FacturaData>2026-04-15</FacturaData>
+      </Antet></Factura>`
+    const r = detectSagaExport("F_12345678_001_2026-04-15.xml", xml)
+    expect(r.type).toBe("saga_native_invoice")
+    expect(r.recommendedHandler).toBe("saga-native-parser")
+    expect(r.confidence).toBe("high")
+  })
+
+  it("detectează SAGA NATIVE doar din content (fără filename canonic)", () => {
+    const xml = `<?xml version="1.0"?>
+      <Factura><Antet>
+        <FurnizorNume>X</FurnizorNume>
+        <FurnizorCIF>12345678</FurnizorCIF>
+        <ClientNume>Y</ClientNume>
+        <ClientCIF>87654321</ClientCIF>
+        <FacturaNumar>001</FacturaNumar>
+      </Antet></Factura>`
+    const r = detectSagaExport("export.xml", xml)
+    expect(r.type).toBe("saga_native_invoice")
+    expect(r.isSagaSpecific).toBe(true)
   })
 
   it("returnează unknown pentru content nerecunoscut", () => {
