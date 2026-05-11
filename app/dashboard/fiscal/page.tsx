@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
+import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
 import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
 import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
@@ -249,6 +250,15 @@ export default function FiscalPage() {
             <ArrowLeft className="size-3" strokeWidth={2} />
             Inapoi la finding
           </a>
+        </section>
+      )}
+
+      {/* Audit Risk Score — F#1 Sprint 8-9 (2026-05-11).
+          Hero card cu scor 0-100 + breakdown explicabil (CECCAR Art. 14).
+          Vizibil doar pe overview (fără tabParam) ca să nu dubleze contextul. */}
+      {!tabParam && (
+        <section>
+          <AuditRiskPanel />
         </section>
       )}
 
