@@ -5,13 +5,15 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { Camera, FileCode2, Package, Radio } from "lucide-react"
+import { Camera, FileCode2, History, ListChecks, Package, Radio } from "lucide-react"
 
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
+import { BatchSessionsCard } from "@/components/compliscan/fiscal/BatchSessionsCard"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
 import { FiscalSubpageShell } from "@/components/compliscan/fiscal/FiscalSubpageShell"
 import { InvoiceOcrPanel } from "@/components/compliscan/fiscal/InvoiceOcrPanel"
+import { SequenceGapCard } from "@/components/compliscan/fiscal/SequenceGapCard"
 import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
 
 export default function FiscalValidationPage() {
@@ -122,6 +124,14 @@ export default function FiscalValidationPage() {
       </Section>
 
       <Section
+        icon={<History className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Sesiuni batch reluabile"
+        subtitle="Procesările bulk lungi pot fi întrerupte (network, refresh, crash). Reia exact de unde au rămas, fără să procesezi din nou facturile deja OK."
+      >
+        <BatchSessionsCard />
+      </Section>
+
+      <Section
         icon={<FileCode2 className="size-4 text-eos-primary" strokeWidth={2} />}
         title="Validare manuală XML"
         subtitle="Validare UBL CIUS-RO + auto-repair sugestii pentru V002 (CustomizationID), V003, V005, T003."
@@ -133,6 +143,14 @@ export default function FiscalValidationPage() {
           onValidate={handleValidateXml}
           onRepair={handleRepairXml}
         />
+      </Section>
+
+      <Section
+        icon={<ListChecks className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Audit numerotare facturi"
+        subtitle="Detectează goluri, duplicate și cronologie inversă în seria de facturi. CECCAR Art. 14 + Cod Fiscal Art. 319 — primul check al inspectorului fiscal."
+      >
+        <SequenceGapCard />
       </Section>
 
       <Section

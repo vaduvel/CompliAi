@@ -212,6 +212,16 @@ export function NotificationBell() {
               ))
             )}
           </div>
+
+          <div className="border-t border-eos-border-subtle bg-eos-surface-elevated/40 px-4 py-2 text-center">
+            <Link
+              href="/dashboard/notificari"
+              onClick={() => setOpen(false)}
+              className="text-[11.5px] text-eos-text-link hover:underline"
+            >
+              Vezi toate notificările →
+            </Link>
+          </div>
         </div>
       )}
     </div>

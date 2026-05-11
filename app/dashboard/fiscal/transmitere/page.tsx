@@ -5,14 +5,16 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { Send, ShieldCheck, AlertTriangle, Clock, Loader2 } from "lucide-react"
+import { AlertTriangle, Clock, FileText, Loader2, Send, ShieldCheck } from "lucide-react"
 import { toast } from "sonner"
 
+import { AnafRequestLogDrawer } from "@/components/compliscan/fiscal/AnafRequestLogDrawer"
 import { SubmitSpvTab } from "@/components/compliscan/fiscal/SubmitSpvTab"
 import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
 import { FiscalSubpageShell } from "@/components/compliscan/fiscal/FiscalSubpageShell"
+import { Button } from "@/components/evidence-os/Button"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { buildFiscalStatusInterpreterGuide } from "@/lib/compliance/efactura-status-interpreter"
 import type { ScanFinding } from "@/lib/compliance/types"
@@ -22,6 +24,7 @@ export default function FiscalTransmissionPage() {
   const findingIdParam = searchParams.get("findingId")
   const [statusFinding, setStatusFinding] = useState<ScanFinding | null>(null)
   const [statusLoading, setStatusLoading] = useState(false)
+  const [logOpen, setLogOpen] = useState(false)
 
   useEffect(() => {
     if (!findingIdParam) {
@@ -59,12 +62,19 @@ export default function FiscalTransmissionPage() {
         title="Transmitere ANAF cu dublă aprobare"
         subtitle="Orice transmitere SPV necesită aprobare manuală. Audit log per submission."
       >
+        <div className="mb-3 flex justify-end">
+          <Button size="sm" variant="ghost" onClick={() => setLogOpen(true)}>
+            <FileText className="mr-1.5 size-3.5" strokeWidth={2} />
+            Istoric cereri ANAF
+          </Button>
+        </div>
         <SubmitSpvTab
           sourceFindingId={findingIdParam}
           fromCockpit={Boolean(findingIdParam)}
           returnToFindingHref={findingIdParam ? `/dashboard/resolve/${findingIdParam}` : null}
         />
       </Section>
+      <AnafRequestLogDrawer open={logOpen} onClose={() => setLogOpen(false)} />
 
       <Section
         icon={<ShieldCheck className="size-4 text-eos-primary" strokeWidth={2} />}

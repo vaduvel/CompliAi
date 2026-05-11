@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { AlertTriangle, CheckCircle2, Copy, Download, FileCode2, RefreshCw, Wand2, Zap } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Copy, Download, FileCode2, Loader2, RefreshCw, Sparkles, Wand2, Zap } from "lucide-react"
 import { toast } from "sonner"
 
 import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
@@ -69,6 +69,17 @@ export function EFacturaValidatorCard({
   const [documentName, setDocumentName] = useState("factura-anaf.xml")
   const [xml, setXml] = useState("")
   const [repairResult, setRepairResult] = useState<EFacturaXmlRepairRecord | null>(null)
+  const [aiExplanations, setAiExplanations] = useState<Array<{
+    code: string
+    title: string
+    staticDescription: string
+    staticFix: string
+    severity: "error" | "warning"
+    legalReference: string
+    autoFixSafe: boolean
+    aiExplanation?: string
+  }> | null>(null)
+  const [explainBusy, setExplainBusy] = useState(false)
   const [showDiff, setShowDiff] = useState(false)
   // GAP #2 — Auto-repair disclaimer + audit log (BLOCKER LEGAL CECCAR).
   // Conform Codului Deontologic CECCAR, contabilul e responsabil profesional
@@ -369,6 +380,72 @@ export function EFacturaValidatorCard({
                   tone="warning"
                 />
               </div>
+
+              {latestValidation.errors.length > 0 && (
+                <div className="space-y-2 rounded-eos-md border border-eos-border bg-eos-surface/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[12px] text-eos-text-muted">
+                      Nu înțelegi erorile? CompliScan poate enrich cu explicații + referințe legale.
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={explainBusy}
+                      onClick={async () => {
+                        setExplainBusy(true)
+                        try {
+                          const codes = latestValidation.errors
+                            .map((line) => line.match(/^([A-Z]+-?[A-Z\d-]+|V\d+|T\d+|BR-[A-Z\d-]+)/)?.[1])
+                            .filter((c): c is string => !!c)
+                          const res = await fetch("/api/efactura/explain-errors", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ errors: codes }),
+                          })
+                          if (!res.ok) throw new Error("HTTP " + res.status)
+                          const payload = (await res.json()) as { explanations: typeof aiExplanations }
+                          setAiExplanations(payload.explanations ?? [])
+                        } catch {
+                          toast.error("Nu am putut genera explicațiile.")
+                        } finally {
+                          setExplainBusy(false)
+                        }
+                      }}
+                    >
+                      {explainBusy ? (
+                        <Loader2 className="mr-1.5 size-3.5 animate-spin" strokeWidth={2} />
+                      ) : (
+                        <Sparkles className="mr-1.5 size-3.5" strokeWidth={2} />
+                      )}
+                      Explică erorile cu AI
+                    </Button>
+                  </div>
+                  {aiExplanations && aiExplanations.length > 0 && (
+                    <ul className="space-y-2">
+                      {aiExplanations.map((exp) => (
+                        <li
+                          key={exp.code}
+                          className="rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-2"
+                        >
+                          <p className="font-display text-[12px] font-semibold text-eos-text">
+                            <span className="font-mono text-[11px] text-eos-text-tertiary">{exp.code}</span>{" "}
+                            · {exp.title}
+                          </p>
+                          <p className="mt-1 text-[11.5px] text-eos-text">{exp.staticDescription}</p>
+                          <p className="mt-1 text-[11px] text-eos-text-muted">
+                            <strong>Fix:</strong> {exp.staticFix}
+                          </p>
+                          <p className="mt-1 text-[10.5px] text-eos-text-tertiary">
+                            {exp.legalReference}
+                            {exp.autoFixSafe ? " · ✓ auto-fix sigur" : ""}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
 
               {repairResult && (
                 <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/[0.06] p-5" data-testid="repair-result">
