@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
@@ -251,6 +252,40 @@ export default function FiscalPage() {
         </section>
       )}
 
+      {/* Cockpit Quick Actions — Sprint 0 IA restructure (2026-05-11).
+          Vizibil DOAR în mod overview (fără tabParam din URL). Pe sub-rute
+          (?tab=X) acest card ascuns ca să nu dubleze contextul. */}
+      {!tabParam && (
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/validare"
+            title="Validare & emitere"
+            description="Validator UBL CIUS-RO + Bulk ZIP + Semnale e-Factura."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/transmitere"
+            title="Transmitere & SPV"
+            description="Submit ANAF cu dublă aprobare + status SPV real-time."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/tva-declaratii"
+            title="TVA & declarații"
+            description="Discrepanțe e-TVA + depuneri D300/D406 + SAF-T hygiene."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/integrari"
+            title="Integrări ERP"
+            description="SmartBill / Oblio / Saga + reconciliere SPV."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/deadline-urgent"
+            title="Deadline urgent"
+            description="PFA Form 082 (26 mai 2026) + calendar termene."
+            urgent
+          />
+        </section>
+      )}
+
       <Tabs defaultValue={defaultTab} className="space-y-4">
         {/* Sprint 0 IA restructure (2026-05-11): TabsList ascuns vizual cu sr-only.
             Navigarea se face din sidebar (7 sub-link-uri grupate). Radix Tabs
@@ -440,5 +475,46 @@ export default function FiscalPage() {
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+// Sprint 0 IA — card simplu folosit în cockpit overview pentru sub-pagini fiscal.
+function CockpitQuickActionCard({
+  href,
+  title,
+  description,
+  urgent = false,
+}: {
+  href: string
+  title: string
+  description: string
+  urgent?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group block rounded-eos-lg border bg-eos-surface p-4 transition-all duration-150 hover:bg-eos-surface-elevated ${
+        urgent
+          ? "border-eos-warning/30 hover:border-eos-warning"
+          : "border-eos-border hover:border-eos-border-strong"
+      }`}
+    >
+      <p
+        data-display-text="true"
+        className={`font-display text-[14px] font-semibold tracking-[-0.015em] ${
+          urgent ? "text-eos-warning" : "text-eos-text"
+        }`}
+      >
+        {title}
+      </p>
+      <p className="mt-1 text-[11.5px] leading-[1.5] text-eos-text-muted">{description}</p>
+      <p
+        className={`mt-3 inline-flex items-center gap-1 font-mono text-[10.5px] font-medium ${
+          urgent ? "text-eos-warning" : "text-eos-primary"
+        }`}
+      >
+        Deschide →
+      </p>
+    </Link>
   )
 }
