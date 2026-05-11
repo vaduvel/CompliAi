@@ -5,6 +5,10 @@
 //  - Verdict: "obligation" | "exempt" | "optional" | "investigate"
 //  - Bază legală
 //  - Acțiune recomandată
+//
+// Sprint 5 EXTEND (2026-05-11): aliniat cu OUG 89/2025 (extindere e-Factura
+// la livrări către clienți nerezidenți cu VAT-ID UE) + advisor mode cu pași
+// concreți + checklist documentare (CMR, declarație vamală, VIES verify).
 
 export type CrossBorderInput = {
   supplierCountry: string   // ISO 3166-1 alpha-2 (ex: "RO", "DE", "GB")
@@ -147,3 +151,145 @@ export function evaluateCrossBorderEfactura(input: CrossBorderInput): CrossBorde
 }
 
 export const SUPPORTED_COUNTRY_CODES = Array.from(EU_COUNTRIES).sort()
+
+// ── Sprint 5 EXTEND — Advisor mode cu checklist documente + verificări ──────
+
+export type CrossBorderAdvisorInput = CrossBorderInput & {
+  /** Suma RON (pentru praguri OSS 10K EUR/an). */
+  amountRON?: number
+  /** Pentru transport: indicare dacă bunul are risc fiscal ridicat (NC8 special). */
+  isHighRiskGoods?: boolean
+}
+
+export type CrossBorderAdvisor = {
+  verdict: CrossBorderVerdict
+  /** Checklist concret pentru contabil cu pași actionable. */
+  documentationChecklist: Array<{
+    item: string
+    required: boolean
+    legalBasis?: string
+  }>
+  /** Verificări externe (VIES VAT, OSS registration, e-Transport UIT). */
+  externalChecks: Array<{
+    label: string
+    url?: string
+    note: string
+  }>
+  /** Update post-OUG 89/2025 explicit (când aplică). */
+  oug89Note?: string
+}
+
+export function evaluateCrossBorderAdvisor(input: CrossBorderAdvisorInput): CrossBorderAdvisor {
+  const verdict = evaluateCrossBorderEfactura(input)
+  const documentationChecklist: CrossBorderAdvisor["documentationChecklist"] = []
+  const externalChecks: CrossBorderAdvisor["externalChecks"] = []
+  let oug89Note: string | undefined
+
+  const supRO = input.supplierCountry === "RO"
+  const cusEU = EU_COUNTRIES.has(input.customerCountry)
+  const cusRO = input.customerCountry === "RO"
+
+  // Documentation checklist
+  documentationChecklist.push({
+    item: "Factură emisă cu CIF furnizor + denumire + adresă completă",
+    required: true,
+    legalBasis: "Cod Fiscal Art. 319",
+  })
+
+  if (supRO && cusEU && !cusRO) {
+    documentationChecklist.push({
+      item: "VAT-ID UE valid al clientului (verificat VIES)",
+      required: input.customerType === "b2b" && input.customerHasEuVat,
+      legalBasis: "Reg. UE 282/2011 Art. 18",
+    })
+    documentationChecklist.push({
+      item: "Document transport (CMR) sau dovadă electronică livrare",
+      required: input.transactionKind === "goods",
+      legalBasis: "Cod Fiscal Art. 294 alin. (2)",
+    })
+
+    externalChecks.push({
+      label: "Verifică VAT-ID UE în VIES",
+      url: "https://ec.europa.eu/taxation_customs/vies/",
+      note: "Obligatoriu înainte de emitere factură intracom. Print/screenshot pentru dosar.",
+    })
+
+    if (input.customerType === "b2b" && input.customerHasEuVat) {
+      documentationChecklist.push({
+        item: "Declarația D390 VIES depusă lunar până la 25 a lunii următoare",
+        required: true,
+        legalBasis: "Cod Fiscal Art. 325",
+      })
+      oug89Note =
+        "OUG 89/2025 (din 1 ian 2026): facturile către clienți UE B2B cu VAT-ID valid pot fi transmise în SPV RO e-Factura voluntar (înainte erau EXCLUSE). Pentru evidență internă, recomandat. Termen unificat 5 zile lucrătoare."
+    }
+
+    if (input.customerType === "b2c") {
+      documentationChecklist.push({
+        item: "Verificare cifră vânzări UE B2C cumulat (prag OSS 10.000 EUR/an)",
+        required: true,
+        legalBasis: "Cod Fiscal Art. 311^1",
+      })
+      externalChecks.push({
+        label: "Înregistrare OSS (One Stop Shop)",
+        url: "https://anaf.ro/spv/",
+        note: "Necesar dacă vânzări B2C UE cumulat > 10.000 EUR/an. TVA țară client.",
+      })
+    }
+  }
+
+  if (supRO && !cusEU) {
+    // Export non-UE
+    documentationChecklist.push({
+      item: "Declarație vamală EX A (export) ștampilată de Vamă",
+      required: true,
+      legalBasis: "Codul Vamal + Cod Fiscal Art. 294 alin. (1)",
+    })
+    documentationChecklist.push({
+      item: "Mențiune pe factură: 'Scutire cu drept de deducere — export Art. 294 alin. (1)'",
+      required: true,
+      legalBasis: "Cod Fiscal Art. 294",
+    })
+    if (input.transactionKind === "services") {
+      documentationChecklist.push({
+        item: "Determinare loc prestare servicii (regula generală vs derogări B2C/B2B)",
+        required: true,
+        legalBasis: "Cod Fiscal Art. 278",
+      })
+    }
+  }
+
+  if (!supRO && cusRO) {
+    documentationChecklist.push({
+      item: "Mențiune reverse charge pe factura primită",
+      required: input.customerType === "b2b",
+      legalBasis: "Cod Fiscal Art. 307",
+    })
+    documentationChecklist.push({
+      item: "Înregistrare în D300 rd. 28 (achiziții intracom) + rd. 31 (TVA reverse charge)",
+      required: input.customerType === "b2b",
+      legalBasis: "Cod Fiscal Art. 311",
+    })
+  }
+
+  // e-Transport (dacă bunuri cu risc fiscal ridicat)
+  if (input.transactionKind === "goods" && input.isHighRiskGoods) {
+    documentationChecklist.push({
+      item: "Cod UIT obținut din e-Transport ÎNAINTE de începerea transportului",
+      required: true,
+      legalBasis: "OUG 41/2022 + Ordin 802/2022 (lista NC8 bunuri risc fiscal ridicat)",
+    })
+    externalChecks.push({
+      label: "Generare cod UIT în e-Transport",
+      url: "https://etransport.anaf.ro/",
+      note: "Sancțiuni LIVE din 1 ian 2026: 20.000 RON pentru lipsa GPS + transport fără cod UIT.",
+    })
+  }
+
+  return {
+    verdict,
+    documentationChecklist,
+    externalChecks,
+    oug89Note,
+  }
+}
