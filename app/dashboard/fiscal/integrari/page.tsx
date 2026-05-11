@@ -3,8 +3,9 @@
 // Sub-pagina IA fiscal: Integrări ERP
 // Conține: SmartBill + Oblio + Saga + ERP↔SPV reconcile
 
-import { PlugZap, Zap, FileCode2, GitCompareArrows } from "lucide-react"
+import { PlugZap, Zap, FileCode2, GitCompareArrows, Landmark } from "lucide-react"
 
+import { BankReconcilePanel } from "@/components/compliscan/fiscal/BankReconcilePanel"
 import { ErpSpvReconcileCard } from "@/components/compliscan/fiscal/ErpSpvReconcileCard"
 import { FiscalSubpageShell } from "@/components/compliscan/fiscal/FiscalSubpageShell"
 import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
@@ -48,6 +49,14 @@ export default function FiscalIntegrationsPage() {
         subtitle="Compară facturile din ERP cu cele din SPV ANAF. Detectează lipsuri, duplicate, diferențe de sumă."
       >
         <ErpSpvReconcileCard />
+      </Section>
+
+      <Section
+        icon={<Landmark className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Reconciliere Bancă ↔ SPV (F#2 KILLER)"
+        subtitle="Upload MT940/CAMT.053/CSV → motor AI 90%+ match facturi cu plăți. Cash-flow forecast 30/60/90 zile. ZERO API banking cost (Nordigen FREE / upload manual)."
+      >
+        <BankReconcilePanel />
       </Section>
     </FiscalSubpageShell>
   )
