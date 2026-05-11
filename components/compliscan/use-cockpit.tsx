@@ -542,9 +542,70 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     await withBusyOperation(async () => {
       const response = await fetch("/api/integrations/efactura/sync", { method: "POST" })
       if (!response.ok) throw new Error("Sincronizarea e-Factura a esuat.")
-      const payload = (await response.json()) as DashboardPayload
+      const payload = (await response.json()) as DashboardPayload & {
+        message?: string
+        sync?: {
+          outcome: "no-cui" | "no-token" | "anaf-error" | "ok"
+          messagesChecked: number
+          newFindings: number
+          rejectedCount: number
+          tokenExpired: boolean
+        }
+      }
       applyDashboardPayload(payload)
-      toast.success("Sincronizare e-Factura pornita")
+
+      const sync = payload.sync
+      const message = payload.message ?? "Sincronizare e-Factura procesată."
+
+      if (!sync || sync.outcome === "ok") {
+        if (sync && sync.messagesChecked === 0) {
+          toast.info("Sync e-Factura", { description: message })
+        } else {
+          toast.success("Sync e-Factura", {
+            description:
+              sync && sync.newFindings > 0
+                ? `${sync.messagesChecked} mesaje SPV procesate · ${sync.newFindings} findings noi.`
+                : message,
+          })
+        }
+        return
+      }
+
+      if (sync.outcome === "no-cui") {
+        toast.warning("Completează profilul", {
+          description: message,
+          action: {
+            label: "Profil organizație",
+            onClick: () => {
+              if (typeof window !== "undefined") {
+                window.location.href = "/dashboard/setari"
+              }
+            },
+          },
+        })
+        return
+      }
+
+      if (sync.outcome === "no-token") {
+        toast.warning(sync.tokenExpired ? "Token ANAF expirat" : "Conectează ANAF SPV", {
+          description: message,
+          action: {
+            label: "Conectează ANAF",
+            onClick: () => {
+              if (typeof window !== "undefined") {
+                window.location.href =
+                  "/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere"
+              }
+            },
+          },
+        })
+        return
+      }
+
+      if (sync.outcome === "anaf-error") {
+        toast.error("ANAF a refuzat sync-ul", { description: message })
+        return
+      }
     }).catch((err) => {
       toast.error("Sync esuat", {
         description: err instanceof Error ? err.message : "Eroare la sincronizare.",
