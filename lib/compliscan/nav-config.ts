@@ -45,6 +45,39 @@ const MODULE_NAV_ITEMS: DashboardNavItem[] = [
   },
 ]
 
+// Cabinet-fiscal — instrumente specifice CECCAR (NU duplicate cu modulul Fiscal
+// principal, ci complementare: calendar termene, agent fiscal, scheduled reports).
+const FISCAL_TOOLS_NAV_ITEMS: DashboardNavItem[] = [
+  {
+    id: "fiscal",
+    label: "Fiscal core",
+    href: dashboardRoutes.fiscal,
+    icon: Landmark,
+    matchers: [dashboardRoutes.fiscal],
+  },
+  {
+    id: "calendar",
+    label: "Calendar termene",
+    href: dashboardRoutes.calendar,
+    icon: CalendarClock,
+    matchers: [dashboardRoutes.calendar],
+  },
+  {
+    id: "scheduled-reports",
+    label: "Rapoarte programate",
+    href: dashboardRoutes.settingsScheduledReports,
+    icon: FileSearch,
+    matchers: [dashboardRoutes.settingsScheduledReports],
+  },
+  {
+    id: "agenti",
+    label: "Agent fiscal",
+    href: dashboardRoutes.agents,
+    icon: Sparkles,
+    matchers: [dashboardRoutes.agents],
+  },
+]
+
 const DPO_NAV_ITEMS: DashboardNavItem[] = [
   {
     id: "dsar",
@@ -181,7 +214,7 @@ export function getSidebarNavSections({
     }
 
     if (userMode === "partner") {
-      return [
+      const base: AdaptiveNavSection[] = [
         {
           id: "portfolio",
           label: "Portofoliu",
@@ -192,12 +225,26 @@ export function getSidebarNavSections({
           label: "Firma activa",
           items: ORG_NAV_FULL,
         },
-        {
+      ]
+      // Secțiunea de "Instrumente" se schimbă în funcție de ICP segment.
+      // Înainte era hardcodat "Instrumente DPO" — incorect pentru cabinet-fiscal.
+      if (icpSegment === "cabinet-fiscal") {
+        base.push({
+          id: "fiscal-tools",
+          label: "Instrumente Fiscal",
+          items: FISCAL_TOOLS_NAV_ITEMS,
+        })
+      } else if (icpSegment === "cabinet-dpo" || icpSegment === null) {
+        // cabinet-dpo SAU onboarding incomplet (null) → fallback DPO existent
+        base.push({
           id: "dpo",
           label: "Instrumente DPO",
           items: DPO_NAV_ITEMS,
-        },
-      ]
+        })
+      }
+      // Pentru alți segmenți partner (cabinet-hr etc.) — filterNavSectionsByIcp
+      // se ocupă mai jos de eliminarea items neaplicabile.
+      return base
     }
 
     if (userMode === "solo") {

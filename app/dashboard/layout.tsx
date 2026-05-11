@@ -14,6 +14,7 @@ import {
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
 import { getOrgContext } from "@/lib/server/org-context"
 import { loadOnboardingGateState, loadOnboardingGateStateForOrg } from "@/lib/server/onboarding-gate"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 function isDemoSession(session: { userId: string; orgId: string }) {
   return session.userId.startsWith("demo-user-") || session.orgId.startsWith("org-demo-")
@@ -67,6 +68,18 @@ export default async function DashboardLayout({
     remediationPlan: corePayload.remediationPlan,
     workspace: corePayload.workspace,
   }
+  // Layer 3 ICP filtering — icpSegment vine din white-label config per org.
+  // Fără el, sidebar-ul cade pe fallback DPO chiar și pentru cabinet-fiscal.
+  let icpSegment: import("@/lib/server/white-label").IcpSegment | null = null
+  if (session) {
+    try {
+      const wl = await getWhiteLabelConfig(session.orgId)
+      icpSegment = wl.icpSegment ?? null
+    } catch {
+      icpSegment = null
+    }
+  }
+
   const initialUser = session
     ? {
         email: session.email,
@@ -76,6 +89,7 @@ export default async function DashboardLayout({
         membershipId: session.membershipId ?? null,
         userMode: userMode ?? null,
         workspaceMode: (session.workspaceMode ?? "org") as "org" | "portfolio",
+        icpSegment,
       }
     : null
 
