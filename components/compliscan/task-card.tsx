@@ -8,6 +8,8 @@ import {
   FileDown,
   Paperclip,
   RefreshCcw,
+  RotateCcw,
+  Trash2,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -30,6 +32,10 @@ type TaskCardProps = {
   highlighted?: boolean
   onMarkDone: (id: string) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
+  onSoftDeleteEvidence: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  onRestoreEvidence: (id: string, evidenceId: string) => void | Promise<void>
+  onPermanentlyDeleteEvidence?: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  canPermanentlyDeleteEvidence?: boolean
   onExport: (id: string) => void
 }
 
@@ -180,6 +186,10 @@ export function TaskCard({
   highlighted,
   onMarkDone,
   onAttachEvidence,
+  onSoftDeleteEvidence,
+  onRestoreEvidence,
+  onPermanentlyDeleteEvidence,
+  canPermanentlyDeleteEvidence,
   onExport,
 }: TaskCardProps) {
   const { track } = useTrackEvent()
@@ -241,6 +251,45 @@ export function TaskCard({
     event.target.value = ""
   }
 
+  async function handleSoftDeleteEvidence() {
+    if (!task.attachedEvidence) return
+    const reason = window.prompt(
+      "Motiv ștergere dovadă (obligatoriu, minim 8 caractere). Exemplu: document încărcat greșit / versiune depășită."
+    )
+    if (reason === null) return
+    const normalizedReason = reason.trim()
+    if (normalizedReason.length < 8) {
+      toast.error("Motiv prea scurt", {
+        description: "Pentru audit trail, ștergerea cere minim 8 caractere.",
+      })
+      return
+    }
+
+    await onSoftDeleteEvidence(task.id, task.attachedEvidence.id, normalizedReason)
+  }
+
+  async function handleRestoreEvidence() {
+    if (!task.deletedEvidence) return
+    await onRestoreEvidence(task.id, task.deletedEvidence.id)
+  }
+
+  async function handlePermanentDeleteEvidence() {
+    if (!task.deletedEvidence || !onPermanentlyDeleteEvidence) return
+    const reason = window.prompt(
+      "Motiv ștergere definitivă (doar owner). Această acțiune elimină fișierul și metadata operațională."
+    )
+    if (reason === null) return
+    const normalizedReason = reason.trim()
+    if (normalizedReason.length < 8) {
+      toast.error("Motiv prea scurt", {
+        description: "Pentru audit trail, ștergerea definitivă cere minim 8 caractere.",
+      })
+      return
+    }
+
+    await onPermanentlyDeleteEvidence(task.id, task.deletedEvidence.id, normalizedReason)
+  }
+
   return (
     <Card
       ref={cardRef}
@@ -272,7 +321,7 @@ export function TaskCard({
                     </Badge>
                   ) : null}
                   {task.status === "done" ? (
-                    <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.24em] text-[11px] text-eos-text-muted">
+                    <Badge className="border-eos-border bg-eos-surface-variant uppercase tracking-[0.14em] text-[11px] text-eos-text-muted">
                       închis
                     </Badge>
                   ) : null}
@@ -303,7 +352,7 @@ export function TaskCard({
             <section className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
               <div className="space-y-3">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                     Acum faci asta
                   </p>
                   <p className="mt-2 text-sm font-medium text-eos-text">
@@ -324,10 +373,16 @@ export function TaskCard({
                   className={
                     task.attachedEvidence
                       ? evidenceQualityTone(task.attachedEvidence.quality?.status)
+                      : task.deletedEvidence
+                        ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
                       : "border-eos-border bg-eos-surface text-eos-text-muted"
                   }
                 >
-                  {task.attachedEvidence ? "dovada atasata" : "fara dovada"}
+                  {task.attachedEvidence
+                    ? "dovada atasata"
+                    : task.deletedEvidence
+                      ? "dovada stearsa soft"
+                      : "fara dovada"}
                 </Badge>
               </div>
 
@@ -384,20 +439,17 @@ export function TaskCard({
                 </div>
               </div>
 
-              <details className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
-                <summary className="cursor-pointer list-none">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-                        Dovada si utilitare
-                      </p>
-                      <p className="text-xs text-eos-text-muted">
-                        {task.attachedEvidence ? "Vezi dovada curenta sau exporta task-ul." : "Adauga dovada, apoi exporta doar daca ai nevoie separat."}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs text-eos-text-muted">Detalii</span>
+              <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface p-3 text-xs text-eos-text-muted">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+                      Dovada si utilitare
+                    </p>
+                    <p className="text-xs text-eos-text-muted">
+                      {task.attachedEvidence ? "Vezi dovada curenta sau exporta task-ul." : "Adauga dovada, apoi exporta doar daca ai nevoie separat."}
+                    </p>
                   </div>
-                </summary>
+                </div>
                 <div className="mt-3 space-y-3">
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
                     {task.attachedEvidence ? (
@@ -432,6 +484,58 @@ export function TaskCard({
                         {evidenceQualitySummary ? (
                           <p className="[overflow-wrap:anywhere]">{evidenceQualitySummary}</p>
                         ) : null}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button
+                            type="button"
+                            onClick={() => void handleSoftDeleteEvidence()}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 border-eos-warning-border text-eos-warning hover:bg-eos-warning-soft"
+                          >
+                            <Trash2 className="size-3.5" strokeWidth={2} />
+                            Șterge cu motiv
+                          </Button>
+                        </div>
+                      </div>
+                    ) : task.deletedEvidence ? (
+                      <div className="space-y-2">
+                        <p className="font-medium text-eos-text">Dovadă ștearsă controlat</p>
+                        <p className="break-all text-eos-text">{task.deletedEvidence.fileName}</p>
+                        <div className="space-y-1 text-eos-text-muted">
+                          <p>
+                            Motiv: <span className="text-eos-text">{task.deletedEvidence.deleteReason}</span>
+                          </p>
+                          <p>
+                            Restore până la:{" "}
+                            <span className="text-eos-text">
+                              {formatEvidenceRecoveryDate(task.deletedEvidence.restoreUntilISO)}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button
+                            type="button"
+                            onClick={() => void handleRestoreEvidence()}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            <RotateCcw className="size-3.5" strokeWidth={2} />
+                            Restaurează
+                          </Button>
+                          {canPermanentlyDeleteEvidence && onPermanentlyDeleteEvidence ? (
+                            <Button
+                              type="button"
+                              onClick={() => void handlePermanentDeleteEvidence()}
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 border-eos-error-border text-eos-error hover:bg-eos-error-soft"
+                            >
+                              <Trash2 className="size-3.5" strokeWidth={2} />
+                              Ștergere definitivă
+                            </Button>
+                          ) : null}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-1">
@@ -443,7 +547,7 @@ export function TaskCard({
 
                   <div className="flex items-center justify-between gap-3 rounded-eos-md border border-dashed border-eos-border bg-eos-bg-inset px-3 py-2">
                     <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
                         Utilitar
                       </p>
                       <p className="text-xs text-eos-text-muted">
@@ -461,7 +565,7 @@ export function TaskCard({
                     </Button>
                   </div>
                 </div>
-              </details>
+              </div>
             </section>
           </div>
 
@@ -621,23 +725,18 @@ function TaskDisclosure({
   children: ReactNode
 }) {
   return (
-    <details className="group rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <summary className="cursor-pointer list-none">
-        <p className="text-[11px] uppercase tracking-[0.24em] text-eos-text-muted">
-          {eyebrow}
+    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">
+        {eyebrow}
+      </p>
+      <div className="mt-2 min-w-0">
+        <p className="text-sm font-medium text-eos-text">{title}</p>
+        <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+          {subtitle}
         </p>
-        <div className="mt-2 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-eos-text">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-              {subtitle}
-            </p>
-          </div>
-          <span className="shrink-0 text-xs text-eos-text-muted">Detalii</span>
-        </div>
-      </summary>
+      </div>
       <div className="mt-4">{children}</div>
-    </details>
+    </div>
   )
 }
 
@@ -659,6 +758,20 @@ function acceptForEvidenceKind(kind: TaskEvidenceKind) {
   return undefined
 }
 
+function formatEvidenceRecoveryDate(iso: string) {
+  try {
+    return new Intl.DateTimeFormat("ro-RO", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(iso))
+  } catch {
+    return iso
+  }
+}
+
 // ── Validation Level Block ────────────────────────────────────────────────────
 
 function ValidationLevelBlock({ level }: { level: ValidationLevel }) {
@@ -674,7 +787,7 @@ function ValidationLevelBlock({ level }: { level: ValidationLevel }) {
       }`}
     >
       <p
-        className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${
+        className={`font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${
           isSpecialist ? "text-eos-error" : "text-eos-warning"
         }`}
       >
@@ -688,7 +801,7 @@ function ValidationLevelBlock({ level }: { level: ValidationLevel }) {
 }
 
 // ── V3 P0.0 / V4.3.3 Resolution Path ─────────────────────────────────────────
-// V4.3: distincție vizuală CompliAI / Tu / Dovadă + progress indicator
+// V4.3: distincție vizuală CompliScan / Tu / Dovadă + progress indicator
 
 type StepKind = "auto" | "human" | "evidence" | "info"
 
@@ -700,14 +813,14 @@ const RESOLUTION_STEPS: Array<{
   { key: "problem",        label: "Problemă detectată", kind: "info" },
   { key: "impact",         label: "Impact dacă nu acționezi", kind: "info" },
   { key: "action",         label: "Acțiunea exactă", kind: "human" },
-  { key: "generatedAsset", label: "CompliAI face", kind: "auto" },
+  { key: "generatedAsset", label: "CompliScan face", kind: "auto" },
   { key: "humanStep",      label: "Tu faci", kind: "human" },
   { key: "closureEvidence",label: "Dovada de închidere", kind: "evidence" },
   { key: "revalidation",   label: "Revalidare", kind: "info" },
 ]
 
 const STEP_KIND_CONFIG: Record<StepKind, { label: string; dot: string; text: string }> = {
-  auto:     { label: "CompliAI", dot: "bg-eos-primary",  text: "text-eos-primary" },
+  auto:     { label: "CompliScan", dot: "bg-eos-primary",  text: "text-eos-primary" },
   human:    { label: "Tu faci",  dot: "bg-eos-warning",   text: "text-eos-warning" },
   evidence: { label: "Dovadă",   dot: "bg-eos-success",   text: "text-eos-success" },
   info:     { label: "",         dot: "bg-eos-text-muted", text: "text-eos-text-muted" },
@@ -724,7 +837,7 @@ function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
     <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-bg-inset">
       {/* Header cu progress */}
       <div className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-2.5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
           Drum complet la rezolvare
         </span>
         {actionSteps > 0 && (
@@ -760,7 +873,7 @@ function ResolutionPath({ resolution }: { resolution: FindingResolution }) {
               </div>
               <div className="min-w-0 pb-1">
                 <div className="flex items-center gap-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-eos-text-muted">
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
                     {label}
                   </p>
                   {cfg.label && (

@@ -1,5 +1,6 @@
 import { buildRemediationPlan } from "@/lib/compliance/remediation"
 import { inferValidationKindFromFinding } from "@/lib/compliance/remediation-recipes"
+import { getTaskStateByTaskId } from "@/lib/compliance/task-ids"
 import { getTaskResolutionTargets } from "@/lib/compliance/task-resolution"
 import { COMPLIANCE_RULE_LIBRARY } from "@/lib/compliance/rule-library"
 import type {
@@ -35,7 +36,10 @@ export function validateTaskAgainstState(
   const validationKind =
     remediation?.validationKind ?? inferValidationKindFromFinding(primaryFinding)
   const latestSource = getLatestRelevantSourceText(state, remediation?.sourceDocument, primaryFinding)
-  const openIssueStillPresent = relatedFindings.length > 0 || relatedAlerts.some((alert) => alert.open)
+  const currentTaskState = getTaskStateByTaskId(state.taskState, taskId)
+  const openRelatedAlerts = relatedAlerts.some((alert) => alert.open)
+  const activeRelatedFindings = relatedFindings.filter((finding) => !isResolvedFindingStatus(finding.findingStatus))
+  const openIssueStillPresent = activeRelatedFindings.length > 0 || openRelatedAlerts
   const hasEvidence = Boolean(attachedEvidence?.trim())
   const primaryRule = primaryFinding?.provenance?.ruleId
     ? COMPLIANCE_RULE_LIBRARY.find((rule) => rule.ruleId === primaryFinding.provenance?.ruleId)
@@ -49,6 +53,27 @@ export function validateTaskAgainstState(
       message: primaryRule
         ? `Atașează dovada cerută pentru ${primaryRule.legalReference} înainte de Mark as fixed & rescan.`
         : "Atașează dovada cerută înainte de Mark as fixed & rescan.",
+      confidence: validationMeta.confidence,
+      basis: validationMeta.basis,
+      checkedSource: latestSource?.documentName,
+    }
+  }
+
+  if (
+    hasEvidence &&
+    currentTaskState?.status === "done" &&
+    relatedFindings.length > 0 &&
+    !openRelatedAlerts
+  ) {
+    return {
+      status: "passed",
+      nextStatus: "done",
+      message: buildValidationMessage({
+        message:
+          "Task-ul este închis operațional, are dovadă atașată și nu mai există alerte active pentru finding-ul asociat.",
+        status: "passed",
+        basis: validationMeta.basis,
+      }),
       confidence: validationMeta.confidence,
       basis: validationMeta.basis,
       checkedSource: latestSource?.documentName,
@@ -170,6 +195,10 @@ function deriveValidationMeta(
     confidence: finding?.verdictConfidence || "low",
     basis: "operational_state",
   }
+}
+
+function isResolvedFindingStatus(status: ScanFinding["findingStatus"] | undefined) {
+  return status === "resolved" || status === "under_monitoring" || status === "dismissed"
 }
 
 function buildValidationContextSuffix(

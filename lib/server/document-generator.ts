@@ -2,17 +2,21 @@
 // Generates: Privacy Policy, Cookie Policy, DPA, Retention Policy, NIS2 Incident Response Plan,
 // AI Governance Policy, Job Description, HR Internal Procedures, REGES Correction Brief,
 // Contract Template, Deletion Attestation.
-// Uses Gemini API. Falls back to a static skeleton when GEMINI_API_KEY is absent.
+// S2B.1 — Suport Gemini + Mistral EU prin ai-provider abstraction.
+// Falls back to a static skeleton când niciun provider nu e disponibil.
 
-import { fetchWithOperationalGuard } from "@/lib/server/http-client"
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite"
+import {
+  generateContent,
+  isGeminiAvailable,
+  isMistralAvailable,
+} from "@/lib/server/ai-provider"
 
 export type DocumentType =
   | "privacy-policy"
   | "cookie-policy"
   | "dpa"
+  | "dsar-response"
+  | "dpia"
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
@@ -38,6 +42,8 @@ export type DocumentGenerationInput = {
   dataFlows?: string
   counterpartyName?: string
   counterpartyReferenceUrl?: string
+  /** Cabinet / partner name that prepared the draft for the client. */
+  preparedBy?: string
   // ── Sprint 16/16 — Extended fields ──────────────────────────────────────
   /** Job description: title of the position */
   jobTitle?: string
@@ -61,6 +67,28 @@ export type DocumentGenerationInput = {
   targetSystem?: string
   /** Deletion attestation: data category */
   dataCategory?: string
+  /**
+   * S1.3 — AI ON/OFF toggle per client (Issue 4 DPO follow-up).
+   * Default `true` (AI enabled). Cand `false`, generatorul ocoleste apelul Gemini
+   * si returneaza direct template-ul determinist (`buildFallbackDocument`).
+   * Setat din `WhiteLabelConfig.aiEnabled` per org de catre cabinet.
+   */
+  aiEnabled?: boolean
+  /**
+   * S1.1 — Custom template upload cabinet.
+   * Markdown content cu variabile {{ORG_NAME}}, {{ORG_CUI}} etc. Daca exista,
+ * folosit ca template-ul de baza pentru fallback (in loc de skeleton intern).
+ * Template-ul cabinetului este sursa de adevar, nu un prompt optional pentru AI.
+   */
+  cabinetTemplateContent?: string
+  /** Numele template-ului cabinet (informativ in metadata generated document). */
+  cabinetTemplateName?: string
+  /**
+   * S2B.1 — AI provider override per request.
+   * Lipsă = folosim default-ul env (gemini). "mistral" cere MISTRAL_API_KEY
+   * + tier Pro+ în registry. Setat din WhiteLabelConfig.aiProvider.
+   */
+  aiProvider?: "gemini" | "mistral"
 }
 
 export type GeneratedDocument = {
@@ -82,6 +110,8 @@ const DOC_EXPIRY_MONTHS: Record<DocumentType, number> = {
   "privacy-policy": 24,
   "cookie-policy": 24,
   dpa: 12,
+  "dsar-response": 6,
+  dpia: 12,
   "retention-policy": 24,
   "nis2-incident-response": 12,
   "ai-governance": 24,
@@ -126,6 +156,14 @@ const DOC_META: Record<DocumentType, { title: string; legalBasis: string }> = {
   dpa: {
     title: "Acord de Prelucrare a Datelor (DPA)",
     legalBasis: "GDPR Art. 28",
+  },
+  "dsar-response": {
+    title: "Răspuns DSAR către persoana vizată",
+    legalBasis: "GDPR Art. 12, 15–22",
+  },
+  dpia: {
+    title: "DPIA — Analiză de impact privind protecția datelor",
+    legalBasis: "GDPR Art. 35",
   },
   "retention-policy": {
     title: "Politică și Matrice de Retenție a Datelor",
@@ -247,6 +285,36 @@ export function normalizeGeneratedDocumentContent(
   return lines.join("\n").replace(/\n{3,}/g, "\n\n")
 }
 
+function ensureGeneratedDocumentIdentity(
+  content: string,
+  input: DocumentGenerationInput,
+  generatedAtISO: string
+) {
+  if (input.documentType !== "dpa") return content
+
+  const preferredLabel = getPreferredDocumentDateLabel(input.documentType)
+  const formattedDate = formatDocumentDateRo(generatedAtISO)
+  const preparedBy = input.preparedBy?.trim()
+  const metadataLines = [
+    `**${preferredLabel}:** ${formattedDate}`,
+    `**Client / Operator:** ${input.orgName}`,
+    `**Furnizor / Procesator:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+    ...(preparedBy ? [`**Pregătit de:** ${preparedBy}`] : []),
+    ...(input.dpoEmail ? [`**Contact consultant / DPO:** ${input.dpoEmail}`] : []),
+    `**Status:** DRAFT — necesită validare înainte de utilizare oficială`,
+  ]
+
+  const lines = content.split("\n")
+  const firstHeadingIndex = lines.findIndex((line) => line.startsWith("# "))
+  const insertAt = firstHeadingIndex >= 0 ? firstHeadingIndex + 1 : 0
+  const bodyWithoutDuplicateMetadata = lines.filter((line) => {
+    return !/^\*\*(Data generării|Client \/ Operator|Operator|Furnizor \/ Procesator|Procesator \/ furnizor|Pregătit de|Contact consultant \/ DPO|Status)\*\*:/i.test(line.trim())
+  })
+
+  bodyWithoutDuplicateMetadata.splice(insertAt, 0, "", ...metadataLines, "")
+  return bodyWithoutDuplicateMetadata.join("\n").replace(/\n{3,}/g, "\n\n")
+}
+
 // ── Prompts ───────────────────────────────────────────────────────────────────
 
 function buildPrompt(input: DocumentGenerationInput, generatedAtISO: string): string {
@@ -329,6 +397,39 @@ Cerințe:
 - Durata și rezilierea acordului
 - Nu inventa altă dată pentru câmpurile de actualizare sau generare
 - Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    "dsar-response": `
+Generează un draft de răspuns DSAR în română pentru persoana vizată.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Include identificarea operatorului, referința cererii și tipul dreptului vizat
+- Explică pașii de verificare a identității și termenul legal de răspuns
+- Structurează răspunsul în secțiuni: confirmare primire, evaluare solicitare, date/sisteme verificate, răspuns propus, drept de reclamație ANSPDCP
+- Include placeholders pentru date care trebuie completate de consultant: [NUME PERSOANĂ], [DATA CERERII], [REFERINȚĂ INTERNĂ]
+- Marchează clar că este DRAFT și necesită validare umană înainte de transmitere
+- Format Markdown cu titluri clare
+- La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+`,
+    dpia: `
+Generează un draft DPIA (Data Protection Impact Assessment) în română conform GDPR Art. 35.
+Baza legală: ${meta.legalBasis}.
+
+Context:
+${contextBlock}
+
+Cerințe:
+- Include imediat sub titlu linia exactă: ${dateLine}
+- Include secțiuni pentru: descrierea prelucrării, scopuri, necesitate, proporționalitate, categorii de date, persoane vizate, destinatari, transferuri, legătura cu RoPA, riscuri pentru drepturile persoanelor, măsuri de mitigare, risc rezidual și decizia consultantului
+- Evidențiază dacă există categorii speciale de date, decizii automate sau prelucrare la scară largă
+- Include checklist final: RoPA actualizat, măsuri aprobate, owner desemnat, dovadă atașată, revizie DPO finală
+- Marchează clar că este DRAFT și necesită validare profesională înainte de utilizare oficială
+- Format Markdown cu titluri clare și tabele
 - La final: "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
 `,
     "retention-policy": `
@@ -650,7 +751,48 @@ Cerințe:
 `,
   }
 
-  return `Ești un expert juridic în conformitate europeană pentru companii românești.\n${prompts[input.documentType].trim()}`
+  // S1.1 — Dacă cabinetul a uploadat un template propriu, îl injectăm la final
+  // ca structură de bază pe care Gemini trebuie să o respecte (păstrând tonul
+  // și secțiunile cabinetului).
+  const cabinetTemplateBlock = input.cabinetTemplateContent?.trim()
+    ? [
+        "",
+        "=== TEMPLATE CABINET (urmează exact structura, secțiunile și tonul de mai jos; înlocuiește placeholder-urile {{VAR}} cu datele din Context) ===",
+        input.cabinetTemplateContent.trim(),
+        "=== SFÂRȘIT TEMPLATE CABINET ===",
+      ].join("\n")
+    : ""
+
+  return `Ești un expert juridic în conformitate europeană pentru companii românești.\n${prompts[input.documentType].trim()}${cabinetTemplateBlock}`
+}
+
+// ── S1.1 helper — template variable substitution ──────────────────────────────
+
+/**
+ * Înlocuiește `{{VAR_NAME}}` cu valori din mapping. Variabilele lipsă rămân
+ * vizibile (NU le ștergem — semnalează cabinet că template-ul cere date noi).
+ */
+function normalizeTemplateVariableName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+}
+
+function applyTemplateVariables(content: string, vars: Record<string, string>): string {
+  const normalizedVars = new Map<string, string>()
+  for (const [key, value] of Object.entries(vars)) {
+    normalizedVars.set(normalizeTemplateVariableName(key), value)
+  }
+
+  return content.replace(/\{\{\s*([A-Za-zÀ-ž_][A-Za-zÀ-ž0-9_]*)\s*\}\}/g, (match, name: string) => {
+    const value = normalizedVars.get(normalizeTemplateVariableName(name))
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value
+    }
+    return match // păstrează `{{VAR}}` ca semnal ca lipsește data
+  })
 }
 
 // ── Static fallback templates ─────────────────────────────────────────────────
@@ -663,9 +805,53 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
   const formattedDate = formatDocumentDateRo(now)
   const websiteHost = normalizeWebsiteForDocument(input.orgWebsite)
   const reviewWarning =
-    "⚠️ Acest document a fost generat cu ajutorul AI. Verifică cu un specialist înainte de utilizare oficială."
+    "⚠️ DRAFT — necesită validarea consultantului înainte de utilizare oficială."
   const serviceFallbackNote =
-    "Serviciul AI a fost indisponibil temporar, așa că acest draft a fost construit din șablonul de siguranță CompliAI."
+    "Draft pregătit cu CompliScan pentru revizia consultantului. Completează câmpurile operaționale înainte de utilizare oficială."
+  const preparedBy = input.preparedBy?.trim() || "DPO Complet"
+  const counterpartyNameForTemplate =
+    input.counterpartyName?.trim() || (input.documentType === "dpa" ? "Procesatorul desemnat" : "")
+
+  // S1.1 — Dacă cabinetul a uploadat un template activ pentru acest documentType,
+  // folosim conținutul template-ului ca bază (cu variabile substituite). NU mai
+  // construim skeleton-ul intern de mai jos.
+  if (input.cabinetTemplateContent && input.cabinetTemplateContent.trim().length > 0) {
+    const substituted = applyTemplateVariables(input.cabinetTemplateContent, {
+      ORG_NAME: input.orgName,
+      orgName: input.orgName,
+      companyName: input.orgName,
+      ORG_CUI: input.orgCui ?? "",
+      orgCui: input.orgCui ?? "",
+      cui: input.orgCui ?? "",
+      ORG_WEBSITE: websiteHost ?? "",
+      orgWebsite: websiteHost ?? "",
+      ORG_SECTOR: input.orgSector ?? "",
+      orgSector: input.orgSector ?? "",
+      DPO_EMAIL: input.dpoEmail ?? "",
+      dpoEmail: input.dpoEmail ?? "",
+      PREPARED_BY: preparedBy,
+      preparedBy,
+      DOCUMENT_TITLE: title,
+      documentTitle: title,
+      DOCUMENT_DATE: formattedDate,
+      documentDate: formattedDate,
+      DATE_LABEL: preferredDateLabel,
+      dateLabel: preferredDateLabel,
+      COUNTERPARTY_NAME: counterpartyNameForTemplate,
+      counterpartyName: counterpartyNameForTemplate,
+      COUNTERPARTY_REFERENCE_URL: input.counterpartyReferenceUrl ?? "",
+      counterpartyReferenceUrl: input.counterpartyReferenceUrl ?? "",
+    })
+    const expiry = calculateExpiryDates(input.documentType, now)
+    return {
+      documentType: input.documentType,
+      title,
+      content: normalizeGeneratedDocumentContent(substituted, input.documentType, now),
+      generatedAtISO: now,
+      llmUsed: false,
+      ...expiry,
+    }
+  }
 
   const contentMap: Record<DocumentType, string> = {
     "privacy-policy": [
@@ -740,9 +926,12 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       `# ${title}`,
       "",
       `**${preferredDateLabel}:** ${formattedDate}`,
-      `**Operator:** ${input.orgName}`,
-      `**Procesator / furnizor:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+      `**Client / Operator:** ${input.orgName}`,
+      `**Furnizor / Procesator:** ${input.counterpartyName ?? "[Completează procesatorul]"}`,
+      `**Pregătit de:** ${preparedBy}`,
+      `**Contact consultant / DPO:** ${input.dpoEmail ?? "[Completează email consultant]"}`,
       `**Baza legală:** ${meta.legalBasis}`,
+      `**Status:** DRAFT — necesită validare înainte de utilizare oficială`,
       "",
       `> ${serviceFallbackNote}`,
       "",
@@ -757,6 +946,79 @@ function buildFallbackDocument(input: DocumentGenerationInput): GeneratedDocumen
       "",
       "## Sub-procesatori, audit și încetare",
       "Sub-procesatorii trebuie autorizați și documentați, operatorul trebuie să poată obține informații de audit rezonabile, iar la încetarea relației datele trebuie returnate sau șterse conform instrucțiunilor operatorului și obligațiilor legale.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    "dsar-response": [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Operator:** ${input.orgName}`,
+      `**Pregătit de:** ${preparedBy}`,
+      `**Contact consultant / DPO:** ${input.dpoEmail ?? "[Completează email consultant]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      `**Status:** DRAFT — necesită validare înainte de transmitere`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## Confirmare primire cerere",
+      "Confirmăm primirea solicitării privind exercitarea drepturilor persoanei vizate. Completați aici data cererii, identitatea solicitantului și referința internă DSAR.",
+      "",
+      "## Verificare identitate și termen",
+      "Înainte de transmiterea răspunsului final, consultantul trebuie să confirme identitatea solicitantului și termenul aplicabil. Termenul standard este de 30 de zile, cu posibilitatea de prelungire în cazuri complexe, documentată separat.",
+      "",
+      "## Evaluarea solicitării",
+      "Descrieți dreptul vizat (acces, rectificare, ștergere, restricționare, opoziție sau portabilitate), sistemele verificate și eventualele limitări legale aplicabile.",
+      "",
+      "## Răspuns propus",
+      "Completați răspunsul concret către persoana vizată, inclusiv datele puse la dispoziție, acțiunile efectuate sau motivul documentat al refuzului parțial/total.",
+      "",
+      "## Drept de reclamație",
+      "Persoana vizată are dreptul de a depune o plângere la ANSPDCP dacă apreciază că răspunsul primit nu respectă GDPR.",
+      "",
+      reviewWarning,
+    ].join("\n"),
+    dpia: [
+      `# ${title}`,
+      "",
+      `**${preferredDateLabel}:** ${formattedDate}`,
+      `**Organizație:** ${input.orgName}`,
+      `**Pregătit de:** ${preparedBy}`,
+      `**Contact consultant / DPO:** ${input.dpoEmail ?? "[Completează email consultant]"}`,
+      `**Baza legală:** ${meta.legalBasis}`,
+      `**Status:** DRAFT — necesită validare profesională`,
+      "",
+      `> ${serviceFallbackNote}`,
+      "",
+      "## 1. Descrierea prelucrării",
+      "Descrieți operațiunea, sistemele implicate, scopurile și legătura cu intrarea RoPA relevantă.",
+      "",
+      "## 2. Necesitate și proporționalitate",
+      "- De ce este necesară prelucrarea?",
+      "- Ce date sunt strict necesare?",
+      "- Există alternative mai puțin intruzive?",
+      "",
+      "## 3. Riscuri pentru persoanele vizate",
+      "| Risc | Impact | Probabilitate | Nivel |",
+      "| --- | --- | --- | --- |",
+      "| Acces neautorizat | Date expuse | Medie | High |",
+      "| Retenție excesivă | Drepturi afectate | Medie | Medium |",
+      "",
+      "## 4. Măsuri de mitigare",
+      "- minimizare date",
+      "- control acces pe roluri",
+      "- logare acces",
+      "- retenție limitată",
+      "- procedură DSAR corelată",
+      "",
+      "## 5. Risc rezidual și decizie",
+      "Completați nivelul riscului rezidual, owner-ul măsurilor și decizia consultantului DPO.",
+      "",
+      "## Checklist final",
+      "- [ ] RoPA actualizat",
+      "- [ ] Măsurile sunt aprobate de management",
+      "- [ ] Dovada implementării este atașată în Dosar",
+      "- [ ] Consultantul DPO a revizuit și aprobat DPIA",
       "",
       reviewWarning,
     ].join("\n"),
@@ -1240,60 +1502,44 @@ export async function generateDocument(
   const now = new Date().toISOString()
   const title = getGeneratedDocumentTitle(input)
 
-  if (!GEMINI_API_KEY) {
+  // DPO Cabinet OS: când Diana folosește template-ul ei, documentul trebuie să
+  // păstreze exact clauzele cabinetului. Nu îl trecem prin AI, ca să evităm
+  // parafrazări sau omisiuni în livrabile client-facing.
+  if (input.cabinetTemplateContent?.trim()) {
+    return buildFallbackDocument(input)
+  }
+
+  // S1.3 — AI ON/OFF toggle per client.
+  // Cand cabinet-ul a dezactivat AI pentru acest client (ex: client sensibil),
+  // returnam template-ul determinist fara apel la Gemini. `llmUsed: false`
+  // ramane vizibil in metadata generated document, deci dosarul stie ca
+  // documentul a fost construit doar din sablon.
+  if (input.aiEnabled === false) {
+    return buildFallbackDocument(input)
+  }
+
+  // S2B.1 — Verificăm disponibilitatea provider-ului. Dacă cabinet a setat
+  // mistral dar lipsesc credentialele, ai-provider face fallback la gemini.
+  if (!isGeminiAvailable() && !isMistralAvailable()) {
     return buildFallbackDocument(input)
   }
 
   const prompt = buildPrompt(input, now)
 
   try {
-    const response = await fetchWithOperationalGuard(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            topP: 0.95,
-            maxOutputTokens: 4096,
-          },
-        }),
-        cache: "no-store",
-        timeoutMs: 55_000,
-        retries: 2,
-        retryDelayMs: 800,
-        label: `document-generator:${input.documentType}`,
-      }
+    const result = await generateContent({
+      prompt,
+      provider: input.aiProvider,
+      temperature: 0.2,
+      maxOutputTokens: 4096,
+      label: `document-generator:${input.documentType}`,
+    })
+
+    const normalizedContent = ensureGeneratedDocumentIdentity(
+      normalizeGeneratedDocumentContent(result.content, input.documentType, now),
+      input,
+      now
     )
-
-    if (!response.ok) {
-      const text = await response.text()
-
-      if ([408, 429, 500, 502, 503, 504].includes(response.status)) {
-        return buildFallbackDocument(input)
-      }
-
-      throw new Error(`Gemini API error ${response.status}: ${text.slice(0, 200)}`)
-    }
-
-    const json = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>
-    }
-
-    const content =
-      json.candidates?.[0]?.content?.parts
-        ?.map((p) => p.text ?? "")
-        .join("")
-        .trim() ?? ""
-
-    if (!content) {
-      throw new Error("Gemini a returnat un document gol.")
-    }
-
-    const normalizedContent = normalizeGeneratedDocumentContent(content, input.documentType, now)
-
     const expiry = calculateExpiryDates(input.documentType, now)
 
     return {
@@ -1306,6 +1552,7 @@ export async function generateDocument(
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
+    // Retryable errors (timeout / 5xx) → fallback determinist.
     if (
       message.includes("HTTP_TIMEOUT") ||
       message.includes("Gemini API error 408") ||
@@ -1313,7 +1560,13 @@ export async function generateDocument(
       message.includes("Gemini API error 500") ||
       message.includes("Gemini API error 502") ||
       message.includes("Gemini API error 503") ||
-      message.includes("Gemini API error 504")
+      message.includes("Gemini API error 504") ||
+      message.includes("Mistral API error 408") ||
+      message.includes("Mistral API error 429") ||
+      message.includes("Mistral API error 500") ||
+      message.includes("Mistral API error 502") ||
+      message.includes("Mistral API error 503") ||
+      message.includes("Mistral API error 504")
     ) {
       return buildFallbackDocument(input)
     }
@@ -1348,6 +1601,20 @@ export const DOCUMENT_TYPES: Array<{
     description: "Contract obligatoriu cu procesatorii de date conform GDPR Art. 28.",
     free: false,
     legalBasis: "GDPR Art. 28",
+  },
+  {
+    id: "dsar-response",
+    label: "Răspuns DSAR",
+    description: "Draft de răspuns către persoana vizată pentru cereri de acces, ștergere, rectificare sau opoziție.",
+    free: false,
+    legalBasis: "GDPR Art. 12, 15–22",
+  },
+  {
+    id: "dpia",
+    label: "DPIA",
+    description: "Analiză de impact Art. 35: risc, măsuri, legătură RoPA și decizie DPO.",
+    free: false,
+    legalBasis: "GDPR Art. 35",
   },
   {
     id: "retention-policy",

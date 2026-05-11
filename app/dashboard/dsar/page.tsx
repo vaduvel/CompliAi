@@ -24,7 +24,7 @@ import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { OrgKnowledgePrefill } from "@/components/compliscan/org-knowledge-prefill"
@@ -233,11 +233,22 @@ export default function DsarPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-      <PageIntro
-        eyebrow={<><SimpleTooltip content="Regulamentul General privind Protecția Datelor — Art. 15-22"><span className="cursor-help border-b border-dotted border-current">GDPR</span></SimpleTooltip>{" · "}<SimpleTooltip content="Data Subject Access Request — cerere de acces la date personale"><span className="cursor-help border-b border-dotted border-current">DSAR</span></SimpleTooltip></>}
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "DSAR", current: true }]}
         title="Cereri acces date"
         description="Gestionează cererile de acces, rectificare și ștergere GDPR Art. 15-22. Deadline legal: 30 de zile de la primire."
-        badges={
+        eyebrowBadges={
+          <>
+            <SimpleTooltip content="Regulamentul General privind Protecția Datelor — Art. 15-22">
+              <span className="cursor-help font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary border-b border-dotted border-current">GDPR</span>
+            </SimpleTooltip>
+            <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">·</span>
+            <SimpleTooltip content="Data Subject Access Request — cerere de acces la date personale">
+              <span className="cursor-help font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary border-b border-dotted border-current">DSAR</span>
+            </SimpleTooltip>
+          </>
+        }
+        actions={
           <Link href="/dashboard/calendar" className="inline-flex items-center gap-1.5 text-xs font-medium text-eos-primary hover:underline">
             <CalendarPlus className="size-3.5" strokeWidth={2} />
             Vezi Calendar deadline-uri

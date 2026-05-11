@@ -110,8 +110,8 @@ export function buildPartnerDigestEmail(digest: PartnerDigest): string {
 
   const greeting = consultantName ? `Salut ${consultantName},` : "Salut,"
   const footer = cabinetName
-    ? `Trimis de ${cabinetName} via CompliAI`
-    : "Digest automat CompliAI Partner Hub"
+    ? `Trimis de ${cabinetName} via CompliScan`
+    : "Digest automat CompliScan Partner Hub"
 
   return `<!DOCTYPE html>
 <html lang="ro">
@@ -119,7 +119,7 @@ export function buildPartnerDigestEmail(digest: PartnerDigest): string {
 <body style="font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;margin:0;padding:24px">
   <div style="max-width:600px;margin:0 auto">
     <div style="background:#0f172a;padding:20px 24px;border-radius:8px 8px 0 0">
-      <h1 style="color:#fff;margin:0;font-size:16px;font-weight:600">🛡 CompliAI · Partner Hub</h1>
+      <h1 style="color:#fff;margin:0;font-size:16px;font-weight:600">CompliScan · Partner Hub</h1>
       <p style="color:#94a3b8;margin:4px 0 0;font-size:12px">Digest săptămânal clienți · ${dateStr}</p>
     </div>
     <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
@@ -217,7 +217,7 @@ export function buildDigestEmail(digest: WeeklyDigest): string {
     <!-- Header -->
     <div style="background:#0f172a;padding:20px 24px;border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:space-between">
       <div>
-        <h1 style="color:#fff;margin:0;font-size:16px;font-weight:600">🛡 CompliAI</h1>
+        <h1 style="color:#fff;margin:0;font-size:16px;font-weight:600">CompliScan</h1>
         <p style="color:#94a3b8;margin:4px 0 0;font-size:12px">Digest săptămânal · ${dateStr}</p>
       </div>
     </div>
@@ -267,7 +267,7 @@ export function buildDigestEmail(digest: WeeklyDigest): string {
 
       <!-- CTA -->
       <div style="text-align:center;margin:24px 0 0">
-        <a href="https://compliai.ro/dashboard"
+        <a href="https://compliscan.ro/dashboard"
            style="display:inline-block;background:#6366f1;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">
           Deschide Dashboard
         </a>
@@ -277,8 +277,8 @@ export function buildDigestEmail(digest: WeeklyDigest): string {
 
     <!-- Footer -->
     <p style="text-align:center;color:#94a3b8;font-size:11px;margin:16px 0">
-      Digest automat CompliAI &mdash;
-      <a href="https://compliai.ro/dashboard/settings" style="color:#6366f1">Dezactivează digest</a>
+      Digest automat CompliScan &mdash;
+      <a href="https://compliscan.ro/dashboard/settings" style="color:#6366f1">Dezactivează digest</a>
     </p>
 
   </div>

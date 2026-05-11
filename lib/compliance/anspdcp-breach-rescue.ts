@@ -19,7 +19,7 @@ export function getIncidentIdFromAnspdcpFindingId(findingId: string) {
 
 /**
  * Construiește finding-ul de urgență ANSPDCP pentru un incident cu date personale.
- * Returnează null dacă notificarea ANSPDCP a fost deja confirmată (acknowledged).
+ * Returnează null dacă notificarea ANSPDCP a fost deja trimisă sau confirmată.
  */
 export function buildAnspdcpBreachFinding(
   incidentId: string,
@@ -28,7 +28,7 @@ export function buildAnspdcpBreachFinding(
   anspdcpStatus: AnspdcpNotificationStatus | undefined,
   nowISO: string
 ): ScanFinding | null {
-  if (anspdcpStatus === "acknowledged") return null
+  if (anspdcpStatus === "submitted" || anspdcpStatus === "acknowledged") return null
 
   const deadline72h = new Date(new Date(detectedAtISO).getTime() + 72 * 3_600_000)
   const hoursLeft = Math.round((deadline72h.getTime() - Date.now()) / 3_600_000)

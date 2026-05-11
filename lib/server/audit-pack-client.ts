@@ -15,6 +15,8 @@ export function buildClientAuditPackDocument(
   auditPack: AuditPackV2,
   options?: {
     annexHrefBase?: string
+    preparedByName?: string | null
+    consultantName?: string | null
   }
 ): ClientAuditPackDocument {
   const dateLabel = auditPack.generatedAt.slice(0, 10)
@@ -23,11 +25,21 @@ export function buildClientAuditPackDocument(
 
   return {
     fileName,
-    html: buildClientAuditPackHtml(auditPack, annexHrefBase),
+    html: buildClientAuditPackHtml(auditPack, annexHrefBase, {
+      preparedByName: options?.preparedByName ?? null,
+      consultantName: options?.consultantName ?? null,
+    }),
   }
 }
 
-function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string) {
+function buildClientAuditPackHtml(
+  auditPack: AuditPackV2,
+  annexHrefBase: string,
+  options: {
+    preparedByName: string | null
+    consultantName: string | null
+  }
+) {
   const evidenceLedgerSummary =
     auditPack.executiveSummary.evidenceLedgerSummary ?? summarizeEvidenceLedger(auditPack.evidenceLedger)
   const hasEvidenceLedger = auditPack.evidenceLedger.length > 0
@@ -163,6 +175,21 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
   const ownerActionRows = buildOwnerActionRows(auditPack)
   const externalUseGuidance = buildBulletList(buildExternalUseGuidance(auditPack))
   const statusLegend = buildStatusLegend()
+  const findingLifecycleRows =
+    auditPack.findingLifecycle.length === 0
+      ? `<tr><td colspan="6" class="empty-cell">Nu există finding-uri în lifecycle pentru acest dosar.</td></tr>`
+      : auditPack.findingLifecycle
+          .map(
+            (item) => `<tr>
+              <td><strong>${escapeHtml(item.title)}</strong><div class="muted small">${escapeHtml(item.category)} · ${escapeHtml(item.severity)}</div></td>
+              <td><span class="chip ${item.dossierReady ? "success" : item.clientDecision === "rejected" ? "danger" : "warning"}">${escapeHtml(item.statusLabel)}</span></td>
+              <td>${escapeHtml(formatFindingLifecycleStage(item.currentStage))}</td>
+              <td>${item.evidence.validated ? "validată" : item.evidence.attached ? "atașată" : "lipsă"}</td>
+              <td>${escapeHtml(item.clientDecision === "none" ? "n/a" : item.clientDecision)}</td>
+              <td>${escapeHtml(item.nextAction)}</td>
+            </tr>`
+          )
+          .join("")
 
   const controlsRows = auditPack.controlsMatrix
     .map(
@@ -523,10 +550,17 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
     <main class="wrap">
       <section class="hero">
         <p class="eyebrow">CompliScan · Audit Pack client-facing</p>
-        <h1>Dosar de audit pentru ${escapeHtml(auditPack.workspace.label)}</h1>
+        <h1>Dosar de audit pentru ${escapeHtml(auditPack.workspace.name)}</h1>
         <p class="sub">
           Acest pachet leaga sursele analizate, sistemele AI identificate, drift-ul activ, controalele recomandate si dovezile validate intr-o forma printabila pentru stakeholderi non-tehnici si audit operational.
         </p>
+        ${
+          options.preparedByName || options.consultantName
+            ? `<p class="sub"><strong>Pregătit de:</strong> ${escapeHtml(
+                [options.preparedByName, options.consultantName].filter(Boolean).join(" · ")
+              )}</p>`
+            : ""
+        }
         <div class="tag-row">
           <span class="chip ${auditPack.executiveSummary.auditReadiness === "audit_ready" ? "success" : "warning"}">${escapeHtml(
             formatAuditReadiness(auditPack.executiveSummary.auditReadiness)
@@ -789,6 +823,26 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
       </section>
 
       <section class="section card">
+        <h2>Finding lifecycle</h2>
+        <p class="muted">Traseul operational detectat → lucrat → client → dovadă → Dosar. Această secțiune este sursa rapidă pentru întrebarea „ce s-a rezolvat și ce mai blochează clientul?”.</p>
+        <table class="table" style="margin-top:14px;">
+          <thead>
+            <tr>
+              <th>Finding</th>
+              <th>Status</th>
+              <th>Etapă</th>
+              <th>Dovadă</th>
+              <th>Client</th>
+              <th>Următorul pas</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${findingLifecycleRows}
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section card">
         <h2>Controls matrix</h2>
         <table class="table">
           <thead>
@@ -861,7 +915,7 @@ function buildClientAuditPackHtml(auditPack: AuditPackV2, annexHrefBase: string)
       </section>
 
       <p class="footer">
-        Acest document a fost generat automat de CompliAI pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. Consultați un specialist juridic pentru validare. Varianta JSON rămâne sursa structurată de adevăr, iar acest format este optimizat pentru citire, discuție și export PDF.
+        Acest dosar este un instrument de lucru pentru organizarea dovezilor și revizia consultantului DPO. Nu înlocuiește validarea profesională și nu reprezintă o opinie juridică finală. Varianta JSON rămâne sursa structurată de adevăr, iar acest format este optimizat pentru citire, discuție și export PDF.
       </p>
     </main>
   </body>
@@ -895,6 +949,21 @@ function emptyState(message: string) {
 
 function formatAuditReadiness(value: AuditPackV2["executiveSummary"]["auditReadiness"]) {
   return value === "audit_ready" ? "pregătit pentru audit" : "necesită review"
+}
+
+function formatFindingLifecycleStage(value: AuditPackV2["findingLifecycle"][number]["currentStage"]) {
+  const labels: Record<AuditPackV2["findingLifecycle"][number]["currentStage"], string> = {
+    detected: "detectat",
+    triaged: "triat",
+    in_progress: "în lucru",
+    sent_to_client: "trimis clientului",
+    client_decided: "feedback client capturat",
+    evidence_attached: "dovadă atașată",
+    evidence_validated: "dovadă validată",
+    resolved: "rezolvat",
+    monitoring: "în Dosar / monitorizare",
+  }
+  return labels[value]
 }
 
 function formatRemediationMode(value: AuditPackV2["controlsMatrix"][number]["remediationMode"]) {

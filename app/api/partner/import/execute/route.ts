@@ -18,6 +18,7 @@ import {
 import { createClaimInvite } from "@/lib/server/claim-ownership"
 import { getPartnerAccountPlanStatus, hasLegacyPartnerOrgPlan } from "@/lib/server/plan"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
+import { getWhiteLabelConfig, saveWhiteLabelConfig } from "@/lib/server/white-label"
 
 type ConfirmedRow = {
   orgName: string
@@ -26,6 +27,12 @@ type ConfirmedRow = {
   employeeCount: OrgEmployeeCount | null
   email: string | null
   website: string | null
+  contactName?: string | null
+  phone?: string | null
+  city?: string | null
+  dpoContract?: string | null
+  notes?: string | null
+  raw?: Record<string, string>
   skip?: boolean
 }
 
@@ -59,6 +66,80 @@ export async function POST(request: Request) {
     const activeMemberships = (await listUserMemberships(session.userId)).filter(
       (m) => m.status === "active" && m.role === "partner_manager"
     )
+    const existingStates = await Promise.all(
+      activeMemberships.map((membership) => readStateForOrg(membership.orgId).catch(() => null))
+    )
+    const existingOrgNames = new Set(activeMemberships.map((m) => normalizeDuplicateKey(m.orgName)))
+    const existingCUIs = new Set(
+      existingStates
+        .map((state) => normalizeCui(state?.orgProfile?.cui))
+        .filter((cui): cui is string => Boolean(cui))
+    )
+    const seenOrgNames = new Set<string>()
+    const seenCUIs = new Set<string>()
+    const preflightFailures: ImportRowResult[] = []
+    const rowsToImport: ConfirmedRow[] = []
+
+    for (const row of activeRows) {
+      const orgNameKey = normalizeDuplicateKey(row.orgName)
+      const cuiKey = normalizeCui(row.cui)
+
+      if (!orgNameKey) {
+        preflightFailures.push({ ok: false, orgName: row.orgName || "?", error: "Nume firmă lipsă" })
+        continue
+      }
+
+      if (existingOrgNames.has(orgNameKey)) {
+        preflightFailures.push({
+          ok: false,
+          orgName: row.orgName,
+          error: "Firmă cu același nume există deja în portofoliu.",
+        })
+        continue
+      }
+
+      if (cuiKey && existingCUIs.has(cuiKey)) {
+        preflightFailures.push({
+          ok: false,
+          orgName: row.orgName,
+          error: "CUI deja existent în portofoliu.",
+        })
+        continue
+      }
+
+      if (seenOrgNames.has(orgNameKey)) {
+        preflightFailures.push({
+          ok: false,
+          orgName: row.orgName,
+          error: "Rând duplicat în fișier: nume firmă identic.",
+        })
+        continue
+      }
+
+      if (cuiKey && seenCUIs.has(cuiKey)) {
+        preflightFailures.push({
+          ok: false,
+          orgName: row.orgName,
+          error: "Rând duplicat în fișier: CUI identic.",
+        })
+        continue
+      }
+
+      seenOrgNames.add(orgNameKey)
+      if (cuiKey) seenCUIs.add(cuiKey)
+      rowsToImport.push(row)
+    }
+
+    if (rowsToImport.length === 0) {
+      return NextResponse.json({
+        imported: 0,
+        failed: preflightFailures.length,
+        total: activeRows.length,
+        results: preflightFailures,
+        message: "Nicio firmă importată. Toate rândurile sunt duplicate sau invalide.",
+      })
+    }
+
     const activeOrgIds = Array.from(new Set(activeMemberships.map((m) => m.orgId)))
     const planStatus = await getPartnerAccountPlanStatus({
       userId: session.userId,
@@ -77,24 +158,25 @@ export async function POST(request: Request) {
         )
       }
 
-      if (activeRows.length > remaining) {
+      if (rowsToImport.length > remaining) {
         throw new AuthzError(
           `În modul trial poți adăuga cel mult ${remaining} firm${remaining === 1 ? "ă" : "e"} acum. Activează un plan Partner pentru mai multe.`,
           403,
           "PARTNER_TRIAL_LIMIT_REACHED"
         )
       }
-    } else if (activeRows.length > remaining) {
+    } else if (rowsToImport.length > remaining) {
       throw new AuthzError(
-        `Poți importa maxim ${remaining} firme. Ai selectat ${activeRows.length}.`,
+        `Poți importa maxim ${remaining} firme. Ai selectat ${rowsToImport.length}.`,
         403,
         "PARTNER_PLAN_LIMIT_REACHED"
       )
     }
 
-    const results: ImportRowResult[] = []
+    const results: ImportRowResult[] = [...preflightFailures]
+    const partnerWhiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
 
-    for (const row of activeRows) {
+    for (const row of rowsToImport) {
       if (!row.orgName?.trim()) {
         results.push({ ok: false, orgName: row.orgName || "?", error: "Nume firmă lipsă" })
         continue
@@ -106,6 +188,20 @@ export async function POST(request: Request) {
           row.orgName.trim(),
           "partner_manager"
         )
+
+        if (partnerWhiteLabel?.partnerName?.trim()) {
+          await saveWhiteLabelConfig(newOrg.orgId, {
+            partnerName: partnerWhiteLabel.partnerName,
+            tagline: partnerWhiteLabel.tagline,
+            logoUrl: partnerWhiteLabel.logoUrl,
+            brandColor: partnerWhiteLabel.brandColor,
+            aiEnabled: partnerWhiteLabel.aiEnabled,
+            signatureUrl: partnerWhiteLabel.signatureUrl,
+            signerName: partnerWhiteLabel.signerName,
+            icpSegment: partnerWhiteLabel.icpSegment,
+            aiProvider: partnerWhiteLabel.aiProvider,
+          })
+        }
 
         // Create claim invite if email present
         if (row.email?.includes("@")) {
@@ -135,6 +231,17 @@ export async function POST(request: Request) {
         if (existingState) {
           existingState.orgProfile = profile
           existingState.applicability = applicability
+          existingState.importedClientContext = {
+            source: "partner_import",
+            importedAtISO: new Date().toISOString(),
+            ...(row.contactName?.trim() ? { contactName: row.contactName.trim() } : {}),
+            ...(row.email?.trim() ? { contactEmail: row.email.trim().toLowerCase() } : {}),
+            ...(row.phone?.trim() ? { phone: row.phone.trim() } : {}),
+            ...(row.city?.trim() ? { city: row.city.trim() } : {}),
+            ...(row.dpoContract?.trim() ? { dpoContract: row.dpoContract.trim() } : {}),
+            ...(row.notes?.trim() ? { notes: row.notes.trim() } : {}),
+            ...(row.raw && Object.keys(row.raw).length > 0 ? { raw: row.raw } : {}),
+          }
           await writeStateForOrg(newOrg.orgId, existingState)
         }
 
@@ -170,4 +277,19 @@ export async function POST(request: Request) {
     if (error instanceof AuthzError) return jsonError(error.message, error.status, error.code)
     return jsonError("Eroare la import.", 500, "IMPORT_FAILED")
   }
+}
+
+function normalizeDuplicateKey(value: string | null | undefined) {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function normalizeCui(value: string | null | undefined) {
+  const trimmed = value?.trim()
+  if (!trimmed) return null
+  return trimmed.replace(/\s+/g, "").toUpperCase()
 }

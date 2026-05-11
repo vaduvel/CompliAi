@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest"
 
-import { canDelete, canExport, canWrite, isViewer, WRITE_ROLES, DELETE_ROLES, EXPORT_ROLES, RESET_ROLES, MEMBERS_ADMIN_ROLES } from "@/lib/server/rbac"
+import {
+  canDelete,
+  canExport,
+  canPerform,
+  canWrite,
+  getPermissionMatrixForExport,
+  isViewer,
+  DELETE_ROLES,
+  EXPORT_ROLES,
+  MEMBERS_ADMIN_ROLES,
+  PERMISSION_MATRIX,
+  RESET_ROLES,
+  USER_ROLES,
+  WRITE_ROLES,
+} from "@/lib/server/rbac"
 
 describe("lib/server/rbac", () => {
   it("partner_manager are acces de scriere", () => {
@@ -44,5 +58,45 @@ describe("lib/server/rbac", () => {
     expect(canDelete("viewer")).toBe(false)
     expect(canExport("viewer")).toBe(false)
     expect(isViewer("viewer")).toBe(true)
+  })
+
+  it("expune o matrice explicita pentru actiunile sensibile de cabinet", () => {
+    expect(PERMISSION_MATRIX.map((row) => row.action)).toEqual(
+      expect.arrayContaining([
+        "send_magic_link",
+        "validate_baseline",
+        "export_client_audit_pack",
+        "export_cabinet_archive",
+        "manage_templates",
+        "delete_evidence",
+        "permanently_delete_evidence",
+      ])
+    )
+    expect(canPerform("partner_manager", "send_magic_link")).toBe(true)
+    expect(canPerform("partner_manager", "validate_baseline")).toBe(true)
+    expect(canPerform("partner_manager", "export_cabinet_archive")).toBe(true)
+    expect(canPerform("reviewer", "export_client_audit_pack")).toBe(true)
+    expect(canPerform("reviewer", "validate_baseline")).toBe(false)
+    expect(canPerform("partner_manager", "delete_evidence")).toBe(true)
+    expect(canPerform("partner_manager", "permanently_delete_evidence")).toBe(false)
+    expect(canPerform("owner", "permanently_delete_evidence")).toBe(true)
+    expect(canPerform("viewer", "send_magic_link")).toBe(false)
+    expect(canPerform(undefined, "view_workspace")).toBe(false)
+  })
+
+  it("nu lasa actiuni fara roluri sau roluri necunoscute in matrice", () => {
+    for (const row of PERMISSION_MATRIX) {
+      expect(row.roles.length).toBeGreaterThan(0)
+      for (const role of row.roles) {
+        expect(USER_ROLES).toContain(role)
+      }
+    }
+  })
+
+  it("returneaza o copie safe pentru exportul de securitate", () => {
+    const exported = getPermissionMatrixForExport()
+    exported[0]?.roles.push("owner")
+    expect(exported).not.toBe(PERMISSION_MATRIX)
+    expect(exported[0]?.roles).not.toBe(PERMISSION_MATRIX[0]?.roles)
   })
 })

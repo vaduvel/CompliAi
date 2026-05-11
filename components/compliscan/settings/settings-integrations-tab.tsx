@@ -4,9 +4,6 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Cloud, Database, ExternalLink, FileCode2, KeyRound, RefreshCw, ShieldCheck } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import {
   EndpointRow,
   formatBackendLabel,
@@ -14,11 +11,13 @@ import {
   repoSyncBadgeLabel,
   repoSyncBadgeVariant,
   SettingsDisclosure,
+  SettingsPill,
   SettingsSignalCard,
   SettingsStatusBlock,
   SettingsTabIntro,
   SettingsTile,
   type RepoSyncStatus,
+  type SettingsPillTone,
   type SupabaseOperationalStatus,
 } from "@/components/compliscan/settings/settings-shared"
 import { SPV_STATUS_LABELS } from "@/lib/fiscal/spv-submission"
@@ -59,6 +58,50 @@ function formatRepoSyncOperationalState(repoSyncStatus: RepoSyncStatus) {
   return "Disponibil"
 }
 
+const btnOutline =
+  "flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[12px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
+const btnOutlineLarge =
+  "flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[12.5px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text"
+
+function Panel({
+  title,
+  pill,
+  description,
+  headerActions,
+  children,
+}: {
+  title: string
+  pill?: React.ReactNode
+  description?: string
+  headerActions?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border-subtle px-4 py-3.5">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3
+                data-display-text="true"
+                className="font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+              >
+                {title}
+              </h3>
+              {pill}
+            </div>
+            {description ? (
+              <p className="max-w-2xl text-[12.5px] text-eos-text-muted">{description}</p>
+            ) : null}
+          </div>
+          {headerActions ? <div className="flex flex-wrap gap-2">{headerActions}</div> : null}
+        </div>
+      </header>
+      <div className="space-y-4 px-4 py-4">{children}</div>
+    </section>
+  )
+}
+
 export function SettingsIntegrationsTab({
   repoSyncStatus,
   supabaseStatus,
@@ -92,6 +135,20 @@ export function SettingsIntegrationsTab({
     }
   }, [])
 
+  const efacturaTone: SettingsPillTone = efacturaLoading
+    ? "outline"
+    : efacturaStatus?.mode === "real"
+      ? "success"
+      : efacturaStatus?.mode === "test"
+        ? "outline"
+        : "neutral"
+
+  const supabaseTone: SettingsPillTone = supabaseStatusLoading
+    ? "outline"
+    : supabaseStatus?.summary.ready
+      ? "success"
+      : "warning"
+
   return (
     <div className="space-y-6">
       <SettingsTabIntro
@@ -99,561 +156,515 @@ export function SettingsIntegrationsTab({
         description="Status operațional pentru traseele externe și acțiunile utile de administrare."
       />
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardHeader>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-base">ANAF / e-Factura</CardTitle>
-                <Badge
-                  variant={
-                    efacturaLoading
-                      ? "outline"
-                      : efacturaStatus?.mode === "real"
-                        ? "success"
-                        : efacturaStatus?.mode === "test"
-                          ? "outline"
-                          : "secondary"
-                  }
-                >
-                  {efacturaLoading
-                    ? "Se verifică"
-                    : efacturaStatus?.mode === "real"
-                      ? "Producție"
-                      : efacturaStatus?.mode === "test"
-                        ? "Sandbox ANAF"
-                        : "Demo local"}
-                </Badge>
-              </div>
-              <p className="max-w-2xl text-sm text-eos-text-muted">
-                Conectezi aplicația la ANAF și vezi clar dacă suntem în sandbox sau în producție. Producția rămâne blocată până la unlock explicit.
-              </p>
+      <Panel
+        title="ANAF / e-Factura"
+        pill={
+          <SettingsPill tone={efacturaTone}>
+            {efacturaLoading
+              ? "Se verifică"
+              : efacturaStatus?.mode === "real"
+                ? "Producție"
+                : efacturaStatus?.mode === "test"
+                  ? "Sandbox ANAF"
+                  : "Demo local"}
+          </SettingsPill>
+        }
+        description="Conectezi aplicația la ANAF și vezi clar dacă suntem în sandbox sau în producție. Producția rămâne blocată până la unlock explicit."
+        headerActions={
+          <>
+            <a
+              href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere"
+              className={btnOutlineLarge}
+            >
+              Conectează ANAF
+            </a>
+            <Link href="/dashboard/fiscal?tab=transmitere" className={btnOutlineLarge}>
+              Deschide Fiscal
+            </Link>
+          </>
+        }
+      >
+        {efacturaLoading ? (
+          <OperationalLoadingCard>
+            Verificăm starea ANAF, token-ul OAuth și mediul curent de transmitere...
+          </OperationalLoadingCard>
+        ) : efacturaStatus ? (
+          <>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <SettingsTile
+                icon={ShieldCheck}
+                label="Mod"
+                value={
+                  efacturaStatus.mode === "real"
+                    ? "Producție"
+                    : efacturaStatus.mode === "test"
+                      ? "Sandbox ANAF"
+                      : "Demo local"
+                }
+              />
+              <SettingsTile
+                icon={KeyRound}
+                label="Token OAuth"
+                value={
+                  efacturaStatus.tokenState === "present"
+                    ? efacturaStatus.operationalState === "reauth_required"
+                      ? "Prezent, dar respins"
+                      : "Prezent"
+                    : efacturaStatus.tokenState === "expired"
+                      ? "Expirat"
+                      : "Lipsă"
+                }
+              />
+              <SettingsTile
+                icon={Cloud}
+                label="Mediu ANAF"
+                value={efacturaStatus.environment === "prod" ? "prod" : "test"}
+              />
+              <SettingsTile
+                icon={RefreshCw}
+                label="Stare oper."
+                value={efacturaStatus.statusLabel}
+              />
+              <SettingsTile
+                icon={RefreshCw}
+                label="Ultim sync"
+                value={
+                  efacturaStatus.syncedAtISO
+                    ? new Date(efacturaStatus.syncedAtISO).toLocaleDateString("ro-RO")
+                    : "Încă nu există"
+                }
+              />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="default">
-                <a href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere">
-                  Conectează ANAF
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="default">
-                <Link href="/dashboard/fiscal?tab=transmitere">
-                  Deschide Fiscal
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {efacturaLoading ? (
-            <OperationalLoadingCard>
-              Verificăm starea ANAF, token-ul OAuth și mediul curent de transmitere...
-            </OperationalLoadingCard>
-          ) : efacturaStatus ? (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <SettingsTile
-                  icon={ShieldCheck}
-                  label="Mod"
-                  value={
-                    efacturaStatus.mode === "real"
-                      ? "Producție"
-                      : efacturaStatus.mode === "test"
-                        ? "Sandbox ANAF"
-                        : "Demo local"
-                  }
-                />
-                <SettingsTile
-                  icon={KeyRound}
-                  label="Token OAuth"
-                  value={
-                    efacturaStatus.tokenState === "present"
-                      ? efacturaStatus.operationalState === "reauth_required"
-                        ? "Prezent, dar respins"
-                        : "Prezent"
-                      : efacturaStatus.tokenState === "expired"
-                        ? "Expirat"
-                        : "Lipsă"
-                  }
-                />
-                <SettingsTile
-                  icon={Cloud}
-                  label="Mediu ANAF"
-                  value={efacturaStatus.environment === "prod" ? "prod" : "test"}
-                />
-                <SettingsTile
-                  icon={RefreshCw}
-                  label="Stare oper."
-                  value={efacturaStatus.statusLabel}
-                />
-                <SettingsTile
-                  icon={RefreshCw}
-                  label="Ultim sync"
-                  value={
-                    efacturaStatus.syncedAtISO
-                      ? new Date(efacturaStatus.syncedAtISO).toLocaleDateString("ro-RO")
-                      : "Încă nu există"
-                  }
-                />
-              </div>
 
-              <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-                <SettingsStatusBlock
-                  eyebrow="Stare curentă"
-                  title={efacturaStatus.statusLabel}
-                  description={efacturaStatus.statusDetail}
-                >
-                  <div className="space-y-2 text-sm text-eos-text-muted">
+            <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+              <SettingsStatusBlock
+                eyebrow="Stare curentă"
+                title={efacturaStatus.statusLabel}
+                description={efacturaStatus.statusDetail}
+              >
+                <div className="space-y-1.5 text-[12.5px] text-eos-text-muted">
+                  <p>
+                    Token:{" "}
+                    <span className="font-semibold text-eos-text">{efacturaStatus.tokenState}</span>
+                  </p>
+                  <p>
+                    Submit real:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {efacturaStatus.productionUnlocked ? "deblocat" : "blocat"}
+                    </span>
+                  </p>
+                  <p>
+                    Persistență:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {efacturaStatus.persistenceBackend === "supabase"
+                        ? "durabilă (Supabase)"
+                        : "fallback local"}
+                    </span>
+                  </p>
+                  {efacturaStatus.tokenExpiresAtISO && (
                     <p>
-                      Token:{" "}
-                      <span className="font-semibold text-eos-text">{efacturaStatus.tokenState}</span>
-                    </p>
-                    <p>
-                      Submit real:{" "}
+                      Expirare token:{" "}
                       <span className="font-semibold text-eos-text">
-                        {efacturaStatus.productionUnlocked ? "deblocat" : "blocat"}
+                        {new Date(efacturaStatus.tokenExpiresAtISO).toLocaleString("ro-RO")}
                       </span>
                     </p>
+                  )}
+                  {efacturaStatus.lastSubmissionStatus && (
                     <p>
-                      Persistență:{" "}
+                      Ultima execuție:{" "}
                       <span className="font-semibold text-eos-text">
-                        {efacturaStatus.persistenceBackend === "supabase"
-                          ? "durabilă (Supabase)"
-                          : "fallback local"}
+                        {SPV_STATUS_LABELS[efacturaStatus.lastSubmissionStatus]}
                       </span>
+                      {efacturaStatus.lastSubmissionAtISO
+                        ? ` · ${new Date(efacturaStatus.lastSubmissionAtISO).toLocaleString("ro-RO")}`
+                        : ""}
                     </p>
-                    {efacturaStatus.tokenExpiresAtISO && (
-                      <p>
-                        Expirare token:{" "}
-                        <span className="font-semibold text-eos-text">
-                          {new Date(efacturaStatus.tokenExpiresAtISO).toLocaleString("ro-RO")}
-                        </span>
-                      </p>
-                    )}
-                    {efacturaStatus.lastSubmissionStatus && (
-                      <p>
-                        Ultima execuție:{" "}
-                        <span className="font-semibold text-eos-text">
-                          {SPV_STATUS_LABELS[efacturaStatus.lastSubmissionStatus]}
-                        </span>
-                        {efacturaStatus.lastSubmissionAtISO
-                          ? ` · ${new Date(efacturaStatus.lastSubmissionAtISO).toLocaleString("ro-RO")}`
-                          : ""}
-                      </p>
-                    )}
-                    {efacturaStatus.lastSubmissionError && (
-                      <p className="text-eos-error">{efacturaStatus.lastSubmissionError}</p>
-                    )}
-                  </div>
-                </SettingsStatusBlock>
-
-                <SettingsStatusBlock
-                  eyebrow="Acțiune recomandată"
-                  title={
-                    efacturaStatus.canAttemptUpload
-                      ? "Poți testa fluxul în sandbox."
-                      : efacturaStatus.tokenState === "missing"
-                        ? "Autorizează aplicația în ANAF."
-                        : "Revalidează conexiunea înainte de upload."
-                  }
-                  description={
-                    efacturaStatus.canAttemptUpload
-                      ? "Continuă în Fiscal → Transmitere ANAF și lucrează doar cu mediul de test."
-                      : efacturaStatus.tokenState === "missing"
-                        ? "După autorizare te trimitem direct în Fiscal → Transmitere ANAF."
-                        : "Tokenul este prezent, dar suprafața fiscală rămâne adevărul operațional pentru upload."
-                  }
-                >
-                  <div className="space-y-2 text-xs text-eos-text-muted">
-                    <p>Callback activ: <code>/api/anaf/callback</code></p>
-                    <p>Connect flow: <code>/api/anaf/connect</code></p>
-                    {efacturaStatus.missingConfig.length > 0 && (
-                      <p>Lipsesc: <span className="font-semibold text-eos-text">{efacturaStatus.missingConfig.join(", ")}</span></p>
-                    )}
-                  </div>
-                </SettingsStatusBlock>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button asChild variant="outline" size="sm">
-                  <a href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere">
-                    <ShieldCheck className="mr-1.5 size-3.5" />
-                    {efacturaStatus.tokenState === "missing" ? "Autentifică ANAF" : "Reautentifică ANAF"}
-                  </a>
-                </Button>
-                <Button asChild variant="outline" size="sm">
-                  <Link href="/dashboard/fiscal?tab=transmitere">
-                    <ExternalLink className="mr-1.5 size-3.5" />
-                    Deschide tab-ul de transmitere
-                  </Link>
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">
-              Nu am putut citi statusul integrării ANAF.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="border-eos-border bg-eos-surface">
-        <CardHeader>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-base">Status operational Supabase</CardTitle>
-                <Badge
-                  variant={
-                    supabaseStatusLoading
-                      ? "outline"
-                      : supabaseStatus?.summary.ready
-                        ? "success"
-                        : "warning"
-                  }
-                  className="gap-1.5"
-                >
-                  {supabaseStatusLoading
-                    ? "Se verifica"
-                    : supabaseStatus?.summary.ready
-                      ? "Pregatit operational"
-                      : "Cere revizuire"}
-                </Badge>
-              </div>
-              <p className="max-w-2xl text-sm text-eos-text-muted">
-                Verificare pentru auth, date si storage. Aici conteaza starea reala, nu doar configurarea.
-              </p>
-            </div>
-            <Button asChild variant="outline" size="default">
-              <Link href="/supabase-rls-verification-runbook.md" target="_blank">
-                Deschide runbook RLS
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {supabaseStatusLoading ? (
-            <OperationalLoadingCard>
-              Verificăm traseul Supabase pentru autentificare, date și stocare...
-            </OperationalLoadingCard>
-          ) : supabaseStatusError ? (
-            <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-warning">
-              {supabaseStatusError}
-            </div>
-          ) : supabaseStatus ? (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-                <SettingsTile
-                  icon={ShieldCheck}
-                  label="Backend auth"
-                  value={formatBackendLabel(supabaseStatus.authBackend)}
-                />
-                <SettingsTile
-                  icon={Database}
-                  label="Backend date"
-                  value={formatBackendLabel(supabaseStatus.dataBackend)}
-                />
-                <SettingsTile
-                  icon={Cloud}
-                  label="Supabase REST"
-                  value={supabaseStatus.restConfigured ? "Configurat" : "Lipseste"}
-                />
-                <SettingsTile
-                  icon={Cloud}
-                  label="Storage privat"
-                  value={supabaseStatus.storageConfigured ? "Configurat" : "Lipseste"}
-                />
-                <SettingsTile
-                  icon={FileCode2}
-                  label="Bucket dovezi"
-                  value={supabaseStatus.bucket?.ok ? "Prezent" : "Lipseste"}
-                />
-                <SettingsTile
-                  icon={ShieldCheck}
-                  label="Fallback local"
-                  value={supabaseStatus.localFallbackAllowed ? "Permis" : "Blocat"}
-                />
-              </div>
-
-              <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-                <SettingsStatusBlock
-                  eyebrow="Stare curenta"
-                  title={
-                    supabaseStatus.summary.ready
-                      ? "Traseul Supabase este pregatit operational."
-                      : "Traseul Supabase cere revizuire."
-                  }
-                  description={supabaseStatus.summary.ready
-                    ? "Auth, metadata si storage pot sustine fluxul controlat curent."
-                    : "Mai exista piese de configurat sau verificat inainte sa tratezi traseul cloud ca fundatie finala."}
-                >
-                  <div className="space-y-2 text-sm text-eos-text-muted">
-                    <p>
-                      Tabele sanatoase:{" "}
-                      <span className="font-semibold text-eos-text">
-                        {supabaseStatus.summary.healthyTables}/{supabaseStatus.summary.totalTables}
-                      </span>
-                    </p>
-                    <p>
-                      Schema Sprint 5:{" "}
-                      <span className="font-semibold text-eos-text">
-                        {supabaseStatus.summary.schemaReady ? "aplicata" : "incompleta"}
-                      </span>
-                    </p>
-                    <p>
-                      Bucket dovezi:{" "}
-                      <span className="font-semibold text-eos-text">
-                        {supabaseStatus.summary.bucketReady ? "pregatit" : "lipseste / invalid"}
-                      </span>
-                    </p>
-                    <p>
-                      Auth:{" "}
-                      <span className="font-semibold text-eos-text">
-                        {formatBackendLabel(supabaseStatus.authBackend)}
-                      </span>
-                      {" · "}
-                      Date:{" "}
-                      <span className="font-semibold text-eos-text">
-                        {formatBackendLabel(supabaseStatus.dataBackend)}
-                      </span>
-                    </p>
-                  </div>
-                </SettingsStatusBlock>
-
-                <div className="space-y-4">
-                  <SettingsStatusBlock
-                    eyebrow="Actiune recomandata"
-                    title={
-                      supabaseStatus.summary.blockers.length > 0
-                        ? "Inchide blocajele de configurare."
-                        : "Nu este nevoie de o actiune imediata."
-                    }
-                    description={
-                      supabaseStatus.summary.blockers.length > 0
-                        ? "Rezolva mai intai punctele care opresc readiness-ul cloud."
-                        : "Poti continua cu operarea normala si verifici doar la schimbari de infrastructura."
-                    }
-                  >
-                    <div className="space-y-2 text-xs text-eos-text-muted">
-                      <p>
-                        Endpoint intern: <code>/api/integrations/supabase/status</code>
-                      </p>
-                      <p>
-                        SQL Editor: <code>supabase/apply-sprint5-complete.sql</code>
-                      </p>
-                    </div>
-                  </SettingsStatusBlock>
-
-                  {supabaseStatus.summary.blockers.length > 0 ? (
-                    <SettingsSignalCard
-                      title="Blocaje active"
-                      items={supabaseStatus.summary.blockers}
-                      tone="warning"
-                    />
-                  ) : (
-                    <SettingsSignalCard
-                      title="Fara blocaje active"
-                      items={[]}
-                      tone="success"
-                      emptyMessage="Nu exista blocaje operationale majore pe traseul Supabase."
-                    />
+                  )}
+                  {efacturaStatus.lastSubmissionError && (
+                    <p className="text-eos-error">{efacturaStatus.lastSubmissionError}</p>
                   )}
                 </div>
-              </div>
+              </SettingsStatusBlock>
 
-              <SettingsDisclosure
-                eyebrow="Detalii tehnice"
-                title="Tabele, bucket si verificari de infrastructura"
-                description="Deschizi aceasta zona doar cand diagnostichezi configurarea sau storage-ul."
+              <SettingsStatusBlock
+                eyebrow="Acțiune recomandată"
+                title={
+                  efacturaStatus.canAttemptUpload
+                    ? "Poți testa fluxul în sandbox."
+                    : efacturaStatus.tokenState === "missing"
+                      ? "Autorizează aplicația în ANAF."
+                      : "Revalidează conexiunea înainte de upload."
+                }
+                description={
+                  efacturaStatus.canAttemptUpload
+                    ? "Continuă în Fiscal → Transmitere ANAF și lucrează doar cu mediul de test."
+                    : efacturaStatus.tokenState === "missing"
+                      ? "După autorizare te trimitem direct în Fiscal → Transmitere ANAF."
+                      : "Tokenul este prezent, dar suprafața fiscală rămâne adevărul operațional pentru upload."
+                }
               >
-                <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-                  <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                    <p className="text-sm font-medium text-eos-text">
-                      Stare tabele critice
-                    </p>
-                    <div className="mt-4 space-y-3">
-                      {Object.entries(supabaseStatus.tables).map(([table, status]) => (
-                        <div
-                          key={table}
-                          className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-eos-text">
-                              {table}
-                            </span>
-                            <Badge variant={status.ok ? "success" : "warning"}>
-                              {status.ok
-                                ? "ok"
-                                : status.state === "missing_schema"
-                                  ? "schema lipsa"
-                                  : "degradat"}
-                            </Badge>
-                          </div>
-                          <p className="mt-2 text-xs text-eos-text-muted">
-                            {status.error || "Tabelul raspunde la verificarea operationala."}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                <div className="space-y-1.5 font-mono text-[11px] text-eos-text-muted">
+                  <p>Callback activ: <code>/api/anaf/callback</code></p>
+                  <p>Connect flow: <code>/api/anaf/connect</code></p>
+                  {efacturaStatus.missingConfig.length > 0 && (
+                    <p>Lipsesc: <span className="font-semibold text-eos-text">{efacturaStatus.missingConfig.join(", ")}</span></p>
+                  )}
+                </div>
+              </SettingsStatusBlock>
+            </div>
 
-                  <div className="space-y-4">
-                    {supabaseStatus.bucket ? (
-                      <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                        <p className="text-sm font-medium text-eos-text">
-                          Bucket dovezi
-                        </p>
-                        <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-eos-text">
-                              bucket:{supabaseStatus.bucket.name}
-                            </span>
-                            <Badge variant={supabaseStatus.bucket.ok ? "success" : "warning"}>
-                              {supabaseStatus.bucket.ok ? "ok" : "lipsa / invalid"}
-                            </Badge>
-                          </div>
-                          <p className="mt-2 text-xs text-eos-text-muted">
-                            {supabaseStatus.bucket.ok
-                              ? "Bucket-ul privat pentru evidence este disponibil."
-                              : supabaseStatus.bucket.error || "Bucket-ul nu este pregatit."}
-                          </p>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href="/api/anaf/connect?returnTo=/dashboard/fiscal?tab=transmitere"
+                className={btnOutline}
+              >
+                <ShieldCheck className="size-3.5" strokeWidth={2} />
+                {efacturaStatus.tokenState === "missing" ? "Autentifică ANAF" : "Reautentifică ANAF"}
+              </a>
+              <Link href="/dashboard/fiscal?tab=transmitere" className={btnOutline}>
+                <ExternalLink className="size-3.5" strokeWidth={2} />
+                Deschide tab-ul de transmitere
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="rounded-eos-sm border border-eos-warning/30 bg-eos-warning-soft p-4 text-[12.5px] text-eos-warning">
+            Nu am putut citi statusul integrării ANAF.
+          </div>
+        )}
+      </Panel>
+
+      <Panel
+        title="Status operațional Supabase"
+        pill={
+          <SettingsPill tone={supabaseTone}>
+            {supabaseStatusLoading
+              ? "Se verifica"
+              : supabaseStatus?.summary.ready
+                ? "Pregatit operational"
+                : "Cere revizuire"}
+          </SettingsPill>
+        }
+        description="Verificare pentru auth, date si storage. Aici conteaza starea reala, nu doar configurarea."
+        headerActions={
+          <Link href="/supabase-rls-verification-runbook.md" target="_blank" className={btnOutlineLarge}>
+            Deschide runbook RLS
+          </Link>
+        }
+      >
+        {supabaseStatusLoading ? (
+          <OperationalLoadingCard>
+            Verificăm traseul Supabase pentru autentificare, date și stocare...
+          </OperationalLoadingCard>
+        ) : supabaseStatusError ? (
+          <div className="rounded-eos-sm border border-eos-warning/30 bg-eos-warning-soft p-4 text-[12.5px] text-eos-warning">
+            {supabaseStatusError}
+          </div>
+        ) : supabaseStatus ? (
+          <>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+              <SettingsTile
+                icon={ShieldCheck}
+                label="Backend auth"
+                value={formatBackendLabel(supabaseStatus.authBackend)}
+              />
+              <SettingsTile
+                icon={Database}
+                label="Backend date"
+                value={formatBackendLabel(supabaseStatus.dataBackend)}
+              />
+              <SettingsTile
+                icon={Cloud}
+                label="Supabase REST"
+                value={supabaseStatus.restConfigured ? "Configurat" : "Lipseste"}
+              />
+              <SettingsTile
+                icon={Cloud}
+                label="Storage privat"
+                value={supabaseStatus.storageConfigured ? "Configurat" : "Lipseste"}
+              />
+              <SettingsTile
+                icon={FileCode2}
+                label="Bucket dovezi"
+                value={supabaseStatus.bucket?.ok ? "Prezent" : "Lipseste"}
+              />
+              <SettingsTile
+                icon={ShieldCheck}
+                label="Fallback local"
+                value={supabaseStatus.localFallbackAllowed ? "Permis" : "Blocat"}
+              />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+              <SettingsStatusBlock
+                eyebrow="Stare curenta"
+                title={
+                  supabaseStatus.summary.ready
+                    ? "Traseul Supabase este pregatit operational."
+                    : "Traseul Supabase cere revizuire."
+                }
+                description={supabaseStatus.summary.ready
+                  ? "Auth, metadata si storage pot sustine fluxul controlat curent."
+                  : "Mai exista piese de configurat sau verificat inainte sa tratezi traseul cloud ca fundatie finala."}
+              >
+                <div className="space-y-1.5 text-[12.5px] text-eos-text-muted">
+                  <p>
+                    Tabele sanatoase:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {supabaseStatus.summary.healthyTables}/{supabaseStatus.summary.totalTables}
+                    </span>
+                  </p>
+                  <p>
+                    Schema Sprint 5:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {supabaseStatus.summary.schemaReady ? "aplicata" : "incompleta"}
+                    </span>
+                  </p>
+                  <p>
+                    Bucket dovezi:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {supabaseStatus.summary.bucketReady ? "pregatit" : "lipseste / invalid"}
+                    </span>
+                  </p>
+                  <p>
+                    Auth:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {formatBackendLabel(supabaseStatus.authBackend)}
+                    </span>
+                    {" · "}
+                    Date:{" "}
+                    <span className="font-semibold text-eos-text">
+                      {formatBackendLabel(supabaseStatus.dataBackend)}
+                    </span>
+                  </p>
+                </div>
+              </SettingsStatusBlock>
+
+              <div className="space-y-4">
+                <SettingsStatusBlock
+                  eyebrow="Actiune recomandata"
+                  title={
+                    supabaseStatus.summary.blockers.length > 0
+                      ? "Inchide blocajele de configurare."
+                      : "Nu este nevoie de o actiune imediata."
+                  }
+                  description={
+                    supabaseStatus.summary.blockers.length > 0
+                      ? "Rezolva mai intai punctele care opresc readiness-ul cloud."
+                      : "Poti continua cu operarea normala si verifici doar la schimbari de infrastructura."
+                  }
+                >
+                  <div className="space-y-1.5 font-mono text-[11px] text-eos-text-muted">
+                    <p>
+                      Endpoint intern: <code>/api/integrations/supabase/status</code>
+                    </p>
+                    <p>
+                      SQL Editor: <code>supabase/apply-sprint5-complete.sql</code>
+                    </p>
+                  </div>
+                </SettingsStatusBlock>
+
+                {supabaseStatus.summary.blockers.length > 0 ? (
+                  <SettingsSignalCard
+                    title="Blocaje active"
+                    items={supabaseStatus.summary.blockers}
+                    tone="warning"
+                  />
+                ) : (
+                  <SettingsSignalCard
+                    title="Fara blocaje active"
+                    items={[]}
+                    tone="success"
+                    emptyMessage="Nu exista blocaje operationale majore pe traseul Supabase."
+                  />
+                )}
+              </div>
+            </div>
+
+            <SettingsDisclosure
+              eyebrow="Detalii tehnice"
+              title="Tabele, bucket si verificari de infrastructura"
+              description="Deschizi aceasta zona doar cand diagnostichezi configurarea sau storage-ul."
+            >
+              <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-4">
+                  <p className="text-[13px] font-medium text-eos-text">
+                    Stare tabele critice
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {Object.entries(supabaseStatus.tables).map(([table, status]) => (
+                      <div
+                        key={table}
+                        className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[12.5px] font-medium text-eos-text">
+                            {table}
+                          </span>
+                          <SettingsPill tone={status.ok ? "success" : "warning"}>
+                            {status.ok
+                              ? "ok"
+                              : status.state === "missing_schema"
+                                ? "schema lipsa"
+                                : "degradat"}
+                          </SettingsPill>
                         </div>
+                        <p className="mt-1.5 text-[11px] text-eos-text-muted">
+                          {status.error || "Tabelul raspunde la verificarea operationala."}
+                        </p>
                       </div>
-                    ) : null}
+                    ))}
                   </div>
                 </div>
-              </SettingsDisclosure>
-            </>
-          ) : null}
-        </CardContent>
-      </Card>
 
-      <Card className="border-eos-border bg-eos-surface">
-        <CardHeader>
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-base">Repo sync pentru engineering</CardTitle>
-                <Badge variant={repoSyncBadgeVariant(repoSyncStatus)}>
-                  {repoSyncBadgeLabel(repoSyncStatus)}
-                </Badge>
+                <div className="space-y-4">
+                  {supabaseStatus.bucket ? (
+                    <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-4">
+                      <p className="text-[13px] font-medium text-eos-text">
+                        Bucket dovezi
+                      </p>
+                      <div className="mt-3 rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[12.5px] font-medium text-eos-text">
+                            bucket:{supabaseStatus.bucket.name}
+                          </span>
+                          <SettingsPill tone={supabaseStatus.bucket.ok ? "success" : "warning"}>
+                            {supabaseStatus.bucket.ok ? "ok" : "lipsa / invalid"}
+                          </SettingsPill>
+                        </div>
+                        <p className="mt-1.5 text-[11px] text-eos-text-muted">
+                          {supabaseStatus.bucket.ok
+                            ? "Bucket-ul privat pentru evidence este disponibil."
+                            : supabaseStatus.bucket.error || "Bucket-ul nu este pregatit."}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
-              <p className="max-w-2xl text-sm text-eos-text-muted">
-                Sincronizare dedicata pentru `compliscan.yaml` si manifests relevante, nu pentru scan complet de repository.
+            </SettingsDisclosure>
+          </>
+        ) : null}
+      </Panel>
+
+      <Panel
+        title="Repo sync pentru engineering"
+        pill={
+          <SettingsPill tone={repoSyncBadgeVariant(repoSyncStatus)}>
+            {repoSyncBadgeLabel(repoSyncStatus)}
+          </SettingsPill>
+        }
+        description="Sincronizare dedicata pentru `compliscan.yaml` si manifests relevante, nu pentru scan complet de repository."
+        headerActions={
+          <Link href="/ghid-engineering-compliscan.md" target="_blank" className={btnOutlineLarge}>
+            Deschide ghidul de engineering
+          </Link>
+        }
+      >
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <SettingsTile
+            icon={ShieldCheck}
+            label="Status"
+            value={formatRepoSyncOperationalState(repoSyncStatus)}
+          />
+          <SettingsTile
+            icon={KeyRound}
+            label="Header"
+            value={repoSyncStatus?.headerName || "x-compliscan-sync-key"}
+          />
+          <SettingsTile
+            icon={FileCode2}
+            label="GitHub adapter"
+            value={repoSyncStatus ? "/api/integrations/repo-sync/github" : "Se incarca"}
+          />
+          <SettingsTile
+            icon={FileCode2}
+            label="GitLab adapter"
+            value={repoSyncStatus ? "/api/integrations/repo-sync/gitlab" : "Se incarca"}
+          />
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+          <SettingsStatusBlock
+            eyebrow="Stare curenta"
+            title={
+              repoSyncStatus?.requiresKey
+                ? "Repo sync este protejat si pregatit pentru CI."
+                : repoSyncStatus?.localAllowedWithoutKey
+                  ? "Repo sync merge local fara cheie."
+                  : "Repo sync este disponibil."
+            }
+            description="Folosesti acest traseu pentru manifests si snapshoturi controlate venite din engineering."
+          >
+            <div className="space-y-1.5 text-[12.5px] text-eos-text-muted">
+              <p>
+                Header activ:{" "}
+                <span className="font-semibold text-eos-text">
+                  {repoSyncStatus?.headerName || "x-compliscan-sync-key"}
+                </span>
+              </p>
+              <p>
+                Endpoint generic:{" "}
+                <span className="font-semibold text-eos-text">
+                  {repoSyncStatus?.genericEndpoint || "Se incarca"}
+                </span>
               </p>
             </div>
-            <Button asChild variant="outline" size="default">
-              <Link href="/ghid-engineering-compliscan.md" target="_blank">
-                Deschide ghidul de engineering
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <SettingsTile
-              icon={ShieldCheck}
-              label="Status"
-              value={formatRepoSyncOperationalState(repoSyncStatus)}
-            />
-            <SettingsTile
-              icon={KeyRound}
-              label="Header"
-              value={repoSyncStatus?.headerName || "x-compliscan-sync-key"}
-            />
-            <SettingsTile
-              icon={FileCode2}
-              label="GitHub adapter"
-              value={repoSyncStatus ? "/api/integrations/repo-sync/github" : "Se incarca"}
-            />
-            <SettingsTile
-              icon={FileCode2}
-              label="GitLab adapter"
-              value={repoSyncStatus ? "/api/integrations/repo-sync/gitlab" : "Se incarca"}
-            />
-          </div>
+          </SettingsStatusBlock>
 
-          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-            <SettingsStatusBlock
-              eyebrow="Stare curenta"
-              title={
-                repoSyncStatus?.requiresKey
-                  ? "Repo sync este protejat si pregatit pentru CI."
-                  : repoSyncStatus?.localAllowedWithoutKey
-                    ? "Repo sync merge local fara cheie."
-                    : "Repo sync este disponibil."
-              }
-              description="Folosesti acest traseu pentru manifests si snapshoturi controlate venite din engineering."
-            >
-              <div className="space-y-2 text-sm text-eos-text-muted">
-                <p>
-                  Header activ:{" "}
-                  <span className="font-semibold text-eos-text">
-                    {repoSyncStatus?.headerName || "x-compliscan-sync-key"}
-                  </span>
-                </p>
-                <p>
-                  Endpoint generic:{" "}
-                  <span className="font-semibold text-eos-text">
-                    {repoSyncStatus?.genericEndpoint || "Se incarca"}
-                  </span>
-                </p>
-              </div>
-            </SettingsStatusBlock>
-
-            <SettingsStatusBlock
-              eyebrow="Actiune recomandata"
-              title="Trimite doar manifests relevante."
-              description="Pornesti sync-ul din CI si validezi apoi snapshot-ul bun ca baseline."
-            >
-              <ul className="space-y-1.5 text-sm text-eos-text-muted">
-                <li>Trimiti `compliscan.yaml` si fisierele de manifest relevante.</li>
-                <li>Dupa primul sync, confirmi sistemele AI reale si snapshot-ul bun.</li>
-              </ul>
-            </SettingsStatusBlock>
-          </div>
-
-          <SettingsDisclosure
-            eyebrow="Detalii tehnice"
-            title="Endpoint-uri si exemplu de apel"
-            description="Deschizi aceasta zona cand configurezi adapterele sau debughezi integrarea."
+          <SettingsStatusBlock
+            eyebrow="Actiune recomandata"
+            title="Trimite doar manifests relevante."
+            description="Pornesti sync-ul din CI si validezi apoi snapshot-ul bun ca baseline."
           >
-            <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                <p className="text-sm font-medium text-eos-text">
-                  Endpoint-uri disponibile
-                </p>
-                <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
-                  <EndpointRow
-                    label="Generic"
-                    value={repoSyncStatus?.genericEndpoint || "Se incarca"}
-                    badge="manual / generic"
-                  />
-                  <EndpointRow
-                    label="GitHub"
-                    value={repoSyncStatus?.githubEndpoint || "Se incarca"}
-                    badge="adapter dedicat"
-                  />
-                  <EndpointRow
-                    label="GitLab"
-                    value={repoSyncStatus?.gitlabEndpoint || "Se incarca"}
-                    badge="adapter dedicat"
-                  />
-                </div>
-              </div>
+            <ul className="space-y-1 text-[12.5px] text-eos-text-muted">
+              <li>Trimiti `compliscan.yaml` si fisierele de manifest relevante.</li>
+              <li>Dupa primul sync, confirmi sistemele AI reale si snapshot-ul bun.</li>
+            </ul>
+          </SettingsStatusBlock>
+        </div>
 
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface p-4">
-                <p className="text-sm font-medium text-eos-text">
-                  Exemplu rapid de curl
-                </p>
-                <pre className="mt-4 overflow-x-auto whitespace-pre-wrap rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-xs leading-6 text-eos-text">
-                  {repoSyncStatus?.curlExample ||
-                    'curl -X POST http://localhost:3001/api/integrations/repo-sync \\\n  -H "Content-Type: application/json" \\\n  -H "x-compliscan-sync-key: ${COMPLISCAN_SYNC_KEY}" \\\n  -d @repo-sync.json'}
-                </pre>
+        <SettingsDisclosure
+          eyebrow="Detalii tehnice"
+          title="Endpoint-uri si exemplu de apel"
+          description="Deschizi aceasta zona cand configurezi adapterele sau debughezi integrarea."
+        >
+          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-4">
+              <p className="text-[13px] font-medium text-eos-text">
+                Endpoint-uri disponibile
+              </p>
+              <div className="mt-3 space-y-2 text-[12.5px] text-eos-text-muted">
+                <EndpointRow
+                  label="Generic"
+                  value={repoSyncStatus?.genericEndpoint || "Se incarca"}
+                  badge="manual / generic"
+                />
+                <EndpointRow
+                  label="GitHub"
+                  value={repoSyncStatus?.githubEndpoint || "Se incarca"}
+                  badge="adapter dedicat"
+                />
+                <EndpointRow
+                  label="GitLab"
+                  value={repoSyncStatus?.gitlabEndpoint || "Se incarca"}
+                  badge="adapter dedicat"
+                />
               </div>
             </div>
-          </SettingsDisclosure>
-        </CardContent>
-      </Card>
+
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-4">
+              <p className="text-[13px] font-medium text-eos-text">
+                Exemplu rapid de curl
+              </p>
+              <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-eos-sm border border-eos-border bg-eos-bg-inset p-3 font-mono text-[11px] leading-[1.6] text-eos-text">
+                {repoSyncStatus?.curlExample ||
+                  'curl -X POST http://localhost:3001/api/integrations/repo-sync \\\n  -H "Content-Type: application/json" \\\n  -H "x-compliscan-sync-key: ${COMPLISCAN_SYNC_KEY}" \\\n  -d @repo-sync.json'}
+              </pre>
+            </div>
+          </div>
+        </SettingsDisclosure>
+      </Panel>
     </div>
   )
 }

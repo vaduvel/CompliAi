@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
+import { LegacyWorkspaceBridge } from "@/components/compliscan/legacy-workspace-bridge"
 import { PortfolioShell } from "@/components/compliscan/portfolio-shell"
 import {
   SESSION_COOKIE,
@@ -9,6 +10,7 @@ import {
   resolveUserMode,
   verifySessionToken,
 } from "@/lib/server/auth"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export const dynamic = "force-dynamic"
 
@@ -28,11 +30,43 @@ export default async function PortfolioLayout({
 
   const userMode = await resolveUserMode(session)
 
-  if (userMode !== "partner" || session.workspaceMode !== "portfolio") {
+  if (userMode !== "partner") {
     redirect("/dashboard")
   }
 
+  if (session.workspaceMode !== "portfolio") {
+    return (
+      <LegacyWorkspaceBridge
+        title="Comutăm sesiunea în Portofoliu"
+        description="Pregătim workspace-ul de cabinet ca să vezi toți clienții într-un singur loc."
+        requestBody={{ workspaceMode: "portfolio" }}
+        destinationHref="/portfolio"
+        preserveCurrentPath
+        fallbackHref="/dashboard"
+        fallbackLabel="Înapoi la dashboard"
+      />
+    )
+  }
+
   const memberships = await listUserMemberships(session.userId)
+
+  // Sprint cleanup fiscal-first (2026-05-11): include icpSegment în initialUser
+  // ca DashboardShell să poată aplica filter cabinet-fiscal pe sidebar/labels.
+  // Mircea fix: pentru partner, ICP-ul vine din CABINET's own org (owner
+  // membership), nu din session.orgId care e clientul curent.
+  let icpSegment: import("@/lib/server/white-label").IcpSegment | null = null
+  try {
+    let lookupOrgId = session.orgId
+    if (userMode === "partner") {
+      const ownerMembership = memberships.find((m) => m.role === "owner")
+      if (ownerMembership) lookupOrgId = ownerMembership.orgId
+    }
+    const wl = await getWhiteLabelConfig(lookupOrgId)
+    icpSegment = wl.icpSegment ?? null
+  } catch {
+    icpSegment = null
+  }
+
   const initialUser = {
     email: session.email,
     orgName: session.orgName,
@@ -41,6 +75,7 @@ export default async function PortfolioLayout({
     membershipId: session.membershipId ?? null,
     userMode,
     workspaceMode: session.workspaceMode ?? "org",
+    icpSegment,
   }
 
   return (

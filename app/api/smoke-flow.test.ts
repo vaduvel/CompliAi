@@ -33,9 +33,12 @@ const mocks = vi.hoisted(() => ({
   readFreshSessionFromRequestMock: vi.fn(),
   readSessionFromRequestMock: vi.fn(),
   readWorkspacePreferenceFromRequestMock: vi.fn(),
+  readFreshStateForOrgMock: vi.fn(),
   readStateForOrgMock: vi.fn(),
   resolveUserForMembershipMock: vi.fn(),
   resolveUserModeMock: vi.fn(),
+  requireFreshAuthenticatedSessionMock: vi.fn(),
+  requireFreshRoleMock: vi.fn(),
   requireRoleMock: vi.fn(),
   serializeCompliScanYamlMock: vi.fn(),
 }))
@@ -58,6 +61,8 @@ vi.mock("@/lib/server/auth", () => ({
   readWorkspacePreferenceFromRequest: mocks.readWorkspacePreferenceFromRequestMock,
   resolveUserForMembership: mocks.resolveUserForMembershipMock,
   resolveUserMode: mocks.resolveUserModeMock,
+  requireFreshAuthenticatedSession: mocks.requireFreshAuthenticatedSessionMock,
+  requireFreshRole: mocks.requireFreshRoleMock,
   requireRole: mocks.requireRoleMock,
   SESSION_COOKIE: "compliscan_session",
   WORKSPACE_PREF_COOKIE: "compliscan_workspace_pref",
@@ -65,6 +70,7 @@ vi.mock("@/lib/server/auth", () => ({
 
 vi.mock("@/lib/server/mvp-store", () => ({
   mutateStateForOrg: mocks.mutateStateForOrgMock,
+  readFreshStateForOrg: mocks.readFreshStateForOrgMock,
   readStateForOrg: mocks.readStateForOrgMock,
 }))
 
@@ -130,6 +136,22 @@ describe("api smoke flow", () => {
       role: "owner",
       exp: Date.now() + 1000,
     })
+    mocks.requireFreshAuthenticatedSessionMock.mockResolvedValue({
+      userId: "user-1",
+      email: "demo@site.ro",
+      orgId: "org-1",
+      orgName: "Org Demo",
+      role: "owner",
+      exp: Date.now() + 1000,
+    })
+    mocks.requireFreshRoleMock.mockResolvedValue({
+      userId: "user-1",
+      email: "demo@site.ro",
+      orgId: "org-1",
+      orgName: "Org Demo",
+      role: "owner",
+      exp: Date.now() + 1000,
+    })
     mocks.readWorkspacePreferenceFromRequestMock.mockReturnValue(null)
     mocks.resolveUserModeMock.mockResolvedValue(null)
     mocks.resolveUserForMembershipMock.mockResolvedValue(null)
@@ -145,6 +167,7 @@ describe("api smoke flow", () => {
       async (_orgId: string, updater: (state: typeof initialComplianceState) => unknown) =>
         updater(initialComplianceState)
     )
+    mocks.readFreshStateForOrgMock.mockResolvedValue(initialComplianceState)
     mocks.readStateForOrgMock.mockResolvedValue({})
     mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({
       state: {

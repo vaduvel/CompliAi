@@ -46,7 +46,7 @@ export function generateContractsBaselinePack(
     kind: "contracts-baseline",
     title: "Pachet minim baseline contractual",
     summary:
-      "CompliAI pregătește matricea de template-uri, checklistul de clauze și planul minim de adoptare. Firma trebuie să adapteze documentele la relațiile reale și să confirme unde sunt salvate și folosite.",
+      "CompliScan pregătește matricea de template-uri, checklistul de clauze și planul minim de adoptare. Firma trebuie să adapteze documentele la relațiile reale și să confirme unde sunt salvate și folosite.",
     assets: [
       {
         id: "contracts-matrix",
@@ -66,9 +66,9 @@ export function generateContractsBaselinePack(
 | --- | --- | --- | --- | --- |
 | Clienți B2B | Contract-cadru prestări servicii / furnizare | [completează] | [completează] | Draft |
 | Furnizori / colaboratori | Contract furnizor / comandă fermă / termeni standard | [completează] | [completează] | Draft |
-| Confidențialitate | NDA bilateral (generează din CompliAI → „Acord NDA") | [completează] | [completează] | Draft |
-| Date personale | DPA separat sau anexă contractuală (generează din CompliAI → „Acord DPA") | [completează] | [completează] | Draft |
-| Furnizori | Contract-cadru furnizor (generează din CompliAI → „Contract Furnizor") | [completează] | [completează] | Draft |
+| Confidențialitate | NDA bilateral (generează din CompliScan → „Acord NDA") | [completează] | [completează] | Draft |
+| Date personale | DPA separat sau anexă contractuală (generează din CompliScan → „Acord DPA") | [completează] | [completează] | Draft |
+| Furnizori | Contract-cadru furnizor (generează din CompliScan → „Contract Furnizor") | [completează] | [completează] | Draft |
 
 ## Reguli practice
 
@@ -135,6 +135,6 @@ ${params.hasAiTools ? "5. Dacă folosești servicii AI furnizate de terți, veri
     generatorDocumentType: "contract-template",
     generatorLabel: "Generează template-ul",
     returnEvidenceNote:
-      "CompliAI a pregătit pachetul contractual: matricea de template-uri, checklistul de clauze și planul de adoptare au fost revizuite. Următorul pas este validarea juridică și punerea în uz a template-urilor pentru relațiile comerciale reale.",
+      "CompliScan a pregătit pachetul contractual: matricea de template-uri, checklistul de clauze și planul de adoptare au fost revizuite. Următorul pas este validarea juridică și punerea în uz a template-urilor pentru relațiile comerciale reale.",
   }
 }

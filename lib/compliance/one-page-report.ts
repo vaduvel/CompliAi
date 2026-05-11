@@ -207,7 +207,7 @@ export function buildOnePageReport(
     topActions,
     metrics,
     disclaimer:
-      "Generat de CompliAI. Informațiile sunt orientative — verifică cu un specialist juridic înainte de orice raport oficial. CompliAI nu garantează rezultate juridice.",
+      "Generat de CompliScan. Informațiile sunt orientative — verifică cu un specialist juridic înainte de orice raport oficial. CompliScan nu garantează rezultate juridice.",
   }
 }
 
@@ -443,7 +443,7 @@ export function buildOnePageReportHtml(data: OnePageReportData): string {
 <html lang="ro">
 <head>
   <meta charset="utf-8" />
-  <title>Raport Executiv CompliAI — ${data.orgName}</title>
+  <title>Raport Executiv CompliScan — ${data.orgName}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; }
@@ -470,7 +470,7 @@ export function buildOnePageReportHtml(data: OnePageReportData): string {
     <div>
       <p style="margin:0;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.1em">Raport Executiv de Conformitate</p>
       <h1 style="margin:4px 0 0;font-size:24px;font-weight:800;color:#111">${data.orgName || "Organizație"}</h1>
-      <p style="margin:4px 0 0;font-size:13px;color:#6b7280">Generat la ${data.generatedAtLabel} · CompliAI</p>
+      <p style="margin:4px 0 0;font-size:13px;color:#6b7280">Generat la ${data.generatedAtLabel} · CompliScan</p>
     </div>
     <div style="text-align:center;min-width:120px;border:2px solid ${scoreColor};border-radius:12px;padding:12px 20px">
       <p style="margin:0;font-size:36px;font-weight:800;color:${scoreColor}">${data.score}</p>

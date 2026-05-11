@@ -1,8 +1,5 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { Badge } from "@/components/evidence-os/Badge"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
 import type { AICompliancePackEntry } from "@/lib/compliance/ai-compliance-pack"
 
 // ── Shared types ───────────────────────────────────────────────────────────────
@@ -33,61 +30,84 @@ export function ControlPackageHighlightsCard({
   }>
 }) {
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-xl">Pachete de control dominante</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-6">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border-subtle px-4 py-3.5">
+        <h3
+          data-display-text="true"
+          className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+        >
+          Pachete de control dominante
+        </h3>
+      </header>
+      <div className="space-y-4 px-4 py-4">
         {highlights.length === 0 && (
-          <EmptyState
-            title="Insuficiente semnale pentru grupuri dominante"
-            label="Confirmă mai întâi suficiente sisteme sau completează câmpurile lipsă din pack — vei vedea ce bundle domină pe fiecare categorie."
-            className="border-eos-border bg-eos-surface-variant py-8"
-          />
+          <div className="rounded-eos-lg border border-dashed border-eos-border bg-white/[0.02] px-4 py-8 text-center">
+            <p
+              data-display-text="true"
+              className="font-display text-[13.5px] font-semibold tracking-[-0.01em] text-eos-text"
+            >
+              Insuficiente semnale pentru grupuri dominante
+            </p>
+            <p className="mt-1.5 text-[12px] leading-[1.5] text-eos-text-muted">
+              Confirmă mai întâi suficiente sisteme sau completează câmpurile lipsă din pack — vei
+              vedea ce bundle domină pe fiecare categorie.
+            </p>
+          </div>
         )}
         <div className="grid gap-4 xl:grid-cols-3">
-          {highlights.map((highlight) => (
-            <div
-              key={highlight.groupKey}
-              className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-eos-text">{highlight.groupLabel}</p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge
-                    variant={
-                      highlight.highestPriority === "P1"
-                        ? "destructive"
-                        : highlight.highestPriority === "P2"
-                          ? "warning"
-                          : "outline"
-                    }
+          {highlights.map((highlight) => {
+            const priorityTone =
+              highlight.highestPriority === "P1"
+                ? "border-eos-error/30 bg-eos-error-soft text-eos-error"
+                : highlight.highestPriority === "P2"
+                  ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+                  : "border-eos-border bg-eos-surface-elevated text-eos-text-muted"
+            return (
+              <div
+                key={highlight.groupKey}
+                className="rounded-eos-lg border border-eos-border bg-eos-surface-elevated p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p
+                    data-display-text="true"
+                    className="font-display text-[13.5px] font-semibold tracking-[-0.01em] text-eos-text"
                   >
-                    {highlight.highestPriority}
-                  </Badge>
-                  <Badge variant="outline">{highlight.systemsCount} sisteme</Badge>
+                    {highlight.groupLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span
+                      className={`inline-flex items-center rounded-sm border ${priorityTone} px-1.5 py-0.5 font-mono text-[10px] font-medium`}
+                    >
+                      {highlight.highestPriority}
+                    </span>
+                    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+                      {highlight.systemsCount} sisteme
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-eos-text-muted">{highlight.businessImpact}</p>
-              <p className="mt-3 text-xs text-eos-text-muted">
-                <span className="font-medium text-eos-text">Owner route:</span>{" "}
-                {highlight.ownerRoute}
-              </p>
-              <p className="mt-2 text-xs text-eos-text-muted">
-                <span className="font-medium text-eos-text">Bundle util:</span>{" "}
-                {highlight.bundleHint}
-              </p>
-              {highlight.familyLabels.length > 0 && (
-                <p className="mt-2 text-xs text-eos-text-muted">
-                  <span className="font-medium text-eos-text">Familii:</span>{" "}
-                  {highlight.familyLabels.join(" · ")}
+                <p className="mt-3 text-[12.5px] leading-[1.55] text-eos-text-muted">
+                  {highlight.businessImpact}
                 </p>
-              )}
-            </div>
-          ))}
+                <p className="mt-3 text-[11.5px] text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Owner route:</span>{" "}
+                  {highlight.ownerRoute}
+                </p>
+                <p className="mt-2 text-[11.5px] text-eos-text-muted">
+                  <span className="font-medium text-eos-text">Bundle util:</span>{" "}
+                  {highlight.bundleHint}
+                </p>
+                {highlight.familyLabels.length > 0 && (
+                  <p className="mt-2 text-[11.5px] text-eos-text-muted">
+                    <span className="font-medium text-eos-text">Familii:</span>{" "}
+                    {highlight.familyLabels.join(" · ")}
+                  </p>
+                )}
+              </div>
+            )
+          })}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 

@@ -216,16 +216,16 @@ function buildHandoffEvidenceNote(input: {
       : ""
 
   if (input.readiness === "ready") {
-    return `CompliAI a pregătit reconcilierea REGES pentru ${orgName}: snapshotul intern include ${input.rosterCount} intrări, iar checklistul pentru registrul real are ${input.registryChecklistCount} puncte de verificat.${expectedLabel}${rangeNote} Următorul pas este verificarea în REGES și întoarcerea cu exportul sau confirmarea corecției.`
+    return `CompliScan a pregătit reconcilierea REGES pentru ${orgName}: snapshotul intern include ${input.rosterCount} intrări, iar checklistul pentru registrul real are ${input.registryChecklistCount} puncte de verificat.${expectedLabel}${rangeNote} Următorul pas este verificarea în REGES și întoarcerea cu exportul sau confirmarea corecției.`
   }
 
   if (input.readiness === "snapshot_only") {
-    return `CompliAI a salvat snapshotul intern pentru REGES la ${orgName}: ${input.rosterCount} intrări sunt pregătite pentru reconciliere.${expectedLabel} Mai trebuie completat checklistul de verificare din registrul real înainte de handoff.`
+    return `CompliScan a salvat snapshotul intern pentru REGES la ${orgName}: ${input.rosterCount} intrări sunt pregătite pentru reconciliere.${expectedLabel} Mai trebuie completat checklistul de verificare din registrul real înainte de handoff.`
   }
 
   if (input.readiness === "checklist_only") {
-    return `CompliAI a salvat checklistul REGES pentru ${orgName}: ${input.registryChecklistCount} puncte sunt pregătite pentru verificare.${expectedLabel} Mai trebuie adăugat snapshotul intern al contractelor / angajaților înainte de handoff.`
+    return `CompliScan a salvat checklistul REGES pentru ${orgName}: ${input.registryChecklistCount} puncte sunt pregătite pentru verificare.${expectedLabel} Mai trebuie adăugat snapshotul intern al contractelor / angajaților înainte de handoff.`
   }
 
-  return `CompliAI a deschis reconcilierea REGES pentru ${orgName}. Următorul pas este completarea snapshotului intern și a checklistului pentru registrul real înainte de handoff.`
+  return `CompliScan a deschis reconcilierea REGES pentru ${orgName}. Următorul pas este completarea snapshotului intern și a checklistului pentru registrul real înainte de handoff.`
 }

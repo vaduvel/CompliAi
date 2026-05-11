@@ -124,7 +124,7 @@ describe("GET /api/exports/audit-pack/client", () => {
       expect.objectContaining({
         orgId: "org-1",
         orgName: "Org Demo",
-        workspaceLabel: "Workspace local",
+        workspaceLabel: "Org Demo",
         userRole: "owner",
       })
     )

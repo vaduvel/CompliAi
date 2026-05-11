@@ -333,4 +333,52 @@ describe("task-validation", () => {
     expect(result.message).toContain("Confirmare parțială")
     expect(result.message).toContain("confirmare umană suplimentară")
   })
+
+  it("valideaza inchiderea operationala cand exista dovada si alerta asociata este inchisa", () => {
+    const state = buildState({
+      alerts: [
+        {
+          id: "alert-cookie",
+          message: "Cookie banner fără opțiune reală de respingere",
+          severity: "high",
+          open: false,
+          sourceDocument: "Website_Apex_Cookie_Check.html",
+          createdAtISO: "2026-04-19T11:00:00.000Z",
+          findingId: "apex-gdpr-cookie-reject",
+        },
+      ],
+      findings: [
+        {
+          id: "apex-gdpr-cookie-reject",
+          title: "Cookie banner fără opțiune reală de respingere",
+          detail:
+            "Site-ul seta analytics înainte de consimțământ, dar consultantul a atașat captura după remediere.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: ["transparency", "accountability"],
+          createdAtISO: "2026-04-19T11:00:00.000Z",
+          sourceDocument: "Website_Apex_Cookie_Check.html",
+          legalReference: "GDPR Art. 5, Art. 6 + ePrivacy",
+        },
+      ],
+      taskState: {
+        "finding-apex-gdpr-cookie-reject": {
+          status: "done",
+          updatedAtISO: "2026-04-28T12:00:00.000Z",
+          attachedEvidence: "cookie-banner-remediat.png",
+        },
+      },
+    })
+
+    const result = validateTaskAgainstState(
+      state,
+      "finding-apex-gdpr-cookie-reject",
+      "cookie-banner-remediat.png"
+    )
+
+    expect(result.status).toBe("passed")
+    expect(result.nextStatus).toBe("done")
+    expect(result.message).toContain("închis operațional")
+  })
 })

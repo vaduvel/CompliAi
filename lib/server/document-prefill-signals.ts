@@ -179,7 +179,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           kind: "generated",
           confidence: "high",
           reason:
-            "Ai deja o politică de confidențialitate generată în CompliAI, ceea ce indică prelucrare de date personale.",
+            "Ai deja o politică de confidențialitate generată în CompliScan, ceea ce indică prelucrare de date personale.",
           source: "document_memory",
         },
         {
@@ -189,7 +189,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           kind: "generated",
           confidence: "high",
           reason:
-            "Ai deja o politică de confidențialitate generată în CompliAI, deci există deja baza pentru politica GDPR cerută în onboarding.",
+            "Ai deja o politică de confidențialitate generată în CompliScan, deci există deja baza pentru politica GDPR cerută în onboarding.",
           source: "document_memory",
         },
         {
@@ -288,7 +288,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           kind: "generated",
           confidence: "high",
           reason:
-            "Ai deja o politică AI generată în CompliAI, deci răspunsul pentru existența unei politici interne AI este „da”.",
+            "Ai deja o politică AI generată în CompliScan, deci răspunsul pentru existența unei politici interne AI este „da”.",
           source: "document_memory",
         },
       ]
@@ -301,7 +301,7 @@ function classifyGeneratedDocument(document: GeneratedDocumentRecord): SignalEvi
           kind: "generated",
           confidence: "high",
           reason:
-            "Ai deja un contract-cadru generat în CompliAI, deci există un baseline contractual pregătit pentru relațiile comerciale standard.",
+            "Ai deja un contract-cadru generat în CompliScan, deci există un baseline contractual pregătit pentru relațiile comerciale standard.",
           source: "document_memory",
         },
       ]

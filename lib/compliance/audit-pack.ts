@@ -6,6 +6,7 @@ import type {
 } from "@/lib/compliance/audit-quality-gates"
 import type { CompliancePrinciple, ComplianceSeverity } from "@/lib/compliance/constitution"
 import type { ControlFamilyRef } from "@/lib/compliance/control-families"
+import type { FindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import type {
   EvidenceQualityAssessment,
@@ -25,6 +26,12 @@ export type AuditPackBaselineStatus = "validated" | "missing"
 export type AuditPackV2 = {
   version: "2.1"
   generatedAt: string
+  issuer: {
+    issuedBy: string
+    cabinetName: string
+    consultantName: string | null
+    source: "workspace" | "white_label"
+  }
   workspace: {
     id: string
     name: string
@@ -252,6 +259,7 @@ export type AuditPackV2 = {
     metadata: Record<string, string | number | boolean> | null
   }>
   traceabilityMatrix: ComplianceTraceRecord[]
+  findingLifecycle: FindingLifecycleView[]
   nis2Report: {
     hasData: boolean
     assessment: {

@@ -1,0 +1,5 @@
+Activitate,Scop,Temei,Categorii date,Persoane vizate,Destinatari,Retentie,Masuri
+Programari pacienti,Gestionare programari si confirmari,Art. 6(1)(b),date contact; CNP optional,pacienti,receptie; medici,3 ani,acces pe roluri
+Fisa medicala si consultatii,Furnizare servicii medicale,Art. 9(2)(h),date sanatate; diagnostic; tratament,pacienti,medici colaboratori,10 ani,control acces si audit intern
+Facturare servicii medicale,Emiterea facturilor,Art. 6(1)(c),date identificare; servicii; plati,pacienti,contabilitate,10 ani,export contabil lunar
+Marketing preventiv,Newsletter campanii sanatate,consimtamant,date contact; preferinte,pacienti abonati,MailTool,3 ani sau retragere,unsubscribe si lista suprimare

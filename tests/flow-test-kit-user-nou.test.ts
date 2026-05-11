@@ -112,7 +112,7 @@ describe("flow test kit - user nou document flow", () => {
     const scanResponse = await postScan(
       new Request("http://localhost/api/scan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", cookie },
         body: JSON.stringify({
           documentName: "03-recruitment-high-risk-bundle-source.txt",
           content,

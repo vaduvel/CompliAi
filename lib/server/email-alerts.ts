@@ -4,12 +4,12 @@
 // Setup:
 //   1. Create free account at resend.com
 //   2. Add RESEND_API_KEY=re_... to .env.local
-//   3. Optionally set ALERT_EMAIL_FROM (default: alerts@compliai.ro)
+//   3. Optionally set ALERT_EMAIL_FROM (default: alerts@compliscan.ro)
 
 import type { AlertEventType } from "@/lib/server/alert-preferences-store"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Alerts <onboarding@resend.dev>"
+const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Alerts <onboarding@resend.dev>"
 
 const EVENT_LABELS: Record<AlertEventType, string> = {
   "drift.detected": "Drift de conformitate detectat",
@@ -30,7 +30,7 @@ function buildEmailHtml(event: AlertEventType, orgId: string, payload: Record<st
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 16px;color:#0f172a">${label}</h2>
@@ -45,8 +45,8 @@ function buildEmailHtml(event: AlertEventType, orgId: string, payload: Record<st
     ` : ""}
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0">
     <p style="color:#94a3b8;font-size:12px;margin:0">
-      Notificare automata CompliAI &mdash;
-      <a href="https://compliai.ro/dashboard/settings" style="color:#6366f1">Gestioneaza notificarile</a>
+      Notificare automata CompliScan &mdash;
+      <a href="https://compliscan.ro/dashboard/settings" style="color:#6366f1">Gestioneaza notificarile</a>
     </p>
   </div>
 </body>
@@ -64,7 +64,7 @@ export async function sendEmailAlert(
   if (!RESEND_API_KEY) {
     // Fallback: log la stdout (util in dev fara Resend configurat)
     console.log(
-      `[CompliAI Alert] EMAIL → ${to} | event=${event} | org=${orgId} | payload=${JSON.stringify(payload)}`
+      `[CompliScan Alert] EMAIL → ${to} | event=${event} | org=${orgId} | payload=${JSON.stringify(payload)}`
     )
     return { ok: true, channel: "console" }
   }
@@ -79,7 +79,7 @@ export async function sendEmailAlert(
       body: JSON.stringify({
         from: FROM_ADDRESS,
         to: [to],
-        subject: `[CompliAI] ${label}`,
+        subject: `[CompliScan] ${label}`,
         html: buildEmailHtml(event, orgId, payload),
       }),
       signal: AbortSignal.timeout(10_000),
@@ -87,16 +87,16 @@ export async function sendEmailAlert(
 
     if (!res.ok) {
       const err = await res.text()
-      console.error(`[CompliAI Alert] Resend error ${res.status}: ${err}`)
+      console.error(`[CompliScan Alert] Resend error ${res.status}: ${err}`)
       return { ok: false, channel: "resend", error: `HTTP ${res.status}: ${err}` }
     }
 
     const data = await res.json() as { id?: string }
-    console.log(`[CompliAI Alert] Email trimis via Resend → ${to} (id=${data.id})`)
+    console.log(`[CompliScan Alert] Email trimis via Resend → ${to} (id=${data.id})`)
     return { ok: true, channel: "resend" }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "fetch failed"
-    console.error(`[CompliAI Alert] Resend exception: ${msg}`)
+    console.error(`[CompliScan Alert] Resend exception: ${msg}`)
     return { ok: false, channel: "resend", error: msg }
   }
 }

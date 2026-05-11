@@ -14,6 +14,7 @@ import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
 import { buildSAFTD406Finding } from "@/lib/compliance/saft-hygiene"
 import { readNis2State } from "@/lib/server/nis2-store"
@@ -21,7 +22,7 @@ import { readDsarState } from "@/lib/server/dsar-store"
 import { createNotification } from "@/lib/server/notifications-store"
 import type { ComplianceState } from "@/lib/compliance/types"
 
-const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliAI Digest <onboarding@resend.dev>"
+const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Digest <onboarding@resend.dev>"
 const SCORE_DROP_THRESHOLD = -3
 const DEADLINE_HORIZON_MS = 7 * 24 * 60 * 60 * 1000
 const FINDING_RECENCY_MS = 24 * 60 * 60 * 1000
@@ -182,7 +183,7 @@ function buildDailyDigestHtml(payload: DailyDigestPayload): string {
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px">
   <div style="background:#1e293b;padding:16px 24px;border-radius:8px 8px 0 0">
-    <h1 style="color:#fff;margin:0;font-size:18px">🛡 CompliAI · Digest zilnic</h1>
+    <h1 style="color:#fff;margin:0;font-size:18px">CompliScan · Digest zilnic</h1>
   </div>
   <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px">
     <h2 style="margin:0 0 8px;color:#0f172a">${payload.orgName}</h2>
@@ -191,7 +192,7 @@ function buildDailyDigestHtml(payload: DailyDigestPayload): string {
     </p>
     ${findingsSection}
     ${deadlinesSection}
-    <a href="${process.env.NEXT_PUBLIC_URL ?? "https://compliai.ro"}/dashboard"
+    <a href="${process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"}/dashboard"
        style="display:inline-block;margin-top:16px;background:#34D399;color:#111;padding:10px 20px;
               border-radius:8px;text-decoration:none;font-weight:600">
       Deschide dashboard →
@@ -199,7 +200,7 @@ function buildDailyDigestHtml(payload: DailyDigestPayload): string {
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0">
     <p style="color:#94a3b8;font-size:12px;margin:0">
       Primești acest email doar când ceva se schimbă.
-      <a href="${process.env.NEXT_PUBLIC_URL ?? "https://compliai.ro"}/dashboard/settings" style="color:#6366f1">Gestionează notificările</a>
+      <a href="${process.env.NEXT_PUBLIC_URL ?? "https://compliscan.ro"}/dashboard/settings" style="color:#6366f1">Gestionează notificările</a>
     </p>
   </div>
 </body>
@@ -244,6 +245,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; sent: boolean; reason?: string }[] = []
   let capturedCronErrors = false
 
@@ -350,7 +353,7 @@ export async function POST(request: Request) {
         }
 
         const deltaLabel = delta !== null && delta < 0 ? ` ↓${Math.abs(delta)}` : ""
-        const subject = `CompliAI · Scor ${scoreToday ?? summary.score}${deltaLabel} · ${new Date().toLocaleDateString("ro-RO")}`
+        const subject = `CompliScan · Scor ${scoreToday ?? summary.score}${deltaLabel} · ${new Date().toLocaleDateString("ro-RO")}`
 
         const html = buildDailyDigestHtml({
           orgName: org.name,
@@ -376,12 +379,45 @@ export async function POST(request: Request) {
 
     const sent = results.filter((r) => r.sent).length
     const skipped = results.filter((r) => !r.sent).length
+    const errors = results.filter(
+      (r) =>
+        !r.sent &&
+        r.reason &&
+        r.reason !== "email disabled" &&
+        r.reason !== "no state" &&
+        r.reason !== "nothing new",
+    ).length
 
     console.log(`[DailyDigest] Run completat: ${sent} trimise, ${skipped} sărite`)
 
     if (capturedCronErrors) {
       await flushCronTelemetry()
     }
+
+    await safeRecordCronRun({
+      name: "daily-digest",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} trimise, ${skipped} sărite${errors > 0 ? `, ${errors} erori` : ""}.`,
+      stats: {
+        sent,
+        skipped,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find(
+              (r) =>
+                !r.sent &&
+                r.reason &&
+                r.reason !== "email disabled" &&
+                r.reason !== "no state" &&
+                r.reason !== "nothing new",
+            )?.reason
+          : undefined,
+    })
 
     return NextResponse.json({ ok: true, sent, skipped, total: results.length })
   } catch (error) {
@@ -393,6 +429,16 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "daily-digest",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la daily digest: ${msg}`, 500, "DAILY_DIGEST_FAILED")
   }

@@ -12,7 +12,7 @@ import { jsonError } from "@/lib/server/api-response"
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_ADDRESS =
-  process.env.ALERT_EMAIL_FROM ?? "CompliAI <onboarding@resend.dev>"
+  process.env.ALERT_EMAIL_FROM ?? "CompliScan <onboarding@resend.dev>"
 const PRIVACY_EMAIL = "privacy@compliscan.ro"
 
 export async function POST(request: Request) {
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
               <tr><td style="padding:4px 12px;color:#666">Data cererii</td><td style="padding:4px 12px">${new Date().toLocaleString("ro-RO")}</td></tr>
               <tr><td style="padding:4px 12px;color:#666">Termen legal</td><td style="padding:4px 12px">30 zile de la primire</td></tr>
             </table>
-            <p style="margin-top:16px;color:#888">Cerere generată automat de CompliAI — GDPR Art. 17 Right to Erasure.</p>
+            <p style="margin-top:16px;color:#888">Cerere generată automat de CompliScan — GDPR Art. 17 Right to Erasure.</p>
           `,
         }),
         signal: AbortSignal.timeout(10_000),

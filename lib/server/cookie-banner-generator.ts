@@ -131,7 +131,7 @@ export function generateCookieBannerSnippet(input: CookieBannerInput): CookieBan
     )
     .join("")
 
-  const html = `<!-- CompliAI Cookie Banner — generat pentru ${input.orgName} -->
+  const html = `<!-- CompliScan Cookie Banner — generat pentru ${input.orgName} -->
 <style>
   #cc-banner,#cc-prefs{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#1a1a1a}
   #cc-banner{position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#fff;border-top:1px solid #e5e7eb;box-shadow:0 -4px 24px rgba(0,0,0,.08);padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;transition:transform .3s ease}

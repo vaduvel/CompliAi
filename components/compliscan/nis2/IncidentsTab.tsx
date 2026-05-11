@@ -1,16 +1,14 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
-  AlertTriangle,
   ArrowLeft,
   Bell,
   ClipboardCheck,
   FileText,
   Shield,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Download,
@@ -18,22 +16,18 @@ import {
   Plus,
   ShieldAlert,
   Trash2,
-  XCircle,
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type {
   Nis2Incident,
   Nis2IncidentSeverity,
-  Nis2IncidentStatus,
   Nis2OperationalImpact,
   Nis2AttackType,
-  AnspdcpBreachNotification,
 } from "@/lib/server/nis2-store"
 import { ATTACK_TYPE_LABELS, OPERATIONAL_IMPACT_LABELS } from "@/lib/compliance/dnsc-report"
 import { downloadDNSCReport, slaLabel, SEVERITY_BADGE, INCIDENT_STATUS_LABELS } from "./nis2-shared"
@@ -60,6 +54,16 @@ export function buildIncidentCockpitEvidenceNote(incident: Nis2Incident) {
   return evidenceParts.filter(Boolean).join(" ")
 }
 
+function isPrivacyOnlyBreachCompleted(incident: Nis2Incident) {
+  return (
+    incident.involvesPersonalData &&
+    (incident.anspdcpNotification?.status === "submitted" || incident.anspdcpNotification?.status === "acknowledged") &&
+    !incident.earlyWarningReport &&
+    !incident.fullReport72h &&
+    !incident.finalReport
+  )
+}
+
 // ── IncidentRow (refactored cu 3-stage stepper + post-incident) ──────────────
 
 export function IncidentRow({
@@ -83,11 +87,15 @@ export function IncidentRow({
 }) {
   const sla24 = slaLabel(incident.deadline24hISO, 24 * 3_600_000)
   const sla72 = slaLabel(incident.deadline72hISO, 72 * 3_600_000)
-  const isOpen = incident.status !== "closed"
+  const privacyBreachCompleted = isPrivacyOnlyBreachCompleted(incident)
+  const displayStatus = privacyBreachCompleted ? "closed" : incident.status
+  const isOpen = displayStatus !== "closed"
   const [showChecklist, setShowChecklist] = useState(false)
   const [showStages, setShowStages] = useState(true)
 
-  const completedStages = [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
+  const completedStages = privacyBreachCompleted
+    ? 3
+    : [incident.earlyWarningReport, incident.fullReport72h, incident.finalReport].filter(Boolean).length
 
   const nis2IncidentBorderL =
     incident.severity === "critical" || incident.severity === "high"
@@ -102,11 +110,11 @@ export function IncidentRow({
       className={`space-y-3 px-5 py-4 ${nis2IncidentBorderL} ${highlighted ? "scroll-mt-24 rounded-eos-lg bg-eos-warning-soft ring-1 ring-eos-warning/30" : ""}`}
     >
       {highlighted && focusMode === "anspdcp" ? (
-        <div className="rounded-eos-md border border-eos-warning/30 bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
+        <div className="rounded-eos-sm border border-eos-warning/30 bg-eos-warning-soft px-3 py-2 text-xs text-eos-warning">
           Ai venit aici din cockpitul finding-ului GDPR de breach. Completează notificarea ANSPDCP și apoi întoarce-te cu dovada în același caz.
         </div>
       ) : highlighted && focusMode === "incident" ? (
-        <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary-soft/20 px-3 py-2 text-xs text-eos-primary">
+        <div className="rounded-eos-sm border border-eos-primary/30 bg-eos-primary-soft/20 px-3 py-2 text-xs text-eos-primary">
           Ai venit aici din cockpitul finding-ului NIS2. Parcurge timeline-ul 24h / 72h / 30 zile pentru incidentul selectat și întoarce-te cu dovada early warning-ului în același caz.
         </div>
       ) : null}
@@ -114,23 +122,23 @@ export function IncidentRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-eos-text">{incident.title}</p>
-            <Badge variant={SEVERITY_BADGE[incident.severity]} className="text-[10px] normal-case tracking-normal">
+            <V3Pill variant={SEVERITY_BADGE[incident.severity]} className="text-[10px] normal-case tracking-normal">
               {incident.severity}
-            </Badge>
-            <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-              {INCIDENT_STATUS_LABELS[incident.status]}
-            </Badge>
-            <Badge variant={completedStages === 3 ? "success" : "warning"} className="text-[10px] normal-case tracking-normal">
-              {completedStages}/3 etape
-            </Badge>
+            </V3Pill>
+            <V3Pill variant="outline" className="text-[10px] normal-case tracking-normal">
+              {INCIDENT_STATUS_LABELS[displayStatus]}
+            </V3Pill>
+            <V3Pill variant={completedStages === 3 ? "success" : "warning"} className="text-[10px] normal-case tracking-normal">
+              {privacyBreachCompleted ? "ANSPDCP trimisă" : `${completedStages}/3 etape`}
+            </V3Pill>
             {incident.involvesPersonalData && (
-              <Badge
+              <V3Pill
                 variant={incident.anspdcpNotification?.status === "submitted" || incident.anspdcpNotification?.status === "acknowledged" ? "default" : "destructive"}
                 className="text-[10px] normal-case tracking-normal gap-1"
               >
                 <Bell className="size-2.5" strokeWidth={2.5} />
                 ANSPDCP {incident.anspdcpNotification?.status === "pending" ? "— de notificat" : incident.anspdcpNotification?.status === "submitted" ? "— trimis" : "— confirmat"}
-              </Badge>
+              </V3Pill>
             )}
           </div>
           {incident.description && (
@@ -145,7 +153,7 @@ export function IncidentRow({
             type="button"
             onClick={() => downloadDNSCReport(incident, orgName)}
             title="Generează raport DNSC"
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs font-medium text-eos-text-muted hover:border-eos-primary/30 hover:bg-eos-primary-soft hover:text-eos-primary"
+            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs font-medium text-eos-text-muted hover:border-eos-primary/30 hover:bg-eos-primary-soft hover:text-eos-primary"
             aria-label="Export raport DNSC"
           >
             <Download className="size-3.5" strokeWidth={2} />
@@ -154,7 +162,7 @@ export function IncidentRow({
           <button
             type="button"
             onClick={() => onDelete(incident.id)}
-            className="rounded-eos-md border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
+            className="rounded-eos-sm border border-eos-border bg-eos-surface p-1.5 text-eos-text-muted hover:bg-eos-error-soft hover:text-eos-error"
             aria-label="Șterge incident"
           >
             <Trash2 className="size-3.5" strokeWidth={2} />
@@ -165,7 +173,7 @@ export function IncidentRow({
       {/* SLA timers */}
       {isOpen && (
         <div className="grid grid-cols-2 gap-2">
-          <div className={`rounded-eos-md border px-3 py-2 ${sla24.expired ? "border-eos-error/30 bg-eos-error-soft" : sla24.urgent ? "border-eos-warning/30 bg-eos-warning-soft" : "border-eos-border bg-eos-surface-variant"}`}>
+          <div className={`rounded-eos-sm border px-3 py-2 ${sla24.expired ? "border-eos-error/30 bg-eos-error-soft" : sla24.urgent ? "border-eos-warning/30 bg-eos-warning-soft" : "border-eos-border bg-eos-surface-variant"}`}>
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla24.expired || sla24.urgent ? "text-eos-error" : "text-eos-text-muted"}`}>24h Early Warning</span>
               <span className={`text-xs font-bold ${sla24.expired ? "text-eos-error" : sla24.urgent ? "text-eos-warning" : "text-eos-text"}`}>
@@ -176,7 +184,7 @@ export function IncidentRow({
               <div className={`h-full rounded-full transition-all ${sla24.expired ? "bg-eos-error" : sla24.urgent ? "bg-eos-warning" : "bg-eos-primary"}`} style={{ width: `${sla24.progressPct}%` }} />
             </div>
           </div>
-          <div className={`rounded-eos-md border px-3 py-2 ${sla72.expired ? "border-eos-error/30 bg-eos-error-soft" : sla72.urgent ? "border-eos-warning/30 bg-eos-warning-soft" : "border-eos-border bg-eos-surface-variant"}`}>
+          <div className={`rounded-eos-sm border px-3 py-2 ${sla72.expired ? "border-eos-error/30 bg-eos-error-soft" : sla72.urgent ? "border-eos-warning/30 bg-eos-warning-soft" : "border-eos-border bg-eos-surface-variant"}`}>
             <div className="flex items-center justify-between">
               <span className={`text-[10px] font-medium uppercase tracking-[0.15em] ${sla72.expired || sla72.urgent ? "text-eos-error" : "text-eos-text-muted"}`}>72h Raport Complet</span>
               <span className={`text-xs font-bold ${sla72.expired ? "text-eos-error" : sla72.urgent ? "text-eos-warning" : "text-eos-text"}`}>
@@ -246,7 +254,7 @@ export function IncidentRow({
           {showChecklist ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
         </button>
         {showChecklist && (
-          <div className="mt-2 rounded-eos-md border border-eos-border bg-eos-surface p-3">
+          <div className="mt-2 rounded-eos-sm border border-eos-border bg-eos-surface p-3">
             <IncidentChecklist_UI attackType={incident.attackType} />
           </div>
         )}
@@ -406,7 +414,7 @@ export function IncidentsTab({
     }
   }
 
-  const openCount = incidents.filter((i) => i.status !== "closed").length
+  const openCount = incidents.filter((i) => i.status !== "closed" && !isPrivacyOnlyBreachCompleted(i)).length
   const highlightedIncident = highlightedIncidentId
     ? incidents.find((incident) => incident.id === highlightedIncidentId)
     : null
@@ -421,22 +429,22 @@ export function IncidentsTab({
   return (
     <div className="space-y-4">
       {highlightedIncident && focusMode === "anspdcp" ? (
-        <Card className="border-eos-warning/30 bg-eos-warning-soft">
-          <CardContent className="flex items-center justify-between gap-4 p-4">
+        <V3Surface className="border-eos-warning/30 bg-eos-warning-soft">
+          <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-eos-text">Flow ANSPDCP deschis din cockpit</p>
               <p className="mt-1 text-xs text-eos-warning/80">
                 Incidentul „{highlightedIncident.title}” este deja selectat mai jos. Completează notificarea ANSPDCP și revino în cockpit cu dovada pregătită.
               </p>
             </div>
-            <Badge variant="warning" className="shrink-0 normal-case tracking-normal">
+            <V3Pill variant="warning" className="shrink-0 normal-case tracking-normal">
               GDPR Art. 33
-            </Badge>
-          </CardContent>
-        </Card>
+            </V3Pill>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : highlightedIncident && focusMode === "incident" ? (
-        <Card className="border-sky-300 bg-sky-50">
-          <CardContent className="flex items-center justify-between gap-4 p-4">
+        <V3Surface className="border-sky-300 bg-sky-50">
+          <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Flow de incident NIS2 deschis din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
@@ -451,15 +459,15 @@ export function IncidentsTab({
                 </Button>
               </Link>
             ) : (
-              <Badge variant="outline" className="shrink-0 normal-case tracking-normal border-sky-300 bg-white text-sky-950">
+              <V3Pill variant="outline" className="shrink-0 normal-case tracking-normal border-sky-300 bg-white text-sky-950">
                 NIS2 Art. 23
-              </Badge>
+              </V3Pill>
             )}
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : sourceFindingId && focusMode === "incident" ? (
-        <Card className="border-sky-300 bg-sky-50">
-          <CardContent className="flex items-center justify-between gap-4 p-4">
+        <V3Surface className="border-sky-300 bg-sky-50">
+          <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-sky-950">Alege incidentul corect din cockpit</p>
               <p className="mt-1 text-xs text-sky-900/80">
@@ -473,16 +481,16 @@ export function IncidentsTab({
               <ArrowLeft className="size-3" strokeWidth={2} />
               Înapoi la finding
             </Link>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : null}
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {openCount > 0 && (
-            <Badge variant="destructive" dot className="normal-case tracking-normal">
+            <V3Pill variant="destructive" dot className="normal-case tracking-normal">
               {openCount} deschis{openCount !== 1 ? "e" : ""}
-            </Badge>
+            </V3Pill>
           )}
         </div>
         <Button size="sm" className="gap-2" onClick={() => setShowForm((v) => !v)}>
@@ -493,30 +501,30 @@ export function IncidentsTab({
 
       {/* Create form */}
       {showForm && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="text-sm">Incident nou</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="text-sm">Incident nou</V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-3">
             <input
               type="text"
               placeholder="Titlu incident *"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+              className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
             />
             <textarea
               placeholder="Descriere (opțional)"
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={2}
-              className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none resize-none"
+              className="w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none resize-none"
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs text-eos-text-muted">Severitate</label>
                 <select
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   value={form.severity}
                   onChange={(e) => setForm((f) => ({ ...f, severity: e.target.value as Nis2IncidentSeverity }))}
                 >
@@ -532,7 +540,7 @@ export function IncidentsTab({
                   placeholder="ERP, email, VPN"
                   value={form.affectedSystems}
                   onChange={(e) => setForm((f) => ({ ...f, affectedSystems: e.target.value }))}
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 />
               </div>
             </div>
@@ -542,7 +550,7 @@ export function IncidentsTab({
               <div>
                 <label className="mb-1 block text-xs text-eos-text-muted">Tip atac</label>
                 <select
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   value={form.attackType}
                   onChange={(e) => setForm((f) => ({ ...f, attackType: e.target.value as Nis2AttackType | "" }))}
                 >
@@ -555,7 +563,7 @@ export function IncidentsTab({
               <div>
                 <label className="mb-1 block text-xs text-eos-text-muted">Impact operațional</label>
                 <select
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   value={form.operationalImpact}
                   onChange={(e) => setForm((f) => ({ ...f, operationalImpact: e.target.value as Nis2OperationalImpact | "" }))}
                 >
@@ -571,17 +579,17 @@ export function IncidentsTab({
               placeholder="Vector de atac (ex: email phishing cu .exe atașat)"
               value={form.attackVector}
               onChange={(e) => setForm((f) => ({ ...f, attackVector: e.target.value }))}
-              className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+              className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
             />
             <textarea
               placeholder="Măsuri luate (containment, remediere)"
               value={form.measuresTaken}
               onChange={(e) => setForm((f) => ({ ...f, measuresTaken: e.target.value }))}
               rows={2}
-              className="w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none resize-none"
+              className="w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-sm text-eos-text outline-none resize-none"
             />
             {/* ANSPDCP: personal data flag */}
-            <label className={`flex items-start gap-2 cursor-pointer rounded-eos-md border px-3 py-2.5 text-xs transition-colors ${
+            <label className={`flex items-start gap-2 cursor-pointer rounded-eos-sm border px-3 py-2.5 text-xs transition-colors ${
               form.involvesPersonalData || form.attackType === "data-breach"
                 ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
                 : "border-eos-border bg-eos-surface-variant text-eos-text"
@@ -614,14 +622,14 @@ export function IncidentsTab({
                 Salvează incident
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {loading ? (
         <LoadingScreen variant="section" />
       ) : incidents.length === 0 ? (
-        <div className="rounded-eos-md border border-eos-border bg-eos-surface p-8 text-center">
+        <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-8 text-center">
           <ShieldAlert className="mx-auto mb-3 size-10 text-eos-text-muted" strokeWidth={1.5} />
           <p className="font-semibold text-eos-text">Niciun incident înregistrat</p>
           <p className="mt-1 text-sm text-eos-text-muted">
@@ -639,7 +647,7 @@ export function IncidentsTab({
           </Button>
         </div>
       ) : (
-        <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
+        <V3Surface className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {incidents.map((inc) => (
             <IncidentRow
               key={inc.id}
@@ -653,11 +661,11 @@ export function IncidentsTab({
               returnTo={returnTo}
             />
           ))}
-        </Card>
+        </V3Surface>
       )}
 
       {/* DNSC info */}
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <p className="font-medium text-eos-text">Obligații raportare NIS2 (Art. 23)</p>
         <p className="mt-1">
           <span className="font-semibold text-eos-warning">24h</span> — Alertă inițială la DNSC (confirmare incident semnificativ).{" "}

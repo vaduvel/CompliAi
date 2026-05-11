@@ -89,6 +89,45 @@ describe("/api/partner/clients/[orgId]", () => {
     expect(payload.orgName).toBe("Client Org SRL")
   })
 
+  it("include finding-urile active chiar dacă nu au alertă deschisă separată", async () => {
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
+      findings: [
+        {
+          id: "finding-ropa",
+          title: "RoPA lipsește pentru procesatorul Stripe",
+          detail: "Registrul Art. 30 nu include procesatorul critic.",
+          category: "GDPR",
+          severity: "high",
+          risk: "high",
+          principles: [],
+          createdAtISO: "2026-04-29T10:00:00.000Z",
+          sourceDocument: "import",
+          findingStatus: "open",
+        },
+      ],
+      alerts: [],
+      aiSystems: [],
+      scannedDocuments: 1,
+      gdprProgress: 0,
+      highRisk: false,
+      efacturaConnected: false,
+    })
+
+    const response = await GET(new Request("http://localhost/api/partner/clients/org-client"), {
+      params: Promise.resolve({ orgId: "org-client" }),
+    })
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.openFindings).toEqual([
+      expect.objectContaining({
+        id: "finding-ropa",
+        title: "RoPA lipsește pentru procesatorul Stripe",
+        severity: "high",
+      }),
+    ])
+  })
+
   it("dezactivează membership-ul clientului pentru org-ul cerut", async () => {
     const response = await DELETE(
       new Request("http://localhost/api/partner/clients/org-client", { method: "DELETE" }),

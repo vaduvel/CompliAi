@@ -13,9 +13,14 @@ const mocks = vi.hoisted(() => ({
   },
   getPersistableTaskIdsMock: vi.fn(),
   loadTaskEvidenceObjectFromSupabaseMock: vi.fn(),
+  mutateStateForOrgMock: vi.fn(),
   readFreshStateForOrgMock: vi.fn(),
   readStoredEvidenceFileMock: vi.fn(),
   getStoredEvidenceSignedUrlMock: vi.fn(),
+  deleteStoredEvidenceFileMock: vi.fn(),
+  deleteEvidenceObjectFromSupabaseMock: vi.fn(),
+  buildDashboardPayloadMock: vi.fn(),
+  getOrgContextMock: vi.fn(),
   requireFreshRoleMock: vi.fn(),
 }))
 
@@ -30,18 +35,32 @@ vi.mock("@/lib/compliance/task-ids", () => ({
 
 vi.mock("@/lib/server/mvp-store", () => ({
   readFreshStateForOrg: mocks.readFreshStateForOrgMock,
+  mutateStateForOrg: mocks.mutateStateForOrgMock,
 }))
 
 vi.mock("@/lib/server/evidence-storage", () => ({
   readStoredEvidenceFile: mocks.readStoredEvidenceFileMock,
   getStoredEvidenceSignedUrl: mocks.getStoredEvidenceSignedUrlMock,
+  deleteStoredEvidenceFile: mocks.deleteStoredEvidenceFileMock,
+}))
+
+vi.mock("@/lib/server/supabase-evidence", () => ({
+  deleteEvidenceObjectFromSupabase: mocks.deleteEvidenceObjectFromSupabaseMock,
 }))
 
 vi.mock("@/lib/server/supabase-evidence-read", () => ({
   loadTaskEvidenceObjectFromSupabase: mocks.loadTaskEvidenceObjectFromSupabaseMock,
 }))
 
-import { GET } from "./route"
+vi.mock("@/lib/server/dashboard-response", () => ({
+  buildDashboardPayload: mocks.buildDashboardPayloadMock,
+}))
+
+vi.mock("@/lib/server/org-context", () => ({
+  getOrgContext: mocks.getOrgContextMock,
+}))
+
+import { DELETE, GET, PATCH } from "./route"
 
 describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
   beforeEach(() => {
@@ -80,6 +99,10 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
     })
     mocks.getStoredEvidenceSignedUrlMock.mockResolvedValue(null)
     mocks.loadTaskEvidenceObjectFromSupabaseMock.mockResolvedValue(null)
+    mocks.getOrgContextMock.mockResolvedValue({ orgId: "org-demo", orgName: "Org Demo" })
+    mocks.buildDashboardPayloadMock.mockImplementation(async (state) => ({ state }))
+    mocks.deleteStoredEvidenceFileMock.mockResolvedValue({ deleted: true })
+    mocks.deleteEvidenceObjectFromSupabaseMock.mockResolvedValue({ deleted: false })
   })
 
   it("servește dovada când task-ul și fișierul există", async () => {
@@ -202,5 +225,148 @@ describe("GET /api/tasks/[id]/evidence/[evidenceId]", () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get("Content-Disposition")).toContain('attachment; filename="proof.pdf"')
+  })
+
+  it("blocheaza descarcarea unei dovezi sterse soft", async () => {
+    mocks.readFreshStateForOrgMock.mockResolvedValueOnce({
+      taskState: {
+        "task-1": {
+          status: "todo",
+          updatedAtISO: "2026-03-13T10:00:00.000Z",
+          deletedEvidenceMeta: {
+            id: "evidence-1",
+            fileName: "proof.pdf",
+            mimeType: "application/pdf",
+            sizeBytes: 32,
+            uploadedAtISO: "2026-03-13T10:00:00.000Z",
+            kind: "policy_text",
+            deletionStatus: "soft_deleted",
+            deletedAtISO: "2026-03-14T10:00:00.000Z",
+            deleteReason: "versiune gresita",
+            restoreUntilISO: "2026-04-13T10:00:00.000Z",
+          },
+        },
+      },
+    })
+
+    const response = await GET(new Request("http://localhost/api/tasks/task-1/evidence/evidence-1"), {
+      params: Promise.resolve({ id: "task-1", evidenceId: "evidence-1" }),
+    })
+    const payload = await response.json()
+
+    expect(response.status).toBe(410)
+    expect(payload.code).toBe("EVIDENCE_SOFT_DELETED")
+  })
+
+  it("sterge soft dovada doar cu motiv si pastreaza restore window", async () => {
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: unknown) => unknown) =>
+      updater({
+        taskState: {
+          "task-1": {
+            status: "done",
+            updatedAtISO: "2026-03-13T10:00:00.000Z",
+            attachedEvidence: "proof.pdf",
+            attachedEvidenceMeta: {
+              id: "evidence-1",
+              fileName: "proof.pdf",
+              mimeType: "application/pdf",
+              sizeBytes: 32,
+              uploadedAtISO: "2026-03-13T10:00:00.000Z",
+              kind: "policy_text",
+              storageProvider: "local_private",
+              storageKey: "org-demo/task-1/proof.pdf",
+            },
+          },
+        },
+        events: [],
+      })
+    )
+
+    const response = await DELETE(
+      new Request("http://localhost/api/tasks/task-1/evidence/evidence-1", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "document incarcat gresit" }),
+      }),
+      { params: Promise.resolve({ id: "task-1", evidenceId: "evidence-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.evidenceDeletion.status).toBe("soft_deleted")
+    expect(payload.state.taskState["task-1"].attachedEvidenceMeta).toBeUndefined()
+    expect(payload.state.taskState["task-1"].deletedEvidenceMeta.deleteReason).toBe(
+      "document incarcat gresit"
+    )
+    expect(payload.state.taskState["task-1"].validationStatus).toBe("needs_review")
+  })
+
+  it("restaureaza dovada soft-deleted in fereastra de recovery", async () => {
+    mocks.mutateStateForOrgMock.mockImplementationOnce(async (_orgId: string, updater: (state: unknown) => unknown) =>
+      updater({
+        taskState: {
+          "task-1": {
+            status: "todo",
+            updatedAtISO: "2026-03-14T10:00:00.000Z",
+            deletedEvidence: "proof.pdf",
+            deletedEvidenceMeta: {
+              id: "evidence-1",
+              fileName: "proof.pdf",
+              mimeType: "application/pdf",
+              sizeBytes: 32,
+              uploadedAtISO: "2026-03-13T10:00:00.000Z",
+              kind: "policy_text",
+              storageProvider: "local_private",
+              storageKey: "org-demo/task-1/proof.pdf",
+              deletionStatus: "soft_deleted",
+              deletedAtISO: "2026-03-14T10:00:00.000Z",
+              deleteReason: "versiune gresita",
+              restoreUntilISO: "2099-04-13T10:00:00.000Z",
+            },
+          },
+        },
+        events: [],
+      })
+    )
+
+    const response = await PATCH(
+      new Request("http://localhost/api/tasks/task-1/evidence/evidence-1", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "restore" }),
+      }),
+      { params: Promise.resolve({ id: "task-1", evidenceId: "evidence-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.evidenceDeletion.status).toBe("restored")
+    expect(payload.state.taskState["task-1"].attachedEvidenceMeta.fileName).toBe("proof.pdf")
+    expect(payload.state.taskState["task-1"].deletedEvidenceMeta).toBeUndefined()
+  })
+
+  it("permite stergerea definitiva doar owner-ului", async () => {
+    mocks.requireFreshRoleMock.mockResolvedValueOnce({
+      userId: "user-1",
+      orgId: "org-demo",
+      email: "demo@site.ro",
+      orgName: "Org Demo",
+      role: "compliance",
+      exp: Date.now() + 1000,
+    })
+
+    const response = await DELETE(
+      new Request("http://localhost/api/tasks/task-1/evidence/evidence-1?permanent=1", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "offboarding complet" }),
+      }),
+      { params: Promise.resolve({ id: "task-1", evidenceId: "evidence-1" }) }
+    )
+    const payload = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(payload.code).toBe("EVIDENCE_PERMANENT_DELETE_OWNER_ONLY")
+    expect(mocks.deleteStoredEvidenceFileMock).not.toHaveBeenCalled()
   })
 })

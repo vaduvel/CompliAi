@@ -43,16 +43,20 @@ vi.mock("node:fs", async () => {
     __writtenFiles: writtenFiles,
     promises: {
       ...actual.promises,
-      mkdir: vi.fn(async () => undefined),
-      writeFile: vi.fn(async (fp: unknown, content: unknown) => {
+      mkdir: actual.promises.mkdir,
+      writeFile: vi.fn(async (fp: unknown, content: unknown, ...args: unknown[]) => {
         if (typeof fp === "string") {
           const base = fp.split("/").pop()!
           writtenFiles[base] = typeof content === "string" ? content : JSON.stringify(content)
         }
+        return actual.promises.writeFile(
+          fp as Parameters<typeof actual.promises.writeFile>[0],
+          content as Parameters<typeof actual.promises.writeFile>[1],
+          ...(args as [Parameters<typeof actual.promises.writeFile>[2]])
+        )
       }),
-      readFile: vi.fn(async () => Buffer.from("PK mock zip")),
-      rm: vi.fn(async () => undefined),
-      mkdtemp: vi.fn(async (_prefix: string) => "/tmp/mock-bundle"),
+      rm: actual.promises.rm,
+      mkdtemp: actual.promises.mkdtemp,
     },
   }
 })
@@ -172,7 +176,7 @@ describe("R-10 — NIS2 data în audit-pack bundle", () => {
     expect(assessment.score).toBe(65)
   })
 
-  it("scrie fișiere NIS2 goale (nu aruncă eroare) când readNis2State eșuează", async () => {
+  it("omite fișierele NIS2 și nu aruncă eroare când readNis2State eșuează", async () => {
     const fsModule = await import("node:fs")
     const writtenFiles: Record<string, string> = {}
 
@@ -187,8 +191,8 @@ describe("R-10 — NIS2 data în audit-pack bundle", () => {
 
     await expect(buildAuditPackBundle(makeAuditPack("org-empty"))).resolves.toBeDefined()
 
-    expect(JSON.parse(writtenFiles["incidents.json"])).toEqual([])
-    expect(JSON.parse(writtenFiles["vendors.json"])).toEqual([])
-    expect(JSON.parse(writtenFiles["assessment.json"])).toEqual({})
+    expect(writtenFiles["incidents.json"]).toBeUndefined()
+    expect(writtenFiles["vendors.json"]).toBeUndefined()
+    expect(writtenFiles["assessment.json"]).toBeUndefined()
   })
 })

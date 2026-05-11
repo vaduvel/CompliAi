@@ -2,14 +2,25 @@
 
 import Link from "next/link"
 import { useDeferredValue, useEffect, useState } from "react"
-import { AlertTriangle, ArrowRight, Bell, Bot, CalendarClock, ChevronRight, Clock, Cpu, FileSearch, Search, Shield } from "lucide-react"
+import { AlertTriangle, ArrowRight, Bell, Bot, CalendarClock, ChevronRight, Clock, Cpu, FileSearch, Shield } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { RemediationBoard } from "@/components/compliscan/remediation-board"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import type { TaskPriority } from "@/components/compliscan/types"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
-import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
+import {
+  V3FilterBar,
+  V3FindingRow,
+  V3FrameworkTag,
+  V3KpiStrip,
+  V3PageHero,
+  V3Panel,
+  V3RiskPill,
+  type V3FilterTab,
+  type V3KpiItem,
+  type V3SeverityTone,
+} from "@/components/compliscan/v3"
 import type { ScanFinding } from "@/lib/compliance/types"
 import { describeFindingRiskForTriage, sortFindingsForTriage } from "@/lib/compliscan/finding-triage"
 import type { UrgencyItem } from "@/app/api/dashboard/urgency/route"
@@ -139,7 +150,18 @@ function getRecipeRowBadge(
   return { label: getExecutionClassLabel(recipe), variant: "outline" }
 }
 
-// ── Finding Row ───────────────────────────────────────────────────────────────
+// ── Finding Row (V3) ──────────────────────────────────────────────────────────
+
+function severityToTone(sev: ScanFinding["severity"]): V3SeverityTone {
+  if (sev === "critical") return "critical"
+  if (sev === "high") return "high"
+  if (sev === "medium") return "medium"
+  return "low"
+}
+
+function severityLabelRo(sev: ScanFinding["severity"]) {
+  return sev === "critical" ? "Critic" : sev === "high" ? "Ridicat" : sev === "medium" ? "Mediu" : "Scăzut"
+}
 
 function FindingRow({ finding }: { finding: ScanFinding }) {
   const recipe = buildCockpitRecipe(finding)
@@ -147,40 +169,46 @@ function FindingRow({ finding }: { finding: ScanFinding }) {
   const hasGenerator = recipe.visibleBlocks.detailBlocks.includes("generator")
   const cockpitHref = dashboardFindingRoute(finding.id, hasGenerator ? { generator: "1" } : undefined)
 
-  const isHigh = finding.severity === "critical" || finding.severity === "high"
-  const isMed = finding.severity === "medium"
-  const leftBorder = isHigh ? "border-l-eos-error" : isMed ? "border-l-eos-warning" : "border-l-eos-border-subtle"
+  const tone = severityToTone(finding.severity)
+  const riskLine = getFindingRiskLine(finding, recipe)
 
   return (
-    <Link
+    <V3FindingRow
       href={cockpitHref}
-      className={`group flex w-full items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant border-l-[3px] py-3.5 pl-4 pr-4 transition-all hover:bg-eos-surface-active ${leftBorder}`}
-    >
-      <div className="min-w-0 flex-1">
-        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-eos-text">
-          {finding.title}
-        </p>
-        <p className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-eos-text-tertiary">
-          {getFindingRiskLine(finding, recipe)}
-        </p>
-      </div>
-      <span className="hidden shrink-0 rounded bg-eos-surface-elevated px-2 py-0.5 text-[10px] font-medium text-eos-text-tertiary sm:inline-flex">
-        {canonicalFrameworkLabel(recipe.framework)}
-      </span>
-      <span className={`hidden shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold lg:inline-flex ${
-        flowStatus.variant === "success" ? "bg-eos-success/10 text-eos-success" :
-        flowStatus.variant === "warning" ? "bg-eos-warning/10 text-eos-warning" :
-        flowStatus.variant === "destructive" ? "bg-eos-error/10 text-eos-error" :
-        "bg-eos-surface-active text-eos-text-tertiary"
-      }`}>
-        {flowStatus.label}
-      </span>
-      <span className={`shrink-0 text-[11px] font-semibold ${isHigh ? "text-eos-error" : isMed ? "text-eos-warning" : "text-eos-text-tertiary"}`}>
-        {finding.severity === "critical" ? "Critic" : finding.severity === "high" ? "Ridicat" : finding.severity === "medium" ? "Mediu" : "Scăzut"}
-      </span>
-      <span className="shrink-0 text-[10px] tabular-nums text-eos-text-tertiary">{ageLabel(finding.createdAtISO)}</span>
-      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
-    </Link>
+      severity={tone}
+      title={finding.title}
+      subtitle={riskLine}
+      meta={
+        <>
+          <span>{ageLabel(finding.createdAtISO)}</span>
+          {finding.sourceDocument && (
+            <>
+              <span className="text-white/10">·</span>
+              <span className="truncate">Sursă: {finding.sourceDocument}</span>
+            </>
+          )}
+        </>
+      }
+      badges={
+        <>
+          <V3RiskPill tone={tone}>{severityLabelRo(finding.severity)}</V3RiskPill>
+          <V3FrameworkTag label={canonicalFrameworkLabel(recipe.framework)} tone="neutral" />
+          <V3FrameworkTag
+            label={flowStatus.label}
+            tone={
+              flowStatus.variant === "success"
+                ? "ok"
+                : flowStatus.variant === "warning"
+                  ? "high"
+                  : flowStatus.variant === "destructive"
+                    ? "critical"
+                    : "neutral"
+            }
+          />
+        </>
+      }
+      ctaLabel="Deschide cockpit"
+    />
   )
 }
 
@@ -192,22 +220,6 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
   const [statusFilter, setStatusFilter] = useState<FindingStatusFilter>("active")
   const [query, setQuery] = useState("")
   const deferredQuery = useDeferredValue(query)
-
-  const filterTabs: Array<{ id: FrameworkFilter; label: string }> = [
-    { id: "toate",     label: "Toate" },
-    { id: "gdpr",      label: "GDPR" },
-    { id: "nis2",      label: "NIS2" },
-    { id: "ai-act",    label: "AI Act" },
-    { id: "furnizori", label: "Furnizori" },
-  ]
-
-  const severityTabs: Array<{ id: SeverityFilter; label: string }> = [
-    { id: "toate", label: "Toate severitățile" },
-    { id: "critical", label: "Critice" },
-    { id: "high", label: "Ridicate" },
-    { id: "medium", label: "Medii" },
-    { id: "low", label: "Scăzute" },
-  ]
 
   const findingsForStatus = findings.filter((finding) =>
     statusFilter === "all" ? true : isFindingActive(finding)
@@ -236,83 +248,78 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
     .filter((f) => matchesFindingSearch(f, deferredQuery))
   )
 
-  return (
-    <div>
-      {/* Filter bar — search + status toggle */}
-      <div className="mb-3 overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
-        {/* Search */}
-        <label className="flex items-center gap-2 border-b border-eos-border-subtle px-4 py-3">
-          <Search className="h-4 w-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Caută după titlu, sursă sau referință legală"
-            className="w-full bg-transparent text-sm text-eos-text outline-none placeholder:text-eos-text-tertiary"
-          />
-          {filtered.length < findingsForStatus.length && (
-            <span className="shrink-0 text-[10px] tabular-nums text-eos-text-tertiary">{filtered.length} din {findingsForStatus.length}</span>
-          )}
-        </label>
+  const frameworkTabs: V3FilterTab<FrameworkFilter>[] = [
+    { id: "toate",     label: "Toate",     count: counts["toate"] },
+    { id: "gdpr",      label: "GDPR",      count: counts["gdpr"] },
+    { id: "nis2",      label: "NIS2",      count: counts["nis2"] },
+    { id: "ai-act",    label: "AI Act",    count: counts["ai-act"] },
+    { id: "furnizori", label: "Furnizori", count: counts["furnizori"] },
+  ]
 
-        {/* Status + Framework filters */}
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3">
-          {/* Status tabs */}
-          <div className="flex gap-1">
+  return (
+    <div className="space-y-3">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <V3FilterBar
+          tabs={frameworkTabs}
+          activeTab={activeFilter}
+          onTabChange={setActiveFilter}
+          searchValue={query}
+          onSearchChange={setQuery}
+          searchPlaceholder="Caută după titlu, sursă sau referință legală"
+          rightSlot={
+            filtered.length < findingsForStatus.length ? (
+              <span className="font-mono text-[10px] tabular-nums text-eos-text-tertiary">
+                {filtered.length} din {findingsForStatus.length}
+              </span>
+            ) : undefined
+          }
+        />
+        <div className="flex flex-wrap items-center gap-2 border-t border-eos-border-subtle bg-eos-surface/80 px-3 py-2 md:px-4">
+          <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            Status
+          </span>
+          <div className="flex gap-1 rounded-eos-sm bg-white/[0.03] p-0.5">
             {[
               { id: "active" as FindingStatusFilter, label: "Deschise", count: findings.filter(isFindingActive).length },
               { id: "all" as FindingStatusFilter, label: "Toate", count: findings.length },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setStatusFilter(tab.id)}
-                className={[
-                  "rounded px-3 py-1.5 text-xs font-medium transition-all",
-                  statusFilter === tab.id
-                    ? "bg-eos-primary/10 text-eos-primary"
-                    : "text-eos-text-tertiary hover:text-eos-text-muted",
-                ].join(" ")}
-              >
-                {tab.label} <span className="ml-1 tabular-nums opacity-70">{tab.count}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="h-4 w-px bg-eos-border-subtle" />
-
-          {/* Framework tabs */}
-          <div className="flex flex-wrap gap-1">
-            {filterTabs.map((tab) => {
-              const active = activeFilter === tab.id
+            ].map((tab) => {
+              const active = statusFilter === tab.id
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveFilter(tab.id)}
+                  onClick={() => setStatusFilter(tab.id)}
                   className={[
-                    "rounded px-3 py-1.5 text-xs font-medium transition-all",
+                    "flex items-center gap-1.5 rounded-eos-sm px-2.5 py-1 text-[12px] font-medium transition-all duration-100",
                     active
-                      ? "bg-eos-primary/10 text-eos-primary"
-                      : "text-eos-text-tertiary hover:text-eos-text-muted",
+                      ? "bg-white/[0.06] font-semibold text-eos-text"
+                      : "text-eos-text-muted hover:text-eos-text",
                   ].join(" ")}
                 >
-                  {tab.label} <span className="ml-1 tabular-nums opacity-70">{counts[tab.id]}</span>
+                  {tab.label}
+                  <span className={`font-mono text-[10px] tabular-nums ${active ? "text-eos-text-muted" : "text-eos-text-tertiary"}`}>
+                    {tab.count}
+                  </span>
                 </button>
               )
             })}
           </div>
-        </div>
-
-        {!soloMode && (
-          <details className="group border-t border-eos-border-subtle">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5">
-              <p className="text-xs font-medium text-eos-text-tertiary">Filtrare severitate</p>
-              <ChevronRight className="h-3.5 w-3.5 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-            </summary>
-            <div className="border-t border-eos-border-subtle px-4 pb-3 pt-3">
-              <div className="flex flex-wrap gap-1.5">
-                {severityTabs.map((tab) => {
+          {!soloMode && (
+            <>
+              <span className="mx-1 h-4 w-px bg-eos-border-subtle" aria-hidden />
+              <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Severitate
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {(
+                  [
+                    { id: "toate" as SeverityFilter, label: "Toate" },
+                    { id: "critical" as SeverityFilter, label: "Critice" },
+                    { id: "high" as SeverityFilter, label: "Ridicate" },
+                    { id: "medium" as SeverityFilter, label: "Medii" },
+                    { id: "low" as SeverityFilter, label: "Scăzute" },
+                  ]
+                ).map((tab) => {
                   const active = severityFilter === tab.id
                   return (
                     <button
@@ -320,26 +327,26 @@ function FindingQueue({ findings, soloMode }: { findings: ScanFinding[]; soloMod
                       type="button"
                       onClick={() => setSeverityFilter(tab.id)}
                       className={[
-                        "rounded px-3 py-1.5 text-xs font-medium transition-all",
+                        "flex items-center gap-1.5 rounded-eos-sm border px-2 py-0.5 font-mono text-[11px] transition-colors duration-100",
                         active
-                          ? "bg-eos-primary/10 text-eos-primary"
-                          : "text-eos-text-tertiary hover:text-eos-text-muted",
+                          ? "border-eos-primary/35 bg-eos-primary/10 text-eos-primary"
+                          : "border-eos-border-subtle bg-transparent text-eos-text-muted hover:border-eos-border-strong hover:text-eos-text",
                       ].join(" ")}
                     >
-                      {tab.label} <span className="ml-1 tabular-nums opacity-70">{severityCounts[tab.id]}</span>
+                      {tab.label}
+                      <span className="tabular-nums opacity-70">{severityCounts[tab.id]}</span>
                     </button>
                   )
                 })}
               </div>
-            </div>
-          </details>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
-
       {filtered.length === 0 ? (
-        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-10 text-center">
-          <p className="text-sm text-eos-text-tertiary">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-10 text-center">
+          <p className="text-[13px] text-eos-text-tertiary">
             {findings.length === 0
               ? "Nu există constatări. Rulează o scanare pentru a detecta probleme."
               : statusFilter === "active"
@@ -389,43 +396,60 @@ function UrgentItemsSection({ items }: { items: UrgencyItem[] }) {
 
   return (
     <section aria-label="Urgențe cu deadline" className="space-y-2">
-      <div className="flex items-center gap-2">
-        <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-eos-text-tertiary">
+      <div className="flex items-center gap-1.5">
+        <AlertTriangle className="size-3 text-eos-error" strokeWidth={2} />
+        <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
           Urgențe cu deadline — {items.length} active
         </p>
       </div>
-      <div className="divide-y divide-eos-border-subtle rounded-eos-lg border border-eos-border bg-eos-surface-variant">
-        {[...critical, ...rest].map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className="flex items-start justify-between gap-3 px-4 py-3 transition-colors hover:bg-eos-surface-variant"
-          >
-            <div className="min-w-0 space-y-0.5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                  item.severity === "critical" ? "bg-eos-error-soft text-eos-error"
-                  : item.severity === "high" ? "bg-eos-warning-soft text-eos-warning"
-                  : "bg-eos-primary-soft text-eos-primary"
-                }`}>
-                  {SOURCE_LABELS[item.source]}
-                </span>
-                <p className="truncate text-sm font-medium text-eos-text">{item.title}</p>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-eos-text-tertiary">
-                {item.daysLeft !== undefined && (
-                  <span className={`flex items-center gap-1 ${item.daysLeft < 0 ? "text-eos-error font-medium" : item.daysLeft <= 3 ? "text-eos-error" : ""}`}>
-                    <Clock className="size-3" strokeWidth={2} />
-                    {item.daysLeft < 0 ? `Depășit cu ${Math.abs(item.daysLeft)}z` : `${item.daysLeft}z rămase`}
+      <div className="divide-y divide-eos-border-subtle overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        {[...critical, ...rest].map((item) => {
+          const stripeColor =
+            item.severity === "critical"
+              ? "bg-eos-error"
+              : item.severity === "high"
+                ? "bg-eos-warning"
+                : "bg-eos-primary"
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              className="group relative flex items-start justify-between gap-3 py-2.5 pl-5 pr-3 transition-colors hover:bg-white/[0.02]"
+            >
+              <span className={`absolute left-0 top-2.5 bottom-2.5 w-[2px] rounded-r-sm ${stripeColor}`} aria-hidden />
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span
+                    className={`inline-flex shrink-0 rounded-sm border px-1.5 py-px font-mono text-[10px] font-semibold uppercase tracking-[0.05em] ${
+                      item.severity === "critical"
+                        ? "border-eos-error/25 bg-eos-error-soft text-eos-error"
+                        : item.severity === "high"
+                          ? "border-eos-warning/25 bg-eos-warning-soft text-eos-warning"
+                          : "border-eos-primary/25 bg-eos-primary/10 text-eos-primary"
+                    }`}
+                  >
+                    {SOURCE_LABELS[item.source]}
                   </span>
-                )}
-                <span>{item.detail}</span>
+                  <p className="truncate text-[13px] font-semibold text-eos-text">{item.title}</p>
+                </div>
+                <div className="flex items-center gap-1.5 font-mono text-[11px] text-eos-text-tertiary">
+                  {item.daysLeft !== undefined && (
+                    <span
+                      className={`flex items-center gap-1 ${
+                        item.daysLeft < 0 ? "font-semibold text-eos-error" : item.daysLeft <= 3 ? "text-eos-error" : ""
+                      }`}
+                    >
+                      <Clock className="size-3" strokeWidth={2} />
+                      {item.daysLeft < 0 ? `Depășit cu ${Math.abs(item.daysLeft)}z` : `${item.daysLeft}z rămase`}
+                    </span>
+                  )}
+                  <span>{item.detail}</span>
+                </div>
               </div>
-            </div>
-            <ArrowRight className="mt-0.5 size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-          </Link>
-        ))}
+              <ArrowRight className="mt-1 size-3.5 shrink-0 text-eos-text-tertiary transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
+            </Link>
+          )
+        })}
       </div>
     </section>
   )
@@ -461,24 +485,108 @@ export function ResolvePageSurface() {
       : `${activeFindings.length} cazuri deschise · ${criticalCount} critice · ${highCount} ridicate`
   const nextActionLine = getResolveNextActionLine(findings)
 
-  return (
-    <div className="space-y-6">
+  const lowCount = activeFindings.length - criticalCount - highCount - mediumCount
 
-      {/* Context strip — lighter, no heavy card */}
-      <div className="flex flex-col gap-4 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant/60 px-5 py-3.5 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-eos-border-subtle">
-        <div className="sm:flex-1 sm:pr-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Se aplică</p>
-          <p className="mt-0.5 text-sm text-eos-text">{applicabilityLabels}</p>
+  const severityKpis: V3KpiItem[] = [
+    {
+      id: "critical",
+      label: "Critice",
+      value: criticalCount,
+      stripe: criticalCount > 0 ? "critical" : undefined,
+      valueTone: criticalCount > 0 ? "critical" : "neutral",
+      detail: criticalCount > 0 ? "necesită rezolvare imediată" : "fără critice deschise",
+    },
+    {
+      id: "high",
+      label: "Ridicate",
+      value: highCount,
+      stripe: highCount > 0 ? "warning" : undefined,
+      valueTone: highCount > 0 ? "warning" : "neutral",
+      detail: highCount > 0 ? "risc mare · <7 zile" : "fără alertă ridicată",
+    },
+    {
+      id: "medium",
+      label: "Medii",
+      value: mediumCount,
+      stripe: mediumCount > 0 ? "info" : undefined,
+      valueTone: mediumCount > 0 ? "info" : "neutral",
+      detail: mediumCount > 0 ? "de prioritizat săptămâna asta" : "nicio alertă medie",
+    },
+    {
+      id: "low",
+      label: "Scăzute",
+      value: lowCount,
+      valueTone: "neutral",
+      detail: lowCount > 0 ? "în monitorizare" : "fără scăzute",
+    },
+    {
+      id: "deadline",
+      label: "Deadline-uri",
+      value: urgencyItems.length,
+      stripe: urgencyItems.length > 0 ? "critical" : undefined,
+      valueTone: urgencyItems.length > 0 ? "critical" : "neutral",
+      detail: urgencyItems.length > 0 ? "DSAR · NIS2 · Vendor" : "fără deadline activ",
+    },
+  ]
+
+  return (
+    <div className="space-y-5">
+      <V3PageHero
+        breadcrumbs={[
+          { label: isSolo ? "Firma mea" : "Portofoliu" },
+          { label: "Acțiuni", current: true },
+        ]}
+        title={isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
+        description={
+          <>
+            {isSolo
+              ? "Aici vezi simplificat ce trebuie rezolvat acum și intri direct în caz. "
+              : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpit. "}
+            <strong className="text-eos-text">{nextActionLine}</strong>
+          </>
+        }
+        actions={
+          <>
+            {openTasks.length > 0 && (
+              <Link
+                href={dashboardRoutes.resolveSupport}
+                className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3.5 text-[12.5px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+              >
+                Task-uri suport · {openTasks.length}
+              </Link>
+            )}
+            <Link
+              href={dashboardRoutes.scan}
+              className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm bg-eos-primary px-3.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-eos-primary-hover"
+            >
+              Scanare nouă
+              <ArrowRight className="size-3.5" strokeWidth={2.5} />
+            </Link>
+          </>
+        }
+      />
+
+      <V3KpiStrip items={severityKpis} />
+
+      <V3Panel
+        eyebrow="Se aplică"
+        padding="tight"
+      >
+        <div className="grid gap-3 md:grid-cols-3">
+          <div>
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">Frameworks</p>
+            <p className="mt-0.5 text-[13px] text-eos-text-muted">{applicabilityLabels}</p>
+          </div>
+          <div>
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">Status</p>
+            <p className="mt-0.5 text-[13px] text-eos-text-muted">{foundSummary}</p>
+          </div>
+          <div>
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">Acum</p>
+            <p className="mt-0.5 text-[13px] text-eos-text-muted">{nextActionLine}</p>
+          </div>
         </div>
-        <div className="sm:flex-1 sm:px-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Am găsit</p>
-          <p className="mt-0.5 text-sm text-eos-text">{foundSummary}</p>
-        </div>
-        <div className="sm:flex-1 sm:pl-6">
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Acum faci asta</p>
-          <p className="mt-0.5 text-sm text-eos-text">{nextActionLine}</p>
-        </div>
-      </div>
+      </V3Panel>
 
       {/* Quick-nav strip — makes orphaned features discoverable */}
       <div className="flex flex-wrap items-center gap-2">
@@ -493,60 +601,12 @@ export function ResolvePageSurface() {
           <Link
             key={item.href}
             href={item.href}
-            className="inline-flex items-center gap-1.5 rounded-full border border-eos-border-subtle bg-eos-surface px-3 py-1.5 text-[11px] font-medium text-eos-text-muted transition-colors hover:bg-eos-surface-active hover:text-eos-text"
+            className="inline-flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1 font-mono text-[11px] text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
           >
             <item.icon className="size-3" strokeWidth={2} />
             {item.label}
           </Link>
         ))}
-      </div>
-
-      {/* Header + Severity KPI row */}
-      <div>
-        <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">De rezolvat</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-          {isSolo ? `${activeFindings.length} urgente de rezolvat` : `${activeFindings.length} cazuri deschise`}
-        </h1>
-        <p className="mt-1 text-sm text-eos-text-tertiary">
-          {isSolo
-            ? "Aici vezi simplificat ce trebuie rezolvat acum și intri direct în caz."
-            : "Inbox-ul de cazuri active. Alegi finding-ul și rezolvi totul din cockpitul lui."}
-        </p>
-
-        {/* Severity KPI row — diferențiere vizuală clară */}
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { label: "Critice", count: criticalCount, color: criticalCount > 0 ? "border-l-eos-error text-eos-error" : "border-l-eos-border-subtle text-eos-text-tertiary" },
-            { label: "Ridicate", count: highCount, color: highCount > 0 ? "border-l-eos-error text-eos-warning" : "border-l-eos-border-subtle text-eos-text-tertiary" },
-            { label: "Medii", count: mediumCount, color: mediumCount > 0 ? "border-l-eos-warning text-eos-warning" : "border-l-eos-border-subtle text-eos-text-tertiary" },
-            { label: "Scăzute", count: activeFindings.length - criticalCount - highCount - mediumCount, color: "border-l-eos-border-subtle text-eos-text-tertiary" },
-          ].map((item) => (
-            <div key={item.label} className={`flex flex-col gap-1 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant border-l-[3px] px-4 py-3 ${item.color}`}>
-              <span className="text-2xl font-semibold tabular-nums leading-none">{item.count}</span>
-              <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">{item.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Secondary actions */}
-        {(openTasks.length > 0 || urgencyItems.length > 0) && (
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {urgencyItems.length > 0 && (
-              <span className="rounded bg-eos-error/10 px-2.5 py-1 text-xs font-semibold text-eos-error">
-                {urgencyItems.length} deadline{urgencyItems.length > 1 ? "-uri" : ""}
-              </span>
-            )}
-            {openTasks.length > 0 && (
-              <Link
-                href={dashboardRoutes.resolveSupport}
-                className="inline-flex items-center gap-1.5 rounded border border-eos-border bg-eos-surface-active px-2.5 py-1 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text"
-              >
-                Task-uri de suport · {openTasks.length}
-                <ChevronRight className="size-3" strokeWidth={2} />
-              </Link>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Main execution queue */}
@@ -555,24 +615,24 @@ export function ResolvePageSurface() {
       </section>
 
       {urgencyItems.length > 0 && (
-        <details className="group rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
+        <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Deadline-uri și semnale conexe
               </p>
-              <p className="mt-1 text-sm text-eos-text-tertiary">
+              <p className="mt-1 text-[13px] text-eos-text-muted">
                 Rămân dedesubt, ca să nu concureze cu inbox-ul principal de constatări.
               </p>
             </div>
-            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
+            <span className="rounded-sm border border-eos-border-subtle bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] text-eos-text-muted">
               {urgencyItems.length} active
             </span>
-          </summary>
-          <div className="mt-4">
+          </div>
+          <div className="mt-3">
             <UrgentItemsSection items={urgencyItems} />
           </div>
-        </details>
+        </div>
       )}
     </div>
   )
@@ -590,38 +650,35 @@ export function ResolveSupportPageSurface() {
   const openTasks = cockpit.tasks.filter((task) => task.status !== "done")
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Task-uri de suport</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-          Board separat · {openTasks.length} deschise
-        </h1>
-        <p className="mt-1 text-sm text-eos-text-tertiary">
-          Aici stau doar task-urile auxiliare. Finding-ul și cockpitul lui rămân traseul principal pentru rezolvare, generare, dovadă și monitorizare.
-        </p>
-        <div className="mt-3">
-          <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-            Board secundar
-          </span>
-        </div>
-      </div>
+    <div className="space-y-5">
+      <V3PageHero
+        breadcrumbs={[
+          { label: "Firma mea" },
+          { label: "Acțiuni" },
+          { label: "Suport", current: true },
+        ]}
+        title={`Board separat · ${openTasks.length} deschise`}
+        description="Aici stau doar task-urile auxiliare. Finding-ul și cockpitul lui rămân traseul principal pentru rezolvare, generare, dovadă și monitorizare."
+        actions={
+          <Link
+            href={dashboardRoutes.resolve}
+            className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+          >
+            Înapoi la De rezolvat
+            <ArrowRight className="size-3.5" strokeWidth={2} />
+          </Link>
+        }
+      />
 
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant px-5 py-4">
+      <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3">
+        <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary/70" aria-hidden />
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-eos-text-muted">Nu concurează cu cockpitul</p>
-            <p className="text-xs text-eos-text-tertiary">
+            <p className="text-[13px] font-semibold text-eos-text">Nu concurează cu cockpitul</p>
+            <p className="text-[12px] leading-relaxed text-eos-text-muted">
               Când un task are caz asociat, intri în cockpitul finding-ului ca să generezi, atașezi dovada și închizi cu urmă clară.
             </p>
           </div>
-          <Link
-            href={dashboardRoutes.resolve}
-            className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-colors hover:text-eos-text-muted"
-          >
-            Înapoi la De rezolvat
-            <ArrowRight className="size-4" strokeWidth={2} />
-          </Link>
         </div>
       </div>
 
@@ -632,6 +689,10 @@ export function ResolveSupportPageSurface() {
         onFilterChange={setTaskFilter}
         onMarkDone={cockpitActions.handleMarkDone}
         onAttachEvidence={cockpitActions.attachEvidence}
+        onSoftDeleteEvidence={cockpitActions.softDeleteEvidence}
+        onRestoreEvidence={cockpitActions.restoreEvidence}
+        onPermanentlyDeleteEvidence={cockpitActions.permanentlyDeleteEvidence}
+        canPermanentlyDeleteEvidence={cockpit.data.workspace.userRole === "owner"}
         onExport={cockpitActions.handleTaskExport}
       />
     </div>

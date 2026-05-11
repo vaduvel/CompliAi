@@ -2,6 +2,7 @@
 
 import type {
   FindingCategory,
+  DeletedTaskEvidenceAttachment,
   RemediationMode,
   TaskEvidenceAttachment,
   TaskEvidenceKind,
@@ -49,6 +50,7 @@ export type CockpitTask = {
   status: TaskStatus
   sourceDocument?: string
   attachedEvidence?: TaskEvidenceAttachment
+  deletedEvidence?: DeletedTaskEvidenceAttachment
   evidenceKinds: TaskEvidenceKind[]
   validationStatus: TaskValidationStatus
   validationMessage?: string

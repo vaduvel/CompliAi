@@ -7,11 +7,11 @@ type DisclaimerVariant = "short" | "medium" | "long"
 
 const TEXTS: Record<DisclaimerVariant, string> = {
   short:
-    "CompliAI reduce munca repetitivă și livrează un dosar pregătit pentru review profesionist. Specialistul intervine doar pentru validare finală.",
+    "CompliScan organizează dovezi și pregătește dosare. Nu constituie opinie juridică sau opinie fiscală; validarea de specialitate rămâne în responsabilitatea cabinetului contabil CECCAR, cabinetului DPO sau a juristului.",
   medium:
     "Acest document a fost generat automat pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. Cazul este pregătit pentru validare de specialitate — documentele și red flags sunt deja organizate.",
   long:
-    "Acest dosar a fost generat automat de CompliAI. Nu constituie opinie juridică și nu garantează conformitatea. CompliAI nu este certificat de DNSC, ANSPDCP sau altă autoritate de reglementare. Dosarul servește ca instrument de organizare a dovezilor — pregătit pentru review profesionist. Specialistul intervine doar pentru validare finală sau situații sensibile.",
+    "Acest dosar a fost generat automat de CompliScan. Nu constituie opinie juridică și nu garantează conformitatea. CompliScan nu este certificat de DNSC, ANSPDCP sau altă autoritate de reglementare. Dosarul servește ca instrument de organizare a dovezilor — pregătit pentru review profesionist. Specialistul intervine doar pentru validare finală sau situații sensibile.",
 }
 
 export function LegalDisclaimer({ variant = "short" }: { variant?: DisclaimerVariant }) {

@@ -93,6 +93,6 @@ describe("buildDigestEmail", () => {
     const html = buildDigestEmail(BASE_DIGEST)
     expect(html.trim()).toMatch(/^<!DOCTYPE html>/i)
     expect(html).toContain("</html>")
-    expect(html).toContain("CompliAI")
+    expect(html).toContain("CompliScan")
   })
 })

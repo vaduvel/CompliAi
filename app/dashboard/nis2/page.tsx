@@ -5,10 +5,10 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { ArrowLeft, ShieldAlert } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3Surface, V3SurfaceBody } from "@/components/compliscan/v3/compat"
+import { V3Intro } from "@/components/compliscan/v3/compat"
 import { SimpleTooltip } from "@/components/evidence-os"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { Nis2RescueBanner } from "@/components/compliscan/nis2-rescue-banner"
@@ -57,7 +57,7 @@ export default function Nis2Page() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
+      <V3Intro
         eyebrow={
           <SimpleTooltip content="Network and Information Security Directive 2 — Directiva UE 2022/2555">
             <span className="cursor-help border-b border-dotted border-current">NIS2</span>
@@ -67,19 +67,19 @@ export default function Nis2Page() {
         description="Instrument de evaluare și monitorizare pentru conformitatea cu Directiva NIS2 (2022/2555) și ghidul DNSC. Evaluare, incident log cu SLA tracking și registrul furnizorilor ICT."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               Directiva (UE) 2022/2555
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            </V3Pill>
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               DNSC Romania
-            </Badge>
+            </V3Pill>
           </>
         }
       />
 
       {sourceFindingId && activeTab === "assessment" && assessmentFocus ? (
-        <Card className="border-eos-warning/30 bg-eos-warning/5">
-          <CardContent className="flex items-center justify-between gap-4 p-4">
+        <V3Surface className="border-eos-warning/30 bg-eos-warning/5">
+          <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-eos-text">Evaluarea NIS2 este deschisă din cockpit</p>
               <p className="mt-1 text-xs text-eos-text-muted">
@@ -93,13 +93,13 @@ export default function Nis2Page() {
               <ArrowLeft className="size-3" strokeWidth={2} />
               Înapoi la finding
             </Link>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : null}
 
       {/* Eligibility CTA — link to wizard page */}
-      <Card className="border-eos-primary/30 bg-eos-primary/5">
-        <CardContent className="flex items-center justify-between gap-4 p-4">
+      <V3Surface className="border-eos-primary/30 bg-eos-primary/5">
+        <V3SurfaceBody className="flex items-center justify-between gap-4 p-4">
           <div className="min-w-0">
             <p className="text-sm font-medium">Verifică dacă firma ta intră sub NIS2</p>
             <p className="mt-0.5 text-xs text-eos-text-muted">Wizard rapid — 3 întrebări bazate pe OUG 155/2024</p>
@@ -110,8 +110,8 @@ export default function Nis2Page() {
               Verifică eligibilitatea
             </Button>
           </Link>
-        </CardContent>
-      </Card>
+        </V3SurfaceBody>
+      </V3Surface>
 
       <Nis2ProgressStepper />
       <Nis2RescueBanner />

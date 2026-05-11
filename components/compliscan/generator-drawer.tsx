@@ -5,7 +5,6 @@ import { AlertTriangle, CheckCircle2, Copy, FileText, Loader2, Maximize2, Plus, 
 import { toast } from "sonner"
 
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { ORG_SECTOR_LABELS } from "@/lib/compliance/applicability"
 import {
@@ -88,10 +87,10 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 }
 
 const inputClass =
-  "ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+  "ring-focus h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
 
 const textareaClass =
-  "ring-focus w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none"
+  "ring-focus w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none"
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -413,7 +412,7 @@ export function GeneratorDrawer({
           className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm p-4 sm:p-8 overflow-y-auto"
           onClick={(e) => { if (e.target === e.currentTarget) setPreviewExpanded(false) }}
         >
-          <div className="relative w-full max-w-3xl rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+          <div className="relative w-full max-w-3xl rounded-eos-lg border border-eos-border bg-eos-surface shadow-2xl">
             {/* Modal header */}
             <div className="flex items-center justify-between gap-4 border-b border-eos-border px-6 py-4">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -423,14 +422,14 @@ export function GeneratorDrawer({
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-eos-md border border-eos-border px-3 py-1.5 text-xs text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+                  className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border px-3 py-1.5 text-xs text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
                 >
                   <Copy className="size-3" strokeWidth={2} />
                   Copiază
                 </button>
                 <button
                   onClick={() => setPreviewExpanded(false)}
-                  className="flex size-7 items-center justify-center rounded-eos-md border border-eos-border text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+                  className="flex size-7 items-center justify-center rounded-eos-sm border border-eos-border text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
                   aria-label="Închide preview"
                 >
                   <X className="size-4" strokeWidth={2} />
@@ -447,37 +446,45 @@ export function GeneratorDrawer({
         </div>
       )}
 
-    <Card data-testid="finding-generator-drawer" className="border-eos-primary/25 bg-eos-surface-variant">
-      <CardContent className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+    <div
+      data-testid="finding-generator-drawer"
+      className="relative overflow-hidden rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.04]"
+    >
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+      <div className="space-y-4 px-4 py-4 sm:px-5 sm:py-5">
 
         {/* ── Header: doc type + compact step indicator ─────────────────── */}
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <p className="flex items-center gap-2 text-base font-semibold text-eos-text">
-              <FileText className="size-4 shrink-0 text-eos-primary" strokeWidth={2} />
+          <div className="min-w-0 space-y-1">
+            <p className="flex items-center gap-1.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+              <FileText className="size-3 shrink-0" strokeWidth={2} />
               {docTypeLabel}
             </p>
-            <p className="text-sm text-eos-text-muted truncate">{findingTitle}</p>
+            <p
+              data-display-text="true"
+              className="truncate font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              {findingTitle}
+            </p>
           </div>
-          {/* Compact step indicator */}
           <div className="flex shrink-0 flex-col items-end gap-1.5">
             <div className="flex items-center gap-1">
               {drawerSteps.map((step) => (
                 <div
                   key={step.id}
                   className={[
-                    "h-1.5 rounded-full transition-all duration-300",
+                    "h-1 rounded-full transition-all duration-300",
                     step.done
-                      ? "w-5 bg-eos-success"
+                      ? "w-4 bg-eos-success"
                       : step.active
-                        ? "w-6 bg-eos-primary"
-                        : "w-4 bg-eos-border",
+                        ? "w-5 bg-eos-primary"
+                        : "w-3 bg-white/[0.06]",
                   ].join(" ")}
                 />
               ))}
             </div>
-            <p className="text-[11px] text-eos-text-tertiary whitespace-nowrap">
-              Pasul {currentStepNum} din {drawerSteps.length}
+            <p className="font-mono text-[10.5px] text-eos-text-tertiary whitespace-nowrap">
+              Pas {currentStepNum}/{drawerSteps.length}
               {currentStepLabel ? ` · ${currentStepLabel}` : ""}
             </p>
           </div>
@@ -486,7 +493,7 @@ export function GeneratorDrawer({
         <div className="flex-1 space-y-4">
 
           {lockedUntilConfirmed ? (
-            <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
+            <div className="rounded-eos-sm border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
               <p className="text-sm text-eos-text-muted">
                 Confirmă findingul mai sus — imediat după confirmare poți completa datele și genera documentul.
               </p>
@@ -548,7 +555,7 @@ export function GeneratorDrawer({
               )}
 
               {showCounterpartyField && (vendorName || vendorDpaUrl) ? (
-                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3 text-sm text-eos-text">
+                <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-3 text-sm text-eos-text">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
                     Context vendor
                   </p>
@@ -570,7 +577,7 @@ export function GeneratorDrawer({
               ) : null}
 
               {siteScanContext && latestSiteScanResult ? (
-                <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary-soft/20 px-4 py-3 text-sm text-eos-text">
+                <div className="rounded-eos-sm border border-eos-primary/20 bg-eos-primary-soft/20 px-4 py-3 text-sm text-eos-text">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
                     Context din site scan
                   </p>
@@ -582,7 +589,7 @@ export function GeneratorDrawer({
               ) : null}
 
               {showRetentionWizard && !lockedUntilConfirmed && (
-                <div className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+                <div className="space-y-3 rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4">
                   <p className="text-xs font-semibold text-eos-text">
                     Matrice retenție — completează categoriile de date
                   </p>
@@ -590,25 +597,25 @@ export function GeneratorDrawer({
                     {retentionRows.map((row, idx) => (
                       <div key={idx} className="grid grid-cols-[1fr_0.7fr_0.8fr_0.8fr_auto] items-center gap-2">
                         <input
-                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          className="rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
                           placeholder="Categorie date"
                           value={row.category}
                           onChange={(e) => updateRetentionRow(idx, "category", e.target.value)}
                         />
                         <input
-                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          className="rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
                           placeholder="Perioadă"
                           value={row.period}
                           onChange={(e) => updateRetentionRow(idx, "period", e.target.value)}
                         />
                         <input
-                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          className="rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
                           placeholder="Trigger ștergere"
                           value={row.trigger}
                           onChange={(e) => updateRetentionRow(idx, "trigger", e.target.value)}
                         />
                         <input
-                          className="rounded-eos-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                          className="rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1.5 text-xs text-eos-text placeholder:text-eos-text-tertiary"
                           placeholder="Bază legală"
                           value={row.basis}
                           onChange={(e) => updateRetentionRow(idx, "basis", e.target.value)}
@@ -628,7 +635,7 @@ export function GeneratorDrawer({
                     <button
                       type="button"
                       onClick={addRetentionRow}
-                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-border px-2.5 py-1.5 text-xs text-eos-text-muted hover:bg-eos-surface-variant"
+                      className="inline-flex items-center gap-1 rounded-eos-sm border border-eos-border px-2.5 py-1.5 text-xs text-eos-text-muted hover:bg-eos-surface-variant"
                     >
                       <Plus className="size-3" strokeWidth={2} />
                       Adaugă categorie
@@ -636,7 +643,7 @@ export function GeneratorDrawer({
                     <button
                       type="button"
                       onClick={applyRetentionMatrix}
-                      className="inline-flex items-center gap-1 rounded-eos-md border border-eos-primary/30 bg-eos-primary/10 px-2.5 py-1.5 text-xs font-medium text-eos-primary hover:bg-eos-primary/20"
+                      className="inline-flex items-center gap-1 rounded-eos-sm border border-eos-primary/30 bg-eos-primary/10 px-2.5 py-1.5 text-xs font-medium text-eos-primary hover:bg-eos-primary/20"
                     >
                       Aplică în context
                     </button>
@@ -708,12 +715,12 @@ export function GeneratorDrawer({
               {!validationPassed && !documentConfirmed && (
                 <div className="space-y-3">
                   {validationRunAtISO && (
-                    <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-4 space-y-3">
+                    <div className="rounded-eos-sm border border-eos-border bg-eos-surface px-4 py-4 space-y-3">
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">Rezultat re-scan</p>
                         <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-eos-error-soft text-eos-error">Are observații</span>
                       </div>
-                      <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
+                      <div className="space-y-2 rounded-eos-sm border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
                         {validationResult?.checks.map((check) => (
                           <div key={check.id} className="flex items-start gap-2 text-sm">
                             {check.passed
@@ -742,12 +749,12 @@ export function GeneratorDrawer({
               {/* Step: Folosește să închizi riscul — acțiune primară după re-scan valid */}
               {validationPassed && !documentConfirmed && (
                 <div className="space-y-3">
-                  <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-4 space-y-3">
+                  <div className="rounded-eos-sm border border-eos-border bg-eos-surface px-4 py-4 space-y-3">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">Rezultat re-scan</p>
                       <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-eos-success-soft text-eos-success">Valid</span>
                     </div>
-                    <div className="space-y-2 rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
+                    <div className="space-y-2 rounded-eos-sm border border-eos-border-subtle bg-eos-bg-inset px-3 py-3">
                       {validationResult?.checks.map((check) => (
                         <div key={check.id} className="flex items-start gap-2 text-sm">
                           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
@@ -755,7 +762,7 @@ export function GeneratorDrawer({
                         </div>
                       ))}
                     </div>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-eos-sm border border-eos-border px-4 py-3 transition-colors hover:bg-eos-surface-variant">
                       <input
                         type="checkbox"
                         checked={humanApprovalConfirmed}
@@ -786,7 +793,7 @@ export function GeneratorDrawer({
 
               {/* Stare finală: document confirmat */}
               {documentConfirmed && (
-                <div className="flex items-center gap-2 rounded-eos-md border border-eos-success/25 bg-eos-success-soft/40 px-4 py-3">
+                <div className="flex items-center gap-2 rounded-eos-sm border border-eos-success/25 bg-eos-success-soft/40 px-4 py-3">
                   <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
                   <p className="text-sm font-medium text-eos-success">Documentul a fost confirmat. Riscul este rezolvat.</p>
                 </div>
@@ -794,8 +801,8 @@ export function GeneratorDrawer({
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
     </>
   )
 }

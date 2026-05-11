@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
-import { AlertTriangle, ArrowRight, Bot, ChevronRight } from "lucide-react"
+import { AlertTriangle, ArrowRight, Bot } from "lucide-react"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { ScanFlowOverviewCard } from "@/components/evidence-os/ScanFlowOverviewCard"
@@ -19,6 +19,8 @@ import { useAgentFlow } from "@/components/compliscan/use-agent-flow"
 import { dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { SourceEnvelope } from "@/lib/compliance/agent-os"
 import { isFindingResolvedLike } from "@/lib/compliscan/finding-cockpit"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip } from "@/components/compliscan/v3/kpi-strip"
 
 const AgentWorkspace = dynamic(
   () => import("@/components/compliscan/agent-workspace").then((mod) => mod.AgentWorkspace),
@@ -57,7 +59,7 @@ function SectionHeader({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">{eyebrow}</p>
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">{eyebrow}</p>
       <p className="mt-1 text-sm font-semibold text-eos-text">{title}</p>
       {description && <p className="mt-0.5 text-xs text-eos-text-tertiary">{description}</p>}
     </div>
@@ -175,100 +177,35 @@ export function ScanPageSurface() {
   return (
     <div className="space-y-6">
 
-      {/* Last scan metrics strip */}
-      {latestDocumentScan && latestDocumentFindings.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Ultima scanare
-              </p>
-              <p className="mt-0.5 text-xs text-eos-text-muted truncate max-w-[260px]">
-                {latestDocumentScan.documentName}
-              </p>
-            </div>
-            <Link
-              href="/dashboard/resolve"
-              className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-3.5 py-2 text-xs font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
-            >
-              Deschide De rezolvat
-              <ArrowRight className="size-3.5" strokeWidth={2} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Constatări
-              </p>
-              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
-                {latestDocumentFindings.length}
-              </p>
-              <p className="mt-0.5 text-[11px] text-eos-text-muted">
-                {activeFromLastScan} active
-              </p>
-            </div>
-            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${criticalOrHighFindings.length > 0 ? "border-eos-border border-l-eos-error" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Critice / ridicate
-              </p>
-              <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${criticalOrHighFindings.length > 0 ? "text-eos-error" : "text-eos-text-tertiary"}`}>
-                {criticalOrHighFindings.length}
-              </p>
-              <p className="mt-0.5 text-[11px] text-eos-text-muted">
-                {criticalOrHighFindings.length > 0 ? "necesită atenție" : "nicio alertă"}
-              </p>
-            </div>
-            <div className={`rounded-eos-xl border bg-eos-surface px-4 py-3.5 border-l-[3px] ${resolvedFromLastScan > 0 ? "border-eos-border border-l-eos-success" : "border-eos-border-subtle border-l-eos-border-subtle"}`}>
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Rezolvate
-              </p>
-              <p className={`mt-1.5 text-2xl font-semibold tabular-nums ${resolvedFromLastScan > 0 ? "text-eos-success" : "text-eos-text-tertiary"}`}>
-                {resolvedFromLastScan}
-              </p>
-              <p className="mt-0.5 text-[11px] text-eos-text-muted">
-                din {latestDocumentFindings.length} total
-              </p>
-            </div>
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface px-4 py-3.5">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Categorii
-              </p>
-              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-eos-text">
-                {categoriesFromLastScan}
-              </p>
-              <p className="mt-0.5 text-[11px] text-eos-text-muted">
-                afectate
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Scanează</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">Adaugă surse noi</h1>
-        <p className="mt-1 text-sm text-eos-text-tertiary">
-          {isSolo
+      {/* Page hero */}
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Scanează", current: true }]}
+        title="Adaugă surse noi"
+        description={
+          isSolo
             ? "Încarci un document, text sau manifest — Compli extrage, analizează și generează findings. Rezolvarea continuă în De rezolvat."
-            : "Alegi sursa și rulezi analiza. Finding-urile noi apar în De rezolvat, unde le confirmi și le rezolvi prin cockpit."}
-        </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-            {sourceType === "document"
-              ? "document"
-              : sourceType === "text"
-                ? "text manual"
-                : sourceType === "manifest"
-                  ? "manifest / repo"
-                  : "compliscan.yaml"}
-          </span>
-          {agentFlow.agentModeActive && (
-            <span className="rounded-full bg-eos-warning-soft px-3 py-1 text-xs font-semibold text-eos-warning">
-              mod agent activ
+            : "Alegi sursa și rulezi analiza. Finding-urile noi apar în De rezolvat, unde le confirmi și le rezolvi prin cockpit."
+        }
+        eyebrowBadges={
+          <>
+            <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+              {sourceType === "document"
+                ? "document"
+                : sourceType === "text"
+                  ? "text manual"
+                  : sourceType === "manifest"
+                    ? "manifest / repo"
+                    : "compliscan.yaml"}
             </span>
-          )}
-          <div className="ml-auto flex flex-wrap gap-2">
+            {agentFlow.agentModeActive && (
+              <span className="inline-flex items-center rounded-sm bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-semibold text-eos-warning">
+                mod agent activ
+              </span>
+            )}
+          </>
+        }
+        actions={
+          <>
             {activeFindingsCount > 0 && (
               <Link
                 href="/dashboard/resolve"
@@ -291,13 +228,63 @@ export function ScanPageSurface() {
               <Bot className="size-4" strokeWidth={2} />
               {agentFlow.agentModeActive ? "Ieși din Mod Agent" : "Mod Agent"}
             </button>
+          </>
+        }
+      />
+
+      {/* Last scan KPI strip */}
+      {latestDocumentScan && latestDocumentFindings.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Ultima scanare — <span className="normal-case font-normal">{latestDocumentScan.documentName}</span>
+            </p>
+            <Link
+              href="/dashboard/resolve"
+              className="flex shrink-0 items-center gap-1.5 rounded-eos-lg bg-eos-primary px-3.5 py-2 text-xs font-semibold text-eos-primary-text transition hover:bg-eos-primary-hover"
+            >
+              Deschide De rezolvat
+              <ArrowRight className="size-3.5" strokeWidth={2} />
+            </Link>
           </div>
+          <V3KpiStrip
+            items={[
+              {
+                id: "constatari",
+                label: "Constatări",
+                value: latestDocumentFindings.length,
+                detail: `${activeFromLastScan} active`,
+              },
+              {
+                id: "critice",
+                label: "Critice / ridicate",
+                value: criticalOrHighFindings.length,
+                detail: criticalOrHighFindings.length > 0 ? "necesită atenție" : "nicio alertă",
+                stripe: criticalOrHighFindings.length > 0 ? "critical" : "neutral",
+                valueTone: criticalOrHighFindings.length > 0 ? "critical" : "neutral",
+              },
+              {
+                id: "rezolvate",
+                label: "Rezolvate",
+                value: resolvedFromLastScan,
+                detail: `din ${latestDocumentFindings.length} total`,
+                stripe: resolvedFromLastScan > 0 ? "success" : "neutral",
+                valueTone: resolvedFromLastScan > 0 ? "success" : "neutral",
+              },
+              {
+                id: "categorii",
+                label: "Categorii",
+                value: categoriesFromLastScan,
+                detail: "afectate",
+              },
+            ]}
+          />
         </div>
-      </div>
+      )}
 
       {/* Active findings nudge */}
       {!agentFlow.agentModeActive && activeFindingsCount > 0 && latestDocumentFindings.length === 0 && (
-        <div className="flex items-center gap-3 rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
+        <div className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-4">
           <AlertTriangle className="size-5 shrink-0 text-eos-warning/70" strokeWidth={2} />
           <p className="flex-1 text-sm text-eos-text-tertiary">
             <span className="font-semibold text-eos-text-muted">Scanare + rezolvare sunt suprafețe separate.</span>{" "}
@@ -418,20 +405,15 @@ export function ScanPageSurface() {
             </div>
           )}
 
-          <details className="group" open={cockpit.data.state.scans.length === 0 || undefined}>
-            <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-3.5 text-sm font-medium text-eos-text-muted transition hover:bg-eos-surface-active [&::-webkit-details-marker]:hidden">
-              <ChevronRight className="size-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-              Detalii context scanare
-            </summary>
-            <div className="mt-4">
-              <ScanFlowOverviewCard
-                sourceType={sourceType}
-                latestDocumentScan={latestDocumentScan}
-                latestManifestScan={latestManifestScan}
-                latestYamlScan={latestYamlScan}
-              />
-            </div>
-          </details>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-tertiary mb-3">Detalii context scanare</p>
+            <ScanFlowOverviewCard
+              sourceType={sourceType}
+              latestDocumentScan={latestDocumentScan}
+              latestManifestScan={latestManifestScan}
+              latestYamlScan={latestYamlScan}
+            />
+          </div>
 
           <div className="flex justify-end border-t border-eos-border-subtle pt-3">
             <Link
@@ -451,7 +433,7 @@ export function ScanPageSurface() {
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-5">
+    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-5">
       <p className="text-sm font-semibold text-eos-text">{title}</p>
       <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>

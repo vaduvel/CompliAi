@@ -20,9 +20,9 @@ export function RiskTrajectoryWidget() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 rounded-eos-xl border border-eos-border bg-eos-surface-variant px-4 py-3">
-        <Loader2 className="size-4 animate-spin text-eos-text-muted" />
-        <span className="text-sm text-eos-text-muted">Calculez trajectoria de risc…</span>
+      <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-2.5">
+        <Loader2 className="size-3.5 animate-spin text-eos-text-muted" />
+        <span className="font-mono text-[11px] text-eos-text-muted">Calculez trajectoria de risc…</span>
       </div>
     )
   }
@@ -40,72 +40,82 @@ export function RiskTrajectoryWidget() {
       : data.trend === "degrading"
         ? "text-eos-error"
         : "text-eos-text-muted"
-  const borderColor =
-    data.trend === "degrading" ? "border-eos-warning/40 bg-eos-warning-soft/5" : "border-eos-border bg-eos-surface-variant"
+  const stripeColor =
+    data.trend === "degrading" ? "bg-eos-warning" : data.trend === "improving" ? "bg-eos-success" : "bg-eos-primary"
 
   return (
-    <div className={`overflow-hidden rounded-eos-xl border ${borderColor}`}>
-      <div className="flex items-center justify-between border-b border-eos-border-subtle px-5 py-3.5">
-        <div className="flex items-center gap-2">
-          <TrendIcon className={`size-4 ${trendColor}`} />
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+    <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <span className={`absolute left-0 top-0 bottom-0 w-[3px] ${stripeColor}`} aria-hidden />
+      <header className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-2.5">
+        <div className="flex items-center gap-1.5">
+          <TrendIcon className={`size-3.5 ${trendColor}`} strokeWidth={2} />
+          <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
             Trajectorie risc
           </p>
         </div>
-        <span className={`text-xs font-medium ${trendColor}`}>
+        <span className={`font-mono text-[11px] font-semibold uppercase tracking-[0.06em] ${trendColor}`}>
           {data.trend === "improving" ? "Îmbunătățire" : data.trend === "degrading" ? "Degradare" : "Stabil"}
         </span>
-      </div>
+      </header>
 
-      <div className="px-5 py-4 space-y-4">
+      <div className="space-y-3 px-4 py-3">
         {/* Score now → 30 days */}
         <div className="flex items-center gap-4">
           <div className="text-center">
-            <p className="text-2xl font-semibold text-eos-text tabular-nums">{data.currentScore}</p>
-            <p className="text-[10px] text-eos-text-muted">acum</p>
+            <p
+              data-display-text="true"
+              className="font-display text-[22px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
+            >
+              {data.currentScore}
+            </p>
+            <p className="mt-1 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              acum
+            </p>
           </div>
-          <div className="flex-1 flex items-center gap-1.5">
-            {/* Mini sparkline using flex bars */}
+          <div className="flex flex-1 items-end gap-1">
             {data.trajectory.map((point) => {
-              const height = Math.max(20, (point.predictedScore / 100) * 40)
+              const height = Math.max(16, (point.predictedScore / 100) * 36)
               const barColor =
-                point.predictedScore >= data.currentScore - 5
-                  ? "bg-eos-primary/40"
-                  : "bg-eos-error/40"
+                point.predictedScore >= data.currentScore - 5 ? "bg-eos-primary/40" : "bg-eos-error/40"
               return (
-                <div key={point.daysFromNow} className="flex flex-col items-center gap-1 flex-1">
-                  <div
-                    className={`w-full rounded-sm ${barColor}`}
-                    style={{ height: `${height}px` }}
-                  />
-                  <span className="text-[9px] text-eos-text-tertiary">{point.daysFromNow}z</span>
+                <div key={point.daysFromNow} className="flex flex-1 flex-col items-center gap-1">
+                  <div className={`w-full rounded-sm ${barColor}`} style={{ height: `${height}px` }} />
+                  <span className="font-mono text-[9px] text-eos-text-tertiary">{point.daysFromNow}z</span>
                 </div>
               )
             })}
           </div>
           {score30 && (
             <div className="text-center">
-              <p className={`text-2xl font-semibold tabular-nums ${delta < -5 ? "text-eos-error" : "text-eos-text"}`}>
+              <p
+                data-display-text="true"
+                className={`font-display text-[22px] font-medium leading-none tabular-nums tracking-[-0.025em] ${delta < -5 ? "text-eos-error" : "text-eos-text"}`}
+              >
                 {score30.predictedScore}
               </p>
-              <p className="text-[10px] text-eos-text-muted">30 zile</p>
+              <p className="mt-1 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                30 zile
+              </p>
             </div>
           )}
         </div>
 
         {/* Top risks */}
         {data.iminentRisks.length > 0 && (
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 border-t border-eos-border-subtle pt-3">
             {data.iminentRisks.slice(0, 3).map((risk) => (
-              <div key={risk.id} className="flex items-start gap-2 text-xs">
-                <span className="mt-0.5 shrink-0 text-eos-text-muted">
-                  {risk.triggerDaysFromNow <= 7 ? "⚠" : "·"}
-                </span>
-                <span className="flex-1 text-eos-text leading-tight">{risk.label}</span>
+              <div key={risk.id} className="flex items-start gap-2 text-[12.5px]">
+                <span
+                  className={`mt-[7px] size-1.5 shrink-0 rounded-full ${
+                    risk.triggerDaysFromNow <= 7 ? "bg-eos-error" : "bg-eos-border-strong"
+                  }`}
+                  aria-hidden
+                />
+                <span className="flex-1 leading-snug text-eos-text">{risk.label}</span>
                 {risk.preventionHref && (
                   <Link
                     href={risk.preventionHref}
-                    className="shrink-0 text-eos-primary hover:underline"
+                    className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-primary hover:underline"
                   >
                     acționează
                   </Link>
@@ -115,12 +125,12 @@ export function RiskTrajectoryWidget() {
           </div>
         )}
 
-        {/* CTA */}
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-xs text-eos-text-muted">{data.summaryLabel}</p>
+        {/* Footer */}
+        <div className="flex items-center justify-between border-t border-eos-border-subtle pt-2.5">
+          <p className="font-mono text-[10.5px] text-eos-text-muted">{data.summaryLabel}</p>
           <Link
             href="/dashboard/agents"
-            className="flex items-center gap-1 text-xs text-eos-primary hover:underline"
+            className="flex items-center gap-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em] text-eos-primary hover:text-eos-text"
           >
             Vezi agenți
             <ArrowRight className="size-3" />

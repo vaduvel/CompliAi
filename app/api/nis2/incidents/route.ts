@@ -7,11 +7,22 @@ import { AuthzError, requireFreshRole } from "@/lib/server/auth"
 import { readNis2State, createIncident } from "@/lib/server/nis2-store"
 import type { Nis2Incident, Nis2IncidentSeverity, Nis2AttackType, Nis2OperationalImpact } from "@/lib/server/nis2-store"
 import { buildAnspdcpBreachFinding, anspdcpFindingId } from "@/lib/compliance/anspdcp-breach-rescue"
+import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
+import type { ComplianceEvent } from "@/lib/compliance/types"
 import { mutateFreshStateForOrg } from "@/lib/server/mvp-store"
 import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { preserveRuntimeStateForSingleFinding } from "@/lib/server/preserve-finding-runtime-state"
 import { mergeNis2PackageFindings } from "@/lib/server/nis2-package-sync"
 import { READ_ROLES, WRITE_ROLES } from "@/lib/server/rbac"
+
+function eventActor(session: Awaited<ReturnType<typeof requireFreshRole>>) {
+  return {
+    id: session.email,
+    label: session.email,
+    role: session.role as ComplianceEvent["actorRole"],
+    source: "session" as const,
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -70,6 +81,23 @@ export async function POST(request: Request) {
       involvesPersonalData: body.involvesPersonalData,
     })
     const nextNis2State = await readNis2State(session.orgId)
+    const nowISO = new Date().toISOString()
+    const incidentEvent = createComplianceEvent(
+      {
+        type: incident.involvesPersonalData ? "incident.personal_data.created" : "incident.created",
+        entityType: "system",
+        entityId: incident.id,
+        message: incident.involvesPersonalData
+          ? `Incident cu date personale înregistrat: ${incident.title} · verifică notificarea ANSPDCP 72h`
+          : `Incident înregistrat: ${incident.title}`,
+        createdAtISO: nowISO,
+        metadata: {
+          severity: incident.severity,
+          involvesPersonalData: Boolean(incident.involvesPersonalData),
+        },
+      },
+      eventActor(session)
+    )
 
     // GOLD 6: dacă incidentul implică date personale → inject finding ANSPDCP
     if (incident.involvesPersonalData) {
@@ -78,7 +106,7 @@ export async function POST(request: Request) {
         incident.title,
         incident.detectedAtISO,
         incident.anspdcpNotification?.status,
-        new Date().toISOString()
+        nowISO
       )
       if (finding) {
         await mutateFreshStateForOrg(
@@ -91,8 +119,18 @@ export async function POST(request: Request) {
                 preserveRuntimeStateForSingleFinding(s.findings, finding),
               ],
               nextNis2State,
-              new Date().toISOString()
+              nowISO
             ),
+            events: appendComplianceEvents(s, [incidentEvent]),
+          }),
+          session.orgName
+        )
+      } else {
+        await mutateFreshStateForOrg(
+          session.orgId,
+          (s) => ({
+            ...s,
+            events: appendComplianceEvents(s, [incidentEvent]),
           }),
           session.orgName
         )
@@ -102,7 +140,8 @@ export async function POST(request: Request) {
         session.orgId,
         (s) => ({
           ...s,
-          findings: mergeNis2PackageFindings(s.findings, nextNis2State, new Date().toISOString()),
+          findings: mergeNis2PackageFindings(s.findings, nextNis2State, nowISO),
+          events: appendComplianceEvents(s, [incidentEvent]),
         }),
         session.orgName
       )

@@ -10,14 +10,12 @@ import {
   Loader2,
   ShieldAlert,
   ShieldCheck,
-  ShieldX,
   Users,
   Wallet,
 } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { V3Stepper, type V3StepperStep } from "@/components/compliscan/v3/stepper"
 import {
   NIS2_SECTORS,
   evaluateNis2Eligibility,
@@ -63,19 +61,46 @@ const REVENUE_OPTIONS: Array<{ value: Nis2RevenueRange; label: string; hint: str
 ]
 
 const STEP_LABELS: Record<WizardStep, string> = {
-  1: "Sector de activitate",
-  2: "Număr angajați",
-  3: "Cifra de afaceri",
+  1: "Sector",
+  2: "Angajați",
+  3: "Cifră afaceri",
   4: "Rezultat",
 }
 
-const RESULT_CONFIG: Record<
-  Nis2EligibilityResult,
-  { icon: typeof ShieldCheck; label: string; variant: "success" | "warning" | "secondary" }
-> = {
-  intri: { icon: ShieldAlert, label: "Intri sub NIS2", variant: "warning" },
-  posibil: { icon: HelpCircle, label: "Posibil NIS2", variant: "warning" },
-  nu_intri: { icon: ShieldCheck, label: "Nu intri sub NIS2", variant: "success" },
+type ResultTone = {
+  icon: typeof ShieldCheck
+  wrapper: string
+  iconColor: string
+  pillClass: string
+}
+
+const RESULT_CONFIG: Record<Nis2EligibilityResult, ResultTone> = {
+  intri: {
+    icon: ShieldAlert,
+    wrapper: "border-eos-warning/30 bg-eos-warning-soft",
+    iconColor: "text-eos-warning",
+    pillClass: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  },
+  posibil: {
+    icon: HelpCircle,
+    wrapper: "border-eos-warning/30 bg-eos-warning-soft",
+    iconColor: "text-eos-warning",
+    pillClass: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  },
+  nu_intri: {
+    icon: ShieldCheck,
+    wrapper: "border-eos-success/30 bg-eos-success-soft",
+    iconColor: "text-eos-success",
+    pillClass: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+  },
+}
+
+function InlineTag({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      {children}
+    </span>
+  )
 }
 
 export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props) {
@@ -137,60 +162,59 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
   const selectedSector = NIS2_SECTORS.find((s) => s.id === sectorId)
   const resultConfig = output ? RESULT_CONFIG[output.result] : null
 
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ShieldAlert className="size-5 text-eos-primary" strokeWidth={2} />
-            Eligibilitate NIS2
-          </CardTitle>
-          <Badge variant="outline" className="text-xs">
-            OUG 155/2024
-          </Badge>
-        </div>
-        <p className="mt-1 text-xs text-eos-text-muted">
-          Verifică dacă organizația ta intră sub incidența Directivei NIS2 — 3 întrebări rapide.
-        </p>
-      </CardHeader>
+  const stepperSteps: V3StepperStep[] = ([1, 2, 3, 4] as WizardStep[]).map((s) => ({
+    id: String(s),
+    label: STEP_LABELS[s],
+    status: s < step ? "done" : s === step ? "active" : "pending",
+  }))
 
-      <CardContent className="space-y-4">
+  return (
+    <section className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="flex items-start justify-between gap-3 border-b border-eos-border-subtle px-4 py-3.5">
+        <div className="min-w-0 space-y-1">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            OUG 155/2024
+          </p>
+          <h3
+            data-display-text="true"
+            className="flex items-center gap-2 font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+          >
+            <ShieldAlert className="size-4 text-eos-primary" strokeWidth={2} />
+            Eligibilitate NIS2
+          </h3>
+          <p className="mt-1 text-[12px] text-eos-text-muted">
+            Verifică dacă organizația ta intră sub incidența Directivei NIS2 — 3 întrebări rapide.
+          </p>
+        </div>
+      </header>
+
+      <div className="space-y-4 px-4 py-4">
         {/* Step progress */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-eos-text-muted">
-            <span>Pas {step}/4 — {STEP_LABELS[step]}</span>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <V3Stepper steps={stepperSteps} />
             {saved && step === 4 && (
               <button
                 onClick={handleReset}
-                className="text-eos-primary hover:underline"
+                className="shrink-0 font-mono text-[10.5px] font-semibold tracking-[0.02em] text-eos-primary hover:underline"
               >
                 Refă evaluarea
               </button>
             )}
-          </div>
-          <div className="flex gap-1.5">
-            {([1, 2, 3, 4] as WizardStep[]).map((s) => (
-              <div
-                key={s}
-                className={`h-1 flex-1 rounded-full transition-all ${
-                  s <= step ? "bg-eos-primary" : "bg-eos-surface-variant"
-                }`}
-              />
-            ))}
           </div>
         </div>
 
         {/* Step 1: Sector */}
         {step === 1 && (
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium">
+            <label className="flex items-center gap-2 text-sm font-medium text-eos-text">
               <Building2 className="size-4" strokeWidth={2} />
               În ce sector activează firma ta?
             </label>
             <select
               value={sectorId}
               onChange={(e) => setSectorId(e.target.value)}
-              className="w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2.5 text-sm text-eos-text focus:border-eos-primary focus:outline-none focus:ring-1 focus:ring-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-2.5 text-sm text-eos-text focus:border-eos-primary focus:outline-none focus:ring-1 focus:ring-eos-primary"
             >
               <option value="">Alege sectorul...</option>
               <optgroup label="Anexa 1 — Sectoare de importanță ridicată">
@@ -222,7 +246,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
         {/* Step 2: Employees */}
         {step === 2 && (
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium">
+            <label className="flex items-center gap-2 text-sm font-medium text-eos-text">
               <Users className="size-4" strokeWidth={2} />
               Câți angajați are firma?
             </label>
@@ -230,7 +254,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
               {EMPLOYEE_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-eos-md border p-3 transition ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-eos-sm border p-3 transition ${
                     employees === opt.value
                       ? "border-eos-primary bg-eos-surface-active"
                       : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
@@ -245,7 +269,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
                     className="mt-0.5"
                   />
                   <div className="min-w-0">
-                    <span className="text-sm font-medium">{opt.label}</span>
+                    <span className="text-sm font-medium text-eos-text">{opt.label}</span>
                     <p className="mt-0.5 text-xs text-eos-text-muted">{opt.hint}</p>
                   </div>
                 </label>
@@ -257,7 +281,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
         {/* Step 3: Revenue */}
         {step === 3 && (
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium">
+            <label className="flex items-center gap-2 text-sm font-medium text-eos-text">
               <Wallet className="size-4" strokeWidth={2} />
               Care este cifra de afaceri anuală?
             </label>
@@ -265,7 +289,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
               {REVENUE_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-eos-md border p-3 transition ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-eos-sm border p-3 transition ${
                     revenue === opt.value
                       ? "border-eos-primary bg-eos-surface-active"
                       : "border-eos-border bg-eos-surface-variant hover:bg-eos-secondary-hover"
@@ -280,7 +304,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
                     className="mt-0.5"
                   />
                   <div className="min-w-0">
-                    <span className="text-sm font-medium">{opt.label}</span>
+                    <span className="text-sm font-medium text-eos-text">{opt.label}</span>
                     <p className="mt-0.5 text-xs text-eos-text-muted">{opt.hint}</p>
                   </div>
                 </label>
@@ -292,53 +316,33 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
         {/* Step 4: Result */}
         {step === 4 && output && resultConfig && (
           <div className="space-y-4">
-            <div
-              className={`rounded-eos-md border p-4 ${
-                output.result === "intri"
-                  ? "border-eos-warning/30 bg-eos-warning-soft dark:border-eos-warning/70 dark:bg-eos-warning-soft/30"
-                  : output.result === "posibil"
-                    ? "border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950/30"
-                    : "border-eos-success/30 bg-eos-success-soft dark:border-eos-success/70 dark:bg-eos-success-soft/30"
-              }`}
-            >
+            <div className={`rounded-eos-sm border p-4 ${resultConfig.wrapper}`}>
               <div className="flex items-center gap-2">
                 <resultConfig.icon
-                  className={`size-5 ${
-                    output.result === "intri"
-                      ? "text-eos-warning dark:text-eos-warning"
-                      : output.result === "posibil"
-                        ? "text-yellow-600 dark:text-yellow-400"
-                        : "text-eos-success dark:text-eos-success"
-                  }`}
+                  className={`size-5 ${resultConfig.iconColor}`}
                   strokeWidth={2}
                 />
-                <span className="text-sm font-semibold">{output.title}</span>
+                <span className="text-sm font-semibold text-eos-text">{output.title}</span>
               </div>
               <p className="mt-2 text-sm text-eos-text-muted">{output.description}</p>
             </div>
 
-            <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-              <p className="text-xs font-medium uppercase tracking-wider text-eos-text-muted">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-3">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
                 Recomandare
               </p>
-              <p className="mt-1 text-sm">{output.recommendation}</p>
+              <p className="mt-1 text-sm text-eos-text">{output.recommendation}</p>
             </div>
 
             {/* Summary of answers */}
             <div className="flex flex-wrap gap-2 text-xs text-eos-text-muted">
-              <Badge variant="outline">
-                {selectedSector?.label ?? sectorId}
-              </Badge>
-              <Badge variant="outline">
-                {EMPLOYEE_OPTIONS.find((o) => o.value === employees)?.label}
-              </Badge>
-              <Badge variant="outline">
-                {REVENUE_OPTIONS.find((o) => o.value === revenue)?.label}
-              </Badge>
+              <InlineTag>{selectedSector?.label ?? sectorId}</InlineTag>
+              <InlineTag>{EMPLOYEE_OPTIONS.find((o) => o.value === employees)?.label}</InlineTag>
+              <InlineTag>{REVENUE_OPTIONS.find((o) => o.value === revenue)?.label}</InlineTag>
             </div>
 
             {error && (
-              <p className="text-sm text-eos-error dark:text-eos-error">{error}</p>
+              <p className="text-sm text-eos-error">{error}</p>
             )}
 
             {!saved && (
@@ -389,7 +393,7 @@ export function Nis2EligibilityWizard({ saved, onComplete, onResetSaved }: Props
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

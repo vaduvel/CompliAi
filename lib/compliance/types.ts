@@ -22,6 +22,8 @@ export type GeneratedDocumentKind =
   | "privacy-policy"
   | "cookie-policy"
   | "dpa"
+  | "dsar-response"
+  | "dpia"
   | "retention-policy"
   | "nis2-incident-response"
   | "ai-governance"
@@ -36,17 +38,106 @@ export type GeneratedDocumentKind =
   | "pay-gap-report"
   | "ropa"
 
+// Sprint 1.2 — Issue 3 DPO: adăugat "rejected" pentru flow magic link reject.
+// Sincron cu DocumentAdoptionStatus din lib/compliance/document-adoption.ts.
 export type GeneratedDocumentAdoptionStatus =
   | "reviewed_internally"
   | "sent_for_signature"
   | "signed"
   | "active"
+  | "rejected"
 
 export type HrRegistryReconciliationRecord = {
   findingId: string
   rosterSnapshot: string
   registryChecklistText: string
   updatedAtISO: string
+}
+
+export type GdprTrainingAudience = "all_staff" | "management" | "new_hires" | "specific_roles"
+
+export type GdprTrainingRecord = {
+  id: string
+  title: string
+  audience: GdprTrainingAudience
+  participantCount: number
+  participantNames?: string[]
+  status: "planned" | "completed" | "evidence_required"
+  dueAtISO?: string
+  completedAtISO?: string
+  evidenceNote?: string
+  evidenceFileName?: string
+  evidenceFileType?: string
+  evidenceFileSizeBytes?: number
+  certificateTitle?: string
+  evidenceValidatedAtISO?: string
+  evidenceValidatedBy?: string
+  createdAtISO: string
+  updatedAtISO: string
+}
+
+export type DpiaRecordStatus =
+  | "draft"
+  | "in_review"
+  | "approved"
+  | "mitigations_in_progress"
+  | "completed"
+  | "archived"
+
+export type DpiaRiskLevel = "low" | "medium" | "high" | "critical"
+
+export type DpiaRecord = {
+  id: string
+  title: string
+  processingPurpose: string
+  processingDescription: string
+  dataCategories: string[]
+  dataSubjects: string[]
+  legalBasis: string
+  specialCategories: boolean
+  automatedDecisionMaking: boolean
+  largeScaleProcessing: boolean
+  linkedRopaDocumentId?: string
+  linkedRopaEntryLabel?: string
+  necessityAssessment: string
+  proportionalityAssessment: string
+  risks: string[]
+  mitigationMeasures: string[]
+  residualRisk: DpiaRiskLevel
+  status: DpiaRecordStatus
+  owner: string
+  dueAtISO?: string
+  reviewedAtISO?: string
+  approvedAtISO?: string
+  approvedBy?: string
+  evidenceNote?: string
+  evidenceFileName?: string
+  exportedAtISO?: string
+  createdAtISO: string
+  updatedAtISO: string
+}
+
+export type DpoMigrationImportKind =
+  | "dsar-log"
+  | "ropa-register"
+  | "vendor-dpa-register"
+  | "training-tracker"
+  | "breach-log"
+  | "approval-history"
+  | "evidence-archive"
+
+export type DpoMigrationImportRecord = {
+  id: string
+  kind: DpoMigrationImportKind
+  fileName: string
+  importedAtISO: string
+  importedByEmail?: string
+  rowCount: number
+  importedCount: number
+  skippedCount: number
+  structuredCount: number
+  archiveOnlyCount: number
+  notes: string[]
 }
 
 export type WorkspaceContext = {
@@ -103,7 +194,7 @@ export type FindingResolution = {
   problem: string          // Ce problemă concretă a detectat sistemul
   impact: string           // Ce se întâmplă dacă nu e rezolvat
   action: string           // Acțiunea concretă recomandată
-  generatedAsset?: string  // Asset generat de CompliAI (document, raport, template)
+  generatedAsset?: string  // Asset generat de CompliScan (document, raport, template)
   humanStep?: string       // Pasul uman obligatoriu (ce trebuie să facă persoana)
   closureEvidence?: string // Dovada care confirmă că problema e rezolvată
   revalidation?: string    // Când și cum se reverificată conformitatea
@@ -212,10 +303,32 @@ export type GeneratedDocumentRecord = {
   adoptionStatus?: GeneratedDocumentAdoptionStatus
   adoptionUpdatedAtISO?: string
   adoptionEvidenceNote?: string
+  // Sprint 1.2 — Issue 3 DPO: comentarii primite prin magic link (NU reject)
+  // Patron poate trimite feedback fără să respingă/aprobe documentul.
+  shareComments?: Array<{
+    id: string
+    authorName: string
+    comment: string
+    recipientType: string
+    createdAtISO: string
+    channel: "public_magic_link"
+  }>
   // E1 — Expiry management
   expiresAtISO?: string           // when this document expires
   nextReviewDateISO?: string      // when to review this document
   refreshStatus?: "current" | "refresh-candidate" | "expired"  // E2 drift-linked
+}
+
+export type ImportedClientContext = {
+  source: "partner_import"
+  importedAtISO: string
+  contactName?: string
+  contactEmail?: string
+  phone?: string
+  city?: string
+  dpoContract?: string
+  notes?: string
+  raw?: Record<string, string>
 }
 
 export type AISystemPurpose =
@@ -284,6 +397,21 @@ export type TaskEvidenceAttachment = {
   quality?: EvidenceQualityAssessment
 }
 
+export type DeletedTaskEvidenceAttachment = TaskEvidenceAttachment & {
+  deletionStatus: "soft_deleted" | "permanently_deleted"
+  deletedAtISO: string
+  deletedByUserId?: string
+  deletedByEmail?: string
+  deletedByRole?: WorkspaceContext["userRole"]
+  deleteReason: string
+  restoreUntilISO: string
+  restoredAtISO?: string
+  restoredByEmail?: string
+  permanentDeletedAtISO?: string
+  permanentDeletedByEmail?: string
+  permanentDeleteReason?: string
+}
+
 export type EvidenceRegistryEntry = TaskEvidenceAttachment & {
   taskId?: string | null
 }
@@ -347,6 +475,21 @@ export type EFacturaValidationRecord = {
   supplierCui?: string
   customerName?: string
   customerCui?: string
+  /**
+   * "b2b" = client are CIF (PartyTaxScheme prezent)
+   * "b2c" = persoană fizică (fără PartyTaxScheme / CompanyID)
+   * "unknown" = nu s-a putut determina (date insuficiente)
+   *
+   * Per OUG 120/2021 modif. OUG 69/2024, facturile B2C trebuie raportate
+   * în SPV în maxim 5 zile lucrătoare de la emitere (din 1 ian 2025).
+   */
+  customerType?: "b2b" | "b2c" | "unknown"
+  /**
+   * Termen ISO calculat ca 5 zile lucrătoare de la `issueDate` pentru B2C,
+   * 5 zile calendaristice pentru B2B (echivalent OUG 120/2021 Art. 10^1).
+   * Dacă issueDate lipsește, termenul nu se calculează.
+   */
+  reportingDeadlineISO?: string
   errors: string[]
   warnings: string[]
   createdAtISO: string
@@ -405,6 +548,8 @@ export type PersistedTaskState = {
   status: PersistedTaskStatus
   attachedEvidence?: string
   attachedEvidenceMeta?: TaskEvidenceAttachment
+  deletedEvidence?: string
+  deletedEvidenceMeta?: DeletedTaskEvidenceAttachment
   updatedAtISO: string
   validationStatus?: TaskValidationStatus
   validationMessage?: string
@@ -433,6 +578,12 @@ export type ComplianceEvent = {
   actorRole?: "owner" | "partner_manager" | "compliance" | "reviewer" | "viewer"
   actorSource?: "session" | "workspace" | "system"
   metadata?: Record<string, string | number | boolean>
+  // S2B.3 — Hash chain end-to-end (tamper-evident events ledger).
+  // selfHash = SHA-256(prevHash + JSON.stringify(eventWithoutHashes)).
+  // prevHash = selfHash al evenimentului anterior (sau "GENESIS" pentru primul).
+  // Câmpurile lipsesc pe evenimente vechi (pre-S2B.3) — backward compatible.
+  prevHash?: string
+  selfHash?: string
 }
 
 export type ComplianceDriftSeverity = ComplianceSeverity
@@ -547,12 +698,74 @@ export type ComplianceState = {
   // ── Fix #7: Async site scan jobs ─────────────────────────────────────────
   siteScanJobs?: Record<string, SiteScanJob>
   hrRegistryReconciliations?: Record<string, HrRegistryReconciliationRecord>
+  gdprTrainingRecords?: GdprTrainingRecord[]
+  dpiaRecords?: DpiaRecord[]
+  dpoMigrationImports?: DpoMigrationImportRecord[]
+  importedClientContext?: ImportedClientContext
   // ── Partner workspace ────────────────────────────────────────────────────
   partnerWorkspace?: {
     orgName?: string
     clientScale?: "1-5" | "5-20" | "20+"
     configuredAtISO: string
   }
+  // ── Sprint 7: ANAF retry queue (buffer pentru transmiteri eșuate temporar) ─
+  anafRetryQueue?: import("@/lib/compliance/anaf-retry-queue").AnafRetryItem[]
+  // ── Sprint 7.6: Real-time SPV monitor — track seen messages ──────────────
+  spvSeenMessageIds?: string[]
+  spvLastPollAtISO?: string
+  // ── Sprint 7.7: Client portal — docs + comments per finding ──────────────
+  clientPortalDocuments?: Array<{
+    id: string
+    findingId: string
+    fileName: string
+    contentType: string
+    sizeBytes: number
+    uploadedByEmail?: string
+    uploadedAtISO: string
+    note?: string
+    storageKey: string
+  }>
+  clientPortalComments?: Array<{
+    id: string
+    findingId: string
+    authorEmail?: string
+    authorRole: "cabinet" | "client"
+    body: string
+    createdAtISO: string
+  }>
+  // ── Bundle D: Integrări ERP (cabinet-fiscal) ─────────────────────────────
+  integrations?: {
+    smartbill?: {
+      email: string
+      token: string
+      cif: string
+      connectedAtISO: string
+      lastSyncAtISO?: string
+      lastSyncCount?: number
+      lastSyncError?: string
+    }
+    oblio?: {
+      email: string
+      accessToken: string
+      tokenExpiresAtISO: string
+      cif: string
+      connectedAtISO: string
+      lastSyncAtISO?: string
+      lastSyncCount?: number
+    }
+  }
+  // ── AI assistant privacy mode (cabinete cu secret profesional CECCAR) ────
+  // "local-only" = forțează Gemma 4 prin Ollama; refuză Gemini/Mistral.
+  // "cloud-allowed" (default) = preferă Gemma local, fallback cloud când nu rulează.
+  aiPrivacyMode?: "local-only" | "cloud-allowed"
+  // ── PFA / CNP Form 082 tracker (OG 6/2026 + Ordin ANAF 378/2026) ─────────
+  // Listă clienți PFA / persoane fizice cu CNP care necesită registrare în
+  // Registrul RO e-Factura via Form 082. Deadline: 26 mai 2026.
+  pfaForm082Clients?: import("@/lib/compliance/pfa-form082-tracker").PfaClientRecord[]
+  // ── F#4 Certificate SPV manager — Sprint 1 (2026-05-11) ──────────────────
+  // Tracking certificate digitale calificate per client; alerts expiry + SPV
+  // re-enrollment grace period detection.
+  certSpvRecords?: import("@/lib/compliance/cert-spv-tracker").CertSpvRecord[]
 }
 
 export type SiteScanSummary = {

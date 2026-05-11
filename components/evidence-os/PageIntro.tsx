@@ -30,14 +30,14 @@ export function PageIntro({
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       className={cn(
-        "rounded-eos-xl border border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-primary))] p-5 shadow-sm",
+        "rounded-eos-lg border border-eos-border-subtle bg-[linear-gradient(180deg,var(--eos-surface-secondary),var(--eos-surface-primary))] p-5 shadow-sm",
         className
       )}
     >
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0 flex-1">
           {eyebrow ? (
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               {eyebrow}
             </p>
           ) : null}

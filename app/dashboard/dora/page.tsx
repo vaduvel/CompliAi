@@ -1,10 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -18,15 +16,20 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { Breadcrumb } from "@/components/evidence-os"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { SimpleTooltip } from "@/components/evidence-os"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
-import type { DoraIncident, DoraTprmEntry, DoraState, DoraIncidentSeverity, DoraIncidentStatus, TprmCriticality } from "@/lib/server/dora-store"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
+import { V3FilterBar, type V3FilterTab } from "@/components/compliscan/v3/filter-bar"
+import type {
+  DoraIncident,
+  DoraTprmEntry,
+  DoraState,
+  DoraIncidentSeverity,
+  DoraIncidentStatus,
+  TprmCriticality,
+} from "@/lib/server/dora-store"
 
 // ─── Label maps ───────────────────────────────────────────────────────────────
 
@@ -34,12 +37,6 @@ const SEVERITY_LABELS: Record<DoraIncidentSeverity, string> = {
   major: "Major",
   significant: "Semnificativ",
   minor: "Minor",
-}
-
-const SEVERITY_BADGE: Record<DoraIncidentSeverity, "destructive" | "warning" | "outline"> = {
-  major: "destructive",
-  significant: "warning",
-  minor: "outline",
 }
 
 const STATUS_LABELS: Record<DoraIncidentStatus, string> = {
@@ -50,24 +47,142 @@ const STATUS_LABELS: Record<DoraIncidentStatus, string> = {
   closed: "Închis",
 }
 
-const STATUS_BADGE: Record<DoraIncidentStatus, "warning" | "default" | "success" | "outline" | "destructive"> = {
-  detected: "destructive",
-  "under-analysis": "warning",
-  "notified-authority": "default",
-  resolved: "success",
-  closed: "outline",
-}
-
 const CRITICALITY_LABELS: Record<TprmCriticality, string> = {
   critical: "Critic",
   important: "Important",
   standard: "Standard",
 }
 
-const CRITICALITY_BADGE: Record<TprmCriticality, "destructive" | "warning" | "outline"> = {
-  critical: "destructive",
-  important: "warning",
-  standard: "outline",
+// ─── Chip helpers (V3 span replacements for Badge) ───────────────────────────
+
+function SeverityChip({ severity }: { severity: DoraIncidentSeverity }) {
+  if (severity === "major") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
+        {SEVERITY_LABELS[severity]}
+      </span>
+    )
+  }
+  if (severity === "significant") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+        {SEVERITY_LABELS[severity]}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      {SEVERITY_LABELS[severity]}
+    </span>
+  )
+}
+
+function StatusChip({ status }: { status: DoraIncidentStatus }) {
+  const label = STATUS_LABELS[status]
+  if (status === "detected") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
+        {label}
+      </span>
+    )
+  }
+  if (status === "under-analysis") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+        {label}
+      </span>
+    )
+  }
+  if (status === "resolved") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-success/30 bg-eos-success-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-success">
+        {label}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      {label}
+    </span>
+  )
+}
+
+function CriticalityChip({ criticality }: { criticality: TprmCriticality }) {
+  if (criticality === "critical") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
+        {CRITICALITY_LABELS[criticality]}
+      </span>
+    )
+  }
+  if (criticality === "important") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+        {CRITICALITY_LABELS[criticality]}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      {CRITICALITY_LABELS[criticality]}
+    </span>
+  )
+}
+
+function RiskChip({ level }: { level: "low" | "medium" | "high" }) {
+  const label = level === "high" ? "Risc ridicat" : level === "medium" ? "Risc mediu" : "Risc scăzut"
+  if (level === "high") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
+        {label}
+      </span>
+    )
+  }
+  if (level === "medium") {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+        {label}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      {label}
+    </span>
+  )
+}
+
+function DeadlineChip({ label, urgent }: { label: string; urgent: boolean }) {
+  if (urgent) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
+        <Clock className="size-2.5" />
+        {label}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      <Clock className="size-2.5" />
+      {label}
+    </span>
+  )
+}
+
+function NeutralChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+      {children}
+    </span>
+  )
+}
+
+function WarningChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+      {children}
+    </span>
+  )
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -141,91 +256,98 @@ export default function DoraPage() {
   const openIncidents = incidents.filter((i) => !["resolved", "closed"].includes(i.status))
   const majorOpen = openIncidents.filter((i) => i.severity === "major")
   const criticalProviders = tprm.filter((t) => t.criticality === "critical" && t.status === "active")
+  const resilienceTests = state?.resilienceTests ?? []
+  const resilienceCompleted = resilienceTests.filter((t) => t.status === "completed").length
+
+  const kpiItems: V3KpiItem[] = [
+    {
+      id: "major-incidents",
+      label: "Incidente majore",
+      value: majorOpen.length,
+      stripe: majorOpen.length > 0 ? "critical" : undefined,
+      valueTone: majorOpen.length > 0 ? "critical" : "neutral",
+      detail: `${openIncidents.length} deschise total`,
+    },
+    {
+      id: "critical-providers",
+      label: "Furnizori critici",
+      value: criticalProviders.length,
+      stripe: criticalProviders.length > 0 ? "warning" : undefined,
+      valueTone: criticalProviders.length > 0 ? "warning" : "neutral",
+      detail: `${tprm.length} furnizori total`,
+    },
+    {
+      id: "resilience-tests",
+      label: "Teste reziliență",
+      value: resilienceTests.length,
+      detail: `${resilienceCompleted} completate`,
+    },
+  ]
+
+  const tabs: V3FilterTab<"incidents" | "tprm">[] = [
+    { id: "incidents", label: "Incidente ICT", count: incidents.length },
+    { id: "tprm", label: "Furnizori TPRM", count: tprm.length },
+  ]
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-      <Breadcrumb items={[
-        { label: "De rezolvat", href: "/dashboard/resolve" },
-        { label: "DORA" },
-      ]} />
-
-      <PageIntro
-        eyebrow={<><SimpleTooltip content="Digital Operational Resilience Act — Regulamentul UE 2022/2554"><span className="cursor-help border-b border-dotted border-current">DORA</span></SimpleTooltip>{" · Reziliență Operațională"}</>}
+    <div className="space-y-6">
+      <V3PageHero
+        breadcrumbs={[{ label: "De rezolvat" }, { label: "DORA", current: true }]}
         title="Reziliență Digitală"
         description="Regulamentul EU 2022/2554 — obligatoriu pentru instituții financiare. Gestionează incidentele ICT, furnizorii terți critici și testele de reziliență."
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <SimpleTooltip content="Digital Operational Resilience Act — Regulamentul UE 2022/2554">
+              <span className="inline-flex cursor-help items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+                DORA
+              </span>
+            </SimpleTooltip>
+            <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+              Reziliență operațională
+            </span>
+          </div>
+        }
       />
 
-      {/* KPI strip */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className={`relative overflow-hidden border-eos-border ${majorOpen.length > 0 ? "border-eos-error/30 bg-eos-error-soft" : ""}`}>
-          {majorOpen.length > 0 && (
-            <div className="absolute inset-x-0 top-0 h-[3px] bg-eos-error" />
-          )}
-          <CardContent className="px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Incidente majore</p>
-            <p className={`mt-1 text-2xl font-semibold tabular-nums ${majorOpen.length > 0 ? "text-eos-error" : "text-eos-text"}`}>
-              {majorOpen.length}
-            </p>
-            <p className="text-[10px] text-eos-text-muted">{openIncidents.length} deschise total</p>
-          </CardContent>
-        </Card>
-        <Card className={`relative overflow-hidden border-eos-border border-l-[3px] ${criticalProviders.length > 0 ? "border-l-eos-warning" : "border-l-eos-border-subtle"}`}>
-          <CardContent className="px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Furnizori critici</p>
-            <p className={`mt-1 text-2xl font-semibold tabular-nums ${criticalProviders.length > 0 ? "text-eos-warning" : "text-eos-text"}`}>{criticalProviders.length}</p>
-            <p className="text-[10px] text-eos-text-muted">{tprm.length} furnizori total</p>
-          </CardContent>
-        </Card>
-        <Card className="border-eos-border border-l-[3px] border-l-eos-border-subtle">
-          <CardContent className="px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Teste reziliență</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums text-eos-text">{state?.resilienceTests.length ?? 0}</p>
-            <p className="text-[10px] text-eos-text-muted">
-              {(state?.resilienceTests ?? []).filter((t) => t.status === "completed").length} completate
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <V3KpiStrip items={kpiItems} />
 
       {/* DORA context banner */}
-      <Card className="border-eos-primary/20 bg-eos-primary-soft/30">
-        <CardContent className="flex items-start gap-3 px-5 py-4">
-          <Shield className="mt-0.5 size-4 shrink-0 text-eos-primary" />
-          <div className="text-xs text-eos-text-muted space-y-1">
-            <p><span className="font-semibold text-eos-text">Termene DORA:</span> Incidente majore → raportare inițială la autoritate în <span className="font-semibold">4 ore</span>, raport detaliat în <span className="font-semibold">72 ore</span>, raport final în <span className="font-semibold">1 lună</span>.</p>
-            <p>Furnizori ICT critici trebuie evaluați anual. Contractele trebuie să includă clauze DORA (Art. 30).</p>
-          </div>
-        </CardContent>
-      </Card>
+      <section className="flex items-start gap-3 overflow-hidden rounded-eos-lg border border-eos-primary/20 bg-eos-primary-soft/30 px-4 py-3.5">
+        <Shield className="mt-0.5 size-4 shrink-0 text-eos-primary" />
+        <div className="space-y-1 text-xs text-eos-text-muted">
+          <p>
+            <span className="font-semibold text-eos-text">Termene DORA:</span> Incidente majore → raportare inițială la autoritate în{" "}
+            <span className="font-semibold">4 ore</span>, raport detaliat în <span className="font-semibold">72 ore</span>, raport final în{" "}
+            <span className="font-semibold">1 lună</span>.
+          </p>
+          <p>Furnizori ICT critici trebuie evaluați anual. Contractele trebuie să includă clauze DORA (Art. 30).</p>
+        </div>
+      </section>
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-eos-border">
-        {(["incidents", "tprm"] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab
-                ? "border-eos-primary text-eos-primary"
-                : "border-transparent text-eos-text-muted hover:text-eos-text"
-            }`}
-          >
-            {tab === "incidents" ? `Incidente ICT (${incidents.length})` : `Furnizori TPRM (${tprm.length})`}
-          </button>
-        ))}
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border">
+        <V3FilterBar<"incidents" | "tprm">
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          rightSlot={
+            activeTab === "incidents" ? (
+              <Button size="sm" className="gap-1.5" onClick={() => setShowIncidentForm(true)}>
+                <Plus className="size-3.5" />
+                Raportează incident
+              </Button>
+            ) : (
+              <Button size="sm" className="gap-1.5" onClick={() => setShowTprmForm(true)}>
+                <Plus className="size-3.5" />
+                Adaugă furnizor ICT
+              </Button>
+            )
+          }
+        />
       </div>
 
       {/* ── Incidents tab ── */}
       {activeTab === "incidents" && (
         <div className="space-y-3">
-          <div className="flex justify-end">
-            <Button size="sm" className="gap-1.5" onClick={() => setShowIncidentForm(true)}>
-              <Plus className="size-3.5" />
-              Raportează incident
-            </Button>
-          </div>
-
           {showIncidentForm && (
             <IncidentForm
               onCreated={onIncidentCreated}
@@ -234,11 +356,20 @@ export default function DoraPage() {
           )}
 
           {incidents.length === 0 && !showIncidentForm && (
-            <EmptyState
-              icon={ShieldAlert}
-              title="Niciun incident ICT"
-              label="Înregistrează incidentele ICT conform obligațiilor DORA Art. 17-23."
-            />
+            <div className="flex flex-col items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface py-12 text-center">
+              <ShieldAlert className="size-10 text-eos-text-tertiary" strokeWidth={1.5} />
+              <div className="space-y-1">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+                >
+                  Niciun incident ICT
+                </p>
+                <p className="max-w-md text-[12.5px] text-eos-text-muted">
+                  Înregistrează incidentele ICT conform obligațiilor DORA Art. 17-23.
+                </p>
+              </div>
+            </div>
           )}
 
           {incidents.map((incident) => (
@@ -250,13 +381,6 @@ export default function DoraPage() {
       {/* ── TPRM tab ── */}
       {activeTab === "tprm" && (
         <div className="space-y-3">
-          <div className="flex justify-end">
-            <Button size="sm" className="gap-1.5" onClick={() => setShowTprmForm(true)}>
-              <Plus className="size-3.5" />
-              Adaugă furnizor ICT
-            </Button>
-          </div>
-
           {showTprmForm && (
             <TprmForm
               onCreated={onTprmCreated}
@@ -265,11 +389,20 @@ export default function DoraPage() {
           )}
 
           {tprm.length === 0 && !showTprmForm && (
-            <EmptyState
-              icon={Shield}
-              title="Niciun furnizor ICT înregistrat"
-              label="Adaugă furnizorii ICT terți. Cei critici necesită evaluare anuală conform DORA Art. 28-30."
-            />
+            <div className="flex flex-col items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface py-12 text-center">
+              <Shield className="size-10 text-eos-text-tertiary" strokeWidth={1.5} />
+              <div className="space-y-1">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+                >
+                  Niciun furnizor ICT înregistrat
+                </p>
+                <p className="max-w-md text-[12.5px] text-eos-text-muted">
+                  Adaugă furnizorii ICT terți. Cei critici necesită evaluare anuală conform DORA Art. 28-30.
+                </p>
+              </div>
+            </div>
           )}
 
           {tprm.map((entry) => (
@@ -304,34 +437,36 @@ function IncidentRow({
     closed: [],
   } as Record<DoraIncidentStatus, DoraIncidentStatus[]>)[i.status]
 
-  const incidentBorderL =
-    i.severity === "major" ? "border-l-eos-error" : i.severity === "significant" ? "border-l-eos-warning" : "border-l-eos-border-subtle"
+  const stripeTone =
+    i.severity === "major"
+      ? "bg-eos-error"
+      : i.severity === "significant"
+        ? "bg-eos-warning"
+        : "bg-eos-border-strong"
+
+  const emphasizeBg = !isClosed && i.severity === "major" ? "bg-eos-error-soft/40" : ""
 
   return (
-    <Card className={`border border-l-[3px] ${incidentBorderL} ${!isClosed && i.severity === "major" ? "bg-eos-error-soft border-eos-error/30" : "border-eos-border"}`}>
-      <CardContent className="px-5 py-4 space-y-3">
+    <section className={`relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface ${emphasizeBg}`}>
+      <span className={`absolute left-0 top-3 bottom-3 w-[2px] rounded-r-sm ${stripeTone}`} aria-hidden />
+      <div className="space-y-3 px-4 py-4">
         <button
           type="button"
           className="flex w-full items-start justify-between gap-3 text-left"
           onClick={() => setExpanded(!expanded)}
         >
-          <div className="flex items-start gap-2 min-w-0">
-            {expanded ? <ChevronDown className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" /> : <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" />}
+          <div className="flex min-w-0 items-start gap-2">
+            {expanded ? (
+              <ChevronDown className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" />
+            ) : (
+              <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" />
+            )}
             <div className="min-w-0">
-              <p className="text-sm font-medium text-eos-text truncate">{i.title}</p>
+              <p className="truncate text-sm font-medium text-eos-text">{i.title}</p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <Badge variant={STATUS_BADGE[i.status]} className="text-[10px] normal-case tracking-normal">
-                  {STATUS_LABELS[i.status]}
-                </Badge>
-                <Badge variant={SEVERITY_BADGE[i.severity]} className="text-[10px] normal-case tracking-normal">
-                  {SEVERITY_LABELS[i.severity]}
-                </Badge>
-                {dl && (
-                  <Badge variant={dl.urgent ? "destructive" : "outline"} className="text-[10px] normal-case tracking-normal gap-1">
-                    <Clock className="size-2.5" />
-                    {dl.label}
-                  </Badge>
-                )}
+                <StatusChip status={i.status} />
+                <SeverityChip severity={i.severity} />
+                {dl && <DeadlineChip label={dl.label} urgent={dl.urgent} />}
                 <span className="text-xs text-eos-text-muted">
                   Detectat: {new Date(i.detectedAtISO).toLocaleDateString("ro-RO")}
                 </span>
@@ -342,17 +477,17 @@ function IncidentRow({
 
         {expanded && (
           <div className="space-y-3 border-t border-eos-border-subtle pt-3">
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Descriere</p>
-              <p className="mt-1 text-sm text-eos-text whitespace-pre-wrap">{i.description}</p>
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-3">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Descriere</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-eos-text">{i.description}</p>
             </div>
 
             {i.affectedSystems.length > 0 && (
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Sisteme afectate</p>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Sisteme afectate</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {i.affectedSystems.map((s) => (
-                    <Badge key={s} variant="outline" className="text-[10px] normal-case">{s}</Badge>
+                    <NeutralChip key={s}>{s}</NeutralChip>
                   ))}
                 </div>
               </div>
@@ -364,9 +499,11 @@ function IncidentRow({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Cauza rădăcină</label>
+                <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  Cauza rădăcină
+                </label>
                 <textarea
-                  className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
+                  className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                   rows={2}
                   value={rootCause}
                   onChange={(e) => setRootCause(e.target.value)}
@@ -374,9 +511,11 @@ function IncidentRow({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Măsuri de remediere</label>
+                <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  Măsuri de remediere
+                </label>
                 <textarea
-                  className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
+                  className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                   rows={2}
                   value={mitigation}
                   onChange={(e) => setMitigation(e.target.value)}
@@ -399,7 +538,7 @@ function IncidentRow({
                   key={s}
                   size="sm"
                   variant={s === "resolved" ? "default" : "outline"}
-                  className="text-xs gap-1.5"
+                  className="gap-1.5 text-xs"
                   onClick={() => {
                     const patch: Record<string, unknown> = { status: s }
                     if (s === "notified-authority") patch.notifiedAuthorityAtISO = new Date().toISOString()
@@ -413,20 +552,23 @@ function IncidentRow({
               ))}
             </div>
 
-            <div className="text-[10px] text-eos-text-muted space-y-0.5">
-              <p>Termen raportare inițial: <span className={timeLeft(i.initialReportDeadlineISO).urgent ? "text-eos-error font-semibold" : ""}>{new Date(i.initialReportDeadlineISO).toLocaleString("ro-RO")}</span></p>
+            <div className="space-y-0.5 text-[10px] text-eos-text-muted">
+              <p>
+                Termen raportare inițial:{" "}
+                <span className={timeLeft(i.initialReportDeadlineISO).urgent ? "font-semibold text-eos-error" : ""}>
+                  {new Date(i.initialReportDeadlineISO).toLocaleString("ro-RO")}
+                </span>
+              </p>
               <p>Termen raport final: {new Date(i.finalReportDeadlineISO).toLocaleDateString("ro-RO")}</p>
               {i.notifiedAuthorityAtISO && (
                 <p>Raportat la autoritate: {new Date(i.notifiedAuthorityAtISO).toLocaleString("ro-RO")}</p>
               )}
-              {i.resolvedAtISO && (
-                <p>Rezolvat: {new Date(i.resolvedAtISO).toLocaleDateString("ro-RO")}</p>
-              )}
+              {i.resolvedAtISO && <p>Rezolvat: {new Date(i.resolvedAtISO).toLocaleDateString("ro-RO")}</p>}
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -444,36 +586,41 @@ function TprmRow({
   const contractEnd = timeLeft(e.contractEndISO)
   const isActive = e.status === "active"
 
+  const stripeTone =
+    e.criticality === "critical"
+      ? "bg-eos-error"
+      : e.criticality === "important"
+        ? "bg-eos-warning"
+        : "bg-eos-border-strong"
+
+  const emphasizeBg = e.criticality === "critical" && e.riskLevel === "high" ? "bg-eos-warning-soft/40" : ""
+
   return (
-    <Card className={`border border-l-[3px] ${e.criticality === "critical" ? "border-l-eos-error border-eos-border" : e.criticality === "important" ? "border-l-eos-warning border-eos-border" : "border-l-eos-border-subtle border-eos-border"} ${e.criticality === "critical" && e.riskLevel === "high" ? "bg-eos-warning-soft" : ""}`}>
-      <CardContent className="px-5 py-4 space-y-3">
+    <section className={`relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface ${emphasizeBg}`}>
+      <span className={`absolute left-0 top-3 bottom-3 w-[2px] rounded-r-sm ${stripeTone}`} aria-hidden />
+      <div className="space-y-3 px-4 py-4">
         <button
           type="button"
           className="flex w-full items-start justify-between gap-3 text-left"
           onClick={() => setExpanded(!expanded)}
         >
-          <div className="flex items-start gap-2 min-w-0">
-            {expanded ? <ChevronDown className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" /> : <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" />}
+          <div className="flex min-w-0 items-start gap-2">
+            {expanded ? (
+              <ChevronDown className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" />
+            ) : (
+              <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-eos-text-muted" />
+            )}
             <div className="min-w-0">
               <p className="text-sm font-medium text-eos-text">{e.providerName}</p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <Badge variant={CRITICALITY_BADGE[e.criticality]} className="text-[10px] normal-case tracking-normal">
-                  {CRITICALITY_LABELS[e.criticality]}
-                </Badge>
-                <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-                  {e.serviceType}
-                </Badge>
-                <Badge
-                  variant={e.riskLevel === "high" ? "destructive" : e.riskLevel === "medium" ? "warning" : "outline"}
-                  className="text-[10px] normal-case tracking-normal"
-                >
-                  Risc {e.riskLevel === "high" ? "ridicat" : e.riskLevel === "medium" ? "mediu" : "scăzut"}
-                </Badge>
+                <CriticalityChip criticality={e.criticality} />
+                <NeutralChip>{e.serviceType}</NeutralChip>
+                <RiskChip level={e.riskLevel} />
                 {isActive && contractEnd.urgent && (
-                  <Badge variant="warning" className="text-[10px] normal-case tracking-normal gap-1">
+                  <WarningChip>
                     <Clock className="size-2.5" />
                     Contract: {contractEnd.label}
-                  </Badge>
+                  </WarningChip>
                 )}
               </div>
             </div>
@@ -484,21 +631,24 @@ function TprmRow({
           <div className="space-y-3 border-t border-eos-border-subtle pt-3">
             <div className="grid grid-cols-2 gap-3 text-xs text-eos-text-muted">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider">Contract</p>
-                <p>{new Date(e.contractStartISO).toLocaleDateString("ro-RO")} — {new Date(e.contractEndISO).toLocaleDateString("ro-RO")}</p>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Contract</p>
+                <p>
+                  {new Date(e.contractStartISO).toLocaleDateString("ro-RO")} —{" "}
+                  {new Date(e.contractEndISO).toLocaleDateString("ro-RO")}
+                </p>
               </div>
               {e.lastAssessmentISO && (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider">Ultima evaluare</p>
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Ultima evaluare</p>
                   <p>{new Date(e.lastAssessmentISO).toLocaleDateString("ro-RO")}</p>
                 </div>
               )}
             </div>
 
             <div>
-              <label className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Note</label>
+              <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Note</label>
               <textarea
-                className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
+                className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text"
                 rows={2}
                 value={notes}
                 onChange={(e2) => setNotes(e2.target.value)}
@@ -511,11 +661,13 @@ function TprmRow({
                 size="sm"
                 variant="outline"
                 className="text-xs"
-                onClick={() => onUpdate(e.id, {
-                  notes,
-                  lastAssessmentISO: new Date().toISOString(),
-                  nextAssessmentISO: new Date(Date.now() + 365 * 86_400_000).toISOString(),
-                })}
+                onClick={() =>
+                  onUpdate(e.id, {
+                    notes,
+                    lastAssessmentISO: new Date().toISOString(),
+                    nextAssessmentISO: new Date(Date.now() + 365 * 86_400_000).toISOString(),
+                  })
+                }
               >
                 Marchează evaluat azi
               </Button>
@@ -542,8 +694,8 @@ function TprmRow({
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -596,30 +748,33 @@ function IncidentForm({
   }
 
   return (
-    <Card className="border-eos-primary/30 bg-eos-primary/5">
-      <CardHeader className="px-5 pt-4 pb-0">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">Raportează incident ICT nou</CardTitle>
-          <button type="button" onClick={onCancel} className="text-eos-text-muted hover:text-eos-text">
-            <X className="size-4" />
-          </button>
-        </div>
-      </CardHeader>
-      <CardContent className="px-5 py-4 space-y-3">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-primary/30 bg-eos-primary/5">
+      <header className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-3.5">
+        <h3
+          data-display-text="true"
+          className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+        >
+          Raportează incident ICT nou
+        </h3>
+        <button type="button" onClick={onCancel} className="text-eos-text-muted hover:text-eos-text">
+          <X className="size-4" />
+        </button>
+      </header>
+      <div className="space-y-3 px-4 py-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Titlu incident *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Titlu incident *</label>
             <input
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary focus:ring-1 focus:ring-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary focus:ring-1 focus:ring-eos-primary"
               placeholder="ex: Atac ransomware pe serverul de producție"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Severitate *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Severitate *</label>
             <select
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={severity}
               onChange={(e) => setSeverity(e.target.value as DoraIncidentSeverity)}
             >
@@ -629,36 +784,36 @@ function IncidentForm({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Sisteme afectate</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Sisteme afectate</label>
             <input
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               placeholder="Core banking, CRM, ... (separate prin virgulă)"
               value={affectedSystems}
               onChange={(e) => setAffectedSystems(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Data producerii *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Data producerii *</label>
             <input
               type="datetime-local"
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Data detectării *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Data detectării *</label>
             <input
               type="datetime-local"
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={detectedAt}
               onChange={(e) => setDetectedAt(e.target.value)}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Descriere *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Descriere *</label>
             <textarea
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               rows={3}
               placeholder="Descrie incidentul: ce s-a întâmplat, impactul operațional, datele afectate..."
               value={description}
@@ -666,9 +821,9 @@ function IncidentForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Impact estimat</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Impact estimat</label>
             <input
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               placeholder="ex: Indisponibilitate 2h, ~5000 clienți afectați"
               value={estimatedImpact}
               onChange={(e) => setEstimatedImpact(e.target.value)}
@@ -677,21 +832,26 @@ function IncidentForm({
         </div>
 
         {severity === "major" && (
-          <div className="rounded-eos-md border border-eos-error/30 bg-eos-error-soft px-3 py-2 flex items-center gap-2">
-            <AlertTriangle className="size-4 text-eos-error shrink-0" />
-            <p className="text-xs text-eos-error">Incident major — trebuie raportat la autoritatea competentă (ASF/BNR) în <strong>4 ore</strong> de la detectare.</p>
+          <div className="flex items-center gap-2 rounded-eos-sm border border-eos-error/30 bg-eos-error-soft px-3 py-2">
+            <AlertTriangle className="size-4 shrink-0 text-eos-error" />
+            <p className="text-xs text-eos-error">
+              Incident major — trebuie raportat la autoritatea competentă (ASF/BNR) în{" "}
+              <strong>4 ore</strong> de la detectare.
+            </p>
           </div>
         )}
 
-        <div className="flex gap-2 justify-end">
-          <Button size="sm" variant="outline" onClick={onCancel}>Anulează</Button>
+        <div className="flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={onCancel}>
+            Anulează
+          </Button>
           <Button size="sm" disabled={submitting} onClick={() => void handleSubmit()} className="gap-1.5">
             {submitting && <Loader2 className="size-3.5 animate-spin" />}
             Înregistrează incident
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -742,39 +902,42 @@ function TprmForm({
   }
 
   return (
-    <Card className="border-eos-primary/30 bg-eos-primary/5">
-      <CardHeader className="px-5 pt-4 pb-0">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">Adaugă furnizor ICT terț</CardTitle>
-          <button type="button" onClick={onCancel} className="text-eos-text-muted hover:text-eos-text">
-            <X className="size-4" />
-          </button>
-        </div>
-      </CardHeader>
-      <CardContent className="px-5 py-4 space-y-3">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-primary/30 bg-eos-primary/5">
+      <header className="flex items-center justify-between border-b border-eos-border-subtle px-4 py-3.5">
+        <h3
+          data-display-text="true"
+          className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+        >
+          Adaugă furnizor ICT terț
+        </h3>
+        <button type="button" onClick={onCancel} className="text-eos-text-muted hover:text-eos-text">
+          <X className="size-4" />
+        </button>
+      </header>
+      <div className="space-y-3 px-4 py-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Denumire furnizor *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Denumire furnizor *</label>
             <input
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               placeholder="ex: AWS, Microsoft Azure, Oracle..."
               value={providerName}
               onChange={(e) => setProviderName(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Tip serviciu *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Tip serviciu *</label>
             <input
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               placeholder="ex: Cloud hosting, Payment processing..."
               value={serviceType}
               onChange={(e) => setServiceType(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Criticitate DORA *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Criticitate DORA *</label>
             <select
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={criticality}
               onChange={(e) => setCriticality(e.target.value as TprmCriticality)}
             >
@@ -784,9 +947,9 @@ function TprmForm({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Nivel de risc</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Nivel de risc</label>
             <select
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={riskLevel}
               onChange={(e) => setRiskLevel(e.target.value as "low" | "medium" | "high")}
             >
@@ -796,32 +959,34 @@ function TprmForm({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Contract de la *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Contract de la *</label>
             <input
               type="date"
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={contractStart}
               onChange={(e) => setContractStart(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-eos-text-muted mb-1">Contract până la *</label>
+            <label className="mb-1 block text-xs font-medium text-eos-text-muted">Contract până la *</label>
             <input
               type="date"
-              className="w-full rounded-eos-md border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
+              className="w-full rounded-eos-sm border border-eos-border bg-white px-3 py-2 text-sm text-eos-text outline-none focus:border-eos-primary"
               value={contractEnd}
               onChange={(e) => setContractEnd(e.target.value)}
             />
           </div>
         </div>
-        <div className="flex gap-2 justify-end">
-          <Button size="sm" variant="outline" onClick={onCancel}>Anulează</Button>
+        <div className="flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={onCancel}>
+            Anulează
+          </Button>
           <Button size="sm" disabled={submitting} onClick={() => void handleSubmit()} className="gap-1.5">
             {submitting && <Loader2 className="size-3.5 animate-spin" />}
             Adaugă furnizor
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }

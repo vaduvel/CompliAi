@@ -4,6 +4,7 @@ import { AuthzError, readFreshSessionFromRequest, resolveUserMode } from "@/lib/
 import { jsonError, withRequestIdHeaders } from "@/lib/server/api-response"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/auth/me")
@@ -13,6 +14,15 @@ export async function GET(request: Request) {
     if (!session) return NextResponse.json({ user: null }, withRequestIdHeaders(undefined, context))
 
     const userMode = await resolveUserMode(session)
+    // Layer 3 ICP separation depends on icpSegment being present in currentUser.
+    // Fetch from white-label config (single source of truth) — fallback null.
+    let icpSegment: string | null = null
+    try {
+      const wl = await getWhiteLabelConfig(session.orgId)
+      icpSegment = wl.icpSegment ?? null
+    } catch {
+      icpSegment = null
+    }
 
     return NextResponse.json(
       {
@@ -24,6 +34,7 @@ export async function GET(request: Request) {
           membershipId: session.membershipId ?? null,
           userMode: userMode ?? null,
           workspaceMode: session.workspaceMode ?? "org",
+          icpSegment,
         },
       },
       withRequestIdHeaders(undefined, context)

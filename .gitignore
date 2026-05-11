@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 .data/
+.data.backup-*/
 public/evidence-uploads/
 *.pem
 

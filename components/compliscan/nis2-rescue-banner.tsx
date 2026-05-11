@@ -41,7 +41,7 @@ export function Nis2RescueBanner() {
   return (
     <div
       role="alert"
-      className={`rounded-eos-md border p-4 ${
+      className={`rounded-eos-sm border p-4 ${
         isCritical
           ? "border-eos-error/40 bg-eos-error/8"
           : "border-eos-warning/40 bg-eos-warning/8"
@@ -59,7 +59,7 @@ export function Nis2RescueBanner() {
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`text-[11px] font-medium uppercase tracking-[0.22em] ${
+              className={`text-[11px] font-medium uppercase tracking-[0.14em] ${
                 isCritical ? "text-eos-error" : "text-eos-warning"
               }`}
             >
@@ -77,7 +77,7 @@ export function Nis2RescueBanner() {
           </p>
 
           <p className="text-xs text-eos-text-muted">
-            CompliAI nu garantează rezultate juridice. Verifică situația cu un consultant specializat
+            CompliScan nu garantează rezultate juridice. Verifică situația cu un consultant specializat
             în securitate cibernetică sau drept IT.
           </p>
 

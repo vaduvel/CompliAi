@@ -2,31 +2,26 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Loader2,
   FileText,
-  Shield,
   XCircle,
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import {
   NIS2_QUESTIONS,
   NIS2_CATEGORY_LABELS,
   SECTOR_LABELS,
   scoreNis2Assessment,
-  type Nis2Answer,
   type Nis2Answers,
   type Nis2Result,
   type Nis2Sector,
@@ -193,9 +188,9 @@ export function AssessmentTab({
       )}
 
       {/* Sector selector */}
-      <Card className="border-eos-border bg-eos-surface">
-        <CardContent className="px-5 py-4">
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">
+      <V3Surface className="border-eos-border bg-eos-surface">
+        <V3SurfaceBody className="px-5 py-4">
+          <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
             Sector organizație
           </p>
           <div className="flex flex-wrap gap-2">
@@ -217,16 +212,16 @@ export function AssessmentTab({
               </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </V3SurfaceBody>
+      </V3Surface>
 
       {/* Live score */}
       {answeredCount > 0 && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="px-5 py-4">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceBody className="px-5 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">
+                <p className="text-xs font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
                   Scor curent ({answeredCount}/{applicable.length} răspunsuri)
                 </p>
                 <div className="mt-1 flex items-end gap-3">
@@ -240,9 +235,9 @@ export function AssessmentTab({
                   </div>
                 </div>
               </div>
-              <Badge variant="outline" className="normal-case tracking-normal">
+              <V3Pill variant="outline" className="normal-case tracking-normal">
                 {liveResult.entityType === "essential" ? "Entitate esențială" : "Entitate importantă"}
-              </Badge>
+              </V3Pill>
             </div>
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-eos-bg-inset">
               <div
@@ -252,8 +247,8 @@ export function AssessmentTab({
                 style={{ width: `${liveResult.score}%` }}
               />
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* Questions by category */}
@@ -261,7 +256,7 @@ export function AssessmentTab({
         const expanded = expandedCategories.has(cat)
         const catAnswered = qs.filter((q) => answers[q.id]).length
         return (
-          <Card key={cat} className="border-eos-border bg-eos-surface">
+          <V3Surface key={cat} className="border-eos-border bg-eos-surface">
             <button
               type="button"
               onClick={() => toggleCategory(cat)}
@@ -278,11 +273,11 @@ export function AssessmentTab({
               )}
             </button>
             {expanded && (
-              <CardContent className="space-y-3 px-5 pb-5 pt-0">
+              <V3SurfaceBody className="space-y-3 px-5 pb-5 pt-0">
                 {qs.map((q, idx) => {
                   const ans = answers[q.id]
                   return (
-                    <div key={q.id} className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+                    <div key={q.id} className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4">
                       <div className="flex items-start gap-3">
                         <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-eos-bg-inset text-[10px] font-bold text-eos-text-muted">
                           {idx + 1}
@@ -292,9 +287,9 @@ export function AssessmentTab({
                             <div className="flex flex-wrap items-center gap-2">
                               <p className="text-sm font-medium text-eos-text">{q.text}</p>
                               {q.weight === 3 && (
-                                <Badge variant="destructive" className="text-[10px] normal-case tracking-normal">
+                                <V3Pill variant="destructive" className="text-[10px] normal-case tracking-normal">
                                   obligatoriu
-                                </Badge>
+                                </V3Pill>
                               )}
                             </div>
                             <p className="mt-0.5 text-xs text-eos-text-muted">{q.hint}</p>
@@ -355,9 +350,9 @@ export function AssessmentTab({
                     </div>
                   )
                 })}
-              </CardContent>
+              </V3SurfaceBody>
             )}
-          </Card>
+          </V3Surface>
         )
       })}
 
@@ -384,18 +379,18 @@ export function AssessmentTab({
 
         {/* Gap analysis */}
         {liveResult.gaps.length > 0 && answeredCount > 0 && (
-          <Card className="border-eos-border bg-eos-surface">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">
+          <V3Surface className="border-eos-border bg-eos-surface">
+            <V3SurfaceHead className="pb-3">
+              <V3SurfaceTitle className="text-sm">
                 Gap analysis — {liveResult.gaps.length} lacun{liveResult.gaps.length !== 1 ? "e" : "ă"} identificat{liveResult.gaps.length !== 1 ? "e" : "ă"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 pt-0">
+              </V3SurfaceTitle>
+            </V3SurfaceHead>
+            <V3SurfaceBody className="space-y-2 pt-0">
               {liveResult.gaps.map((gap) => {
                 const Icon = gap.severity === "critical" ? XCircle : AlertTriangle
                 const color = gap.severity === "critical" ? "text-eos-error" : gap.severity === "high" ? "text-eos-error" : "text-eos-warning"
                 return (
-                  <div key={gap.questionId} className="flex gap-3 rounded-eos-md border border-eos-border bg-eos-surface p-3">
+                  <div key={gap.questionId} className="flex gap-3 rounded-eos-sm border border-eos-border bg-eos-surface p-3">
                     <Icon className={`mt-0.5 size-4 shrink-0 ${color}`} strokeWidth={2} />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-eos-text">{gap.question}</p>
@@ -405,8 +400,8 @@ export function AssessmentTab({
                   </div>
                 )
               })}
-            </CardContent>
-          </Card>
+            </V3SurfaceBody>
+          </V3Surface>
         )}
 
         {savedRecord && (
@@ -440,4 +435,3 @@ export function AssessmentTab({
     </div>
   )
 }
-

@@ -5,9 +5,9 @@ import { useEffect, useMemo, useState } from "react"
 import { ClipboardCheck, Loader2, Undo2 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import { Textarea } from "@/components/evidence-os/Textarea"
 import {
   FISCAL_PROTOCOL_ACTION_LABELS,
@@ -198,17 +198,17 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
   }
 
   return (
-    <Card className="border-eos-border bg-eos-surface" data-testid="fiscal-execution-log-card">
-      <CardHeader className="border-b border-eos-border-subtle pb-3">
+    <V3Surface className="border-eos-border bg-eos-surface" data-testid="fiscal-execution-log-card">
+      <V3SurfaceHead className="border-b border-eos-border-subtle pb-3">
         <div className="space-y-2">
-          <CardTitle className="text-sm">Jurnal de execuție fiscală</CardTitle>
+          <V3SurfaceTitle className="text-sm">Jurnal de execuție fiscală</V3SurfaceTitle>
           <p className="text-sm text-eos-text-muted">
             Aici transformi protocolul fiscal într-o urmă reală: ce factură ai urmărit, ce ai făcut în SPV și unde rămâne dovada finală pentru cockpit și audit.
           </p>
         </div>
-      </CardHeader>
+      </V3SurfaceHead>
 
-      <CardContent className="space-y-4 pt-4">
+      <V3SurfaceBody className="space-y-4 pt-4">
         {loading ? (
           <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text-muted">
             <Loader2 className="size-4 animate-spin" />
@@ -223,21 +223,21 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
             ) : null}
 
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="normal-case tracking-normal">
+              <V3Pill variant="outline" className="normal-case tracking-normal">
                 {findingTypeId}
-              </Badge>
-              <Badge
+              </V3Pill>
+              <V3Pill
                 variant={derived?.readiness === "ready" ? "secondary" : "outline"}
                 className="normal-case tracking-normal"
               >
                 {derived?.readinessLabel ?? "completează protocolul"}
-              </Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">
+              </V3Pill>
+              <V3Pill variant="outline" className="normal-case tracking-normal">
                 {derived?.actionStatusLabel ?? FISCAL_PROTOCOL_ACTION_LABELS.checked_pending}
-              </Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">
+              </V3Pill>
+              <V3Pill variant="outline" className="normal-case tracking-normal">
                 {derived?.receiptStatusLabel ?? FISCAL_PROTOCOL_RECEIPT_LABELS.missing}
-              </Badge>
+              </V3Pill>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
@@ -249,7 +249,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                   value={invoiceRef}
                   onChange={(event) => setInvoiceRef(event.target.value)}
                   placeholder={findingTypeId === "EF-004" ? "Ex: INV-2026-114 / mesaj ANAF 2231" : "Ex: INV-2026-114"}
-                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </label>
 
@@ -258,7 +258,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                 <select
                   value={actionStatus}
                   onChange={(event) => setActionStatus(event.target.value as FiscalProtocolActionStatus)}
-                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  className="ring-focus h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
                 >
                   {(Object.entries(FISCAL_PROTOCOL_ACTION_LABELS) as [FiscalProtocolActionStatus, string][]).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -276,7 +276,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                   value={spvReference}
                   onChange={(event) => setSpvReference(event.target.value)}
                   placeholder="Ex: MSG-ANAF-2026-00412"
-                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </label>
 
@@ -285,7 +285,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                 <select
                   value={receiptStatus}
                   onChange={(event) => setReceiptStatus(event.target.value as FiscalProtocolReceiptStatus)}
-                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  className="ring-focus h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
                 >
                   {(Object.entries(FISCAL_PROTOCOL_RECEIPT_LABELS) as [FiscalProtocolReceiptStatus, string][]).map(([value, label]) => (
                     <option key={value} value={value}>
@@ -303,7 +303,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                   type="datetime-local"
                   value={receiptReceivedAt}
                   onChange={(event) => setReceiptReceivedAt(event.target.value)}
-                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  className="ring-focus h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
                 />
               </label>
 
@@ -313,7 +313,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
                   value={evidenceLocation}
                   onChange={(event) => setEvidenceLocation(event.target.value)}
                   placeholder="Ex: Dosar / Fiscal / recipise / martie-2026"
-                  className="ring-focus h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </label>
             </div>
@@ -334,7 +334,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
 
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-text-tertiary">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                   Checklist protocol
                 </p>
                 <ul className="space-y-1 text-sm text-eos-text-muted">
@@ -348,7 +348,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
               </div>
 
               <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-eos-text-tertiary">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                   Ce mai lipsește
                 </p>
                 {derived?.missingItems.length ? (
@@ -369,7 +369,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
             </div>
 
             <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
+              <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
               <Textarea
                 readOnly
                 value={derived?.handoffEvidenceNote ?? ""}
@@ -407,7 +407,7 @@ export function FiscalExecutionLogCard({ findingId, findingTypeId }: Props) {
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
+      </V3SurfaceBody>
+    </V3Surface>
   )
 }

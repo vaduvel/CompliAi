@@ -1,12 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, Loader2, Shield, XCircle } from "lucide-react"
-import { toast } from "sonner"
+import { CheckCircle2, Loader2, Shield } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import type { Nis2Incident, Nis2AttackType } from "@/lib/server/nis2-store"
 import type { IncidentChecklist, ChecklistStep } from "@/lib/compliance/incident-checklists"
 
@@ -62,11 +59,17 @@ export function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackTy
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold text-eos-text">{checklist.label}</p>
-          <p className="text-[10px] text-eos-text-muted">{checklist.description}</p>
+          <p className="text-[10.5px] text-eos-text-muted">{checklist.description}</p>
         </div>
-        <Badge variant={progress === 100 ? "default" : "outline"} className="text-[10px] normal-case tracking-normal">
+        <span
+          className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${
+            progress === 100
+              ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
+              : "border-eos-border bg-eos-surface-elevated text-eos-text-muted"
+          }`}
+        >
           {completedSteps.size}/{checklist.steps.length} pași
-        </Badge>
+        </span>
       </div>
 
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-eos-surface">
@@ -83,7 +86,7 @@ export function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackTy
             <button
               key={step.id}
               type="button"
-              className={`flex w-full items-start gap-2.5 rounded-eos-md border px-3 py-2 text-left transition-colors ${done ? "border-eos-success/20 bg-eos-success-soft" : "border-eos-border bg-eos-surface-variant hover:bg-eos-surface"}`}
+              className={`flex w-full items-start gap-2.5 rounded-eos-sm border px-3 py-2 text-left transition-colors ${done ? "border-eos-success/20 bg-eos-success-soft" : "border-eos-border bg-eos-surface-variant hover:bg-eos-surface"}`}
               onClick={() => toggleStep(step.id)}
             >
               <div className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-sm border ${done ? "border-eos-success bg-eos-success text-white" : "border-eos-border"}`}>
@@ -95,14 +98,14 @@ export function IncidentChecklist_UI({ attackType }: { attackType?: Nis2AttackTy
                   {step.text}
                 </p>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                  <span className={`inline-block rounded-sm border px-1.5 py-0.5 text-[9px] font-medium ${CATEGORY_COLORS[step.category]}`}>
+                  <span className={`inline-block rounded-sm border px-1.5 py-0.5 font-mono text-[9px] font-medium ${CATEGORY_COLORS[step.category]}`}>
                     {CATEGORY_LABELS[step.category]}
                   </span>
                   {step.deadlineHours && (
-                    <span className="text-[9px] text-eos-text-tertiary">⏱ {step.deadlineHours}h</span>
+                    <span className="font-mono text-[9px] text-eos-text-tertiary">⏱ {step.deadlineHours}h</span>
                   )}
                   {step.legalBasis && (
-                    <span className="text-[9px] text-eos-text-tertiary">{step.legalBasis}</span>
+                    <span className="font-mono text-[9px] text-eos-text-tertiary">{step.legalBasis}</span>
                   )}
                 </div>
               </div>
@@ -128,6 +131,24 @@ export function getStageStatus(incident: Nis2Incident, key: StageKey): "done" | 
   if (key === "earlyWarning") return incident.earlyWarningReport ? "done" : "active"
   if (key === "fullReport") return incident.fullReport72h ? "done" : incident.earlyWarningReport ? "active" : "locked"
   return incident.finalReport ? "done" : incident.fullReport72h ? "active" : "locked"
+}
+
+const STAGE_STATUS_TONE: Record<
+  "done" | "active" | "locked",
+  { pill: string; label: string }
+> = {
+  done: {
+    pill: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+    label: "Trimis",
+  },
+  active: {
+    pill: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+    label: "De completat",
+  },
+  locked: {
+    pill: "border-eos-border bg-eos-surface-elevated text-eos-text-muted",
+    label: "Blocat",
+  },
 }
 
 export function IncidentStageStepper({
@@ -181,11 +202,11 @@ export function IncidentStageStepper({
 
   return (
     <div className="space-y-1.5">
-      <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
         Raportare NIS2 Art. 23 — 3 etape
       </p>
       <div className="flex gap-1">
-        {STAGE_META.map((stage, idx) => {
+        {STAGE_META.map((stage) => {
           const status = getStageStatus(incident, stage.key)
           return (
             <div
@@ -200,8 +221,9 @@ export function IncidentStageStepper({
       {STAGE_META.map((stage) => {
         const status = getStageStatus(incident, stage.key)
         const isExpanded = expandedStage === stage.key
+        const statusTone = STAGE_STATUS_TONE[status]
         return (
-          <div key={stage.key} className={`rounded-eos-md border ${status === "done" ? "border-eos-success/20 bg-eos-success-soft" : status === "active" ? "border-eos-primary/30 bg-eos-primary/5" : "border-eos-border bg-eos-surface-variant opacity-60"}`}>
+          <div key={stage.key} className={`rounded-eos-sm border ${status === "done" ? "border-eos-success/20 bg-eos-success-soft" : status === "active" ? "border-eos-primary/30 bg-eos-primary/5" : "border-eos-border bg-eos-surface-variant opacity-60"}`}>
             <button
               type="button"
               className="flex w-full items-center justify-between px-3 py-2"
@@ -209,30 +231,28 @@ export function IncidentStageStepper({
               disabled={status === "locked"}
             >
               <div className="flex items-center gap-2">
-                <div className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold ${status === "done" ? "bg-eos-success text-white" : status === "active" ? "bg-eos-primary text-white" : "bg-eos-surface text-eos-text-muted"}`}>
+                <div className={`flex size-5 items-center justify-center rounded-full font-mono text-[10px] font-bold ${status === "done" ? "bg-eos-success text-white" : status === "active" ? "bg-eos-primary text-white" : "bg-eos-surface text-eos-text-muted"}`}>
                   {status === "done" ? <CheckCircle2 className="size-3" /> : STAGE_META.indexOf(stage) + 1}
                 </div>
                 <span className={`text-xs font-medium ${status === "locked" ? "text-eos-text-muted" : "text-eos-text"}`}>
                   {stage.label}
                 </span>
-                <span className="text-[10px] text-eos-text-tertiary">{stage.deadline} · {stage.article}</span>
+                <span className="font-mono text-[10px] text-eos-text-tertiary">{stage.deadline} · {stage.article}</span>
               </div>
-              {status === "done" && (
-                <Badge variant="success" className="text-[10px] normal-case tracking-normal">Trimis</Badge>
-              )}
-              {status === "active" && !isExpanded && (
-                <Badge variant="warning" className="text-[10px] normal-case tracking-normal">De completat</Badge>
-              )}
-              {status === "locked" && (
-                <Badge variant="outline" className="text-[10px] normal-case tracking-normal">Blocat</Badge>
+              {(!isExpanded || status !== "active") && (
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${statusTone.pill}`}
+                >
+                  {statusTone.label}
+                </span>
               )}
             </button>
             {isExpanded && status === "active" && (
               <div className="space-y-3 border-t border-eos-border-subtle px-3 pb-3 pt-3">
                 <div>
-                  <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Conținut raport</label>
+                  <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Conținut raport</label>
                   <textarea
-                    className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                    className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary"
                     rows={3}
                     placeholder="Descrierea situației..."
                     value={formData.content ?? ""}
@@ -242,9 +262,9 @@ export function IncidentStageStepper({
                 {stage.key === "earlyWarning" && (
                   <>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Evaluare inițială impact</label>
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Evaluare inițială impact</label>
                       <textarea
-                        className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary"
+                        className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary"
                         rows={2}
                         placeholder="Ce sisteme/servicii sunt afectate..."
                         value={formData.impactAssessment ?? ""}
@@ -260,21 +280,21 @@ export function IncidentStageStepper({
                 {stage.key === "fullReport" && (
                   <>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Analiză detaliată</label>
-                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Cauze, cronologie, amploare..." value={formData.detailedAnalysis ?? ""} onChange={(e) => setFormData((p) => ({ ...p, detailedAnalysis: e.target.value }))} />
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Analiză detaliată</label>
+                      <textarea className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Cauze, cronologie, amploare..." value={formData.detailedAnalysis ?? ""} onChange={(e) => setFormData((p) => ({ ...p, detailedAnalysis: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Indicatori tehnici (IoC)</label>
-                      <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="IP-uri, hash-uri, domenii..." value={formData.technicalIndicators ?? ""} onChange={(e) => setFormData((p) => ({ ...p, technicalIndicators: e.target.value }))} />
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Indicatori tehnici (IoC)</label>
+                      <input className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="IP-uri, hash-uri, domenii..." value={formData.technicalIndicators ?? ""} onChange={(e) => setFormData((p) => ({ ...p, technicalIndicators: e.target.value }))} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Categorii date afectate</label>
-                        <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="personale, financiare, medicale..." value={formData.dataCategories ?? ""} onChange={(e) => setFormData((p) => ({ ...p, dataCategories: e.target.value }))} />
+                        <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Categorii date afectate</label>
+                        <input className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="personale, financiare, medicale..." value={formData.dataCategories ?? ""} onChange={(e) => setFormData((p) => ({ ...p, dataCategories: e.target.value }))} />
                       </div>
                       <div>
-                        <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Nr. utilizatori afectați (estimat)</label>
-                        <input type="number" className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="0" value={formData.affectedUsers ?? ""} onChange={(e) => setFormData((p) => ({ ...p, affectedUsers: e.target.value }))} />
+                        <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Nr. utilizatori afectați (estimat)</label>
+                        <input type="number" className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" placeholder="0" value={formData.affectedUsers ?? ""} onChange={(e) => setFormData((p) => ({ ...p, affectedUsers: e.target.value }))} />
                       </div>
                     </div>
                   </>
@@ -282,20 +302,20 @@ export function IncidentStageStepper({
                 {stage.key === "finalReport" && (
                   <>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Analiză cauză rădăcină (RCA)</label>
-                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce a cauzat incidentul..." value={formData.rootCause ?? ""} onChange={(e) => setFormData((p) => ({ ...p, rootCause: e.target.value }))} />
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Analiză cauză rădăcină (RCA)</label>
+                      <textarea className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce a cauzat incidentul..." value={formData.rootCause ?? ""} onChange={(e) => setFormData((p) => ({ ...p, rootCause: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Lecții învățate</label>
-                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce am învățat..." value={formData.lessons ?? ""} onChange={(e) => setFormData((p) => ({ ...p, lessons: e.target.value }))} />
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Lecții învățate</label>
+                      <textarea className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce am învățat..." value={formData.lessons ?? ""} onChange={(e) => setFormData((p) => ({ ...p, lessons: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Măsuri preventive</label>
-                      <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce măsuri luăm pentru a preveni..." value={formData.preventive ?? ""} onChange={(e) => setFormData((p) => ({ ...p, preventive: e.target.value }))} />
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Măsuri preventive</label>
+                      <textarea className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text placeholder:text-eos-text-tertiary" rows={2} placeholder="Ce măsuri luăm pentru a preveni..." value={formData.preventive ?? ""} onChange={(e) => setFormData((p) => ({ ...p, preventive: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Termen remediere</label>
-                      <input type="date" className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={formData.remediationDeadline ?? ""} onChange={(e) => setFormData((p) => ({ ...p, remediationDeadline: e.target.value }))} />
+                      <label className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Termen remediere</label>
+                      <input type="date" className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={formData.remediationDeadline ?? ""} onChange={(e) => setFormData((p) => ({ ...p, remediationDeadline: e.target.value }))} />
                     </div>
                   </>
                 )}
@@ -311,7 +331,11 @@ export function IncidentStageStepper({
                   <div className="space-y-1">
                     <p><span className="font-medium text-eos-text">Trimis:</span> {new Date(incident.earlyWarningReport.submittedAtISO).toLocaleString("ro-RO")}</p>
                     <p>{incident.earlyWarningReport.content}</p>
-                    {incident.earlyWarningReport.crossBorderEffect && <Badge variant="warning" className="text-[10px] normal-case tracking-normal">Efect transfrontalier</Badge>}
+                    {incident.earlyWarningReport.crossBorderEffect && (
+                      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+                        Efect transfrontalier
+                      </span>
+                    )}
                   </div>
                 )}
                 {stage.key === "fullReport" && incident.fullReport72h && (

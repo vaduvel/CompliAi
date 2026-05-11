@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { CheckCircle2, ClipboardCheck, Shield, Users } from "lucide-react"
+import { ClipboardCheck, Users } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import type { MaturityAssessment, BoardMember, Nis2Incident } from "@/lib/server/nis2-store"
 
 // ── NIS2 Progress Stepper ───────────────────────────────────────────────────────
@@ -81,14 +80,37 @@ export function Nis2ProgressStepper() {
           className={`flex flex-col gap-1 rounded-eos-lg border px-3 py-2.5 transition-all hover:border-eos-primary/40 ${statusColor[step.status]}`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium text-eos-text-tertiary">Pasul {i + 1}</span>
-            <span className="text-[11px] font-bold">{statusIcon[step.status]}</span>
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Pasul {i + 1}
+            </span>
+            <span className="font-mono text-[11px] font-bold">{statusIcon[step.status]}</span>
           </div>
           <p className="text-sm font-semibold leading-tight">{step.label}</p>
           <p className="text-[11px] leading-tight opacity-70">{step.sub}</p>
         </Link>
       ))}
     </div>
+  )
+}
+
+// ── Inline status pill helpers (replaces evidence-os Badge) ────────────────────
+
+type InlineBadgeTone = "success" | "warning" | "destructive" | "outline"
+
+const INLINE_BADGE_TONES: Record<InlineBadgeTone, string> = {
+  success: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+  warning: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  destructive: "border-eos-error/30 bg-eos-error-soft text-eos-error",
+  outline: "border-eos-border bg-eos-surface-elevated text-eos-text-muted",
+}
+
+function InlinePill({ tone, children }: { tone: InlineBadgeTone; children: React.ReactNode }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${INLINE_BADGE_TONES[tone]}`}
+    >
+      {children}
+    </span>
   )
 }
 
@@ -119,7 +141,7 @@ export function MaturityCard() {
               <p className="text-xs text-eos-text-muted">Obligatorie — OUG 155/2024 Art.18(7) ✅ · ~15 min · 10 domenii</p>
             </div>
           </div>
-          <Badge variant="warning" className="shrink-0">Necompletată</Badge>
+          <InlinePill tone="warning">Necompletată</InlinePill>
         </div>
       </Link>
     )
@@ -128,6 +150,13 @@ export function MaturityCard() {
   const daysLeft = Math.ceil(
     (new Date(assessment.remediationPlanDue).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   )
+
+  const levelTone: InlineBadgeTone =
+    assessment.level === "essential"
+      ? "success"
+      : assessment.level === "important"
+        ? "warning"
+        : "destructive"
 
   return (
     <Link href="/dashboard/nis2/maturitate" className="block">
@@ -146,12 +175,7 @@ export function MaturityCard() {
             </p>
           </div>
         </div>
-        <Badge
-          variant={assessment.level === "essential" ? "success" : assessment.level === "important" ? "warning" : "destructive"}
-          className="shrink-0 normal-case"
-        >
-          {assessment.level}
-        </Badge>
+        <InlinePill tone={levelTone}>{assessment.level}</InlinePill>
       </div>
     </Link>
   )
@@ -195,11 +219,11 @@ export function GovernanceCard() {
           </div>
         </div>
         {members.length === 0 ? (
-          <Badge variant="outline" className="shrink-0">Necompletat</Badge>
+          <InlinePill tone="outline">Necompletat</InlinePill>
         ) : issues > 0 ? (
-          <Badge variant="warning" className="shrink-0">{issues} problemă{issues > 1 ? "i" : ""}</Badge>
+          <InlinePill tone="warning">{issues} problemă{issues > 1 ? "i" : ""}</InlinePill>
         ) : (
-          <Badge variant="success" className="shrink-0">Conform</Badge>
+          <InlinePill tone="success">Conform</InlinePill>
         )}
       </div>
     </Link>

@@ -2,14 +2,16 @@
 
 import dynamic from "next/dynamic"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Archive, ArrowRight, Briefcase, ChevronRight, Copy, FileCheck2, Loader2, Scale, Share2, Shield, ScrollText } from "lucide-react"
+import { Archive, ArrowRight, Briefcase, Copy, FileCheck2, Loader2, Scale, Share2, Shield, ScrollText } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 
 import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
+import { DocumentShareAction } from "@/components/compliscan/document-share-action"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData, useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { VendorTrustPackCard } from "@/components/compliscan/vendor-trust-pack-card"
 import { DOCUMENT_ADOPTION_LABELS } from "@/lib/compliance/document-adoption"
 import type { GeneratedDocumentRecord } from "@/lib/compliance/types"
@@ -89,25 +91,25 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
   return (
     <div className="space-y-6">
       {!hideHeader && (
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Rapoarte</p>
-          <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-            {isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
-          </h1>
-          <p className="mt-1 text-sm text-eos-text-tertiary">
-            {isSolo
+        <V3PageHero
+          breadcrumbs={[{ label: "Dashboard" }, { label: "Rapoarte", current: true }]}
+          title={isSolo ? "Dosarul tău" : "Dovezi și livrabile"}
+          description={
+            isSolo
               ? "Documentele generate, exporturile și dovezile aprobate — tot ce ai nevoie pentru un audit sau un control."
-              : "Output-ul conformității tale — livrabile gata de trimis, dovezi aprobate și pachet de handoff."}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-              doar vizualizare
-            </span>
-            <span className="rounded-full border border-eos-border bg-eos-surface-active px-3 py-1 text-xs font-medium text-eos-text-tertiary">
-              Audit: {auditStatusLabel}
-            </span>
-          </div>
-        </div>
+              : "Output-ul conformității tale — livrabile gata de trimis, dovezi aprobate și pachet de handoff."
+          }
+          eyebrowBadges={
+            <>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                doar vizualizare
+              </span>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Audit: {auditStatusLabel}
+              </span>
+            </>
+          }
+        />
       )}
 
       {!isSolo ? <ReportsTabs /> : null}
@@ -137,58 +139,52 @@ export function ReportsPageSurface({ hideHeader = false }: { hideHeader?: boolea
       {!isSolo ? <PartnerCounselPack /> : null}
 
       {/* Secondary: detailed info under fold */}
-      <details className="group">
-        <summary className="flex cursor-pointer items-center gap-2 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-5 py-3.5 text-sm font-medium text-eos-text-muted transition hover:bg-eos-surface-active [&::-webkit-details-marker]:hidden">
-          <ChevronRight className="size-4 shrink-0 text-eos-text-tertiary transition-transform group-open:rotate-90" strokeWidth={2} />
-          Detalii snapshot și semnale
-        </summary>
-        <div className="mt-4 space-y-6">
-          <SnapshotStatusCard
-            latestSnapshot={latestSnapshot}
-            validatedBaseline={validatedBaseline}
-            driftCount={activeDrifts.length}
-          />
+      <div className="space-y-6">
+        <SnapshotStatusCard
+          latestSnapshot={latestSnapshot}
+          validatedBaseline={validatedBaseline}
+          driftCount={activeDrifts.length}
+        />
 
-          {cockpit.data.compliancePack && (
-            <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
-          )}
+        {cockpit.data.compliancePack && (
+          <AICompliancePackSummaryCard pack={cockpit.data.compliancePack} />
+        )}
 
-          {!isSolo ? <InspectorModePanel /> : null}
+        {!isSolo ? <InspectorModePanel /> : null}
 
-          {/* Contextual access — Trust surfaces */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Link
-              href="/dashboard/reports/trust-center"
-              className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3 text-sm transition-colors hover:border-eos-border hover:bg-eos-surface-active"
-            >
-              <Shield className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-eos-text-muted">Trust Center</p>
-                <p className="text-xs text-eos-text-tertiary">Profil public de conformitate</p>
-              </div>
-              <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-            </Link>
-            <Link
-              href="/dashboard/reports/audit-log"
-              className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3 text-sm transition-colors hover:border-eos-border hover:bg-eos-surface-active"
-            >
-              <ScrollText className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-eos-text-muted">Jurnal audit</p>
-                <p className="text-xs text-eos-text-tertiary">Istoricul complet al acțiunilor</p>
-              </div>
-              <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
-            </Link>
-          </div>
+        {/* Contextual access — Trust surfaces */}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/dashboard/reports/trust-center"
+            className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3 text-sm transition-colors hover:border-eos-border hover:bg-eos-surface-active"
+          >
+            <Shield className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-eos-text-muted">Trust Center</p>
+              <p className="text-xs text-eos-text-tertiary">Profil public de conformitate</p>
+            </div>
+            <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+          </Link>
+          <Link
+            href="/dashboard/reports/audit-log"
+            className="flex items-center gap-3 rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3 text-sm transition-colors hover:border-eos-border hover:bg-eos-surface-active"
+          >
+            <ScrollText className="size-4 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-eos-text-muted">Jurnal audit</p>
+              <p className="text-xs text-eos-text-tertiary">Istoricul complet al acțiunilor</p>
+            </div>
+            <ArrowRight className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={2} />
+          </Link>
         </div>
-      </details>
+      </div>
     </div>
   )
 }
 
 function SectionLoadingCard({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-5">
       <p className="text-sm font-semibold text-eos-text-muted">{title}</p>
       <p className="mt-1 text-xs text-eos-text-tertiary">{detail}</p>
     </div>
@@ -219,7 +215,7 @@ function SnapshotStatusCard({
   driftCount: number
 }) {
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
       <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
         <h2 className="text-lg font-semibold text-eos-text">Snapshot curent</h2>
         <p className="mt-1 text-sm text-eos-text-tertiary">Baza din care pornesc exporturile și dovezile.</p>
@@ -235,7 +231,7 @@ function SnapshotStatusCard({
         {latestSnapshot && (
           <>
             <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-tertiary">Generat</p>
+              <p className="text-xs uppercase font-mono tracking-[0.14em] text-eos-text-tertiary">Generat</p>
               <p className="mt-2 text-sm font-semibold text-eos-text">
                 {new Date(latestSnapshot.generatedAt).toLocaleString("ro-RO")}
               </p>
@@ -276,7 +272,7 @@ function SnapshotStatusCard({
 function SnapshotMeta({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-tertiary">{label}</p>
+      <p className="text-xs uppercase font-mono tracking-[0.14em] text-eos-text-tertiary">{label}</p>
       <p className="mt-2 text-sm font-semibold text-eos-text-muted">{value}</p>
     </div>
   )
@@ -332,14 +328,18 @@ function PartnerCounselPack() {
       })
       if (!res.ok) throw new Error("Eroare server")
       const data = (await res.json()) as {
-        token?: { token: string; expiresAtISO: string }
+        token?: string | { token?: string; expiresAtISO?: string }
       }
-      if (!data.token) throw new Error("Token gol")
+      const tokenValue = typeof data.token === "string" ? data.token : data.token?.token
+      if (!tokenValue) throw new Error("Token gol")
 
-      const link = `${window.location.origin}/shared/${data.token.token}`
+      const link = `${window.location.origin}/shared/${tokenValue}`
       setShareLink(link)
-      await navigator.clipboard.writeText(link)
-      toast.success(`Link securizat copiat — expiră în 72h`)
+      const copied = await navigator.clipboard
+        ?.writeText(link)
+        .then(() => true)
+        .catch(() => false)
+      toast.success(copied ? "Link securizat copiat — expiră în 72h" : "Link securizat generat. Copiază-l din câmpul afișat.")
     } catch {
       toast.error("Nu am putut genera linkul de partajare")
     } finally {
@@ -348,7 +348,7 @@ function PartnerCounselPack() {
   }, [])
 
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
       <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
         <h2 className="text-lg font-semibold text-eos-text">Partner & Counsel Pack</h2>
         <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -409,7 +409,12 @@ function PartnerCounselPack() {
               <button
                 type="button"
                 className="shrink-0 text-eos-text-tertiary hover:text-eos-text-muted transition-colors"
-                onClick={() => void navigator.clipboard.writeText(shareLink).then(() => toast.info("Link copiat"))}
+                onClick={() => {
+                  void navigator.clipboard
+                    ?.writeText(shareLink)
+                    .then(() => toast.info("Link copiat"))
+                    .catch(() => toast.info("Selectează linkul și copiază-l manual."))
+                }}
               >
                 <Copy className="size-3.5" />
               </button>
@@ -429,7 +434,9 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   "pay-gap-report": "Raport Pay Transparency",
   "privacy-policy": "Politică de confidențialitate",
   "nis2-incident-response": "Plan IR NIS2",
+  dpa: "Acord DPA",
   "dpa-agreement": "Acord DPA",
+  "dsar-response": "Răspuns DSAR",
   "data-processing-record": "Registru Prelucrări",
   "ropa": "Registru RoPA",
 }
@@ -442,7 +449,7 @@ function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) 
   const hasAutoGenerated = sorted.some((d) => d.id.startsWith("audit-pack-auto-"))
 
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
       <div className="border-b border-eos-border-subtle px-5 pt-4 pb-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
@@ -501,6 +508,7 @@ function GeneratedDocumentsVault({ docs }: { docs: GeneratedDocumentRecord[] }) 
                     )}
                   </div>
                 </div>
+                <DocumentShareAction document={doc} />
               </div>
             )
           })}

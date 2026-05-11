@@ -8,12 +8,11 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, ChevronRight } from "
 import { RecentScansCard } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { Badge } from "@/components/evidence-os/Badge"
-import { Breadcrumb } from "@/components/evidence-os"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent } from "@/components/evidence-os/Card"
 import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { HandoffCard } from "@/components/evidence-os/HandoffCard"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import type { ScanFinding, FindingResolution } from "@/lib/compliance/types"
@@ -258,11 +257,11 @@ export default function ScanResultsPage() {
   if (!targetScan) {
     return (
       <div className="space-y-8">
-        <PageIntro
-          eyebrow="Scaneaza / Rezultat"
+        <V3PageHero
+          breadcrumbs={[{ label: "Scanează" }, { label: "Rezultat", current: true }]}
           title="Rezultatul cautat nu mai este disponibil"
           description="Scanarea cautata nu mai apare in snapshotul curent. Poti porni o analiza noua sau poti cauta rezultatul in Istoric."
-          badges={
+          eyebrowBadges={
             <Badge variant="outline" className="normal-case tracking-normal">
               rezultat indisponibil
             </Badge>
@@ -346,31 +345,12 @@ export default function ScanResultsPage() {
   return (
     <div className="space-y-8">
 
-      {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
-      <Breadcrumb items={[
-        { label: "Scanează", href: dashboardRoutes.scan },
-        { label: "Rezultat" },
-      ]} />
-
-      {/* ── Success Banner ─────────────────────────────────────────────────── */}
-      {targetScan.analysisStatus === "completed" && (
-        <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/30 bg-eos-success-soft px-4 py-3">
-          <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
-          <p className="text-sm font-medium text-eos-text">
-            Analiză finalizată
-            <span className="ml-1 font-normal text-eos-text-muted">
-              · {targetScan.documentName} · {targetFindings.length} finding-uri
-            </span>
-          </p>
-        </div>
-      )}
-
       {/* ── Page Header ───────────────────────────────────────────────────── */}
-      <PageIntro
-        eyebrow="Scaneaza / Rezultat"
+      <V3PageHero
+        breadcrumbs={[{ label: "Scanează" }, { label: "Rezultat", current: true }]}
         title={`Rezultatul pentru ${targetScan.documentName}`}
         description="Verdictul și explicația scanării tocmai analizate. Execuția continuă în De rezolvat — această pagină rămâne ancorată la rezultatul curent."
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {sourceBadgeLabel(targetScan)}
@@ -381,21 +361,6 @@ export default function ScanResultsPage() {
               </Badge>
             )}
           </>
-        }
-        aside={
-          <div className="space-y-1.5">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-              Finding-uri
-            </p>
-            <p className="text-2xl font-semibold text-eos-text">{targetFindings.length}</p>
-            <p className="text-sm text-eos-text-muted">
-              {criticalCount > 0
-                ? `${criticalCount} critice`
-                : highCount > 0
-                  ? `${highCount} ridicate`
-                  : "fără probleme majore"}
-            </p>
-          </div>
         }
         actions={
           <>
@@ -415,6 +380,34 @@ export default function ScanResultsPage() {
         }
       />
 
+      {/* ── Finding count strip ───────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-md border border-eos-border bg-eos-surface sm:grid-cols-4">
+        {[
+          { label: "Total finding-uri", value: targetFindings.length },
+          { label: "Critice", value: criticalCount },
+          { label: "Ridicate", value: highCount },
+          { label: "Medii / scăzute", value: mediumCount + lowCount },
+        ].map((item) => (
+          <div key={item.label} className="px-4 py-3">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">{item.label}</p>
+            <p className="mt-1 text-xl font-semibold text-eos-text">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Success Banner ─────────────────────────────────────────────────── */}
+      {targetScan.analysisStatus === "completed" && (
+        <div className="flex items-center gap-3 rounded-eos-md border border-eos-success/30 bg-eos-success-soft px-4 py-3">
+          <CheckCircle2 className="size-4 shrink-0 text-eos-success" strokeWidth={2} />
+          <p className="text-sm font-medium text-eos-text">
+            Analiză finalizată
+            <span className="ml-1 font-normal text-eos-text-muted">
+              · {targetScan.documentName} · {targetFindings.length} finding-uri
+            </span>
+          </p>
+        </div>
+      )}
+
       {/* ── Summary Strip ─────────────────────────────────────────────────── */}
       <Card className="border-eos-border bg-eos-surface">
         <CardContent className="px-5 py-5">
@@ -431,7 +424,7 @@ export default function ScanResultsPage() {
       <section aria-label="Finding-uri din această scanare">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+            <p className="text-[11px] font-medium font-mono uppercase tracking-[0.14em] text-eos-text-tertiary">
               Finding-uri din această scanare
             </p>
             <p className="mt-1 text-sm text-eos-text-muted">

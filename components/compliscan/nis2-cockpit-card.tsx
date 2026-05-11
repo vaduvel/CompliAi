@@ -76,11 +76,9 @@ export function Nis2CockpitCard() {
 
   if (state.status === "loading") {
     return (
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
-        <div className="flex items-center gap-2 text-sm font-medium text-eos-text-muted">
-          <Loader2 className="size-4 animate-spin" strokeWidth={2} />
-          Se încarcă pachetul NIS2
-        </div>
+      <div className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-2.5">
+        <Loader2 className="size-3.5 animate-spin text-eos-text-muted" strokeWidth={2} />
+        <span className="font-mono text-[11px] text-eos-text-muted">Se încarcă pachetul NIS2</span>
       </div>
     )
   }
@@ -89,56 +87,72 @@ export function Nis2CockpitCard() {
 
   const { nis2Package, findings, exportReady } = state.payload
   const topGap = nis2Package.gaps[0] ?? null
+  const hasFindings = findings.length > 0
 
   return (
-    <section className="rounded-eos-xl border border-eos-border bg-eos-surface-variant p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">NIS2 rollout</p>
-          <div className="mt-2 flex items-center gap-2">
-            {findings.length > 0 ? (
-              <AlertTriangle className="size-4 text-eos-warning" strokeWidth={2} />
-            ) : (
-              <ShieldCheck className="size-4 text-eos-success" strokeWidth={2} />
-            )}
-            <h2 className="text-base font-semibold text-eos-text">
-              {findings.length > 0 ? "Ai gap-uri NIS2 active" : "Pachetul NIS2 este stabil"}
-            </h2>
+    <section className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <span
+        className={`absolute left-0 top-0 bottom-0 w-[3px] ${hasFindings ? "bg-eos-warning" : "bg-eos-success"}`}
+        aria-hidden
+      />
+      <div className="px-4 py-3.5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              NIS2 rollout
+            </p>
+            <div className="mt-1 flex items-center gap-1.5">
+              {hasFindings ? (
+                <AlertTriangle className="size-3.5 text-eos-warning" strokeWidth={2} />
+              ) : (
+                <ShieldCheck className="size-3.5 text-eos-success" strokeWidth={2} />
+              )}
+              <h2
+                data-display-text="true"
+                className="font-display text-[14.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+              >
+                {hasFindings ? "Ai gap-uri NIS2 active" : "Pachetul NIS2 este stabil"}
+              </h2>
+            </div>
+            <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-eos-text-muted">
+              {nis2Package.handoffNote}
+            </p>
           </div>
-          <p className="mt-1 max-w-2xl text-sm text-eos-text-tertiary">{nis2Package.handoffNote}</p>
+          {cta && (
+            <Link
+              href={cta.href}
+              className="inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+            >
+              {cta.label}
+              <ArrowRight className="size-3" strokeWidth={2} />
+            </Link>
+          )}
         </div>
-        {cta && (
-          <Link
-            href={cta.href}
-            className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text transition-colors hover:bg-eos-surface-elevated"
+
+        <div className="mt-3 grid gap-px overflow-hidden rounded-eos-sm bg-eos-border-subtle sm:grid-cols-2 xl:grid-cols-4">
+          <Metric label="DNSC" value={nis2Package.dnscStatus === "confirmed" ? "confirmat" : nis2Package.dnscStatus} tone={nis2Package.dnscStatus === "confirmed" ? "ok" : "warn"} />
+          <Metric label="Assessment" value={nis2Package.assessmentScore === null ? "lipsă" : `${nis2Package.assessmentScore}%`} tone={nis2Package.assessmentScore !== null && nis2Package.assessmentScore >= 50 ? "ok" : "warn"} />
+          <Metric label="Incidente deschise" value={String(nis2Package.openIncidents)} tone={nis2Package.openIncidents === 0 ? "ok" : "warn"} />
+          <Metric label="Vendori critici" value={String(nis2Package.criticalVendors)} tone={nis2Package.criticalVendors === 0 ? "muted" : "warn"} />
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span
+            className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em] ${
+              exportReady
+                ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
+                : "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+            }`}
           >
-            {cta.label}
-            <ArrowRight className="size-4" strokeWidth={2} />
-          </Link>
-        )}
-      </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label="DNSC" value={nis2Package.dnscStatus === "confirmed" ? "confirmat" : nis2Package.dnscStatus} tone={nis2Package.dnscStatus === "confirmed" ? "ok" : "warn"} />
-        <Metric label="Assessment" value={nis2Package.assessmentScore === null ? "lipsă" : `${nis2Package.assessmentScore}%`} tone={nis2Package.assessmentScore !== null && nis2Package.assessmentScore >= 50 ? "ok" : "warn"} />
-        <Metric label="Incidente deschise" value={String(nis2Package.openIncidents)} tone={nis2Package.openIncidents === 0 ? "ok" : "warn"} />
-        <Metric label="Vendori critici" value={String(nis2Package.criticalVendors)} tone={nis2Package.criticalVendors === 0 ? "muted" : "warn"} />
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${
-          exportReady
-            ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
-            : "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
-        }`}>
-          <ShieldEllipsis className="size-3.5" strokeWidth={2} />
-          {exportReady ? "gata de handoff" : `${findings.length} gap${findings.length === 1 ? "" : "-uri"} active`}
-        </span>
-        {topGap && (
-          <span className="inline-flex rounded-full border border-eos-border bg-eos-surface-active px-2.5 py-1 text-xs font-medium text-eos-text-tertiary">
-            Top gap: {topGap.finding}
+            <ShieldEllipsis className="size-3" strokeWidth={2} />
+            {exportReady ? "gata de handoff" : `${findings.length} gap${findings.length === 1 ? "" : "-uri"}`}
           </span>
-        )}
+          {topGap && (
+            <span className="inline-flex rounded-sm border border-eos-border-subtle bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+              Top gap: {topGap.finding}
+            </span>
+          )}
+        </div>
       </div>
     </section>
   )
@@ -161,9 +175,16 @@ function Metric({
         : "text-eos-text"
 
   return (
-    <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface px-4 py-3">
-      <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">{label}</p>
-      <p className={`mt-2 text-lg font-semibold ${toneClass}`}>{value}</p>
+    <div className="bg-eos-surface px-3 py-2.5">
+      <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+        {label}
+      </p>
+      <p
+        data-display-text="true"
+        className={`mt-1 font-display text-[18px] font-medium leading-none tracking-[-0.02em] tabular-nums ${toneClass}`}
+      >
+        {value}
+      </p>
     </div>
   )
 }

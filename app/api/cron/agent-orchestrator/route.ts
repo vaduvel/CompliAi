@@ -13,6 +13,7 @@ import { loadOrganizations } from "@/lib/server/auth"
 import { executeAgents, sweepSemiAutoActions } from "@/lib/server/agent-orchestrator"
 import type { AgentType } from "@/lib/compliance/agentic-engine"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 // Daily: compliance_monitor + fiscal_sensor (high-frequency) + document + vendor_risk.
 // regulatory_radar runs weekly (lower frequency, legislative changes are slow).
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; totalActions: number; totalIssues: number; error?: string }[] = []
   let capturedCronErrors = false
 
@@ -78,6 +81,25 @@ export async function POST(request: Request) {
       await flushCronTelemetry()
     }
 
+    const orgsWithErrors = results.filter((r) => r.error).length
+    await safeRecordCronRun({
+      name: "agent-orchestrator",
+      lastRunAtISO: nowISO,
+      ok: orgsWithErrors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${results.length} orgs procesate, ${totalIssues} probleme, ${totalActions} acțiuni${orgsWithErrors > 0 ? `, ${orgsWithErrors} erori` : ""}.`,
+      stats: {
+        orgsProcessed: results.length,
+        totalIssues,
+        totalActions,
+        errors: orgsWithErrors,
+      },
+      errorMessage:
+        orgsWithErrors > 0
+          ? results.find((r) => r.error)?.error
+          : undefined,
+    })
+
     return NextResponse.json({
       ok: true,
       orgsProcessed: results.length,
@@ -95,6 +117,18 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "agent-orchestrator",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: {
+        orgsProcessed: results.length,
+      },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la execuția agenților: ${msg}`, 500, "AGENT_ORCHESTRATOR_FAILED")
   }

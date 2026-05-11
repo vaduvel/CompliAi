@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ChangeEvent } from "react"
+import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react"
 import { AlertTriangle, ArrowRight, Upload } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3RiskPill } from "@/components/compliscan/v3"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 
 type SalaryRecord = {
   id: string
@@ -30,6 +29,35 @@ type PayGapReport = {
   obligationMet: boolean
   status: "draft" | "approved" | "published"
   recommendations: string[]
+}
+
+function GapChip({ value, children }: { value: number; children?: ReactNode }) {
+  const abs = Math.abs(value)
+  if (abs > 15) {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-warning/30 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-warning">
+        {children ?? `${value}%`}
+      </span>
+    )
+  }
+  if (abs >= 5) {
+    return (
+      <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
+        {children ?? `${value}%`}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-sm border border-eos-success/30 bg-eos-success-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-success">
+      {children ?? `${value}%`}
+    </span>
+  )
+}
+
+function RiskChip({ risk }: { risk: "low" | "medium" | "high" }) {
+  const tone = risk === "high" ? "high" : risk === "medium" ? "medium" : "ok"
+  const label = risk === "high" ? "risc ridicat" : risk === "medium" ? "risc mediu" : "risc scăzut"
+  return <V3RiskPill tone={tone}>{label}</V3RiskPill>
 }
 
 export function PayTransparencyPage() {
@@ -65,13 +93,6 @@ export function PayTransparencyPage() {
     const uniqueRoles = new Set(records.map((record) => record.jobRole.trim()).filter(Boolean))
     return uniqueRoles.size
   }, [records])
-
-  const riskTone =
-    latestReport?.riskLevel === "high"
-      ? "warning"
-      : latestReport?.riskLevel === "medium"
-        ? "outline"
-        : "success"
 
   async function reload() {
     const response = await fetch("/api/pay-transparency", { cache: "no-store" })
@@ -160,7 +181,7 @@ export function PayTransparencyPage() {
   return (
     <div className="space-y-6">
       {showDeadlineBanner ? (
-        <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-3 text-sm">
+        <div className="flex items-start gap-3 rounded-eos-sm border border-eos-warning/30 bg-eos-warning-soft px-4 py-3 text-sm">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
           <div>
             <p className="font-semibold text-eos-warning">Deadline 7 iunie 2026</p>
@@ -172,36 +193,41 @@ export function PayTransparencyPage() {
       ) : null}
 
       {error ? (
-        <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft/50 p-4 text-sm text-eos-error">
+        <div className="rounded-eos-sm border border-eos-error/30 bg-eos-error-soft/50 p-4 text-sm text-eos-error">
           {error}
         </div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">1. Încarcă datele salariale</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <div className="flex flex-wrap gap-3">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-eos-md border border-eos-border px-3 py-2 text-sm text-eos-text">
+        <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+          <header className="border-b border-eos-border-subtle px-4 py-3.5">
+            <h3
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              1. Încarcă datele salariale
+            </h3>
+          </header>
+          <div className="space-y-4 px-4 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-eos-sm border border-eos-border px-3 py-2 text-sm text-eos-text transition hover:border-eos-border-strong">
                 <Upload className="size-4" strokeWidth={2} />
                 Încarcă CSV
                 <input type="file" accept=".csv,text/csv" className="hidden" onChange={handleFileInput} />
               </label>
-              <Badge variant="outline" className="normal-case tracking-normal">
+              <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                 {records.length} înregistrări salvate
-              </Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">
+              </span>
+              <span className="inline-flex items-center rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                 finding {findingStatus ?? "open"}
-              </Badge>
+              </span>
             </div>
 
             <textarea
               value={csvContent}
               onChange={(event) => setCsvContent(event.target.value)}
               placeholder="Rol,Gen,Salariu brut,Bonusuri,Tip contract,Departament"
-              className="min-h-[220px] w-full rounded-eos-md border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text outline-none"
+              className="min-h-[220px] w-full rounded-eos-sm border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text outline-none focus:border-eos-border-strong"
             />
 
             <Button onClick={() => void handleUpload()} disabled={busy || !csvContent.trim()}>
@@ -215,28 +241,31 @@ export function PayTransparencyPage() {
                 <Metric label="F / altul" value={String(genderMix.women + genderMix.hidden)} />
               </div>
             ) : null}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">2. Calculează și aprobă raportul</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
+        <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+          <header className="border-b border-eos-border-subtle px-4 py-3.5">
+            <h3
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              2. Calculează și aprobă raportul
+            </h3>
+          </header>
+          <div className="space-y-4 px-4 py-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <Metric label="Înregistrări" value={String(records.length)} />
               <Metric label="Raport curent" value={latestReport ? latestReport.status : "lipsește"} />
             </div>
 
             {latestReport ? (
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+              <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm font-semibold text-eos-text">
                     Gap salarial {latestReport.gapPercent}%
                   </p>
-                  <Badge variant={riskTone} className="normal-case tracking-normal">
-                    risc {latestReport.riskLevel}
-                  </Badge>
+                  <RiskChip risk={latestReport.riskLevel} />
                 </div>
                 <p className="mt-1 text-xs text-eos-text-muted">
                   Medie M {latestReport.avgSalaryM} RON · Medie F {latestReport.avgSalaryF} RON
@@ -259,7 +288,7 @@ export function PayTransparencyPage() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4 text-sm text-eos-text-muted">
                 Generează primul draft după ce ai încărcat datele salariale.
               </div>
             )}
@@ -268,23 +297,28 @@ export function PayTransparencyPage() {
               Calculează gap salarial
               <ArrowRight className="size-4" strokeWidth={2} />
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </div>
 
       {latestReport ? (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">3. Rezultate pe roluri</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-6">
+        <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+          <header className="border-b border-eos-border-subtle px-4 py-3.5">
+            <h3
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              3. Rezultate pe roluri
+            </h3>
+          </header>
+          <div className="space-y-3 px-4 py-4">
             {latestReport.gapByRole.length === 0 ? (
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4 text-sm text-eos-text-muted">
                 Nu există suficiente date pentru comparație pe roluri.
               </div>
             ) : (
               latestReport.gapByRole.map((role) => (
-                <div key={role.role} className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+                <div key={role.role} className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium text-eos-text">{role.role}</p>
@@ -292,39 +326,34 @@ export function PayTransparencyPage() {
                         M {role.avgSalaryM} RON · F {role.avgSalaryF} RON · diferență {role.gap} RON
                       </p>
                     </div>
-                    <Badge
-                      variant={Math.abs(role.gapPercent) > 15 ? "warning" : Math.abs(role.gapPercent) >= 5 ? "outline" : "success"}
-                      className="normal-case tracking-normal"
-                    >
-                      {role.gapPercent}%
-                    </Badge>
+                    <GapChip value={role.gapPercent} />
                   </div>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       ) : null}
 
       {latestReport?.gapByDepartment?.length ? (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">4. Semnal pe departamente</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-6">
+        <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+          <header className="border-b border-eos-border-subtle px-4 py-3.5">
+            <h3
+              data-display-text="true"
+              className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
+              4. Semnal pe departamente
+            </h3>
+          </header>
+          <div className="space-y-3 px-4 py-4">
             {latestReport.gapByDepartment.map((department) => (
-              <div key={department.dept} className="flex items-center justify-between rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+              <div key={department.dept} className="flex items-center justify-between rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
                 <p className="text-sm font-medium text-eos-text">{department.dept}</p>
-                <Badge
-                  variant={Math.abs(department.gapPercent) > 15 ? "warning" : Math.abs(department.gapPercent) >= 5 ? "outline" : "success"}
-                  className="normal-case tracking-normal"
-                >
-                  {department.gapPercent}%
-                </Badge>
+                <GapChip value={department.gapPercent} />
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       ) : null}
     </div>
   )
@@ -332,8 +361,8 @@ export function PayTransparencyPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
+    <div className="rounded-eos-sm border border-eos-border bg-white/[0.02] p-4">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">{label}</p>
       <p className="mt-2 text-lg font-semibold text-eos-text">{value}</p>
     </div>
   )

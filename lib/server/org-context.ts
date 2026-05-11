@@ -75,10 +75,10 @@ export async function getOrgContext(
     orgName: resolvedOrgName,
     workspaceLabel:
       process.env.COMPLISCAN_WORKSPACE_LABEL?.trim() ||
-      (process.env.NODE_ENV === "production" ? "Workspace neconfigurat" : "Workspace local"),
+      resolvedOrgName,
     workspaceOwner,
     workspaceInitials:
-      process.env.COMPLISCAN_WORKSPACE_INITIALS?.trim() || initialsFromName(workspaceOwner),
+      process.env.COMPLISCAN_WORKSPACE_INITIALS?.trim() || initialsFromName(resolvedOrgName),
     userRole: sessionRole,  // Sprint 6 — expune rolul în WorkspaceContext
   }
 }

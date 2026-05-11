@@ -317,23 +317,36 @@ export function buildSAFTD406Finding(opts: {
   ]
 }
 
-// ── Cross-filing check (SAF-T vs D300/D394) ─────────────────────────────────
+// ── Cross-filing check (SAF-T vs D300/D394/D390) ────────────────────────────
 
 /**
- * Check if SAF-T periods align with D300 (TVA) and D394 filings.
- * Returns consistency issues for mismatches.
+ * Check if SAF-T periods align with D300 (TVA), D394 (achiziții/livrări locale)
+ * și D390 (recapitulativă) filings. Returns consistency issues for mismatches.
+ *
+ * Reguli:
+ *   - SAF-T (lunar) trebuie să aibă D300 corespunzător pentru aceeași perioadă
+ *   - D394 e lunar pentru contribuabili plătitori TVA (cross-check cu D300)
+ *   - D390 e periodic (3-luni) pentru intracomunitare
  */
 export function checkCrossFilingConsistency(
   allFilings: FilingRecord[],
 ): SAFTConsistencyIssue[] {
   const issues: SAFTConsistencyIssue[] = []
 
-  const saftPeriods = new Set(
-    allFilings.filter((f) => f.type === "saft" && f.status !== "upcoming").map((f) => f.period),
-  )
-  const d300Periods = new Set(
-    allFilings.filter((f) => f.type === "d300_tva" && f.status !== "upcoming").map((f) => f.period),
-  )
+  const periodsByType = (type: FilingRecord["type"]) =>
+    new Set(
+      allFilings
+        .filter((f) => f.type === type && f.status !== "upcoming")
+        .map((f) => f.period),
+    )
+
+  const filingIdsForType = (type: FilingRecord["type"], period: string) =>
+    allFilings.filter((f) => f.type === type && f.period === period).map((f) => f.id)
+
+  const saftPeriods = periodsByType("saft")
+  const d300Periods = periodsByType("d300_tva")
+  const d394Periods = periodsByType("d394_local")
+  const d390Periods = periodsByType("d390_recap")
 
   // SAF-T filed but no D300 for same period
   for (const period of saftPeriods) {
@@ -343,14 +356,12 @@ export function checkCrossFilingConsistency(
         message: `SAF-T depus pentru ${period} dar lipsește Declarația 300 (TVA) pentru aceeași perioadă.`,
         severity: "warning",
         periods: [period],
-        filingIds: allFilings
-          .filter((f) => f.type === "saft" && f.period === period)
-          .map((f) => f.id),
+        filingIds: filingIdsForType("saft", period),
       })
     }
   }
 
-  // D300 filed but no SAF-T for same period
+  // D300 filed but no SAF-T for same period (lunar)
   for (const period of d300Periods) {
     if (!saftPeriods.has(period)) {
       issues.push({
@@ -358,9 +369,52 @@ export function checkCrossFilingConsistency(
         message: `Declarația 300 (TVA) depusă pentru ${period} dar lipsește SAF-T (D406) pentru aceeași perioadă.`,
         severity: "warning",
         periods: [period],
-        filingIds: allFilings
-          .filter((f) => f.type === "d300_tva" && f.period === period)
-          .map((f) => f.id),
+        filingIds: filingIdsForType("d300_tva", period),
+      })
+    }
+  }
+
+  // D300 filed but no D394 for same period (D394 e cross-check pentru D300)
+  for (const period of d300Periods) {
+    if (!d394Periods.has(period)) {
+      issues.push({
+        type: "cross_filing_mismatch",
+        message: `Declarația 300 (TVA) depusă pentru ${period} dar lipsește D394 (achiziții/livrări locale) pentru aceeași perioadă.`,
+        severity: "warning",
+        periods: [period],
+        filingIds: filingIdsForType("d300_tva", period),
+      })
+    }
+  }
+
+  // D394 fără D300 (rar, dar posibil)
+  for (const period of d394Periods) {
+    if (!d300Periods.has(period)) {
+      issues.push({
+        type: "cross_filing_mismatch",
+        message: `D394 depusă pentru ${period} dar lipsește Declarația 300 (TVA) — D394 trebuie întotdeauna însoțită de D300.`,
+        severity: "error",
+        periods: [period],
+        filingIds: filingIdsForType("d394_local", period),
+      })
+    }
+  }
+
+  // D390 (recapitulativă) — verifică doar dacă există perioade trimestriale
+  // care apar în D300 dar lipsesc în D390. Convenție period: "2026-Q1".
+  const d300Quarters = new Set(
+    allFilings
+      .filter((f) => f.type === "d300_tva" && /^\d{4}-Q[1-4]$/.test(f.period) && f.status !== "upcoming")
+      .map((f) => f.period),
+  )
+  for (const period of d300Quarters) {
+    if (!d390Periods.has(period)) {
+      issues.push({
+        type: "cross_filing_mismatch",
+        message: `D300 trimestrial depus pentru ${period} dar lipsește D390 (recapitulativă) pentru aceeași perioadă.`,
+        severity: "warning",
+        periods: [period],
+        filingIds: filingIdsForType("d300_tva", period),
       })
     }
   }

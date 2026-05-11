@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import { Button } from "@/components/evidence-os/Button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
@@ -13,6 +13,7 @@ type LegacyWorkspaceBridgeProps = {
   destinationHref: string
   fallbackHref: string
   fallbackLabel: string
+  preserveCurrentPath?: boolean
   requestBody:
     | { workspaceMode: "portfolio" }
     | { workspaceMode: "org"; orgId: string }
@@ -24,12 +25,15 @@ export function LegacyWorkspaceBridge({
   destinationHref,
   fallbackHref,
   fallbackLabel,
+  preserveCurrentPath = false,
   requestBody,
 }: LegacyWorkspaceBridgeProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [error, setError] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
   const requestBodyKey = useMemo(() => JSON.stringify(requestBody), [requestBody])
+  const targetHref = preserveCurrentPath ? pathname : destinationHref
 
   useEffect(() => {
     let cancelled = false
@@ -51,7 +55,7 @@ export function LegacyWorkspaceBridge({
 
         if (cancelled) return
 
-        router.replace(destinationHref)
+        router.replace(targetHref)
         router.refresh()
       } catch (nextError) {
         if (cancelled) return
@@ -64,7 +68,7 @@ export function LegacyWorkspaceBridge({
     return () => {
       cancelled = true
     }
-  }, [attempt, destinationHref, requestBodyKey, router])
+  }, [attempt, requestBodyKey, router, targetHref])
 
   if (error) {
     return (

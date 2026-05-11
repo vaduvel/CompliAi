@@ -22,8 +22,28 @@ describe("middleware", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1")
   })
 
+  it("lasă liber flow-ul public magic link fără sesiune", async () => {
+    const approve = await middleware(makeRequest("http://localhost/api/shared/signed.token/approve"))
+    const reject = await middleware(makeRequest("http://localhost/api/shared/signed.token/reject"))
+    const comment = await middleware(makeRequest("http://localhost/api/shared/signed.token/comment"))
+
+    expect(approve.status).toBe(200)
+    expect(approve.headers.get("x-middleware-next")).toBe("1")
+    expect(reject.status).toBe(200)
+    expect(reject.headers.get("x-middleware-next")).toBe("1")
+    expect(comment.status).toBe(200)
+    expect(comment.headers.get("x-middleware-next")).toBe("1")
+  })
+
   it("continuă să protejeze alte rute API fără sesiune", async () => {
     const response = await middleware(makeRequest("http://localhost/api/health"))
+
+    expect(response.status).toBe(401)
+    expect(await response.json()).toEqual({ error: "Unauthorized" })
+  })
+
+  it("nu deschide alte rute shared API fără sesiune", async () => {
+    const response = await middleware(makeRequest("http://localhost/api/shared/signed.token"))
 
     expect(response.status).toBe(401)
     expect(await response.json()).toEqual({ error: "Unauthorized" })

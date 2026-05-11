@@ -18,7 +18,18 @@ export const dashboardRoutes = {
   agents: "/dashboard/agents",
   dsar: "/dashboard/dsar",
   ropa: "/dashboard/ropa",
+  dpia: "/dashboard/dpia",
+  breach: "/dashboard/breach",
+  training: "/dashboard/training",
+  dpoMigration: "/dashboard/migration",
   fiscal: "/dashboard/fiscal",
+  // Sprint 0 (2026-05-11) — fiscal sidebar restructure IA cu sub-rute
+  fiscalCockpit: "/dashboard/fiscal", // alias pentru overview
+  fiscalValidation: "/dashboard/fiscal/validare",
+  fiscalTransmission: "/dashboard/fiscal/transmitere",
+  fiscalTva: "/dashboard/fiscal/tva-declaratii",
+  fiscalIntegrations: "/dashboard/fiscal/integrari",
+  fiscalDeadlines: "/dashboard/fiscal/deadline-urgent",
   vendorReview: "/dashboard/vendor-review",
   payTransparency: "/dashboard/pay-transparency",
   // Dosar unificat — Wave 1 cleanup
@@ -31,6 +42,10 @@ export const dashboardRoutes = {
   trustCenter: "/dashboard/reports/trust-center",
   generator: "/dashboard/generator",
   approvals: "/dashboard/approvals",
+  // S1.7 — Cabinet view pentru magic links trimise patroni (approve/reject/comment).
+  magicLinks: "/dashboard/magic-links",
+  // S1.1 — Cabinet templates upload (Markdown personalizat per documentType).
+  cabinetTemplates: "/dashboard/cabinet/templates",
   settings: "/dashboard/settings",
   settingsScheduledReports: "/dashboard/settings/scheduled-reports",
   settingsBilling: "/dashboard/settings/abonament",
@@ -85,6 +100,10 @@ export const dashboardRouteGroups = {
     dashboardRoutes.aiConformity,
     dashboardRoutes.nis2,
     dashboardRoutes.dsar,
+    dashboardRoutes.dpia,
+    dashboardRoutes.breach,
+    dashboardRoutes.training,
+    dashboardRoutes.dpoMigration,
     dashboardRoutes.agents,
     dashboardRoutes.fiscal,
     dashboardRoutes.vendorReview,
@@ -102,6 +121,9 @@ export const dashboardRouteGroups = {
     dashboardRoutes.trustCenter,
     dashboardRoutes.generator,
     dashboardRoutes.ropa,
+    dashboardRoutes.vendorReview,
+    dashboardRoutes.magicLinks,
+    dashboardRoutes.cabinetTemplates,
   ],
   settings: [dashboardRoutes.settings, dashboardRoutes.settingsScheduledReports],
 } as const

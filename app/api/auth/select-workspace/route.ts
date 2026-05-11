@@ -52,29 +52,48 @@ export async function POST(request: Request) {
         )
       }
 
+      const memberships = await listUserMemberships(session.userId)
+      const portfolioMembership =
+        memberships.find((m) => m.status === "active" && m.role === "owner") ??
+        memberships.find((m) => m.status === "active" && m.orgId === session.orgId) ??
+        memberships.find((m) => m.status === "active")
+
+      if (!portfolioMembership) {
+        return jsonError(
+          "Nu am găsit workspace-ul de portofoliu pentru acest consultant.",
+          403,
+          "WORKSPACE_PORTFOLIO_NOT_FOUND",
+          undefined,
+          context
+        )
+      }
+
+      const resolvedUser = await resolveUserForMembership(session.userId, portfolioMembership.membershipId)
+
       const token = createSessionToken({
-        userId: session.userId,
-        orgId: session.orgId,
-        email: session.email,
-        orgName: session.orgName,
-        role: session.role,
+        userId: resolvedUser.id,
+        orgId: resolvedUser.orgId,
+        email: resolvedUser.email,
+        orgName: resolvedUser.orgName,
+        role: resolvedUser.role,
         userMode: userMode ?? undefined,
-        membershipId: session.membershipId,
+        membershipId: resolvedUser.membershipId,
         workspaceMode: "portfolio",
       })
 
       const response = jsonWithRequestContext({
         ok: true,
         workspaceMode: "portfolio",
-        orgId: session.orgId,
-        orgName: session.orgName,
-        role: session.role,
+        orgId: resolvedUser.orgId,
+        orgName: resolvedUser.orgName,
+        role: resolvedUser.role,
+        membershipId: resolvedUser.membershipId,
       }, context)
       response.cookies.set(SESSION_COOKIE, token, getSessionCookieOptions())
       response.cookies.set(
         WORKSPACE_PREF_COOKIE,
         createWorkspacePreferenceToken({
-          orgId: session.orgId,
+          orgId: resolvedUser.orgId,
           workspaceMode: "portfolio",
         }),
         getWorkspacePreferenceCookieOptions()

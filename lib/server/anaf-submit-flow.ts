@@ -176,12 +176,78 @@ export function diagnoseAnafSubmissionError(errorDetail: string | null | undefin
 }
 
 // ── Local fallback ───────────────────────────────────────────────────────────
+//
+// Mircea fix (2026-05-11): persist submissions to disk pentru fallback dev/
+// offline. Memory-only se pierde la Fast Refresh / restart. Cu disk JSON,
+// submissions create-uite persistă chiar și fără Supabase reachable.
+// În production cu Supabase live, branch-ul ăsta nu se atinge.
+
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
+import { join } from "path"
 
 const localSubmissions = new Map<string, SPVSubmissionRow[]>()
+const SUBMISSIONS_DIR = join(process.cwd(), ".data")
+let submissionsLoaded = false
+
+function submissionsFilePath(orgId: string): string {
+  return join(SUBMISSIONS_DIR, `spv-submissions-${orgId}.json`)
+}
+
+function loadSubmissionsFromDisk(orgId: string): SPVSubmissionRow[] {
+  try {
+    const file = submissionsFilePath(orgId)
+    if (!existsSync(file)) return []
+    const raw = readFileSync(file, "utf8")
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? (parsed as SPVSubmissionRow[]) : []
+  } catch {
+    return []
+  }
+}
+
+function persistSubmissionsToDisk(orgId: string, rows: SPVSubmissionRow[]): void {
+  try {
+    if (!existsSync(SUBMISSIONS_DIR)) {
+      mkdirSync(SUBMISSIONS_DIR, { recursive: true })
+    }
+    writeFileSync(submissionsFilePath(orgId), JSON.stringify(rows, null, 2), "utf8")
+  } catch {
+    // Disk write may fail on read-only filesystems (Vercel) — ignore.
+    // Memory cache still has the data for the rest of the process lifetime.
+  }
+}
 
 function getLocalSubmissions(orgId: string): SPVSubmissionRow[] {
-  if (!localSubmissions.has(orgId)) localSubmissions.set(orgId, [])
+  if (!localSubmissions.has(orgId)) {
+    // First access pentru acest org — încearcă să încarci de pe disk (recuperare
+    // post Fast Refresh / dev restart).
+    const fromDisk = loadSubmissionsFromDisk(orgId)
+    localSubmissions.set(orgId, fromDisk)
+  }
   return localSubmissions.get(orgId)!
+}
+
+/** Persist current memory state to disk pentru orgId. Called după mutații. */
+function syncLocalSubmissionsToDisk(orgId: string): void {
+  const rows = localSubmissions.get(orgId)
+  if (rows) persistSubmissionsToDisk(orgId, rows)
+}
+
+// Detect transient network failures (ENOTFOUND, fetch failed) — Supabase URL
+// configured but unreachable in dev/offline scenarios. Caller falls back to
+// local store. Real HTTP errors (4xx/5xx) propagate normally.
+function isSupabaseUnreachable(err: unknown): boolean {
+  if (!(err instanceof Error)) return false
+  const msg = err.message.toLowerCase()
+  if (msg.includes("fetch failed")) return true
+  if (msg.includes("enotfound")) return true
+  if (msg.includes("econnrefused")) return true
+  if (msg.includes("network error")) return true
+  if (msg.includes("etimedout")) return true
+  // Recurse into cause chain (fetch wraps the real error in `cause`)
+  const cause = (err as { cause?: unknown }).cause
+  if (cause && cause !== err) return isSupabaseUnreachable(cause)
+  return false
 }
 
 // ── 1. Initiate submit — creates pending_action (always manual) ──────────────
@@ -239,9 +305,16 @@ export async function initiateSubmit(params: {
   const row = submissionToRow(submission)
 
   if (hasSupabaseConfig()) {
-    await supabaseInsert("spv_submissions", [row], "public")
+    try {
+      await supabaseInsert("spv_submissions", [row], "public")
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      getLocalSubmissions(orgId).push(row)
+      syncLocalSubmissionsToDisk(orgId)
+    }
   } else {
     getLocalSubmissions(orgId).push(row)
+    syncLocalSubmissionsToDisk(orgId)
   }
 
   // Store XML in a separate local map for execution (not persisted in Supabase row)
@@ -508,18 +581,29 @@ export async function listSubmissions(
   orgId: string,
   limit = 20
 ): Promise<SPVSubmission[]> {
-  const submissions = hasSupabaseConfig()
-    ? (
+  const fromLocal = () =>
+    getLocalSubmissions(orgId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, limit)
+      .map(rowToSubmission)
+
+  let submissions: SPVSubmission[]
+  if (hasSupabaseConfig()) {
+    try {
+      submissions = (
         await supabaseSelect<SPVSubmissionRow>(
           "spv_submissions",
           `select=*&org_id=eq.${orgId}&order=created_at.desc&limit=${limit}`,
           "public"
         )
       ).map(rowToSubmission)
-    : getLocalSubmissions(orgId)
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .slice(0, limit)
-        .map(rowToSubmission)
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      submissions = fromLocal()
+    }
+  } else {
+    submissions = fromLocal()
+  }
 
   return Promise.all(submissions.map((submission) => reconcileSubmissionApprovalState(submission)))
 }
@@ -530,17 +614,26 @@ export async function getSubmission(
   orgId: string,
   submissionId: string
 ): Promise<SPVSubmission | null> {
-  if (hasSupabaseConfig()) {
-    const rows = await supabaseSelect<SPVSubmissionRow>(
-      "spv_submissions",
-      `select=*&org_id=eq.${orgId}&id=eq.${submissionId}&limit=1`,
-      "public"
-    )
-    return rows[0] ? reconcileSubmissionApprovalState(rowToSubmission(rows[0])) : null
+  const fromLocal = () => {
+    const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
+    return row ? reconcileSubmissionApprovalState(rowToSubmission(row)) : null
   }
 
-  const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
-  return row ? reconcileSubmissionApprovalState(rowToSubmission(row)) : null
+  if (hasSupabaseConfig()) {
+    try {
+      const rows = await supabaseSelect<SPVSubmissionRow>(
+        "spv_submissions",
+        `select=*&org_id=eq.${orgId}&id=eq.${submissionId}&limit=1`,
+        "public"
+      )
+      return rows[0] ? reconcileSubmissionApprovalState(rowToSubmission(rows[0])) : null
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return fromLocal()
+    }
+  }
+
+  return fromLocal()
 }
 
 export async function syncSubmissionApprovalDecision(params: {
@@ -581,17 +674,24 @@ async function getSubmissionByApprovalActionId(
   orgId: string,
   approvalActionId: string
 ): Promise<SPVSubmission | null> {
-  if (hasSupabaseConfig()) {
-    const rows = await supabaseSelect<SPVSubmissionRow>(
-      "spv_submissions",
-      `select=*&org_id=eq.${orgId}&approval_action_id=eq.${approvalActionId}&limit=1`,
-      "public"
-    )
-    return rows[0] ? rowToSubmission(rows[0]) : null
+  const fromLocal = () => {
+    const row = getLocalSubmissions(orgId).find((r) => r.approval_action_id === approvalActionId)
+    return row ? rowToSubmission(row) : null
   }
-
-  const row = getLocalSubmissions(orgId).find((r) => r.approval_action_id === approvalActionId)
-  return row ? rowToSubmission(row) : null
+  if (hasSupabaseConfig()) {
+    try {
+      const rows = await supabaseSelect<SPVSubmissionRow>(
+        "spv_submissions",
+        `select=*&org_id=eq.${orgId}&approval_action_id=eq.${approvalActionId}&limit=1`,
+        "public"
+      )
+      return rows[0] ? rowToSubmission(rows[0]) : null
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return fromLocal()
+    }
+  }
+  return fromLocal()
 }
 
 // ── Internal helpers ────────────────────────────────────────────────────────
@@ -636,19 +736,28 @@ async function updateSubmissionStatus(
   status: SPVSubmissionStatus,
   extra?: Partial<SPVSubmissionRow>
 ): Promise<void> {
-  if (hasSupabaseConfig()) {
-    await supabaseUpdate(
-      "spv_submissions",
-      `org_id=eq.${orgId}&id=eq.${submissionId}`,
-      { status, ...extra },
-      "public"
-    )
-  } else {
+  const updateLocal = () => {
     const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
     if (row) {
       row.status = status
       if (extra) Object.assign(row, extra)
+      syncLocalSubmissionsToDisk(orgId)
     }
+  }
+  if (hasSupabaseConfig()) {
+    try {
+      await supabaseUpdate(
+        "spv_submissions",
+        `org_id=eq.${orgId}&id=eq.${submissionId}`,
+        { status, ...extra },
+        "public"
+      )
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      updateLocal()
+    }
+  } else {
+    updateLocal()
   }
 }
 

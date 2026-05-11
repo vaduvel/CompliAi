@@ -150,7 +150,7 @@ const LEVEL_META: Record<ValidationLevel, Omit<ValidationLevelMeta, "level">> = 
     shortLabel: "Confirmare internă",
     description: "Necesită confirmare de la administrator, contabil sau responsabil intern.",
     escalationCopy:
-      "CompliAI a pregătit cazul. Un responsabil intern trebuie să confirme datele și să valideze acțiunea recomandată.",
+      "CompliScan a pregătit cazul. Un responsabil intern trebuie să confirme datele și să valideze acțiunea recomandată.",
   },
   3: {
     label: "Validare de specialitate",

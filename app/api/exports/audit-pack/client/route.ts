@@ -10,6 +10,7 @@ import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { getOrgContext } from "@/lib/server/org-context"
 import { readNis2State } from "@/lib/server/nis2-store"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/exports/audit-pack/client")
@@ -25,6 +26,7 @@ export async function GET(request: Request) {
       ...(await getOrgContext({ request })),
       orgId: session.orgId,
       orgName: session.orgName,
+      workspaceLabel: session.orgName,
       userRole: session.role,
     }
     const payload = await buildDashboardPayload(state, workspaceOverride)
@@ -37,7 +39,11 @@ export async function GET(request: Request) {
       snapshot,
       nis2State,
     })
-    const document = buildClientAuditPackDocument(auditPack)
+    const whiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
+    const document = buildClientAuditPackDocument(auditPack, {
+      preparedByName: whiteLabel?.partnerName?.trim() || null,
+      consultantName: whiteLabel?.signerName?.trim() || null,
+    })
 
     return new Response(document.html, {
       ...withRequestIdHeaders(

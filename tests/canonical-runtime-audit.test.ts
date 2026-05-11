@@ -132,7 +132,7 @@ describe("canonical runtime audit", () => {
     const scanResponse = await postScan(
       new Request("http://localhost/api/scan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", cookie: cookie ?? "" },
         body: JSON.stringify({
           documentName: "03-recruitment-high-risk-bundle-source.txt",
           content: source,
@@ -187,7 +187,7 @@ describe("canonical runtime audit", () => {
     const reportsPayload = await reportsResponse.json()
     expect(reportsResponse.status).toBe(200)
     expect(Array.isArray(reportsPayload.report.topActions)).toBe(true)
-    expect(reportsPayload.report.disclaimer).toMatch(/CompliAI/i)
+    expect(reportsPayload.report.disclaimer).toMatch(/CompliScan/i)
     expect(reportsPayload.html).toContain("Raport Executiv de Conformitate")
 
     const settingsSummaryResponse = await getSettingsSummary(

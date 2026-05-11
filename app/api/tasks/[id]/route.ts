@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
-import type { PersistedTaskStatus } from "@/lib/compliance/types"
+import type { ComplianceState, PersistedTaskStatus } from "@/lib/compliance/types"
 import { getPersistableTaskIds } from "@/lib/compliance/task-ids"
 import { getTaskResolutionTargets } from "@/lib/compliance/task-resolution"
 import { AuthzError, requireFreshRole } from "@/lib/server/auth"
@@ -71,13 +71,14 @@ export async function PATCH(
     }
 
     const nextState = await mutateStateForOrg(session.orgId, (current) => {
-      if (!getPersistableTaskIds(current).has(id)) {
+      const taskStateKey = resolveTaskStateKey(current, id)
+      if (!isKnownTaskId(current, id, taskStateKey)) {
         throw new Error("TASK_NOT_FOUND")
       }
 
       const nowISO = new Date().toISOString()
       const previous =
-        current.taskState[id] ?? {
+        current.taskState[taskStateKey ?? id] ?? {
           status: "todo" as const,
           updatedAtISO: nowISO,
         }
@@ -104,7 +105,22 @@ export async function PATCH(
         body.action === "validate" || body.action === "mark_done_and_validate"
 
       if (shouldValidate) {
-        const validation = validateTaskAgainstState(current, id, attachedEvidence)
+        const validationState =
+          body.action === "mark_done_and_validate"
+            ? {
+                ...current,
+                taskState: {
+                  ...current.taskState,
+                  [taskStateKey ?? id]: {
+                    ...previous,
+                    status: "done" as const,
+                    attachedEvidence,
+                    attachedEvidenceMeta,
+                  },
+                },
+              }
+            : current
+        const validation = validateTaskAgainstState(validationState, id, attachedEvidence)
         validationStatus = validation.status
         validationMessage = validation.message
         validationConfidence = validation.confidence
@@ -219,7 +235,7 @@ export async function PATCH(
         driftRecords,
         taskState: {
           ...current.taskState,
-          [id]: {
+          [taskStateKey ?? id]: {
             status: nextStatus,
             attachedEvidence,
             attachedEvidenceMeta,
@@ -327,4 +343,19 @@ export async function PATCH(
       "TASK_PATCH_FAILED"
     )
   }
+}
+
+function resolveTaskStateKey(state: ComplianceState, taskId: string) {
+  if (state.taskState[taskId]) return taskId
+
+  if (taskId.startsWith("finding-")) {
+    const legacyFindingId = taskId.replace(/^finding-/, "")
+    if (state.taskState[legacyFindingId]) return legacyFindingId
+  }
+
+  return null
+}
+
+function isKnownTaskId(state: ComplianceState, taskId: string, taskStateKey: string | null) {
+  return Boolean(taskStateKey) || getPersistableTaskIds(state).has(taskId)
 }

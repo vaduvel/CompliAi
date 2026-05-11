@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import {
@@ -227,11 +227,11 @@ export default function ConformitatePage() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Conformitate AI"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Conformitate", current: true }]}
         title="Evaluare conformitate EU AI Act"
         description="Workflow de 10 întrebări care evaluează conformitatea sistemelor AI cu EU AI Act. Identifică lacunele și generează un plan de remediere prioritizat."
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               EU AI Act 2024/1689

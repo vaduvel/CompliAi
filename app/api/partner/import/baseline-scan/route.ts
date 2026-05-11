@@ -9,8 +9,8 @@
 import { NextResponse } from "next/server"
 
 import { evaluateApplicability } from "@/lib/compliance/applicability"
-import type { OrgProfile } from "@/lib/compliance/applicability"
 import type { FullIntakeAnswers } from "@/lib/compliance/intake-engine"
+import type { ScanRecord } from "@/lib/compliance/types"
 import {
   buildInitialFindings,
   buildInitialIntakeAnswers,
@@ -18,6 +18,8 @@ import {
 import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
 import { lookupOrgProfilePrefillByCui } from "@/lib/server/anaf-company-lookup"
 import { buildWebsitePrefillSignals } from "@/lib/server/website-prefill-signals"
+import { buildRomanianPrivacyFindings } from "@/lib/compliance/romanian-privacy-findings"
+import { buildImportBaselineAnswers } from "@/lib/compliance/import-baseline-profile"
 import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import { jsonError } from "@/lib/server/api-response"
 import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
 
     let prefill = state.orgProfilePrefill ?? null
     let updatedProfile = state.orgProfile
+    const nowISO = new Date().toISOString()
 
     // Store website in profile if provided and not already set
     if (body.website && updatedProfile && !updatedProfile.website) {
@@ -138,48 +141,33 @@ export async function POST(request: Request) {
     // Partner verifies/dismisses what remains in cockpit.
     if (updatedProfile) {
       const hasWebsite = !!websiteUrl
-      const hasEmployees = updatedProfile.employeeCount !== "1-9"
       const efacturaActive = prefill?.efacturaRegistered === true
 
-      // Helper: prefer real website signal over pessimistic default
-      const sigYes = (key: keyof typeof websiteSuggestions): "yes" | undefined =>
-        websiteSuggestions[key]?.value === true ? "yes" : undefined
-
-      const conservativeAnswers: FullIntakeAnswers = {
-        // Core questions — assume positive (company does these things)
-        sellsToConsumers: "unknown",
-        hasEmployees: hasEmployees ? "yes" : "unknown",
-        processesPersonalData: sigYes("processesPersonalData") ?? "probably",
-        usesAITools: updatedProfile.usesAITools ? "yes" : "no",
-        usesExternalVendors: "probably",
-        hasSiteWithForms: sigYes("hasSiteWithForms") ?? (hasWebsite ? "probably" : "unknown"),
-        hasStandardContracts: "probably",
-        // Conditional answers — assume "no" / missing (generates findings)
-        // unless website/ANAF gave us real positive evidence.
-        hasJobDescriptions: hasEmployees ? "no" : undefined,
-        hasEmployeeRegistry: hasEmployees ? "no" : undefined,
-        hasInternalProcedures: hasEmployees ? "no" : undefined,
-        hasPrivacyPolicy: sigYes("hasPrivacyPolicy") ?? "no",
-        hasDsarProcess: "no",
-        hasRopaRegistry: "no",
-        hasVendorDpas: "no",
-        hasRetentionSchedule: "no",
-        hasAiPolicy: updatedProfile.usesAITools ? "no" : undefined,
-        hasVendorDocumentation: "no",
-        vendorsSendPersonalData: "probably",
-        hasSitePrivacyPolicy: sigYes("hasSitePrivacyPolicy") ?? (hasWebsite ? "no" : undefined),
-        hasCookiesConsent: sigYes("hasCookiesConsent") ?? (hasWebsite ? "no" : undefined),
-      }
+      const conservativeAnswers: FullIntakeAnswers = buildImportBaselineAnswers(updatedProfile, {
+        hasWebsite,
+        websiteSignals: {
+          processesPersonalData: websiteSuggestions.processesPersonalData?.value === true,
+          hasSiteWithForms: websiteSuggestions.hasSiteWithForms?.value === true,
+          hasPrivacyPolicy: websiteSuggestions.hasPrivacyPolicy?.value === true,
+          hasSitePrivacyPolicy: websiteSuggestions.hasSitePrivacyPolicy?.value === true,
+          hasCookiesConsent: websiteSuggestions.hasCookiesConsent?.value === true,
+        },
+      })
 
       // Also generate from prefill-aware engine for any ANAF-enriched suggestions
       const prefillAnswers = buildInitialIntakeAnswers(updatedProfile, prefill)
 
       // Merge: conservative answers take precedence — but they now include real signals
       const mergedAnswers = { ...prefillAnswers, ...conservativeAnswers }
+      state.intakeAnswers = mergedAnswers
+      state.intakeCompletedAtISO = nowISO
       console.log("[baseline-scan] efacturaActive (from ANAF):", efacturaActive)
       const nis2State = await readNis2State(body.orgId)
       const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
-      const findings = buildInitialFindings(mergedAnswers, { supplementalFindings: nis2Findings })
+      const romanianPrivacyFindings = buildRomanianPrivacyFindings(updatedProfile, nowISO)
+      const findings = buildInitialFindings(mergedAnswers, {
+        supplementalFindings: [...nis2Findings, ...romanianPrivacyFindings],
+      })
 
       console.log("[baseline-scan] Generated findings:", findings.length, "for org:", body.orgId)
 
@@ -189,7 +177,47 @@ export async function POST(request: Request) {
         const newFindings = findings.filter((f) => !existingIds.has(f.id))
         state.findings = [...state.findings, ...newFindings]
       }
+
+      if (romanianPrivacyFindings.some((finding) => finding.id === "intake-gdpr-training-tracker")) {
+        const hasDefaultTraining = (state.gdprTrainingRecords ?? []).some(
+          (record) => record.id === "gdpr-training-baseline-required"
+        )
+        if (!hasDefaultTraining) {
+          const due = new Date(nowISO)
+          due.setDate(due.getDate() + 30)
+          state.gdprTrainingRecords = [
+            {
+              id: "gdpr-training-baseline-required",
+              title: "Training GDPR inițial pentru angajați",
+              audience: "all_staff",
+              participantCount: 0,
+              status: "evidence_required",
+              dueAtISO: due.toISOString(),
+              evidenceNote:
+                "Creat automat la baseline pentru că organizația are angajați. Consultantul DPO completează participanții și atașează dovada comunicării.",
+              createdAtISO: nowISO,
+              updatedAtISO: nowISO,
+            },
+            ...(state.gdprTrainingRecords ?? []),
+          ]
+        }
+      }
     }
+
+    const baselineScan: ScanRecord = {
+      id: `baseline-import-${body.orgId}-${Date.now()}`,
+      documentName: "Baseline import portofoliu",
+      contentPreview:
+        "Scan automat rulat după importul firmei în portofoliu: ANAF, profil organizație, website și intake GDPR.",
+      createdAtISO: nowISO,
+      analyzedAtISO: nowISO,
+      findingsCount: state.findings.length,
+      sourceKind: "manifest",
+      extractionMethod: "manual",
+      extractionStatus: "completed",
+      analysisStatus: "completed",
+    }
+    state.scans = [baselineScan, ...(state.scans ?? [])].slice(0, 100)
 
     await writeStateForOrg(body.orgId, state)
 

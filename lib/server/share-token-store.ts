@@ -7,6 +7,8 @@ import { createHmac } from "crypto"
 export type ShareTokenPayload = {
   orgId: string
   recipientType: "accountant" | "counsel" | "partner"
+  documentId?: string
+  documentTitle?: string
   createdAtISO: string
   expiresAtISO: string
 }
@@ -34,12 +36,15 @@ function fromB64url(s: string): string {
 export function generateSignedShareToken(
   orgId: string,
   recipientType: ShareTokenPayload["recipientType"],
-  nowISO: string
+  nowISO: string,
+  document?: { documentId?: string | null; documentTitle?: string | null }
 ): string {
   const expiresAt = new Date(new Date(nowISO).getTime() + 72 * 3_600_000)
   const payload: ShareTokenPayload = {
     orgId,
     recipientType,
+    ...(document?.documentId ? { documentId: document.documentId } : {}),
+    ...(document?.documentTitle ? { documentTitle: document.documentTitle } : {}),
     createdAtISO: nowISO,
     expiresAtISO: expiresAt.toISOString(),
   }

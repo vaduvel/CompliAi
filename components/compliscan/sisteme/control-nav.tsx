@@ -2,7 +2,6 @@
 
 import { Check } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { cn } from "@/lib/utils"
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
 import type { ControlPrimaryViewMode, SystemsSubViewMode } from "./sisteme-shared"
@@ -62,20 +61,26 @@ export function ControlPrimaryTabs({
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-eos-md border p-4 text-left transition ${
+            className={cn(
+              "rounded-eos-lg border p-4 text-left transition",
               isActive
-                ? "border-eos-border-subtle bg-eos-surface-active"
-                : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
-            }`}
+                ? "border-eos-border-strong bg-white/[0.03]"
+                : "border-eos-border bg-eos-surface hover:border-eos-border-strong hover:bg-white/[0.02]"
+            )}
           >
             <div className="space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-semibold text-eos-text">{tab.title}</p>
-                <Badge variant="outline" className="shrink-0 normal-case tracking-normal">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[14px] font-semibold tracking-[-0.015em] text-eos-text"
+                >
+                  {tab.title}
+                </p>
+                <span className="inline-flex shrink-0 items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                   {tab.badge}
-                </Badge>
+                </span>
               </div>
-              <p className="text-xs leading-5 text-eos-text-muted">{tab.description}</p>
+              <p className="text-[12px] leading-[1.5] text-eos-text-muted">{tab.description}</p>
             </div>
           </button>
         )
@@ -205,10 +210,10 @@ export function SystemsLinearStepper({
               type="button"
               onClick={() => onChange(step.id)}
               className={cn(
-                "flex items-start gap-3 rounded-eos-md border p-3 text-left transition",
+                "flex items-start gap-3 rounded-eos-sm border p-3 text-left transition",
                 status === "active"
-                  ? "border-eos-border-subtle bg-eos-surface-active"
-                  : "border-eos-border bg-eos-surface hover:bg-eos-secondary-hover"
+                  ? "border-eos-border-strong bg-white/[0.03]"
+                  : "border-eos-border bg-eos-surface hover:border-eos-border-strong hover:bg-white/[0.02]"
               )}
             >
               <div

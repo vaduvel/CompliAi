@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import Link from "next/link"
 import {
   AlertCircle,
@@ -13,12 +13,9 @@ import {
 
 import { FindingVerdictMeta } from "@/components/compliscan/finding-verdict-meta"
 import { TextExtractDrawer } from "@/components/compliscan/text-extract-drawer"
-import { Badge } from "@/components/evidence-os/Badge"
 import { ActionCluster } from "@/components/evidence-os/ActionCluster"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
 import { Separator } from "@/components/evidence-os/Separator"
 import type { CockpitTask } from "@/components/compliscan/types"
 import {
@@ -43,7 +40,7 @@ export function LoadingScreen({ variant = "page" }: { variant?: "page" | "sectio
   const containerClass =
     variant === "page"
       ? "grid min-h-screen place-items-center bg-eos-bg text-eos-text"
-      : "grid min-h-[40vh] place-items-center rounded-eos-md border border-eos-border bg-eos-surface text-eos-text"
+      : "grid min-h-[40vh] place-items-center rounded-eos-sm border border-eos-border bg-eos-surface text-eos-text"
 
   return (
     <div className={containerClass}>
@@ -54,17 +51,19 @@ export function LoadingScreen({ variant = "page" }: { variant?: "page" | "sectio
 
 export function ErrorScreen({
   message,
+  hint,
   onRetry,
   variant = "section",
 }: {
   message?: string
+  hint?: string
   onRetry?: () => void
   variant?: "page" | "section"
 }) {
   const containerClass =
     variant === "page"
       ? "grid min-h-screen place-items-center bg-eos-bg text-eos-text"
-      : "grid min-h-[40vh] place-items-center rounded-eos-md border border-eos-error-border bg-eos-error-soft text-eos-text"
+      : "grid min-h-[40vh] place-items-center rounded-eos-sm border border-eos-error-border bg-eos-error-soft text-eos-text"
 
   return (
     <div className={containerClass}>
@@ -74,15 +73,15 @@ export function ErrorScreen({
           {message ?? "Tabloul de bord nu a putut fi încărcat."}
         </p>
         <p className="text-xs text-eos-text-muted">
-          Verifica conexiunea si incearca din nou.
+          {hint ?? "Verifică conexiunea și încearcă din nou."}
         </p>
         {onRetry && (
           <button
             type="button"
             onClick={onRetry}
-            className="mt-1 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-2 text-sm text-eos-text transition-colors hover:bg-eos-surface-variant"
+            className="mt-1 rounded-eos-sm border border-eos-border bg-eos-surface px-4 py-2 text-sm text-eos-text transition-colors hover:bg-eos-surface-variant"
           >
-            Incearca din nou
+            Încearcă din nou
           </button>
         )}
       </div>
@@ -107,6 +106,87 @@ function driftSeverityLabel(severity: ComplianceDriftRecord["severity"]) {
   if (severity === "high") return "ridicat"
   if (severity === "medium") return "mediu"
   return "scazut"
+}
+
+function RoutePill({
+  children,
+  className,
+  variant = "default",
+}: {
+  children: ReactNode
+  className?: string
+  variant?: "default" | "secondary" | "destructive" | "outline" | "success" | "warning"
+}) {
+  const variantClass =
+    variant === "success"
+      ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
+      : variant === "warning"
+        ? "border-eos-warning/25 bg-eos-warning-soft text-eos-warning"
+        : variant === "destructive"
+          ? "border-eos-error/25 bg-eos-error-soft text-eos-error"
+          : variant === "outline"
+            ? "border-eos-border-subtle bg-white/[0.04] text-eos-text-muted"
+            : variant === "secondary"
+              ? "border-eos-border-subtle bg-white/[0.04] text-eos-text-muted"
+              : "border-eos-primary/25 bg-eos-primary/10 text-eos-primary"
+
+  return (
+    <span
+      className={[
+        "inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.05em]",
+        variantClass,
+        className ?? "",
+      ].join(" ")}
+    >
+      {children}
+    </span>
+  )
+}
+
+function RouteEmptyState({
+  title,
+  label,
+  icon: Icon = FileText,
+  actions,
+  className,
+}: {
+  title?: string
+  label: string
+  icon?: typeof FileText
+  actions?: ReactNode
+  className?: string
+}) {
+  return (
+    <div
+      className={[
+        "flex flex-col items-center justify-center rounded-eos-lg border border-dashed border-eos-border-subtle bg-eos-bg-inset px-4 py-10 text-center",
+        className ?? "",
+      ].join(" ")}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="mb-3 flex size-10 items-center justify-center rounded-eos-sm border border-eos-border bg-white/[0.03]">
+        <Icon className="size-5 text-eos-text-tertiary" aria-hidden="true" />
+      </div>
+      {title ? (
+        <p
+          data-display-text="true"
+          className="break-words font-display text-sm font-semibold tracking-[-0.015em] text-eos-text [overflow-wrap:anywhere]"
+        >
+          {title}
+        </p>
+      ) : null}
+      <p
+        className={[
+          "break-words text-[13px] leading-relaxed text-eos-text-muted [overflow-wrap:anywhere]",
+          title ? "mt-1 max-w-md" : "max-w-sm",
+        ].join(" ")}
+      >
+        {label}
+      </p>
+      {actions ? <div className="mt-4 flex w-full flex-wrap justify-center gap-2">{actions}</div> : null}
+    </div>
+  )
 }
 
 export function DriftCommandCenter({
@@ -136,22 +216,22 @@ export function DriftCommandCenter({
   }, [activeDrifts])
 
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="border-b border-eos-border pb-5">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border pb-5 px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <CardTitle className="text-base">Control drift</CardTitle>
+            <h3 data-display-text="true" className="font-display text-base font-semibold leading-tight tracking-[-0.01em] text-eos-text">Control drift</h3>
             <p className="mt-2 max-w-2xl text-sm text-eos-text-muted">
               Schimbarile detectate, impactul operational si escalarea activa.
             </p>
           </div>
-          <Badge className={activeDrifts.length > 0 ? driftSeverityClasses(primaryDrift?.severity ?? "medium") : "border-eos-border bg-eos-surface-variant text-eos-text-muted"}>
+          <RoutePill className={activeDrifts.length > 0 ? driftSeverityClasses(primaryDrift?.severity ?? "medium") : "border-eos-border bg-eos-surface-variant text-eos-text-muted"}>
             {activeDrifts.length > 0 ? `${activeDrifts.length} drift activ` : "control stabil"}
-          </Badge>
+          </RoutePill>
         </div>
-      </CardHeader>
+      </header>
 
-      <CardContent className="space-y-4 pt-5">
+      <div className="space-y-4 pt-5 px-4">
         {selectedDrift ? (
           <>
             <div className="space-y-3">
@@ -175,9 +255,9 @@ export function DriftCommandCenter({
                               {drift.summary}
                             </p>
                             {isSelected ? (
-                              <Badge className="border-eos-border-strong bg-eos-bg-inset text-eos-text">
+                              <RoutePill className="border-eos-border-strong bg-eos-bg-inset text-eos-text">
                                 selectat
-                              </Badge>
+                              </RoutePill>
                             ) : null}
                           </div>
                           <p className="mt-1 text-xs text-eos-text-muted">
@@ -189,16 +269,16 @@ export function DriftCommandCenter({
                           </p>
                         </div>
                         <div className="flex flex-wrap justify-end gap-2">
-                          <Badge className={driftSeverityClasses(drift.severity)}>
+                          <RoutePill className={driftSeverityClasses(drift.severity)}>
                             {driftSeverityLabel(drift.severity)}
-                          </Badge>
-                          <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
+                          </RoutePill>
+                          <RoutePill className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
                             {formatDriftLifecycleStatus(drift.lifecycleStatus ?? "open")}
-                          </Badge>
+                          </RoutePill>
                           {breached ? (
-                            <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+                            <RoutePill className="border-eos-error-border bg-eos-error-soft text-eos-error">
                               SLA depășit
-                            </Badge>
+                            </RoutePill>
                           ) : null}
                         </div>
                       </div>
@@ -208,14 +288,13 @@ export function DriftCommandCenter({
               })}
             </div>
 
-            <details className="group">
-              <summary className="flex cursor-pointer select-none items-center gap-2 py-1 text-xs font-medium text-eos-text-muted hover:text-eos-text">
-                <span className="transition-transform group-open:rotate-90">▶</span>
+            <div>
+              <p className="py-1 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Detalii drift selectat
-              </summary>
+              </p>
               <div className="mt-3 grid gap-3 md:grid-cols-3">
-                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Impact principal</p>
+                <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Impact principal</p>
                   <p className="mt-1.5 text-sm font-semibold text-eos-text">
                     {selectedGuidance?.lawReference || "revizie legala / operationala"}
                   </p>
@@ -224,8 +303,8 @@ export function DriftCommandCenter({
                   </p>
                 </div>
 
-                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Actiune pentru drift</p>
+                <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Actiune pentru drift</p>
                   <p className="mt-1.5 text-sm font-semibold text-eos-text">
                     {selectedGuidance?.nextAction || "Revizuiesti drift-ul si inchizi task-ul derivat"}
                   </p>
@@ -234,8 +313,8 @@ export function DriftCommandCenter({
                   </p>
                 </div>
 
-                <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-                  <p className="text-xs uppercase tracking-[0.2em] text-eos-text-muted">Escalare si baseline</p>
+                <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Escalare si baseline</p>
                   <p className="mt-1.5 text-sm font-semibold text-eos-text">
                     {hasValidatedBaseline ? "Baseline validat" : "Baseline inca nevalidat"}
                   </p>
@@ -265,7 +344,7 @@ export function DriftCommandCenter({
                   </p>
                 </div>
               </div>
-            </details>
+            </div>
 
             <div className="space-y-3">
               <ActionCluster
@@ -289,14 +368,14 @@ export function DriftCommandCenter({
               {(selectedBreached || breachedCount > 1) && (
                 <div className="flex flex-wrap gap-2">
                   {selectedBreached ? (
-                    <Badge variant="destructive" className="normal-case tracking-normal">
+                    <RoutePill variant="destructive" className="normal-case tracking-normal">
                       Driftul selectat a depasit SLA-ul
-                    </Badge>
+                    </RoutePill>
                   ) : null}
                   {breachedCount > 1 ? (
-                    <Badge variant="warning" className="normal-case tracking-normal">
+                    <RoutePill variant="warning" className="normal-case tracking-normal">
                       {breachedCount} drift-uri depasesc SLA-ul
-                    </Badge>
+                    </RoutePill>
                   ) : null}
                 </div>
               )}
@@ -304,7 +383,7 @@ export function DriftCommandCenter({
           </>
         ) : (
           <>
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
               <p className="text-lg font-semibold text-eos-text">
                 Nu există drift deschis acum
               </p>
@@ -334,8 +413,8 @@ export function DriftCommandCenter({
             />
           </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -397,30 +476,30 @@ export function ScanWorkspace({
   const isTextMode = sourceMode === "text"
 
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="border-b border-eos-border pb-5">
-        <CardTitle className="text-base">Flux scanare</CardTitle>
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border pb-5 px-4 py-4">
+        <h3 data-display-text="true" className="font-display text-base font-semibold leading-tight tracking-[-0.01em] text-eos-text">Flux scanare</h3>
         <p className="text-sm text-eos-text-muted">
           {isTextMode
             ? "Lipeste textul integral sau un extras relevant. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura fara sa mai incarci un fisier."
             : "Incarca un document PDF, imagine sau completeaza textul daca OCR-ul are nevoie de clarificari. Analiza detecteaza probleme GDPR, EU AI Act si e-Factura."}
         </p>
-      </CardHeader>
+      </header>
 
-      <CardContent className="space-y-6 pt-6">
+      <div className="space-y-6 pt-6 px-4">
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-4">
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
               <p className="text-sm font-medium text-eos-text">
                 {isTextMode ? "Pasul 1: denumeste analiza" : "Pasul 1: alege sursa"}
               </p>
               <div className="mt-4">
                 {isTextMode ? (
-                  <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4 text-sm text-eos-text-muted">
+                  <div className="rounded-eos-sm border border-eos-border bg-eos-bg p-4 text-sm text-eos-text-muted">
                     Foloseste acest mod cand ai deja textul copiat din politica, contract, ToS sau procedura interna si nu vrei OCR.
                   </div>
                 ) : (
-                  <label className="ring-focus flex min-h-[112px] cursor-pointer items-center justify-center rounded-eos-md border border-dashed border-eos-border-strong bg-eos-bg px-5 text-center text-sm text-eos-text-muted hover:bg-eos-secondary-hover">
+                  <label className="ring-focus flex min-h-[112px] cursor-pointer items-center justify-center rounded-eos-sm border border-dashed border-eos-border-strong bg-eos-bg px-5 text-center text-sm text-eos-text-muted hover:bg-eos-secondary-hover">
                     <span>
                       <Upload className="mx-auto mb-3 size-5 text-eos-primary" strokeWidth={2} />
                       {documentFile
@@ -443,7 +522,7 @@ export function ScanWorkspace({
               </div>
             </div>
 
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
               <p className="text-sm font-medium text-eos-text">Pasul 2: context si scope</p>
               <div className="mt-4 grid gap-4">
                 <input
@@ -452,7 +531,7 @@ export function ScanWorkspace({
                   value={documentName}
                   onChange={(event) => setDocumentName(event.target.value)}
                   placeholder="Nume sursă"
-                  className="ring-focus h-9 rounded-eos-md border border-eos-border bg-eos-bg px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus h-9 rounded-eos-sm border border-eos-border bg-eos-bg px-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
                 <textarea
                   id="scanExtractedText"
@@ -465,24 +544,24 @@ export function ScanWorkspace({
                       ? "Lipește aici textul pe care vrei să-l analizăm."
                       : "Text pentru analiză. Dacă ai PDF, lasă aici gol."
                   }
-                  className="ring-focus rounded-eos-md border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
+                  className="ring-focus rounded-eos-sm border border-eos-border bg-eos-bg px-4 py-3 text-sm text-eos-text outline-none placeholder:text-eos-text-muted"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
               <p className="text-sm font-medium text-eos-text">Pasul 3: extrage si revizuieste</p>
               <div className="mt-4 space-y-3 text-sm text-eos-text-muted">
-                <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Document</p>
+                <div className="rounded-eos-sm border border-eos-border bg-eos-bg p-4">
+                  <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Document</p>
                   <p className="mt-2 text-sm text-eos-text">
                     {documentName || "Inca nu ai setat numele documentului."}
                   </p>
                 </div>
-                <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Sursa</p>
+                <div className="rounded-eos-sm border border-eos-border bg-eos-bg p-4">
+                  <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Sursa</p>
                   <p className="mt-2">
                     {isTextMode
                       ? documentContent.trim()
@@ -495,17 +574,17 @@ export function ScanWorkspace({
                           : "Nicio sursa"}
                   </p>
                 </div>
-                <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Scope implicit</p>
+                <div className="rounded-eos-sm border border-eos-border bg-eos-bg p-4">
+                  <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Scope implicit</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">GDPR</Badge>
-                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">EU AI Act</Badge>
-                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">e-Factura</Badge>
+                    <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">GDPR</RoutePill>
+                    <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">EU AI Act</RoutePill>
+                    <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">e-Factura</RoutePill>
                   </div>
                 </div>
                 {pendingScanId && (
-                  <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                  <div className="rounded-eos-sm border border-eos-border bg-eos-bg p-4">
+                    <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                       Text extras pentru review
                     </p>
                     <textarea
@@ -514,7 +593,7 @@ export function ScanWorkspace({
                       value={pendingExtractedText}
                       onChange={(event) => setPendingExtractedText(event.target.value)}
                       rows={8}
-                      className="ring-focus mt-3 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3 text-sm text-eos-text outline-none"
+                      className="ring-focus mt-3 w-full rounded-eos-sm border border-eos-border bg-eos-surface-variant px-4 py-3 text-sm text-eos-text outline-none"
                     />
                   </div>
                 )}
@@ -566,7 +645,7 @@ export function ScanWorkspace({
               </div>
             </div>
 
-            <div className="rounded-eos-md border border-eos-border bg-eos-bg p-4 text-sm text-eos-text-muted">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-bg p-4 text-sm text-eos-text-muted">
               <p className="font-medium text-eos-text">Status flux</p>
               <p className="mt-2">
                 {scanInfo || "In asteptare. Incarca sursa si porneste fluxul."}
@@ -577,8 +656,8 @@ export function ScanWorkspace({
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -599,11 +678,11 @@ export function LatestDocumentSection({
 
   return (
     <>
-      <Card className="border-eos-border bg-eos-surface">
-        <CardHeader className="border-b border-eos-border pb-5">
+      <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <header className="border-b border-eos-border pb-5 px-4 py-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <CardTitle className="text-base">Ultimul document analizat</CardTitle>
+              <h3 data-display-text="true" className="font-display text-base font-semibold leading-tight tracking-[-0.01em] text-eos-text">Ultimul document analizat</h3>
               <p className="mt-2 text-sm text-eos-text-muted">
                 Rezultatul este legat explicit de documentul tocmai scanat.
               </p>
@@ -617,36 +696,36 @@ export function LatestDocumentSection({
               </Button>
             )}
           </div>
-        </CardHeader>
+        </header>
 
-        <CardContent className="space-y-6 pt-6">
+        <div className="space-y-6 pt-6 px-4">
           {!latestScan && (
-            <EmptyState
+            <RouteEmptyState
               title="Încă nu ai documente analizate"
               label="Pornește un flux nou din Scanare și aici vei vedea ultimul document analizat."
-              className="items-start rounded-eos-md border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
+              className="items-start rounded-eos-sm border-eos-border bg-eos-surface-variant px-5 py-5 text-left"
             />
           )}
 
           {latestScan && (
             <>
               <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+                <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
                   <div className="flex flex-wrap items-center gap-3">
-                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                    <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                       {latestScan.documentName}
-                    </Badge>
-                    <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                    </RoutePill>
+                    <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                       Scanat la {new Date(latestScan.createdAtISO).toLocaleString("ro-RO")}
-                    </Badge>
+                    </RoutePill>
                   </div>
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {latestScanInsights.map((insight) => (
                       <div
                         key={insight.id}
-                        className="rounded-eos-md border border-eos-border bg-eos-bg p-4"
+                        className="rounded-eos-sm border border-eos-border bg-eos-bg p-4"
                       >
-                        <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                        <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                           {insight.label}
                         </p>
                         <p className="mt-2 text-sm text-eos-text">{insight.value}</p>
@@ -655,16 +734,16 @@ export function LatestDocumentSection({
                   </div>
                 </div>
 
-                <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+                <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
                   <p className="text-sm font-medium text-eos-text">
                     De ce a fost detectat
                   </p>
                   <div className="mt-4 space-y-3">
                     {latestScanFindings.length === 0 && (
-                      <EmptyState
+                      <RouteEmptyState
                         title="Nu avem încă explicația detecției"
                         label="Pentru acest document nu există încă detalii despre regula sau fragmentul care a declanșat finding-ul."
-                        className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                        className="rounded-eos-sm border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                       />
                     )}
                     {latestScanFindings.slice(0, 3).map((finding) => (
@@ -680,13 +759,13 @@ export function LatestDocumentSection({
                       >
                         <div className="p-4">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                            <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                               {finding.provenance?.ruleId || "fara regula"}
-                            </Badge>
+                            </RoutePill>
                             {finding.provenance?.matchedKeyword && (
-                              <Badge variant="outline" className="normal-case tracking-normal text-eos-text-muted">
+                              <RoutePill variant="outline" className="normal-case tracking-normal text-eos-text-muted">
                                 keyword: {finding.provenance.matchedKeyword}
-                              </Badge>
+                              </RoutePill>
                             )}
                           </div>
                           <p className="mt-3 text-sm font-semibold text-eos-text">
@@ -710,16 +789,16 @@ export function LatestDocumentSection({
                 </div>
               </div>
 
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-5">
+              <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-5">
                 <p className="text-sm font-medium text-eos-text">
                   Rezultatul pentru acest document
                 </p>
                 <div className="mt-4 space-y-3">
                   {latestScanTasks.length === 0 && (
-                    <EmptyState
+                    <RouteEmptyState
                       title="Încă nu ai task-uri din documentul ăsta"
                       label="Când analiza găsește probleme acționabile, task-urile apar aici și în De rezolvat."
-                      className="rounded-eos-md border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
+                      className="rounded-eos-sm border-eos-border-subtle bg-eos-bg-inset px-4 py-6"
                     />
                   )}
                   {latestScanTasks.slice(0, 3).map((task) => (
@@ -745,8 +824,8 @@ export function LatestDocumentSection({
               <Separator className="bg-eos-border" />
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <TextExtractDrawer
         open={openText}
@@ -766,11 +845,11 @@ export function RecentScansCard({
   tasks: CockpitTask[]
 }) {
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="border-b border-eos-border pb-5">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border pb-5 px-4 py-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <CardTitle className="text-base">Surse recente analizate</CardTitle>
+            <h3 data-display-text="true" className="font-display text-base font-semibold leading-tight tracking-[-0.01em] text-eos-text">Surse recente analizate</h3>
             <p className="text-sm text-eos-text-muted">
               Documentele si manifestele raman separate ca sa vezi rapid ce ai scanat si unde continui.
             </p>
@@ -782,10 +861,10 @@ export function RecentScansCard({
             Mergi la Scanează
           </Link>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-6">
+      </header>
+      <div className="space-y-4 pt-6 px-4">
         {scans.length === 0 && (
-          <EmptyState
+          <RouteEmptyState
             title="Nu există surse scanate încă"
             label="Mergi la Scanează pentru a adăuga primul document sau primul manifest."
             className="border-eos-border bg-eos-surface-variant py-8"
@@ -812,10 +891,10 @@ export function RecentScansCard({
             <DenseListItem key={scan.id} className="group hover:border-eos-border-strong">
               <Link
                 href={targetHref}
-                className="flex flex-col gap-4 rounded-eos-md p-5 transition hover:bg-eos-secondary-hover md:flex-row md:items-center md:justify-between"
+                className="flex flex-col gap-4 rounded-eos-sm p-5 transition hover:bg-eos-secondary-hover md:flex-row md:items-center md:justify-between"
               >
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-eos-md bg-eos-bg text-eos-text-muted">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-eos-sm bg-eos-bg text-eos-text-muted">
                     <FileText className="size-5" strokeWidth={2} />
                   </div>
                   <div className="min-w-0">
@@ -823,9 +902,9 @@ export function RecentScansCard({
                       {scan.documentName}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <Badge className="border-eos-border bg-eos-bg text-eos-text-muted">
+                      <RoutePill className="border-eos-border bg-eos-bg text-eos-text-muted">
                         {sourceLabel(scan)}
-                      </Badge>
+                      </RoutePill>
                     </div>
                     <p className="mt-0.5 text-sm text-eos-text-muted">
                       Scanat pe {new Date(scan.createdAtISO).toLocaleString("ro-RO")}
@@ -834,7 +913,7 @@ export function RecentScansCard({
                 </div>
 
                 <div className="flex w-full flex-wrap items-center justify-between gap-3 md:w-auto md:shrink-0 md:justify-end">
-                  <Badge
+                  <RoutePill
                     className={
                       needsReview
                         ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
@@ -856,11 +935,11 @@ export function RecentScansCard({
                         : hasIssues
                           ? `${openTasks.length} task${openTasks.length !== 1 ? "-uri" : ""} deschise`
                           : "Fara probleme"}
-                  </Badge>
+                  </RoutePill>
                   {p1Count > 0 && (
-                    <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+                    <RoutePill className="border-eos-error-border bg-eos-error-soft text-eos-error">
                       {p1Count} P1
-                    </Badge>
+                    </RoutePill>
                   )}
                   <span className="text-sm text-eos-text-muted">
                     {sourceActionLabel(scan)}
@@ -871,8 +950,8 @@ export function RecentScansCard({
             </DenseListItem>
           )
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -899,9 +978,9 @@ export function AlertsList({ tasks }: { tasks: CockpitTask[] }) {
                 <p className="mt-2 text-sm text-eos-text-muted">{task.summary}</p>
                 <p className="mt-2 text-xs text-eos-text-muted">{task.triggerLabel}</p>
               </div>
-              <Badge className="border-eos-error-border bg-eos-error-soft text-eos-error">
+              <RoutePill className="border-eos-error-border bg-eos-error-soft text-eos-error">
                 {task.priority}
-              </Badge>
+              </RoutePill>
             </div>
             <p className="mt-3 text-xs text-eos-text-muted">
               {task.source} · {task.lawReference}

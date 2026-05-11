@@ -12,7 +12,7 @@ import {
   Zap,
 } from "lucide-react"
 
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { Card } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
@@ -125,11 +125,11 @@ export function ReportsAuditLogPageSurface() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Audit"
+      <V3PageHero
+        breadcrumbs={[{ label: "Rapoarte" }, { label: "Log de audit", current: true }]}
         title="Log de audit"
         description="Toate actiunile inregistrate in sistem — task-uri, dovezi, drift-uri, alerte. Imutabil si exportabil."
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {events.length} evenimente

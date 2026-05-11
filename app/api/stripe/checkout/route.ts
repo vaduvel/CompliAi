@@ -1,6 +1,7 @@
 // app/api/stripe/checkout/route.ts
-// Creare sesiune Stripe Checkout — Free→Pro sau Pro→Partner
-// Necesită: STRIPE_SECRET_KEY, STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_PARTNER_MONTHLY
+// S2A.1 — Creare sesiune Stripe Checkout cu support 14 ICP SKU (Doc 06).
+// Tier-urile sunt definite în lib/server/stripe-tier-config.ts.
+// Env vars per tier: STRIPE_PRICE_{TIER_ID_UPPERCASE}_MONTHLY
 
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { jsonError } from "@/lib/server/api-response"
@@ -8,14 +9,12 @@ import { AuthzError, requireFreshAuthenticatedSession, resolveUserMode } from "@
 import { getOrgPlan, getOrgPlanRecord, isPartnerAccountPlan } from "@/lib/server/plan"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
 import { logRouteError } from "@/lib/server/operational-logger"
-
-const STRIPE_PRICES: Record<string, string | undefined> = {
-  pro: process.env.STRIPE_PRICE_PRO_MONTHLY,
-  partner: process.env.STRIPE_PRICE_PARTNER_MONTHLY,
-  partner_10: process.env.STRIPE_PRICE_PARTNER_10_MONTHLY ?? process.env.STRIPE_PRICE_PARTNER_MONTHLY,
-  partner_25: process.env.STRIPE_PRICE_PARTNER_25_MONTHLY ?? process.env.STRIPE_PRICE_PARTNER_MONTHLY,
-  partner_50: process.env.STRIPE_PRICE_PARTNER_50_MONTHLY ?? process.env.STRIPE_PRICE_PARTNER_MONTHLY,
-}
+import {
+  getStripePriceId,
+  isAccountScopedTier,
+  isOrgScopedTier,
+  isValidTier,
+} from "@/lib/server/stripe-tier-config"
 
 export async function POST(request: Request) {
   const context = createRequestContext(request, "/api/stripe/checkout")
@@ -42,13 +41,9 @@ export async function POST(request: Request) {
       })
     }
 
-    if (billingScope === "org" && !["pro", "partner"].includes(targetPlan)) {
-      return jsonError("Plan invalid. Acceptat: pro, partner.", 400, "INVALID_PLAN", undefined, context)
-    }
-
-    if (billingScope === "account" && !isPartnerAccountPlan(targetPlan)) {
+    if (!isValidTier(targetPlan)) {
       return jsonError(
-        "Plan invalid. Acceptat: partner_10, partner_25, partner_50.",
+        `Plan invalid: ${targetPlan}. Vezi /pricing pentru lista completă.`,
         400,
         "INVALID_PLAN",
         undefined,
@@ -56,10 +51,34 @@ export async function POST(request: Request) {
       )
     }
 
-    const priceId = STRIPE_PRICES[targetPlan]
+    // Validate billingScope-tier consistency. Backward-compat: legacy "pro"/"partner"
+    // sunt acceptate (mapping în registry), partner_10/25/50 cer scope "account".
+    if (billingScope === "org" && !isOrgScopedTier(targetPlan)) {
+      return jsonError(
+        "Acest plan necesită billingScope=account (cabinet partner).",
+        400,
+        "INVALID_PLAN_SCOPE",
+        undefined,
+        context
+      )
+    }
+    if (billingScope === "account" && !isAccountScopedTier(targetPlan)) {
+      // Permitem și legacy partner_* prin isPartnerAccountPlan
+      if (!isPartnerAccountPlan(targetPlan)) {
+        return jsonError(
+          "Acest plan necesită billingScope=org (org-level subscription).",
+          400,
+          "INVALID_PLAN_SCOPE",
+          undefined,
+          context
+        )
+      }
+    }
+
+    const priceId = getStripePriceId(targetPlan)
     if (!priceId) {
       return jsonError(
-        `STRIPE_PRICE_${targetPlan.toUpperCase()}_MONTHLY nu este configurat.`,
+        `STRIPE_PRICE pentru tier ${targetPlan} nu este configurat (env var lipsă).`,
         500,
         "STRIPE_PRICE_NOT_CONFIGURED",
         undefined,

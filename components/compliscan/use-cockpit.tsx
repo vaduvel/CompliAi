@@ -31,6 +31,7 @@ import type {
   WorkspaceContext,
 } from "@/lib/compliance/types"
 import type { AICompliancePack } from "@/lib/compliance/ai-compliance-pack"
+import type { AuditPackV2 } from "@/lib/compliance/audit-pack"
 import { dashboardRoutes, dashboardScanResultsRoute } from "@/lib/compliscan/dashboard-routes"
 import type { ComplianceTraceRecord } from "@/lib/compliance/traceability"
 import { formatPurposeLabel } from "@/lib/compliance/ai-inventory"
@@ -44,6 +45,24 @@ export type DashboardPayload = {
   workspace: WorkspaceContext
   compliancePack?: AICompliancePack
   traceabilityMatrix?: ComplianceTraceRecord[]
+  auditReadinessSummary?: {
+    auditReadiness: AuditPackV2["executiveSummary"]["auditReadiness"]
+    baselineStatus: AuditPackV2["executiveSummary"]["baselineStatus"]
+    complianceScore: AuditPackV2["executiveSummary"]["complianceScore"]
+    riskLabel: AuditPackV2["executiveSummary"]["riskLabel"]
+    topBlockers: string[]
+    nextActions: string[]
+    activeDrifts: number
+    openFindings: number
+    remediationOpen: number
+    validatedEvidenceItems: number
+    missingEvidenceItems: number
+    evidenceLedgerSummary: AuditPackV2["executiveSummary"]["evidenceLedgerSummary"]
+    auditQualityDecision: AuditPackV2["executiveSummary"]["auditQualityDecision"]
+    blockedQualityGates: number
+    reviewQualityGates: number
+    bundleStatus: AuditPackV2["bundleEvidenceSummary"]["status"]
+  }
   evidenceLedger?: EvidenceRegistryEntry[]
 }
 
@@ -87,6 +106,18 @@ type TaskEvidenceUploadResponse = DashboardPayload & {
   message?: string
   error?: string
   evidence?: TaskEvidenceAttachment
+}
+
+type TaskEvidenceMutationResponse = DashboardPayload & {
+  message?: string
+  error?: string
+  evidenceDeletion?: {
+    status: "soft_deleted" | "restored" | "permanently_deleted"
+    evidenceId: string
+    deletedAtISO?: string
+    restoredAtISO?: string
+    restoreUntilISO?: string
+  }
 }
 
 function useCockpitStore(initialData?: DashboardPayload | null) {
@@ -171,7 +202,7 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
 
   async function ensureHeavyPayload() {
     if (!data) return
-    if (data.compliancePack && data.traceabilityMatrix) return
+    if (data.compliancePack && data.traceabilityMatrix && data.auditReadinessSummary) return
 
     await withBusyOperation(async () => {
       const response = await fetch(DASHBOARD_FULL_ENDPOINT, { cache: "no-store" })
@@ -703,12 +734,17 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
         }
         if (!response.ok) throw new Error(payload.error || "Validarea XML a esuat.")
         applyDashboardPayload(payload)
-        toast.success(payload.validation?.valid ? "XML validat" : "XML cu probleme", {
-          description:
-            payload.validation?.valid
-              ? "Factura trece validarea structurala de baza."
-              : "Corecteaza erorile si valideaza din nou inainte de transmitere.",
-        })
+        const isValid = payload.validation?.valid ?? false
+        const description = isValid
+          ? "Factura trece validarea structurala de baza."
+          : "Corecteaza erorile si valideaza din nou inainte de transmitere."
+        // id deduplică toast-urile — re-validarea înlocuiește toast-ul curent
+        // (apelăm direct toast.success/error ca să nu rupem `this` binding)
+        if (isValid) {
+          toast.success("XML validat", { id: "efactura-validation", description })
+        } else {
+          toast.error("XML cu probleme", { id: "efactura-validation", description })
+        }
         return payload.validation ?? null
       } catch (err) {
         const message = err instanceof Error ? err.message : "Eroare la validarea XML."
@@ -1057,6 +1093,76 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     })
   }
 
+  async function softDeleteEvidence(taskId: string, evidenceId: string, reason: string) {
+    return mutateEvidenceDeletion(taskId, evidenceId, {
+      method: "DELETE",
+      reason,
+      successTitle: "Dovada ștearsă soft",
+      successDescription: "Poate fi restaurată din task în fereastra de recovery.",
+    })
+  }
+
+  async function restoreEvidence(taskId: string, evidenceId: string) {
+    return mutateEvidenceDeletion(taskId, evidenceId, {
+      method: "PATCH",
+      action: "restore",
+      successTitle: "Dovada restaurată",
+      successDescription: "Revalidează task-ul înainte de audit_ready.",
+    })
+  }
+
+  async function permanentlyDeleteEvidence(taskId: string, evidenceId: string, reason: string) {
+    return mutateEvidenceDeletion(taskId, evidenceId, {
+      method: "DELETE",
+      permanent: true,
+      reason,
+      successTitle: "Dovada ștearsă definitiv",
+      successDescription: "Fișierul și metadata operațională au fost eliminate.",
+    })
+  }
+
+  async function mutateEvidenceDeletion(
+    taskId: string,
+    evidenceId: string,
+    options: {
+      method: "DELETE" | "PATCH"
+      action?: "restore"
+      permanent?: boolean
+      reason?: string
+      successTitle: string
+      successDescription: string
+    }
+  ) {
+    await withBusyOperation(async () => {
+      try {
+        const response = await fetch(
+          `/api/tasks/${encodeURIComponent(taskId)}/evidence/${encodeURIComponent(evidenceId)}${
+            options.permanent ? "?permanent=1" : ""
+          }`,
+          {
+            method: options.method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: options.action,
+              reason: options.reason,
+            }),
+          }
+        )
+        const payload = (await response.json()) as TaskEvidenceMutationResponse
+        if (!response.ok) {
+          throw new Error(payload.error || "Operația pe dovadă a eșuat.")
+        }
+
+        applyDashboardPayload(payload)
+        toast.success(options.successTitle, { description: options.successDescription })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Eroare la operația pe dovadă."
+        toast.error("Evidence control eșuat", { description: message })
+        throw err
+      }
+    })
+  }
+
   function handleTaskExport(taskId: string) {
     const task = tasks.find((item) => item.id === taskId)
     if (!task) return
@@ -1166,6 +1272,9 @@ function useCockpitStore(initialData?: DashboardPayload | null) {
     handleMarkDone,
     handleBulkMarkDone,
     attachEvidence,
+    softDeleteEvidence,
+    restoreEvidence,
+    permanentlyDeleteEvidence,
     handleTaskExport,
     handleSandbox,
     addAISystem,
@@ -1262,6 +1371,9 @@ export type CockpitActionSlice = Pick<
   | "handleSyncNow"
   | "handleMarkDone"
   | "attachEvidence"
+  | "softDeleteEvidence"
+  | "restoreEvidence"
+  | "permanentlyDeleteEvidence"
   | "handleTaskExport"
   | "handleSandbox"
   | "addAISystem"
@@ -1427,6 +1539,9 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleSyncNow,
     handleMarkDone,
     attachEvidence,
+    softDeleteEvidence,
+    restoreEvidence,
+    permanentlyDeleteEvidence,
     handleTaskExport,
     handleSandbox,
     addAISystem,
@@ -1470,6 +1585,9 @@ export function useCockpitMutations(): CockpitActionSlice {
     handleSyncNow,
     handleMarkDone,
     attachEvidence,
+    softDeleteEvidence,
+    restoreEvidence,
+    permanentlyDeleteEvidence,
     handleTaskExport,
     handleSandbox,
     addAISystem,

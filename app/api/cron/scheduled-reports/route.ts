@@ -16,10 +16,13 @@ import {
 import { createPendingAction } from "@/lib/server/approval-queue"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { executeScheduledReportDelivery } from "@/lib/server/scheduled-report-runtime"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 const CRON_SECRET = process.env.CRON_SECRET
 
 export async function GET(request: Request) {
+  const startMs = Date.now()
+  const nowISO = new Date().toISOString()
   try {
     // Verify cron secret (Vercel sets this header automatically)
     const authHeader = request.headers.get("authorization")
@@ -27,10 +30,17 @@ export async function GET(request: Request) {
       return jsonError("Unauthorized.", 401, "UNAUTHORIZED")
     }
 
-    const nowISO = new Date().toISOString()
     const dueReports = await getDueReports(nowISO)
 
     if (dueReports.length === 0) {
+      await safeRecordCronRun({
+        name: "scheduled-reports",
+        lastRunAtISO: nowISO,
+        ok: true,
+        durationMs: Date.now() - startMs,
+        summary: "Niciun raport scheduled due.",
+        stats: { processed: 0, pendingCreated: 0, errors: 0 },
+      })
       return NextResponse.json({ ok: true, processed: 0, message: "No reports due." })
     }
 
@@ -128,6 +138,21 @@ export async function GET(request: Request) {
       }
     }
 
+    await safeRecordCronRun({
+      name: "scheduled-reports",
+      lastRunAtISO: nowISO,
+      ok: errors.length === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${processed} rapoarte procesate, ${pendingCreated} cu aprobare necesară${errors.length > 0 ? `, ${errors.length} erori` : ""}.`,
+      stats: {
+        processed,
+        pendingCreated,
+        errors: errors.length,
+        due: dueReports.length,
+      },
+      errorMessage: errors.length > 0 ? errors[0] : undefined,
+    })
+
     return NextResponse.json({
       ok: true,
       processed,
@@ -136,8 +161,18 @@ export async function GET(request: Request) {
       message: `${processed} rapoarte procesate, ${pendingCreated} cu aprobare necesară.`,
     })
   } catch (error) {
+    const msg = error instanceof Error ? error.message : "Eroare la cron scheduled-reports."
+    await safeRecordCronRun({
+      name: "scheduled-reports",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: {},
+      errorMessage: msg,
+    })
     return jsonError(
-      error instanceof Error ? error.message : "Eroare la cron scheduled-reports.",
+      msg,
       500,
       "CRON_FAILED"
     )

@@ -22,7 +22,8 @@ import { toast } from "sonner"
 import { Badge } from "@/components/evidence-os/Badge"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
 import {
   AGENT_LABELS,
   AGENT_DESCRIPTIONS,
@@ -48,13 +49,20 @@ type AgentsResponse = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function statusVariant(status: string): "success" | "destructive" | "warning" | "secondary" | "outline" {
+function statusVariant(
+  status: string,
+): "success" | "destructive" | "warning" | "secondary" | "outline" {
   switch (status) {
-    case "completed": return "success"
-    case "failed": return "destructive"
-    case "running": return "warning"
-    case "awaiting_approval": return "warning"
-    default: return "secondary"
+    case "completed":
+      return "success"
+    case "failed":
+      return "destructive"
+    case "running":
+      return "warning"
+    case "awaiting_approval":
+      return "warning"
+    default:
+      return "secondary"
   }
 }
 
@@ -81,16 +89,27 @@ const ACTION_TYPE_LABELS: Record<string, string> = {
 function formatDate(iso: string | undefined): string {
   if (!iso) return "—"
   const d = new Date(iso)
-  return d.toLocaleDateString("ro-RO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+  return d.toLocaleDateString("ro-RO", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 function agentIcon(type: AgentType) {
   switch (type) {
-    case "compliance_monitor": return ShieldCheck
-    case "fiscal_sensor": return Zap
-    case "document": return Activity
-    case "vendor_risk": return AlertTriangle
-    case "regulatory_radar": return Bot
+    case "compliance_monitor":
+      return ShieldCheck
+    case "fiscal_sensor":
+      return Zap
+    case "document":
+      return Activity
+    case "vendor_risk":
+      return AlertTriangle
+    case "regulatory_radar":
+      return Bot
   }
 }
 
@@ -109,71 +128,87 @@ function AgentCard({
   const lastRun = agent.lastRun
 
   return (
-    <Card>
+    <Card className="border-eos-border bg-eos-surface">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-eos-surface-variant">
-              <Icon className="size-5 text-eos-primary" />
+            <div className="flex size-9 items-center justify-center rounded-eos-md bg-eos-surface-variant">
+              <Icon className="size-4 text-eos-primary" />
             </div>
             <div>
-              <CardTitle className="text-base">{agent.label}</CardTitle>
-              <p className="mt-0.5 text-xs text-eos-text-muted">{agent.description}</p>
+              <CardTitle className="text-sm font-semibold text-eos-text">{agent.label}</CardTitle>
+              <p className="mt-0.5 font-mono text-[10px] text-eos-text-muted">{agent.description}</p>
             </div>
           </div>
           {agent.implemented ? (
-            <Badge variant="success" className="shrink-0">Activ</Badge>
+            <Badge variant="success" className="shrink-0">
+              Activ
+            </Badge>
           ) : (
-            <Badge variant="outline" className="shrink-0">Planificat</Badge>
+            <Badge variant="outline" className="shrink-0">
+              Planificat
+            </Badge>
           )}
         </div>
       </CardHeader>
       <CardContent>
         {lastRun ? (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs">
               <span className="text-eos-text-muted">Ultimul run:</span>
-              <span className="text-eos-text">{formatDate(lastRun.startedAtISO)}</span>
+              <span className="font-mono text-eos-text">{formatDate(lastRun.startedAtISO)}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs">
               <span className="text-eos-text-muted">Status:</span>
-              <Badge variant={statusVariant(lastRun.status)}>{STATUS_LABELS[lastRun.status] ?? lastRun.status}</Badge>
+              <Badge variant={statusVariant(lastRun.status)}>
+                {STATUS_LABELS[lastRun.status] ?? lastRun.status}
+              </Badge>
             </div>
             {lastRun.metrics && (
-              <div className="grid grid-cols-2 gap-2 rounded-md bg-eos-surface-variant p-2 text-xs">
-                <div>
-                  <span className="text-eos-text-muted">Scanate:</span>{" "}
-                  <span className="font-medium">{lastRun.metrics.itemsScanned}</span>
+              <div className="grid grid-cols-2 gap-2 rounded-eos-md bg-eos-surface-variant p-2">
+                <div className="text-xs">
+                  <span className="text-eos-text-muted">Scanate: </span>
+                  <span className="font-medium tabular-nums text-eos-text">
+                    {lastRun.metrics.itemsScanned}
+                  </span>
                 </div>
-                <div>
-                  <span className="text-eos-text-muted">Probleme:</span>{" "}
-                  <span className="font-medium">{lastRun.metrics.issuesFound}</span>
+                <div className="text-xs">
+                  <span className="text-eos-text-muted">Probleme: </span>
+                  <span className="font-medium tabular-nums text-eos-text">
+                    {lastRun.metrics.issuesFound}
+                  </span>
                 </div>
-                <div>
-                  <span className="text-eos-text-muted">Auto:</span>{" "}
-                  <span className="font-medium">{lastRun.metrics.actionsAutoApplied}</span>
+                <div className="text-xs">
+                  <span className="text-eos-text-muted">Auto: </span>
+                  <span className="font-medium tabular-nums text-eos-text">
+                    {lastRun.metrics.actionsAutoApplied}
+                  </span>
                 </div>
-                <div>
-                  <span className="text-eos-text-muted">Aprobare:</span>{" "}
-                  <span className="font-medium">{lastRun.metrics.actionsPendingApproval}</span>
+                <div className="text-xs">
+                  <span className="text-eos-text-muted">Aprobare: </span>
+                  <span className="font-medium tabular-nums text-eos-text">
+                    {lastRun.metrics.actionsPendingApproval}
+                  </span>
                 </div>
               </div>
             )}
             {lastRun.confidence !== undefined && (
-              <div className="flex items-center gap-2 text-xs text-eos-text-muted">
-                <span>Confidență:</span>
-                <div className="h-1.5 flex-1 rounded-full bg-eos-surface-variant">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] text-eos-text-muted">Confidență</span>
+                <div className="h-1 flex-1 rounded-full bg-eos-surface-variant">
                   <div
                     className="h-full rounded-full bg-eos-primary transition-all"
                     style={{ width: `${Math.round(lastRun.confidence * 100)}%` }}
                   />
                 </div>
-                <span className="font-medium text-eos-text">{Math.round(lastRun.confidence * 100)}%</span>
+                <span className="font-mono text-[10px] font-medium tabular-nums text-eos-text">
+                  {Math.round(lastRun.confidence * 100)}%
+                </span>
               </div>
             )}
           </div>
         ) : (
-          <p className="text-sm text-eos-text-tertiary">Niciun run înregistrat.</p>
+          <p className="text-xs text-eos-text-tertiary">Niciun run înregistrat.</p>
         )}
 
         <div className="mt-4 flex justify-end">
@@ -208,33 +243,29 @@ function RunHistoryItem({ run }: { run: AgentOutput }) {
       >
         <Chevron className="size-4 shrink-0 text-eos-text-muted" />
         <div className="flex flex-1 items-center gap-2">
-          <span className="text-sm font-medium text-eos-text">
-            {AGENT_LABELS[run.agentType]}
-          </span>
+          <span className="text-sm font-medium text-eos-text">{AGENT_LABELS[run.agentType]}</span>
           <Badge variant={statusVariant(run.status)} className="text-[10px]">
             {STATUS_LABELS[run.status] ?? run.status}
           </Badge>
         </div>
-        <div className="flex items-center gap-3 text-xs text-eos-text-muted">
-          {run.metrics && (
-            <span>{run.metrics.issuesFound} probleme</span>
-          )}
+        <div className="flex items-center gap-3 font-mono text-[10.5px] text-eos-text-muted">
+          {run.metrics && <span>{run.metrics.issuesFound} probleme</span>}
           <span>{formatDate(run.startedAtISO)}</span>
         </div>
       </button>
 
       {expanded && (
         <div className="space-y-3 border-t border-eos-border-subtle bg-eos-surface-variant/30 px-4 py-3">
-          {/* Reasoning */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">Raționament</p>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Raționament
+            </p>
             <p className="mt-1 text-sm text-eos-text">{run.reasoning}</p>
           </div>
 
-          {/* Actions */}
           {run.actions.length > 0 && (
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-eos-text-muted">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                 Acțiuni ({run.actions.length})
               </p>
               <ul className="mt-1 space-y-1.5">
@@ -245,9 +276,8 @@ function RunHistoryItem({ run }: { run: AgentOutput }) {
             </div>
           )}
 
-          {/* Error */}
           {run.error && (
-            <div className="flex items-start gap-2 rounded-md bg-eos-error-soft p-2">
+            <div className="flex items-start gap-2 rounded-eos-md bg-eos-error-soft p-2">
               <XCircle className="mt-0.5 size-4 shrink-0 text-eos-error" />
               <p className="text-sm text-eos-error">{run.error}</p>
             </div>
@@ -283,15 +313,20 @@ function ActionItem({ action }: { action: AgentAction }) {
 
 // ── L2 Pending Actions ────────────────────────────────────────────────────────
 
-/** Map action type → destination page where user takes action */
 function l2ActionHref(action: AgentAction): string {
   switch (action.type) {
-    case "document_drafted": return "/dashboard/generator"
-    case "escalation_raised": return "/dashboard/resolve"
-    case "finding_created": return "/dashboard/resolve"
-    case "vendor_rescored": return "/dashboard/vendor-review"
-    case "review_triggered": return "/dashboard/vendor-review"
-    default: return "/dashboard/resolve"
+    case "document_drafted":
+      return "/dashboard/generator"
+    case "escalation_raised":
+      return "/dashboard/resolve"
+    case "finding_created":
+      return "/dashboard/resolve"
+    case "vendor_rescored":
+      return "/dashboard/vendor-review"
+    case "review_triggered":
+      return "/dashboard/vendor-review"
+    default:
+      return "/dashboard/resolve"
   }
 }
 
@@ -300,11 +335,10 @@ type PendingL2Action = AgentAction & { agentType: AgentType; runId: string }
 function PendingActionsSection({ runs }: { runs: AgentOutput[] }) {
   const router = useRouter()
 
-  // Collect all L2 actions (approvalLevel >= 2, not auto-applied) from all recent runs
   const pendingActions: PendingL2Action[] = runs.flatMap((run) =>
     run.actions
       .filter((a) => !a.autoApplied && a.approvalLevel >= 2)
-      .map((a) => ({ ...a, agentType: run.agentType, runId: run.runId }))
+      .map((a) => ({ ...a, agentType: run.agentType, runId: run.runId })),
   )
 
   if (pendingActions.length === 0) return null
@@ -312,7 +346,9 @@ function PendingActionsSection({ runs }: { runs: AgentOutput[] }) {
   return (
     <section>
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-eos-text">Acțiuni în așteptare</h2>
+        <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          Acțiuni în așteptare
+        </p>
         <Badge variant="warning">{pendingActions.length}</Badge>
       </div>
       <Card className="border-eos-warning/30 bg-eos-warning-soft/10">
@@ -323,9 +359,9 @@ function PendingActionsSection({ runs }: { runs: AgentOutput[] }) {
               className="flex items-start gap-3 border-b border-eos-border-subtle p-4 last:border-0"
             >
               <Clock className="mt-0.5 size-4 shrink-0 text-eos-warning" />
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="text-xs font-medium text-eos-text-muted">
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[10px] font-medium text-eos-text-muted">
                     {AGENT_LABELS[action.agentType]}
                   </span>
                   <Badge variant="outline" className="text-[10px]">
@@ -407,7 +443,7 @@ export default function AgentDashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-eos-text-muted" />
+        <Loader2 className="size-7 animate-spin text-eos-text-tertiary" />
       </div>
     )
   }
@@ -417,47 +453,53 @@ export default function AgentDashboardPage() {
   const activeAgents = agents.filter((a) => a.implemented).length
   const lastRunDate = recentRuns.length > 0 ? formatDate(recentRuns[0].startedAtISO) : "—"
 
+  const kpiItems: V3KpiItem[] = [
+    {
+      id: "active",
+      label: "Agenți activi",
+      value: activeAgents,
+      valueTone: "info",
+      detail: `din ${agents.length} total`,
+    },
+    {
+      id: "runs",
+      label: "Run-uri recente",
+      value: recentRuns.length,
+      valueTone: "neutral",
+      detail: lastRunDate !== "—" ? `Ultimul: ${lastRunDate}` : "Niciun run",
+    },
+    {
+      id: "issues",
+      label: "Probleme detectate",
+      value: totalIssues,
+      valueTone: totalIssues > 0 ? "warning" : "neutral",
+      detail: "cumulat toate run-urile",
+    },
+    {
+      id: "actions",
+      label: "Acțiuni executate",
+      value: totalActions,
+      valueTone: "success",
+      detail: "auto + cu aprobare",
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      <PageIntro
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Agenți", current: true }]}
         title="Agenți Compliance"
         description="Motor agentic V6 — monitorizare automată, detecție, clasificare și escalare inteligentă."
       />
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold text-eos-primary">{activeAgents}</p>
-            <p className="mt-1 text-xs text-eos-text-muted">Agenți activi</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold text-eos-text">{recentRuns.length}</p>
-            <p className="mt-1 text-xs text-eos-text-muted">Run-uri recente</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold text-eos-warning">{totalIssues}</p>
-            <p className="mt-1 text-xs text-eos-text-muted">Probleme detectate</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold text-eos-success">{totalActions}</p>
-            <p className="mt-1 text-xs text-eos-text-muted">Acțiuni executate</p>
-          </CardContent>
-        </Card>
-      </div>
+      <V3KpiStrip items={kpiItems} />
 
-      {/* L2 Pending actions — shown only when there are actions waiting human approval */}
       <PendingActionsSection runs={recentRuns} />
 
-      {/* Agent cards */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-eos-text">Agenți disponibili</h2>
+        <p className="mb-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          Agenți disponibili
+        </p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {agents.map((agent) => (
             <AgentCard
@@ -470,21 +512,22 @@ export default function AgentDashboardPage() {
         </div>
       </section>
 
-      {/* Recent run history */}
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-eos-text">Istoric rulări</h2>
+        <p className="mb-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          Istoric rulări
+        </p>
         {recentRuns.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Activity className="mb-3 size-10 text-eos-text-tertiary" />
+          <div className="flex flex-col items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface py-12 text-center">
+            <Activity className="size-9 text-eos-text-tertiary" strokeWidth={1.5} />
+            <div>
               <p className="text-sm font-medium text-eos-text-muted">Niciun run înregistrat</p>
-              <p className="mt-1 text-xs text-eos-text-tertiary">
+              <p className="mt-0.5 text-xs text-eos-text-tertiary">
                 Execută un agent manual sau așteaptă cron-ul zilnic.
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ) : (
-          <Card>
+          <Card className="border-eos-border bg-eos-surface">
             <CardContent className="p-0">
               {recentRuns.map((run) => (
                 <RunHistoryItem key={run.runId} run={run} />

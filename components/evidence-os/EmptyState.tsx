@@ -14,7 +14,7 @@ export function EmptyState({ title, label, icon: Icon = FileText, actions, class
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-eos-md border border-dashed border-eos-border-subtle bg-eos-bg-inset px-4 py-10 text-center",
+        "flex flex-col items-center justify-center rounded-eos-lg border border-dashed border-eos-border-subtle bg-eos-bg-inset px-4 py-10 text-center",
         className
       )}
       role="status"

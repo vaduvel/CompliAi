@@ -8,7 +8,7 @@ import { ReportsTabs } from "@/components/compliscan/reports-tabs"
 import { Button } from "@/components/evidence-os/Button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/evidence-os/Card"
 import { DenseListItem } from "@/components/evidence-os/DenseListItem"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { SummaryStrip, type SummaryStripItem } from "@/components/evidence-os/SummaryStrip"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import type { OrgPolicyAcknowledgments } from "@/lib/server/policy-store"
@@ -279,11 +279,11 @@ export function ReportsPoliciesPageSurface() {
 
   return (
     <div className="space-y-8">
-      <PageIntro
-        eyebrow="Politici"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Politici", current: true }]}
         title="Politici și proceduri interne"
         description="Template-uri aprobate pentru GDPR, AI Act și conformitate operațională."
-        badges={
+        eyebrowBadges={
           <>
             <Badge variant="outline" className="normal-case tracking-normal">
               {confirmedCount}/{totalCount} confirmate

@@ -1,13 +1,21 @@
+import Link from "next/link"
 import { CheckCircle2, Lock, ShieldCheck, XCircle } from "lucide-react"
 
-import { computeDashboardSummary, normalizeComplianceState } from "@/lib/compliance/engine"
+import { CompliScanLogoLockup } from "@/components/compliscan/logo"
+import { V3RiskPill, V3ScoreRing } from "@/components/compliscan/v3"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { loadOrganizations } from "@/lib/server/auth"
+import { buildPublicReadinessProfile } from "@/lib/server/public-readiness-profile"
 
 // ─── Data helpers ─────────────────────────────────────────────────────────────
 
 function isValidOrgId(id: string): boolean {
   return /^org-[a-z0-9]{8,}$/.test(id)
+}
+
+function initialsFromName(value: string) {
+  const parts = value.trim().split(/\s+/).filter(Boolean).slice(0, 2)
+  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "TC"
 }
 
 async function readOrgName(orgId: string): Promise<string> {
@@ -21,21 +29,6 @@ async function readOrgName(orgId: string): Promise<string> {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function TrustMetricCard({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="rounded-eos-md border border-gray-200 bg-white p-4 shadow-sm">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-gray-400">{label}</p>
-      <div className="mt-2">{children}</div>
-    </div>
-  )
-}
-
 function StatusPill({
   ok,
   labelOk,
@@ -47,33 +40,50 @@ function StatusPill({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+      className={[
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-[2px] font-mono text-[10.5px] font-semibold uppercase tracking-[0.04em]",
         ok
-          ? "bg-eos-success-soft text-eos-success ring-1 ring-emerald-200"
-          : "bg-eos-warning-soft text-eos-warning ring-1 ring-amber-200"
-      }`}
+          ? "border-eos-success/30 bg-eos-success-soft text-eos-success"
+          : "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+      ].join(" ")}
     >
       {ok ? (
-        <CheckCircle2 className="size-3.5" strokeWidth={2} />
+        <CheckCircle2 className="size-3" strokeWidth={2.5} />
       ) : (
-        <XCircle className="size-3.5" strokeWidth={2} />
+        <XCircle className="size-3" strokeWidth={2.5} />
       )}
       {ok ? labelOk : labelFail}
     </span>
   )
 }
 
-// ─── Not-found / error states ─────────────────────────────────────────────────
+// ─── Not-found state ──────────────────────────────────────────────────────────
 
 function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-eos-bg px-6">
       <div className="max-w-md text-center">
-        <ShieldCheck className="mx-auto mb-4 size-12 text-gray-300" strokeWidth={1.5} />
-        <h1 className="text-xl font-semibold text-gray-900">Profil negăsit</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-eos-sm border border-eos-border bg-eos-surface">
+          <ShieldCheck className="size-5 text-eos-text-tertiary" strokeWidth={1.75} />
+        </div>
+        <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          Trust Center
+        </p>
+        <h1
+          data-display-text="true"
+          className="mt-3 font-display text-[24px] font-semibold tracking-[-0.025em] text-eos-text"
+        >
+          Profil negăsit
+        </h1>
+        <p className="mt-3 text-[13.5px] leading-[1.65] text-eos-text-muted">
           Organizația solicitată nu are un profil public de conformitate disponibil.
         </p>
+        <Link
+          href="/trust"
+          className="mt-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-primary transition-colors hover:text-eos-primary/80"
+        >
+          → Înapoi la Trust Center
+        </Link>
       </div>
     </div>
   )
@@ -101,8 +111,16 @@ export default async function TrustPage({
     return <NotFound />
   }
 
-  const normalizedState = normalizeComplianceState(state)
-  const summary = computeDashboardSummary(normalizedState)
+  const profile = await buildPublicReadinessProfile(state, {
+    orgId,
+    orgName,
+    workspaceLabel: orgName,
+    workspaceOwner: "Trust Center public",
+    workspaceInitials: initialsFromName(orgName),
+  })
+  const normalizedState = profile.state
+  const score = profile.score
+  const riskLabel = profile.riskLabel
   const { gdprProgress, highRisk, efacturaConnected } = normalizedState
 
   const isGdprGood = gdprProgress >= 70
@@ -114,111 +132,221 @@ export default async function TrustPage({
     year: "numeric",
   })
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="mx-auto max-w-2xl">
+  const scoreTone = score >= 70 ? "ok" : score >= 40 ? "high" : "critical"
 
-        {/* Header */}
-        <div className="mb-8 flex items-start gap-4">
-          <div className="grid size-12 shrink-0 place-items-center rounded-eos-lg bg-eos-primary-soft ring-1 ring-blue-100">
-            <ShieldCheck className="size-6 text-eos-primary" strokeWidth={2} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold text-gray-900">Trust Center</h1>
-              <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-2.5 py-0.5 text-[11px] text-gray-400">
-                <Lock className="size-3" strokeWidth={2} />
-                doar vizualizare
-              </span>
-            </div>
-            <p className="mt-1 text-base text-gray-600">{orgName}</p>
-            <p className="mt-0.5 text-sm text-gray-400">Profil public de conformitate</p>
-          </div>
+  return (
+    <div className="min-h-screen bg-eos-bg text-eos-text">
+      {/* ── Top nav ── */}
+      <header className="border-b border-eos-border bg-eos-bg/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
+          <Link href="/">
+            <CompliScanLogoLockup variant="flat" size="sm" />
+          </Link>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-eos-border bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
+            <Lock className="size-3" strokeWidth={2} />
+            Doar vizualizare
+          </span>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-6 py-12">
+        {/* ── Hero ── */}
+        <div className="mb-10">
+          <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
+            Trust Center · profil public
+          </p>
+          <h1
+            data-display-text="true"
+            className="mt-3 font-display text-[30px] font-semibold leading-[1.15] tracking-[-0.025em] text-eos-text md:text-[36px]"
+            style={{ textWrap: "balance" }}
+          >
+            {orgName}
+          </h1>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+            Status conformitate · actualizat {updatedAt}
+          </p>
         </div>
 
-        {/* Score hero */}
-        <div className="mb-6 rounded-eos-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex items-end gap-3">
-            <span className="text-5xl font-bold text-gray-900">{summary.score}%</span>
-            <div className="mb-1">
-              <span
-                className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                  summary.score >= 70
-                    ? "bg-eos-success-soft text-eos-success ring-1 ring-emerald-200"
-                    : summary.score >= 40
-                    ? "bg-eos-warning-soft text-eos-warning ring-1 ring-amber-200"
-                    : "bg-eos-error-soft text-eos-error ring-1 ring-red-200"
-                }`}
-              >
-                {summary.riskLabel}
-              </span>
+        {/* ── Score hero card ── */}
+        <div className="mb-6 rounded-eos-lg border border-eos-border bg-eos-surface p-6">
+          <div className="flex items-center gap-5">
+            <V3ScoreRing value={score} tone={scoreTone} size={72} strokeWidth={5} />
+            <div className="flex-1">
+              <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                Scor public de readiness
+              </p>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span
+                  data-display-text="true"
+                  className="font-display text-[44px] font-medium leading-none tabular-nums tracking-[-0.025em] text-eos-text"
+                >
+                  {score}
+                </span>
+                <span className="text-[13px] font-medium text-eos-text-tertiary">%</span>
+              </div>
+              <div className="mt-2">
+                <V3RiskPill tone={scoreTone}>{riskLabel}</V3RiskPill>
+              </div>
             </div>
           </div>
-          <p className="mt-2 text-sm text-gray-400">Scor global de conformitate</p>
 
           {/* Progress bar */}
-          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+          <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-eos-border-strong/30">
             <div
-              className={`h-full rounded-full transition-all ${
-                summary.score >= 70
+              className={[
+                "h-full transition-all duration-500",
+                score >= 70
                   ? "bg-eos-success"
-                  : summary.score >= 40
-                  ? "bg-eos-warning"
-                  : "bg-eos-error"
-              }`}
-              style={{ width: `${summary.score}%` }}
+                  : score >= 40
+                    ? "bg-eos-warning"
+                    : "bg-eos-error",
+              ].join(" ")}
+              style={{ width: `${score}%` }}
             />
+          </div>
+          {profile.auditPack.executiveSummary.auditReadiness !== "audit_ready" ? (
+            <p className="mt-3 text-[12px] leading-[1.6] text-eos-text-muted">
+              Profilul rămâne în review până când baseline-ul, dovezile și controalele cerute de
+              Audit Pack sunt validate.
+            </p>
+          ) : null}
+        </div>
+
+        {/* ── KPI metrics grid ── */}
+        <div className="grid divide-x divide-eos-border overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface md:grid-cols-2">
+          {/* GDPR */}
+          <div className="px-4 py-3.5">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                GDPR
+              </p>
+              <StatusPill ok={isGdprGood} labelOk="Conform" labelFail="În progres" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-1">
+              <span
+                data-display-text="true"
+                className={[
+                  "font-display text-[24px] font-medium leading-none tabular-nums tracking-[-0.025em]",
+                  isGdprGood ? "text-eos-success" : "text-eos-warning",
+                ].join(" ")}
+              >
+                {gdprProgress}
+              </span>
+              <span className="text-[13px] text-eos-text-tertiary">%</span>
+            </div>
+            <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-muted">
+              progres acoperire
+            </p>
+          </div>
+
+          {/* AI Act */}
+          <div className="px-4 py-3.5">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                EU AI Act
+              </p>
+              <StatusPill
+                ok={isAiActGood}
+                labelOk="Fără risc ridicat"
+                labelFail="Risc ridicat"
+              />
+            </div>
+            <div className="mt-2">
+              <span
+                data-display-text="true"
+                className={[
+                  "font-display text-[24px] font-medium leading-none tabular-nums tracking-[-0.025em]",
+                  isAiActGood ? "text-eos-success" : "text-eos-error",
+                ].join(" ")}
+              >
+                {highRisk}
+              </span>
+            </div>
+            <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-muted">
+              {highRisk === 0
+                ? "niciun sistem high-risk"
+                : `${highRisk === 1 ? "sistem" : "sisteme"} cu risc ridicat`}
+            </p>
+          </div>
+
+          {/* e-Factura */}
+          <div className="px-4 py-3.5">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                e-Factura
+              </p>
+              <StatusPill
+                ok={efacturaConnected}
+                labelOk="Conectat"
+                labelFail="Neconectat"
+              />
+            </div>
+            <p
+              data-display-text="true"
+              className={[
+                "mt-2 font-display text-[18px] font-semibold leading-tight tracking-[-0.015em]",
+                efacturaConnected ? "text-eos-success" : "text-eos-text-tertiary",
+              ].join(" ")}
+            >
+              {efacturaConnected ? "Activ" : "Inactiv"}
+            </p>
+            <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-muted">
+              {efacturaConnected
+                ? "integrare ANAF SPV"
+                : "integrarea nu e configurată"}
+            </p>
+          </div>
+
+          {/* Ultima actualizare */}
+          <div className="px-4 py-3.5">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                Ultima sincronizare
+              </p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-eos-success/25 bg-eos-success-soft px-2 py-[2px] font-mono text-[10px] font-semibold uppercase tracking-[0.04em] text-eos-success">
+                <CheckCircle2 className="size-3" strokeWidth={2.5} />
+                Verificat
+              </span>
+            </div>
+            <p
+              data-display-text="true"
+              className="mt-2 font-display text-[16px] font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              {updatedAt}
+            </p>
+            <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-muted">
+              status verificat
+            </p>
           </div>
         </div>
 
-        {/* Metrics grid */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TrustMetricCard label="GDPR">
-            <StatusPill ok={isGdprGood} labelOk="Conform" labelFail="În progres" />
-            <p className="mt-2 text-sm text-gray-500">Progres: {gdprProgress}%</p>
-          </TrustMetricCard>
-
-          <TrustMetricCard label="EU AI Act">
-            <StatusPill
-              ok={isAiActGood}
-              labelOk="Fără risc ridicat"
-              labelFail="Sisteme de risc ridicat"
-            />
-            <p className="mt-2 text-sm text-gray-500">
-              {highRisk === 0
-                ? "Niciun sistem AI cu risc ridicat detectat"
-                : `${highRisk} sistem${highRisk !== 1 ? "e" : ""} cu risc ridicat`}
-            </p>
-          </TrustMetricCard>
-
-          <TrustMetricCard label="e-Factura">
-            <StatusPill
-              ok={efacturaConnected}
-              labelOk="Conectat"
-              labelFail="Neconectat"
-            />
-            <p className="mt-2 text-sm text-gray-500">
-              {efacturaConnected
-                ? "Integrare e-Factura activă"
-                : "Integrarea e-Factura nu este configurată"}
-            </p>
-          </TrustMetricCard>
-
-          <TrustMetricCard label="Ultima actualizare">
-            <p className="text-sm font-semibold text-gray-800">{updatedAt}</p>
-            <div className="mt-1.5 flex items-center gap-1">
-              <CheckCircle2 className="size-3.5 text-eos-success" strokeWidth={2} />
-              <p className="text-xs text-gray-400">Status verificat</p>
-            </div>
-          </TrustMetricCard>
+        {/* ── Disclaimer ── */}
+        <div className="mt-6 rounded-eos-lg border border-eos-border bg-white/[0.02] px-5 py-4">
+          <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            Notă juridică
+          </p>
+          <p className="mt-2 text-[12.5px] leading-[1.65] text-eos-text-muted">
+            Acest profil este generat automat de CompliScan și reflectă starea conformității
+            la data afișată. Datele sunt furnizate exclusiv în scop informativ și nu
+            substituie consilierea juridică.
+          </p>
         </div>
+      </main>
 
-        {/* Footer */}
-        <p className="mt-8 text-center text-xs text-gray-400">
-          Acest profil este generat automat de CompliScan și reflectă starea conformității la data afișată.
-          Datele sunt furnizate exclusiv în scop informativ.
-        </p>
-      </div>
+      <footer className="border-t border-eos-border-subtle py-6">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-5 gap-y-2 px-6 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+          <Link href="/" className="transition-colors hover:text-eos-text-muted">
+            Acasă
+          </Link>
+          <Link href="/trust" className="transition-colors hover:text-eos-text-muted">
+            Trust Center
+          </Link>
+          <Link href="/privacy" className="transition-colors hover:text-eos-text-muted">
+            Privacy
+          </Link>
+          <span className="ml-auto text-eos-text-muted">© 2026 CompliScan</span>
+        </div>
+      </footer>
     </div>
   )
 }

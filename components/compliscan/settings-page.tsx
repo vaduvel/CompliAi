@@ -7,7 +7,7 @@ import { ArrowRight, Bell, CalendarClock, Download, Loader2, MailWarning, Shield
 import { toast } from "sonner"
 
 import { LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { Input } from "@/components/evidence-os/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/evidence-os/Select"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -29,6 +29,7 @@ import type { AlertPreferences, AlertEventType } from "@/lib/server/alert-prefer
 import type { AutonomyPolicy } from "@/lib/server/autonomy-resolver"
 import { ACTION_TYPE_LABELS } from "@/lib/server/approval-queue"
 import type { PendingActionType } from "@/lib/server/approval-queue"
+import { AIPrivacyModeCard } from "@/components/compliscan/settings/AIPrivacyModeCard"
 
 const AUTONOMY_POLICY_OPTIONS: Array<{ value: AutonomyPolicy; label: string; desc: string }> = [
   { value: "auto", label: "Automat", desc: "Se execută imediat, fără aprobare" },
@@ -277,6 +278,13 @@ export function SettingsPageSurface() {
   const [wlTagline, setWlTagline] = useState("")
   const [wlBrandColor, setWlBrandColor] = useState("#6366f1")
   const [wlLogoUrl, setWlLogoUrl] = useState("")
+  // S1.3 — AI ON/OFF per client. Default true.
+  const [wlAiEnabled, setWlAiEnabled] = useState(true)
+  // S1.5 — Signature upload + signer name pentru footer document.
+  const [wlSignatureUrl, setWlSignatureUrl] = useState("")
+  const [wlSignerName, setWlSignerName] = useState("")
+  // S2B.1 — AI provider override (gemini | mistral). null = default env.
+  const [wlAiProvider, setWlAiProvider] = useState<"gemini" | "mistral" | null>(null)
   const [wlLoading, setWlLoading] = useState(false)
   const [wlSaving, setWlSaving] = useState(false)
   const [wlStorageBackend, setWlStorageBackend] = useState<"supabase" | "local_fallback">("supabase")
@@ -295,6 +303,10 @@ export function SettingsPageSurface() {
         setWlTagline(c.tagline ?? "")
         setWlBrandColor(c.brandColor ?? "#6366f1")
         setWlLogoUrl(c.logoUrl ?? "")
+        setWlAiEnabled(c.aiEnabled !== false) // missing/true → true
+        setWlSignatureUrl(c.signatureUrl ?? "")
+        setWlSignerName(c.signerName ?? "")
+        setWlAiProvider(c.aiProvider ?? null)
         setWlStorageBackend(c.storageBackend ?? "supabase")
         setWlPersistenceStatus(c.persistenceStatus ?? "synced")
       })
@@ -314,6 +326,10 @@ export function SettingsPageSurface() {
           tagline: wlTagline || null,
           brandColor: wlBrandColor,
           logoUrl: wlLogoUrl || null,
+          aiEnabled: wlAiEnabled,
+          signatureUrl: wlSignatureUrl || null,
+          signerName: wlSignerName || null,
+          aiProvider: wlAiProvider,
         }),
       })
       if (res.ok) {
@@ -534,28 +550,45 @@ export function SettingsPageSurface() {
   const validatedBaseline = cockpit.data.state.snapshotHistory.find(
     (snapshot) => snapshot.snapshotId === cockpit.data?.state.validatedBaselineSnapshotId
   )
+
+  // Issue 2 DPO — preconditii pentru "Valideaza snapshot ca baseline".
+  // Doc 07 cere: 0 findings open + 0 remediations active + 0 missing evidence.
+  const auditSummary = cockpit.data.auditReadinessSummary
+  const baselineOpenFindings = auditSummary?.openFindings ?? 0
+  const baselineRemediationOpen = auditSummary?.remediationOpen ?? 0
+  const baselineMissingEvidence = auditSummary?.missingEvidenceItems ?? 0
+  const baselineActiveDrifts = auditSummary?.activeDrifts ?? 0
+  const baselinePreconditionsBlocked =
+    baselineOpenFindings > 0 ||
+    baselineRemediationOpen > 0 ||
+    baselineMissingEvidence > 0 ||
+    baselineActiveDrifts > 0
+  const baselineBlockerReasons = [
+    baselineOpenFindings > 0 ? `${baselineOpenFindings} finding-uri deschise` : null,
+    baselineRemediationOpen > 0 ? `${baselineRemediationOpen} sarcini de remediere active` : null,
+    baselineMissingEvidence > 0 ? `${baselineMissingEvidence} dovezi pendinte` : null,
+    baselineActiveDrifts > 0 ? `${baselineActiveDrifts} drift-uri deschise` : null,
+  ].filter((reason): reason is string => reason !== null)
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Setări</p>
-        <h1 className="mt-1.5 text-2xl font-semibold text-eos-text">
-          {isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
-        </h1>
-        <p className="mt-1 text-sm text-eos-text-tertiary">
-          {isSolo
+    <div className="space-y-6">
+      <V3PageHero
+        breadcrumbs={[{ label: "Setări", current: true }]}
+        title={isSolo ? "Administrezi organizația și planul" : "Administrezi contextul operational"}
+        description={
+          isSolo
             ? "Aici rămân doar organizația, membrii, notificările și drumul către planul de facturare."
-            : "Context, acces si operare. Executia ramane in Scaneaza, De rezolvat si Rapoarte."}
-        </p>
-        <div className="mt-3">
-          <span className="rounded-full border border-eos-border bg-eos-surface-variant px-3 py-1 text-xs font-medium text-eos-text-tertiary">
+            : "Context, acces și operare. Execuția rămâne în Scanează, De rezolvat și Rapoarte."
+        }
+        eyebrowBadges={
+          <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
             {isSolo ? "admin firmă" : "operational admin"}
           </span>
-        </div>
-      </div>
+        }
+      />
 
       <div className="space-y-6">
-        <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
           <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
             <h2 className="text-lg font-semibold text-eos-text-muted">Automatizări recurente</h2>
             <p className="mt-2 text-sm text-eos-text-tertiary">
@@ -600,12 +633,52 @@ export function SettingsPageSurface() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Link>
             </div>
+
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-eos-text-muted">Echipa cabinetului</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
+                    Adaugă colegi cu roluri (compliance, reviewer, viewer). Multi-seat pentru cabinete cu 2-15 oameni.
+                  </p>
+                </div>
+                <CalendarClock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <Link
+                href="/dashboard/settings/team"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-eos-primary transition hover:text-eos-primary"
+              >
+                Gestionează echipa
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+
+            <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-eos-text-muted">Cron-uri & observabilitate</p>
+                  <p className="mt-1 text-sm leading-6 text-eos-text-tertiary">
+                    Joburi automate (reminder fiscal, P300, ANAF retry, SPV monitor). Last-run + status pentru audit.
+                  </p>
+                </div>
+                <CalendarClock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <Link
+                href="/dashboard/settings/cron-status"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-eos-primary transition hover:text-eos-primary"
+              >
+                Vezi status cron-uri
+                <ArrowRight className="size-4" strokeWidth={2} />
+              </Link>
+            </div>
+
+            <AIPrivacyModeCard />
           </div>
         </div>
 
         {/* Tab navigation */}
         <div className="space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Zone Setari</p>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Zone setari</p>
           <div className="overflow-x-auto pb-1">
             <div className="flex min-w-max gap-0 border-b border-eos-border-subtle">
               {visibleTabs.map((tab) => (
@@ -614,7 +687,7 @@ export function SettingsPageSurface() {
                   type="button"
                   onClick={() => setActiveTab(tab.value)}
                   className={[
-                    "inline-flex min-h-[56px] min-w-[152px] flex-col items-start whitespace-normal border-b-2 px-4 py-3 text-left transition-colors",
+                    "inline-flex min-h-[56px] w-[156px] shrink-0 flex-col items-start whitespace-normal border-b-2 px-4 py-3 text-left transition-colors",
                     activeTab === tab.value
                       ? "border-b-2 border-eos-primary text-eos-text"
                       : "border-transparent text-eos-text-tertiary hover:text-eos-text-muted",
@@ -638,7 +711,7 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">Aici fixezi contextul local de lucru: organizația activă, baseline-ul validat și rezumatul operațional de bază.</p>
             </div>
 
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <h2 className="text-lg font-semibold text-eos-text-muted">Setări spațiu de lucru</h2>
               </div>
@@ -689,8 +762,15 @@ export function SettingsPageSurface() {
                       <div className="flex flex-col gap-2">
                         <button
                           type="button"
-                          disabled={cockpit.busy || !activeSnapshot}
+                          disabled={cockpit.busy || !activeSnapshot || baselinePreconditionsBlocked}
                           onClick={() => void cockpitActions.setValidatedBaseline()}
+                          title={
+                            baselinePreconditionsBlocked
+                              ? `Închide întâi: ${baselineBlockerReasons.join(", ")}.`
+                              : !activeSnapshot
+                                ? "Generează întâi un snapshot prin scanare."
+                                : "Marchează snapshot-ul curent ca reper stabil pentru drift."
+                          }
                           className="inline-flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-variant px-4 py-2 text-sm font-medium text-eos-text-muted transition hover:text-eos-text-muted disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Valideaza snapshot-ul curent
@@ -703,6 +783,11 @@ export function SettingsPageSurface() {
                         >
                           Elimina baseline-ul
                         </button>
+                        {baselinePreconditionsBlocked && !validatedBaseline ? (
+                          <p className="text-xs text-eos-warning">
+                            Închide întâi: {baselineBlockerReasons.join(", ")}.
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -733,7 +818,7 @@ export function SettingsPageSurface() {
             </div>
 
             {canViewClaimStatus ? (
-              <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+              <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                 <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
@@ -838,7 +923,7 @@ export function SettingsPageSurface() {
               </div>
             ) : null}
 
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -1031,7 +1116,7 @@ export function SettingsPageSurface() {
             ) : (
               <div className="space-y-4">
                 {/* ── Email ─────────────────────────────────────────────────── */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <div className="flex items-center gap-2">
                       <Bell className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
@@ -1087,7 +1172,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* ── Webhook ───────────────────────────────────────────────── */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <div className="flex items-center gap-2">
                       <Webhook className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
@@ -1128,7 +1213,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* ── Events ────────────────────────────────────────────────── */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h2 className="text-lg font-semibold text-eos-text-muted">Evenimente monitorizate</h2>
                   </div>
@@ -1206,7 +1291,7 @@ export function SettingsPageSurface() {
             ) : (
               <>
                 {/* Risk level policies */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h3 className="text-base font-semibold text-eos-text-muted">Politici per nivel de risc</h3>
                     <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -1253,7 +1338,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* Category overrides */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h3 className="text-base font-semibold text-eos-text-muted">Excepții pe tip de acțiune</h3>
                     <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -1343,7 +1428,7 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">Aici pui politici locale de drift și acțiuni destructive care nu ar trebui să stea în același flux cu operational sau acces.</p>
             </div>
 
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -1392,7 +1477,7 @@ export function SettingsPageSurface() {
               </div>
             </div>
 
-            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-error-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-eos-error">Reset workspace local</h2>
@@ -1440,12 +1525,12 @@ export function SettingsPageSurface() {
 
             {/* ── GDPR Rights ──────────────────────────────────────────────── */}
             <div className="border-t border-eos-border-subtle pt-6">
-              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">GDPR · Drepturile tale</p>
               <p className="mt-1 text-sm text-eos-text-tertiary">Export, ștergere date de conformitate și solicitare ștergere cont. Aceste acțiuni sunt ireversibile.</p>
             </div>
 
             {/* Art. 20 — Export date */}
-            <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <h2 className="text-lg font-semibold text-eos-text-muted">Exportă datele personale</h2>
                 <p className="mt-1 text-sm text-eos-text-tertiary">
@@ -1471,7 +1556,7 @@ export function SettingsPageSurface() {
             </div>
 
             {/* Art. 17 — Ștergere date conformitate */}
-            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-error-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-eos-error">Șterge datele de conformitate</h2>
@@ -1506,14 +1591,14 @@ export function SettingsPageSurface() {
             </div>
 
             {/* Art. 17 — Solicită ștergere cont */}
-            <div className="rounded-eos-xl border border-eos-error-border bg-eos-surface-variant">
+            <div className="rounded-eos-lg border border-eos-error-border bg-eos-surface-variant">
               <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-eos-error">Solicită ștergerea contului</h2>
                   <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-semibold text-eos-error">GDPR Art. 17</span>
                 </div>
                 <p className="mt-1 text-sm text-eos-text-tertiary">
-                  Trimite o solicitare echipei CompliAI pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
+                  Trimite o solicitare echipei CompliScan pentru ștergerea completă a contului. Procesarea durează maxim 30 de zile.
                 </p>
               </div>
               <div className="px-5 py-5 space-y-4">
@@ -1582,13 +1667,19 @@ export function SettingsPageSurface() {
               <p className="mt-1 text-sm text-eos-text-tertiary">
                 Personalizează cum apare brandul tău în rapoartele și documentele generate pentru clienți.
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Badge variant={wlPersistenceStatus === "fallback" ? "warning" : "success"} className="normal-case tracking-normal">
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <span
+                  className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${
+                    wlPersistenceStatus === "fallback"
+                      ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+                      : "border-eos-success/30 bg-eos-success-soft text-eos-success"
+                  }`}
+                >
                   {wlPersistenceStatus === "fallback" ? "fallback local" : "Supabase synced"}
-                </Badge>
-                <Badge variant="outline" className="normal-case tracking-normal">
+                </span>
+                <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                   {wlStorageBackend === "supabase" ? "storage: supabase" : "storage: local"}
-                </Badge>
+                </span>
               </div>
             </div>
 
@@ -1599,7 +1690,7 @@ export function SettingsPageSurface() {
             ) : (
               <div className="space-y-6">
                 {wlPersistenceStatus === "fallback" ? (
-                  <div className="rounded-eos-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4 text-sm text-eos-text">
+                  <div className="rounded-eos-lg border border-amber-500/30 bg-amber-500/5 px-5 py-4 text-sm text-eos-text">
                     Brandingul este disponibil, dar persistă momentan pe fallback local. Nu îl trata ca adevăr
                     de producție până când traseul Supabase nu revine la `synced`.
                   </div>
@@ -1607,7 +1698,7 @@ export function SettingsPageSurface() {
 
                 {/* Preview strip */}
                 <div
-                  className="flex items-center gap-4 rounded-eos-xl border px-5 py-4"
+                  className="flex items-center gap-4 rounded-eos-lg border px-5 py-4"
                   style={{ borderColor: wlBrandColor + "33", backgroundColor: wlBrandColor + "0d" }}
                 >
                   <div
@@ -1633,7 +1724,7 @@ export function SettingsPageSurface() {
                 </div>
 
                 {/* Form */}
-                <div className="rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+                <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant">
                   <div className="border-b border-eos-border-subtle px-5 pt-5 pb-4">
                     <h3 className="text-base font-semibold text-eos-text-muted">Identitate vizuală</h3>
                   </div>
@@ -1664,7 +1755,7 @@ export function SettingsPageSurface() {
                         <div className="mt-2 flex items-center gap-3">
                           <input
                             type="color"
-                            className="h-9 w-12 cursor-pointer rounded-eos-md border border-eos-border bg-transparent p-0.5"
+                            className="h-9 w-12 cursor-pointer rounded-eos-sm border border-eos-border bg-transparent p-0.5"
                             value={wlBrandColor}
                             onChange={(e) => setWlBrandColor(e.target.value)}
                           />
@@ -1689,6 +1780,132 @@ export function SettingsPageSurface() {
                         />
                         <p className="mt-1 text-xs text-eos-text-tertiary">URL public accesibil — apare în antetul rapoartelor exportate.</p>
                       </label>
+                    </div>
+
+                    {/* S1.3 — AI ON/OFF toggle per client */}
+                    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-eos-text-muted">
+                            Generare AI documente
+                          </p>
+                          <p className="mt-1 text-xs text-eos-text-tertiary">
+                            {wlAiEnabled
+                              ? "Documentele se generează cu Gemini EU pe baza șabloanelor + datele organizației. Ideal pentru viteză."
+                              : "Documentele se construiesc deterministic din șabloane validate, fără apel AI. Recomandat pentru clienți sensibili (banking, healthcare, public sector)."}
+                          </p>
+                          <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+                            stare curentă: {wlAiEnabled ? "AI ON · Gemini EU" : "AI OFF · template-only"}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={wlAiEnabled}
+                          onClick={() => setWlAiEnabled((prev) => !prev)}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors ${
+                            wlAiEnabled ? "bg-eos-primary" : "bg-eos-border"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              wlAiEnabled ? "translate-x-6" : "translate-x-1"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* S2B.1 — AI provider selector (Gemini default / Mistral EU sovereignty) */}
+                    {wlAiEnabled && (
+                      <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                        <p className="text-sm font-semibold text-eos-text-muted">
+                          Provider AI
+                        </p>
+                        <p className="mt-1 text-xs text-eos-text-tertiary">
+                          Default-ul de sistem este Google Gemini (US/EU regional). Pentru
+                          clienți care cer suveranitate strictă (banking/healthcare/public
+                          sector EU), poți comuta la Mistral Large 2 (sediu Paris, hosting EU).
+                        </p>
+                        <div className="mt-3 grid gap-2 md:grid-cols-3">
+                          <ProviderOption
+                            id={null}
+                            currentValue={wlAiProvider}
+                            label="Default sistem"
+                            sublabel="Folosește setarea env (gemini)"
+                            onSelect={() => setWlAiProvider(null)}
+                          />
+                          <ProviderOption
+                            id="gemini"
+                            currentValue={wlAiProvider}
+                            label="Google Gemini"
+                            sublabel="Rapid · regional EU/US"
+                            onSelect={() => setWlAiProvider("gemini")}
+                          />
+                          <ProviderOption
+                            id="mistral"
+                            currentValue={wlAiProvider}
+                            label="Mistral EU"
+                            sublabel="Suveranitate · sediu Paris"
+                            onSelect={() => setWlAiProvider("mistral")}
+                          />
+                        </div>
+                        <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary">
+                          stare: {wlAiProvider === "mistral"
+                            ? "MISTRAL EU forțat"
+                            : wlAiProvider === "gemini"
+                              ? "GEMINI forțat"
+                              : "default sistem (config env)"}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* S1.5 — Signature upload pentru footer document */}
+                    <div className="rounded-eos-lg border border-eos-border bg-eos-surface-variant p-4">
+                      <div className="mb-3">
+                        <p className="text-sm font-semibold text-eos-text-muted">
+                          Semnătură consultant (opțional)
+                        </p>
+                        <p className="mt-1 text-xs text-eos-text-tertiary">
+                          Apare în footer-ul documentelor generate sau exportate. Recomandat: PNG cu fundal transparent, max 400×120px.
+                        </p>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <label className="block">
+                          <span className="text-xs font-medium text-eos-text-muted">URL imagine semnătură</span>
+                          <input
+                            className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                            placeholder="https://..."
+                            value={wlSignatureUrl}
+                            onChange={(e) => setWlSignatureUrl(e.target.value)}
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="text-xs font-medium text-eos-text-muted">Numele afișat sub semnătură</span>
+                          <input
+                            className="mt-1.5 h-9 w-full rounded-eos-lg border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text outline-none focus:border-eos-border-strong transition-all"
+                            placeholder="Diana Popescu, DPO"
+                            value={wlSignerName}
+                            onChange={(e) => setWlSignerName(e.target.value)}
+                          />
+                        </label>
+                      </div>
+                      {wlSignatureUrl && /^https?:\/\//.test(wlSignatureUrl) && (
+                        <div className="mt-3 rounded-eos-md border border-dashed border-eos-border bg-white/5 p-3">
+                          <p className="font-mono text-[10.5px] uppercase tracking-[0.06em] text-eos-text-tertiary mb-2">
+                            Preview
+                          </p>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={wlSignatureUrl}
+                            alt="Semnătură consultant"
+                            className="max-h-16 max-w-[280px] object-contain"
+                          />
+                          {wlSignerName && (
+                            <p className="mt-1 text-xs text-eos-text-muted">{wlSignerName}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1982,4 +2199,42 @@ export function SettingsPageSurface() {
       setRemovingMembershipId(null)
     }
   }
+}
+
+// ── S2B.1 — AI provider option card ──────────────────────────────────────────
+
+function ProviderOption({
+  id,
+  currentValue,
+  label,
+  sublabel,
+  onSelect,
+}: {
+  id: "gemini" | "mistral" | null
+  currentValue: "gemini" | "mistral" | null
+  label: string
+  sublabel: string
+  onSelect: () => void
+}) {
+  const selected = id === currentValue
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={[
+        "rounded-eos-md border p-3 text-left transition-colors",
+        selected
+          ? "border-eos-primary bg-eos-primary/[0.08]"
+          : "border-eos-border bg-eos-surface hover:border-eos-border-strong",
+      ].join(" ")}
+    >
+      <p className={[
+        "text-sm font-semibold",
+        selected ? "text-eos-primary" : "text-eos-text-muted",
+      ].join(" ")}>
+        {label}
+      </p>
+      <p className="mt-0.5 text-[11px] text-eos-text-tertiary">{sublabel}</p>
+    </button>
+  )
 }

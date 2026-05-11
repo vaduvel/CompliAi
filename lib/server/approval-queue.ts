@@ -9,6 +9,22 @@
 import { supabaseInsert, supabaseSelect, supabaseUpdate } from "./supabase-rest"
 import { hasSupabaseConfig } from "./supabase-rest"
 
+// Detect network failures pentru fallback la local store.
+// Mirror la helper-ul din anaf-submit-flow + supabase-rest.
+function isSupabaseUnreachable(err: unknown): boolean {
+  if (!(err instanceof Error)) return false
+  const msg = err.message.toLowerCase()
+  if (msg.includes("fetch failed")) return true
+  if (msg.includes("enotfound")) return true
+  if (msg.includes("econnrefused")) return true
+  if (msg.includes("network error")) return true
+  if (msg.includes("etimedout")) return true
+  if (msg.includes("supabase circuit open")) return true
+  const cause = (err as { cause?: unknown }).cause
+  if (cause && cause !== err) return isSupabaseUnreachable(cause)
+  return false
+}
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export type PendingActionType =
@@ -171,7 +187,12 @@ export async function createPendingAction(params: {
   }
 
   if (hasSupabaseConfig()) {
-    await supabaseInsert("pending_actions", [row], "public")
+    try {
+      await supabaseInsert("pending_actions", [row], "public")
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      getLocalActions(params.orgId).push(row)
+    }
   } else {
     getLocalActions(params.orgId).push(row)
   }
@@ -188,55 +209,70 @@ export async function listPendingActions(
     limit?: number
   }
 ): Promise<PendingAction[]> {
-  if (hasSupabaseConfig()) {
-    let query = `select=*&org_id=eq.${orgId}&order=created_at.desc`
+  const listLocal = () => {
+    let actions = getLocalActions(orgId)
     if (filters?.status?.length) {
-      query += `&status=in.(${filters.status.join(",")})`
+      actions = actions.filter((a) => filters.status!.includes(a.status as PendingActionStatus))
     }
     if (filters?.actionType?.length) {
-      query += `&action_type=in.(${filters.actionType.join(",")})`
+      actions = actions.filter((a) => filters.actionType!.includes(a.action_type as PendingActionType))
     }
     if (filters?.riskLevel?.length) {
-      query += `&risk_level=in.(${filters.riskLevel.join(",")})`
+      actions = actions.filter((a) => filters.riskLevel!.includes(a.risk_level as RiskLevel))
     }
-    query += `&limit=${filters?.limit ?? 100}`
+    return actions
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, filters?.limit ?? 100)
+      .map(rowToAction)
+  }
+  if (hasSupabaseConfig()) {
+    try {
+      let query = `select=*&org_id=eq.${orgId}&order=created_at.desc`
+      if (filters?.status?.length) {
+        query += `&status=in.(${filters.status.join(",")})`
+      }
+      if (filters?.actionType?.length) {
+        query += `&action_type=in.(${filters.actionType.join(",")})`
+      }
+      if (filters?.riskLevel?.length) {
+        query += `&risk_level=in.(${filters.riskLevel.join(",")})`
+      }
+      query += `&limit=${filters?.limit ?? 100}`
 
-    const rows = await supabaseSelect<PendingActionRow>("pending_actions", query, "public")
-    return rows.map(rowToAction)
+      const rows = await supabaseSelect<PendingActionRow>("pending_actions", query, "public")
+      return rows.map(rowToAction)
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return listLocal()
+    }
   }
 
-  // Local fallback
-  let actions = getLocalActions(orgId)
-  if (filters?.status?.length) {
-    actions = actions.filter((a) => filters.status!.includes(a.status as PendingActionStatus))
-  }
-  if (filters?.actionType?.length) {
-    actions = actions.filter((a) => filters.actionType!.includes(a.action_type as PendingActionType))
-  }
-  if (filters?.riskLevel?.length) {
-    actions = actions.filter((a) => filters.riskLevel!.includes(a.risk_level as RiskLevel))
-  }
-  return actions
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .slice(0, filters?.limit ?? 100)
-    .map(rowToAction)
+  // Local fallback (no Supabase config)
+  return listLocal()
 }
 
 export async function getPendingAction(
   orgId: string,
   actionId: string
 ): Promise<PendingAction | null> {
-  if (hasSupabaseConfig()) {
-    const rows = await supabaseSelect<PendingActionRow>(
-      "pending_actions",
-      `select=*&org_id=eq.${orgId}&id=eq.${actionId}&limit=1`,
-      "public"
-    )
-    return rows[0] ? rowToAction(rows[0]) : null
+  const fromLocal = () => {
+    const row = getLocalActions(orgId).find((a) => a.id === actionId)
+    return row ? rowToAction(row) : null
   }
-
-  const row = getLocalActions(orgId).find((a) => a.id === actionId)
-  return row ? rowToAction(row) : null
+  if (hasSupabaseConfig()) {
+    try {
+      const rows = await supabaseSelect<PendingActionRow>(
+        "pending_actions",
+        `select=*&org_id=eq.${orgId}&id=eq.${actionId}&limit=1`,
+        "public"
+      )
+      return rows[0] ? rowToAction(rows[0]) : null
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return fromLocal()
+    }
+  }
+  return fromLocal()
 }
 
 export async function decidePendingAction(params: {
@@ -248,51 +284,59 @@ export async function decidePendingAction(params: {
 }): Promise<PendingAction | null> {
   const now = new Date().toISOString()
 
-  if (hasSupabaseConfig()) {
-    // Read current to append audit trail
-    const current = await getPendingAction(params.orgId, params.actionId)
-    if (!current || current.status !== "pending") return null
+  const decideLocal = () => {
+    const row = getLocalActions(params.orgId).find((a) => a.id === params.actionId)
+    if (!row || row.status !== "pending") return null
 
-    const updatedTrail: AuditEntry[] = [
-      ...current.auditTrail,
-      {
-        action: params.decision,
-        by: params.decidedByEmail,
-        at: now,
-        detail: params.note,
-      },
+    row.status = params.decision
+    row.decided_at = now
+    row.decided_by_email = params.decidedByEmail
+    row.decision_note = params.note ?? null
+    row.audit_trail = [
+      ...(Array.isArray(row.audit_trail) ? row.audit_trail : []),
+      { action: params.decision, by: params.decidedByEmail, at: now, detail: params.note },
     ]
-
-    await supabaseUpdate(
-      "pending_actions",
-      `org_id=eq.${params.orgId}&id=eq.${params.actionId}`,
-      {
-        status: params.decision,
-        decided_at: now,
-        decided_by_email: params.decidedByEmail,
-        decision_note: params.note ?? null,
-        audit_trail: updatedTrail,
-      },
-      "public"
-    )
-
-    return getPendingAction(params.orgId, params.actionId)
+    return rowToAction(row)
   }
 
-  // Local fallback
-  const row = getLocalActions(params.orgId).find((a) => a.id === params.actionId)
-  if (!row || row.status !== "pending") return null
+  if (hasSupabaseConfig()) {
+    try {
+      // Read current to append audit trail
+      const current = await getPendingAction(params.orgId, params.actionId)
+      if (!current || current.status !== "pending") return null
 
-  row.status = params.decision
-  row.decided_at = now
-  row.decided_by_email = params.decidedByEmail
-  row.decision_note = params.note ?? null
-  row.audit_trail = [
-    ...(Array.isArray(row.audit_trail) ? row.audit_trail : []),
-    { action: params.decision, by: params.decidedByEmail, at: now, detail: params.note },
-  ]
+      const updatedTrail: AuditEntry[] = [
+        ...current.auditTrail,
+        {
+          action: params.decision,
+          by: params.decidedByEmail,
+          at: now,
+          detail: params.note,
+        },
+      ]
 
-  return rowToAction(row)
+      await supabaseUpdate(
+        "pending_actions",
+        `org_id=eq.${params.orgId}&id=eq.${params.actionId}`,
+        {
+          status: params.decision,
+          decided_at: now,
+          decided_by_email: params.decidedByEmail,
+          decision_note: params.note ?? null,
+          audit_trail: updatedTrail,
+        },
+        "public"
+      )
+
+      return getPendingAction(params.orgId, params.actionId)
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return decideLocal()
+    }
+  }
+
+  // Local fallback (no Supabase config)
+  return decideLocal()
 }
 
 export async function markExecuted(
@@ -301,30 +345,38 @@ export async function markExecuted(
   result?: Record<string, unknown>
 ): Promise<void> {
   const now = new Date().toISOString()
-
-  if (hasSupabaseConfig()) {
-    const current = await getPendingAction(orgId, actionId)
-    const trail: AuditEntry[] = [
-      ...(current?.auditTrail ?? []),
-      { action: "executed", by: "system", at: now },
-    ]
-
-    await supabaseUpdate(
-      "pending_actions",
-      `org_id=eq.${orgId}&id=eq.${actionId}`,
-      {
-        executed_at: now,
-        execution_result: result ?? null,
-        audit_trail: trail,
-      },
-      "public"
-    )
-  } else {
+  const markLocal = () => {
     const row = getLocalActions(orgId).find((a) => a.id === actionId)
     if (row) {
       row.executed_at = now
       row.execution_result = result ?? null
     }
+  }
+
+  if (hasSupabaseConfig()) {
+    try {
+      const current = await getPendingAction(orgId, actionId)
+      const trail: AuditEntry[] = [
+        ...(current?.auditTrail ?? []),
+        { action: "executed", by: "system", at: now },
+      ]
+
+      await supabaseUpdate(
+        "pending_actions",
+        `org_id=eq.${orgId}&id=eq.${actionId}`,
+        {
+          executed_at: now,
+          execution_result: result ?? null,
+          audit_trail: trail,
+        },
+        "public"
+      )
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      markLocal()
+    }
+  } else {
+    markLocal()
   }
 }
 
@@ -338,31 +390,39 @@ export async function markAutoExecuted(
   result?: Record<string, unknown>
 ): Promise<void> {
   const now = new Date().toISOString()
-
-  if (hasSupabaseConfig()) {
-    const current = await getPendingAction(orgId, actionId)
-    const trail: AuditEntry[] = [
-      ...(current?.auditTrail ?? []),
-      { action: "auto_executed", by: "system", at: now, detail: "Semi-auto: 24h window elapsed without rejection" },
-    ]
-    await supabaseUpdate(
-      "pending_actions",
-      `org_id=eq.${orgId}&id=eq.${actionId}`,
-      {
-        status: "auto_executed",
-        executed_at: now,
-        execution_result: result ?? null,
-        audit_trail: trail,
-      },
-      "public"
-    )
-  } else {
+  const markLocal = () => {
     const row = getLocalActions(orgId).find((a) => a.id === actionId)
     if (row) {
       row.status = "auto_executed"
       row.executed_at = now
       row.execution_result = result ?? null
     }
+  }
+
+  if (hasSupabaseConfig()) {
+    try {
+      const current = await getPendingAction(orgId, actionId)
+      const trail: AuditEntry[] = [
+        ...(current?.auditTrail ?? []),
+        { action: "auto_executed", by: "system", at: now, detail: "Semi-auto: 24h window elapsed without rejection" },
+      ]
+      await supabaseUpdate(
+        "pending_actions",
+        `org_id=eq.${orgId}&id=eq.${actionId}`,
+        {
+          status: "auto_executed",
+          executed_at: now,
+          execution_result: result ?? null,
+          audit_trail: trail,
+        },
+        "public"
+      )
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      markLocal()
+    }
+  } else {
+    markLocal()
   }
 }
 

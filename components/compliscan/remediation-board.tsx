@@ -35,6 +35,10 @@ type RemediationBoardProps = {
   onMarkDone: (id: string) => void
   onBulkMarkDone?: (ids: string[]) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
+  onSoftDeleteEvidence: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  onRestoreEvidence: (id: string, evidenceId: string) => void | Promise<void>
+  onPermanentlyDeleteEvidence?: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  canPermanentlyDeleteEvidence?: boolean
   onExport: (id: string) => void
 }
 
@@ -67,6 +71,10 @@ export function RemediationBoard({
   onMarkDone,
   onBulkMarkDone,
   onAttachEvidence,
+  onSoftDeleteEvidence,
+  onRestoreEvidence,
+  onPermanentlyDeleteEvidence,
+  canPermanentlyDeleteEvidence,
   onExport,
 }: RemediationBoardProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -124,7 +132,7 @@ export function RemediationBoard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.12em]">
+              <CardTitle className="text-sm font-semibold text-eos-text uppercase tracking-[0.14em]">
                 Task-uri de suport
               </CardTitle>
               <Badge className="border-eos-border bg-eos-bg-inset text-eos-text-muted">
@@ -137,11 +145,8 @@ export function RemediationBoard({
           </div>
 
           {openCount > 0 && (
-            <details className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
-              <summary className="cursor-pointer list-none text-xs text-eos-text-muted">
-                Filtru: {activeFilterLabel}
-              </summary>
-              <div className="mt-2 space-y-2">
+            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-2.5">
+              <div className="space-y-2">
                 {filterGroups.map((group) => (
                   <FilterCluster
                     key={group.label}
@@ -152,7 +157,7 @@ export function RemediationBoard({
                   />
                 ))}
               </div>
-            </details>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -244,6 +249,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -260,6 +269,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -276,6 +289,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -292,6 +309,10 @@ export function RemediationBoard({
             onToggleSelect={toggleSelect}
             onMarkDone={onMarkDone}
             onAttachEvidence={onAttachEvidence}
+            onSoftDeleteEvidence={onSoftDeleteEvidence}
+            onRestoreEvidence={onRestoreEvidence}
+            onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+            canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
             onExport={onExport}
           />
         )}
@@ -317,6 +338,10 @@ export function RemediationBoard({
                   highlighted={highlightedTaskId === task.id}
                   onMarkDone={onMarkDone}
                   onAttachEvidence={onAttachEvidence}
+                  onSoftDeleteEvidence={onSoftDeleteEvidence}
+                  onRestoreEvidence={onRestoreEvidence}
+                  onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+                  canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
                   onExport={onExport}
                 />
               </div>
@@ -340,7 +365,7 @@ function FilterCluster({
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <div className="flex flex-wrap gap-2">
         {values.map((value) => {
           const filter = filters.find((item) => item.value === value)
@@ -378,6 +403,10 @@ function TaskGroup({
   onToggleSelect,
   onMarkDone,
   onAttachEvidence,
+  onSoftDeleteEvidence,
+  onRestoreEvidence,
+  onPermanentlyDeleteEvidence,
+  canPermanentlyDeleteEvidence,
   onExport,
 }: {
   title: string
@@ -390,6 +419,10 @@ function TaskGroup({
   onToggleSelect?: (id: string) => void
   onMarkDone: (id: string) => void
   onAttachEvidence: (id: string, file: File, kind: TaskEvidenceKind) => void | Promise<void>
+  onSoftDeleteEvidence: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  onRestoreEvidence: (id: string, evidenceId: string) => void | Promise<void>
+  onPermanentlyDeleteEvidence?: (id: string, evidenceId: string, reason: string) => void | Promise<void>
+  canPermanentlyDeleteEvidence?: boolean
   onExport: (id: string) => void
 }) {
   const toneClass =
@@ -433,6 +466,10 @@ function TaskGroup({
               highlighted={highlightedTaskId === task.id}
               onMarkDone={onMarkDone}
               onAttachEvidence={onAttachEvidence}
+              onSoftDeleteEvidence={onSoftDeleteEvidence}
+              onRestoreEvidence={onRestoreEvidence}
+              onPermanentlyDeleteEvidence={onPermanentlyDeleteEvidence}
+              canPermanentlyDeleteEvidence={canPermanentlyDeleteEvidence}
               onExport={onExport}
             />
           </div>
@@ -472,7 +509,7 @@ function RelatedFindingAnchor({
       <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
               Caz asociat
             </p>
             <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />

@@ -6,17 +6,21 @@ import { toast } from "sonner"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3FilterBar, V3FrameworkTag, V3KpiStrip, V3PageHero, V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3"
 import { Button } from "@/components/evidence-os/Button"
-import { Card } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import type { PortfolioTaskRow } from "@/lib/server/portfolio"
 
-const priorityVariant = {
-  P1: "destructive",
-  P2: "warning",
-  P3: "outline",
+const priorityTone: Record<PortfolioTaskRow["priority"], V3SeverityTone> = {
+  P1: "critical",
+  P2: "high",
+  P3: "medium",
+}
+
+const severityTone: Record<PortfolioTaskRow["severity"], V3SeverityTone> = {
+  critical: "critical",
+  high: "high",
+  medium: "medium",
+  low: "low",
 } as const
 
 type GroupBy = "none" | "orgName" | "severity" | "priority"
@@ -83,12 +87,15 @@ function BatchActionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-eos-xl border border-eos-border bg-eos-surface shadow-2xl">
+      <div className="w-full max-w-lg overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface shadow-2xl">
         <div className="border-b border-eos-border-subtle px-6 py-4">
-          <h2 className="text-base font-semibold text-eos-text">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+            Acțiune în lot
+          </p>
+          <h2 data-display-text="true" className="mt-1 font-display text-[16px] font-semibold tracking-[-0.015em] text-eos-text">
             Batch acțiuni — {tasks.length} taskuri selectate
           </h2>
-          <p className="mt-1 text-xs text-eos-text-muted">
+          <p className="mt-1 text-[12px] text-eos-text-muted">
             Generează draft-uri pentru {byOrg.size} firme. Confirmare individuală per firmă.
           </p>
         </div>
@@ -97,9 +104,7 @@ function BatchActionModal({
           {Array.from(byOrg.entries()).map(([orgId, orgTasks]) => (
             <div key={orgId} className="py-3">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-                  {orgTasks[0].orgName}
-                </Badge>
+                <V3FrameworkTag label={orgTasks[0].orgName} />
                 <span className="text-xs text-eos-text-muted">
                   {orgTasks.length} task{orgTasks.length > 1 ? "uri" : ""}
                 </span>
@@ -107,12 +112,9 @@ function BatchActionModal({
               <ul className="mt-1.5 space-y-1 pl-2">
                 {orgTasks.map((task) => (
                   <li key={task.taskId} className="flex items-start gap-2 text-xs text-eos-text-muted">
-                    <Badge
-                      variant={priorityVariant[task.priority]}
-                      className="mt-0.5 shrink-0 text-[9px] normal-case tracking-normal"
-                    >
+                    <V3RiskPill tone={priorityTone[task.priority]} className="mt-0.5 shrink-0">
                       {task.priority}
-                    </Badge>
+                    </V3RiskPill>
                     <span className="text-eos-text">{task.title}</span>
                   </li>
                 ))}
@@ -198,6 +200,12 @@ export function PortfolioTasksPage() {
   const grouped = useMemo(() => groupTasks(filteredTasks, groupBy), [filteredTasks, groupBy])
 
   const p1Count = useMemo(() => tasks.filter((t) => t.priority === "P1").length, [tasks])
+  const dueCount = useMemo(() => tasks.filter((t) => t.dueDate).length, [tasks])
+  const selectedCount = selected.size
+  const highSeverityCount = useMemo(
+    () => tasks.filter((t) => t.severity === "critical" || t.severity === "high").length,
+    [tasks]
+  )
 
   function toggleTask(key: string) {
     setSelected((prev) => {
@@ -213,6 +221,7 @@ export function PortfolioTasksPage() {
 
   // Count unique orgs
   const uniqueOrgs = new Set(tasks.map((t) => t.orgName)).size
+  const activeFilter = filterPriority !== "all" ? filterPriority : filterSeverity !== "all" ? filterSeverity : "all"
 
   return (
     <div className="space-y-6">
@@ -224,21 +233,20 @@ export function PortfolioTasksPage() {
         />
       )}
 
-      <PageIntro
-        eyebrow="Portofoliu"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Portofoliu" }, { label: "Task-uri", current: true }]}
         title="De rezolvat — cross-client"
-        description="Toate taskurile active din portofoliu, grupate și filtrabile. Selectează și acționează în lot."
-        badges={
+        description={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {tasks.length} taskuri din {uniqueOrgs} firme
-            </Badge>
-            {p1Count > 0 ? (
-              <Badge variant="destructive" dot className="normal-case tracking-normal">
-                {p1Count} P1
-              </Badge>
-            ) : null}
+            Toate taskurile active din portofoliu, grupate și filtrabile. Selectează și acționează în lot, dar confirmarea rămâne individuală per firmă.
           </>
+        }
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-2">
+            <V3FrameworkTag label="taskuri" count={tasks.length} />
+            <V3FrameworkTag label="firme" count={uniqueOrgs} />
+            {p1Count > 0 ? <V3RiskPill tone="critical">{p1Count} P1</V3RiskPill> : null}
+          </div>
         }
         actions={
           selected.size > 0 ? (
@@ -254,22 +262,76 @@ export function PortfolioTasksPage() {
         }
       />
 
-      {/* Filters bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-48 flex-1">
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Caută firmă, task, owner..."
-            className="w-full rounded-eos-md border border-eos-border bg-eos-surface py-2 pl-3 pr-3 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none"
-          />
-        </div>
+      <V3KpiStrip
+        items={[
+          {
+            id: "tasks",
+            label: "Taskuri active",
+            value: tasks.length,
+            detail: `${uniqueOrgs} firme afectate`,
+            stripe: tasks.length > 0 ? "info" : undefined,
+          },
+          {
+            id: "priority",
+            label: "Prioritate P1",
+            value: p1Count,
+            detail: p1Count > 0 ? "necesită decizie rapidă" : "fără P1 acum",
+            stripe: p1Count > 0 ? "critical" : undefined,
+            valueTone: p1Count > 0 ? "critical" : "neutral",
+          },
+          {
+            id: "risk",
+            label: "Severitate ridicată",
+            value: highSeverityCount,
+            detail: "critical + high",
+            stripe: highSeverityCount > 0 ? "warning" : undefined,
+            valueTone: highSeverityCount > 0 ? "warning" : "neutral",
+          },
+          {
+            id: "due",
+            label: "Cu scadență",
+            value: dueCount,
+            detail: "au termen explicit",
+          },
+          {
+            id: "selected",
+            label: "Selectate",
+            value: selectedCount,
+            detail: selectedCount > 0 ? "pregătite pentru lot" : "niciun batch activ",
+            valueTone: selectedCount > 0 ? "info" : "neutral",
+          },
+        ]}
+      />
 
+      <V3FilterBar
+        tabs={[
+          { id: "all", label: "Toate", count: tasks.length },
+          { id: "P1", label: "P1", count: p1Count },
+          { id: "critical", label: "Critice", count: tasks.filter((t) => t.severity === "critical").length },
+          { id: "high", label: "Ridicate", count: tasks.filter((t) => t.severity === "high").length },
+        ]}
+        activeTab={activeFilter}
+        onTabChange={(id) => {
+          if (id === "P1") {
+            setFilterPriority("P1")
+            setFilterSeverity("all")
+          } else if (id === "critical" || id === "high") {
+            setFilterSeverity(id)
+            setFilterPriority("all")
+          } else {
+            setFilterSeverity("all")
+            setFilterPriority("all")
+          }
+        }}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Caută firmă, task, owner..."
+        rightSlot={
+          <>
         <select
           value={filterSeverity}
           onChange={(e) => setFilterSeverity(e.target.value as FilterSeverity)}
-          className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text focus:outline-none"
+              className="h-[30px] rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 font-mono text-[11px] text-eos-text-muted focus:outline-none"
         >
           <option value="all">Toate severitățile</option>
           <option value="critical">Critical</option>
@@ -281,7 +343,7 @@ export function PortfolioTasksPage() {
         <select
           value={filterPriority}
           onChange={(e) => setFilterPriority(e.target.value as FilterPriority)}
-          className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text focus:outline-none"
+              className="h-[30px] rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 font-mono text-[11px] text-eos-text-muted focus:outline-none"
         >
           <option value="all">Toate prioritățile</option>
           <option value="P1">P1 — Urgent</option>
@@ -289,7 +351,7 @@ export function PortfolioTasksPage() {
           <option value="P3">P3 — Standard</option>
         </select>
 
-        <div className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-1 py-1">
+            <div className="flex h-[30px] items-center gap-1 rounded-eos-sm border border-eos-border bg-eos-surface px-1">
           <Layers className="ml-2 size-3.5 text-eos-text-muted" strokeWidth={2} />
           {(["none", "orgName", "severity", "priority"] as GroupBy[]).map((g) => (
             <button
@@ -298,7 +360,7 @@ export function PortfolioTasksPage() {
               onClick={() => setGroupBy(g)}
               className={`rounded-eos-sm px-2.5 py-1 text-[11px] font-medium transition ${
                 groupBy === g
-                  ? "bg-eos-primary text-white"
+                      ? "bg-white/[0.06] text-eos-text"
                   : "text-eos-text-muted hover:text-eos-text"
               }`}
             >
@@ -306,40 +368,55 @@ export function PortfolioTasksPage() {
             </button>
           ))}
         </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Task list */}
       {filteredTasks.length === 0 ? (
-        <Card className="border-eos-border bg-eos-surface">
-          <EmptyState
-            title="Nu sunt taskuri"
-            label={tasks.length > 0 ? "Niciun task nu corespunde filtrelor." : "Nu există taskuri active."}
-            icon={ClipboardList}
-            className="px-5 py-10"
-          />
-        </Card>
+        <section className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-10 text-center">
+          <ClipboardList className="mx-auto mb-3 size-6 text-eos-text-tertiary" strokeWidth={1.6} />
+          <h3 data-display-text="true" className="font-display text-[16px] font-semibold text-eos-text">
+            Nu sunt taskuri
+          </h3>
+          <p className="mx-auto mt-1 max-w-md text-[13px] text-eos-text-muted">
+            {tasks.length > 0 ? "Niciun task nu corespunde filtrelor." : "Nu există taskuri active."}
+          </p>
+        </section>
       ) : (
         Object.entries(grouped).map(([groupLabel, groupTasks]) => (
           <div key={groupLabel}>
             {groupBy !== "none" && (
               <div className="mb-2 flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-eos-text">{groupLabel}</h3>
-                <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
-                  {groupTasks.length}
-                </Badge>
+                <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  {groupLabel}
+                </h3>
+                <V3FrameworkTag label="taskuri" count={groupTasks.length} />
               </div>
             )}
-            <Card className="divide-y divide-eos-border-subtle overflow-hidden border-eos-border bg-eos-surface">
+            <div className="space-y-2">
               {groupTasks.map((task) => {
                 const key = `${task.orgId}-${task.taskId}`
                 const isSelected = selected.has(key)
                 return (
-                  <div
+                  <article
                     key={key}
-                    className={`flex flex-wrap items-start gap-3 px-5 py-4 ${
-                      isSelected ? "bg-eos-primary-soft/30" : ""
+                    className={`group relative flex flex-wrap items-center gap-3 overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-4 transition-all duration-150 hover:border-eos-border-strong hover:bg-white/[0.02] ${
+                      isSelected ? "border-eos-primary/40 bg-eos-primary-soft/20" : ""
                     }`}
                   >
+                    <span
+                      className={`absolute left-0 top-0 bottom-0 w-[3px] ${
+                        severityTone[task.severity] === "critical"
+                          ? "bg-eos-error"
+                          : severityTone[task.severity] === "high"
+                            ? "bg-eos-warning"
+                            : severityTone[task.severity] === "medium"
+                              ? "bg-eos-primary/70"
+                              : "bg-eos-border-strong"
+                      }`}
+                      aria-hidden
+                    />
                     <button
                       type="button"
                       onClick={() => toggleTask(key)}
@@ -358,20 +435,15 @@ export function PortfolioTasksPage() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          variant={priorityVariant[task.priority]}
-                          className="text-[10px] normal-case tracking-normal"
-                        >
+                        <V3RiskPill tone={priorityTone[task.priority]}>
                           {task.priority}
-                        </Badge>
-                        <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-                          {task.orgName}
-                        </Badge>
-                        <span className="text-xs text-eos-text-muted">Owner: {task.owner}</span>
+                        </V3RiskPill>
+                        <V3FrameworkTag label={task.orgName} />
+                        <span className="font-mono text-[11px] text-eos-text-muted">Owner: {task.owner}</span>
                       </div>
-                      <p className="mt-2 text-sm font-medium text-eos-text">{task.title}</p>
-                      <p className="mt-1 text-xs leading-5 text-eos-text-muted">{task.evidence}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-eos-text-muted">
+                      <p className="mt-2 text-[13.5px] font-semibold leading-tight tracking-[-0.015em] text-eos-text">{task.title}</p>
+                      <p className="mt-1 text-[12px] leading-5 text-eos-text-muted">{task.evidence}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[11px] text-eos-text-muted">
                         <span>Severitate: {task.severity}</span>
                         {task.dueDate ? <span>• Scadență: {task.dueDate}</span> : null}
                         {task.updatedAtISO ? (
@@ -386,18 +458,18 @@ export function PortfolioTasksPage() {
                       destination="/dashboard/resolve"
                       label="Deschide"
                     />
-                  </div>
+                  </article>
                 )
               })}
-            </Card>
+            </div>
           </div>
         ))
       )}
 
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <div className="flex items-center gap-2 text-eos-text">
           <Flag className="size-4" strokeWidth={1.8} />
-          <span className="font-medium">Queue unificat cross-client</span>
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">Queue unificat cross-client</span>
         </div>
         <p className="mt-1">
           Selectează taskuri din firme diferite și generează draft-uri în lot. Confirmare individuală per firmă — nu se aplică nimic automat.

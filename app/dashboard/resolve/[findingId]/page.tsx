@@ -12,12 +12,18 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import { Button, buttonVariants } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
-import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
 import { LoadingScreen, ErrorScreen } from "@/components/compliscan/route-sections"
 import { useCockpitMutations } from "@/components/compliscan/use-cockpit"
+import {
+  V3PageHero,
+  V3Panel,
+  V3RiskPill,
+  V3FrameworkTag,
+  V3Stepper,
+  type V3SeverityTone,
+  type V3StepperStep,
+} from "@/components/compliscan/v3"
 import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import type { ScanFinding } from "@/lib/compliance/types"
 import {
@@ -26,6 +32,7 @@ import {
   FindingHeroAction,
 } from "@/components/compliscan/finding-cockpit-shared"
 import { DocumentAdoptionCard } from "@/components/compliscan/document-adoption-card"
+import { ShareFindingButton } from "@/components/compliscan/fiscal/ShareFindingButton"
 import {
   getFindingAgeLabel,
   isFindingResolvedLike,
@@ -35,6 +42,7 @@ import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { getCloseGatingRequirements } from "@/lib/compliscan/finding-kernel"
 import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
 import { supportsDocumentAdoption, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
+import type { FindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import type { DocumentType } from "@/lib/server/document-generator"
 
 const GENERATOR_PROGRESS_TOAST_ID = "resolve-document-progress"
@@ -77,6 +85,7 @@ type FindingDetailResponse = {
   finding: FindingDetail
   linkedGeneratedDocument?: LinkedGeneratedDocument | null
   documentFlowState?: "not_required" | "draft_missing" | "draft_ready" | "attached_as_evidence"
+  lifecycle?: FindingLifecycleView
   feedbackMessage?: string
   pendingApproval?: boolean
   actionId?: string
@@ -86,6 +95,18 @@ type FindingDetailResponse = {
     percentage: number
     items: EvidenceCompletenessItem[]
   }
+}
+
+const LIFECYCLE_STAGE_LABELS: Record<FindingLifecycleView["completedStages"][number], string> = {
+  detected: "Detectat",
+  triaged: "Triat",
+  in_progress: "Lucrat",
+  sent_to_client: "Trimis client",
+  client_decided: "Feedback client",
+  evidence_attached: "Dovadă",
+  evidence_validated: "Validat",
+  resolved: "Închis",
+  monitoring: "Dosar",
 }
 
 function getExecutionClassLabel(recipe: ReturnType<typeof buildCockpitRecipe>) {
@@ -127,6 +148,7 @@ export default function FindingDetailPage() {
   const [operationalEvidenceNote, setOperationalEvidenceNote] = useState("")
   const [revalidationConfirmed, setRevalidationConfirmed] = useState(false)
   const [evidenceCompleteness, setEvidenceCompleteness] = useState<FindingDetailResponse["evidenceCompleteness"]>(undefined)
+  const [lifecycle, setLifecycle] = useState<FindingLifecycleView | null>(null)
   const [pendingApprovalId, setPendingApprovalId] = useState<string | null>(null)
   const [nextReviewDateISO, setNextReviewDateISO] = useState(getDefaultReviewDateInput())
   const [manualReviewCycleId, setManualReviewCycleId] = useState<string | null>(null)
@@ -146,6 +168,7 @@ export default function FindingDetailPage() {
     setRevalidationConfirmed(false)
     setNextReviewDateISO(data.finding.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
     setEvidenceCompleteness(data.evidenceCompleteness)
+    setLifecycle(data.lifecycle ?? null)
     if (data.pendingApproval && data.actionId) {
       setPendingApprovalId(data.actionId)
     }
@@ -474,6 +497,7 @@ export default function FindingDetailPage() {
       setNextReviewDateISO(payload.finding?.nextMonitoringDateISO?.slice(0, 10) ?? getDefaultReviewDateInput())
       setRevalidationConfirmed(false)
       setEvidenceCompleteness(payload.evidenceCompleteness)
+      setLifecycle(payload.lifecycle ?? null)
       setPendingApprovalId(null)
       if (options?.redirectTo) {
         router.push(options.redirectTo)
@@ -537,7 +561,20 @@ export default function FindingDetailPage() {
   }
 
   if (loading) return <LoadingScreen variant="section" />
-  if (error || !finding) return <ErrorScreen message={error ?? "Finding inexistent."} variant="section" />
+  if (error || !finding) {
+    const isMissing = !error || /inexistent|not found|404/i.test(error)
+    return (
+      <ErrorScreen
+        message={isMissing ? "Cazul nu mai există sau a fost arhivat." : error ?? "Cazul nu a putut fi încărcat."}
+        hint={
+          isMissing
+            ? "Vezi inbox-ul De rezolvat sau Dosarul pentru cazurile rezolvate."
+            : "Verifică conexiunea și încearcă din nou."
+        }
+        variant="section"
+      />
+    )
+  }
 
   const status = (finding.findingStatus ?? "open") as "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   const statusCfg = getFindingStatusPresentation(finding.findingStatus)
@@ -763,103 +800,138 @@ export default function FindingDetailPage() {
     setStatusFeedback("Urma de adoptare a documentului a fost actualizată în Dosar.")
   }
 
+  const severityTone: V3SeverityTone =
+    finding.severity === "critical"
+      ? "critical"
+      : finding.severity === "high"
+        ? "high"
+        : finding.severity === "medium"
+          ? "medium"
+          : "low"
+  const severityLabel =
+    finding.severity === "critical"
+      ? "Critic"
+      : finding.severity === "high"
+        ? "Ridicat"
+        : finding.severity === "medium"
+          ? "Mediu"
+          : "Scăzut"
+
+  const categoryLabel = finding.category.replace(/_/g, " ")
+
+  const v3Steps: V3StepperStep[] = PROGRESS_STEPS.map((step, i) => ({
+    id: step.id,
+    label: step.label,
+    status:
+      i < currentStepIdx
+        ? "done"
+        : i === currentStepIdx
+          ? "active"
+          : "pending",
+  }))
+
   return (
-    <div className="space-y-4 px-1 sm:space-y-5 sm:px-0">
+    <div className="space-y-4 sm:space-y-5">
 
-      {/* ── Compact case header ──────────────────────────────────────────── */}
-      <div className="space-y-3">
-        {/* Back nav + meta row */}
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href={dashboardRoutes.resolve}
-            className="flex items-center gap-1.5 text-sm text-eos-text-muted transition-colors hover:text-eos-text"
-          >
-            <ArrowLeft className="size-3.5" strokeWidth={2} />
-            De rezolvat
-          </Link>
-          <div className="flex items-center gap-2 text-xs text-eos-text-tertiary">
-            <span>{getFindingAgeLabel(finding.createdAtISO)}</span>
-            {finding.sourceDocument && (
-              <span className="text-eos-border">·</span>
-            )}
-            {finding.sourceDocument && (
-              <span>Sursă: {finding.sourceDocument}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Title + badges */}
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
-            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-eos-text-tertiary">
-              {finding.category.replace(/_/g, " ")}
+      {/* ── V3 hero compact ──────────────────────────────────────────────── */}
+      <V3PageHero
+        compact
+        breadcrumbs={[
+          { label: "Firma mea" },
+          { label: "Acțiuni" },
+          { label: finding.id.toUpperCase(), current: true },
+        ]}
+        eyebrowBadges={
+          <>
+            <V3RiskPill tone={severityTone}>{severityLabel}</V3RiskPill>
+            <V3FrameworkTag label={categoryLabel} tone="neutral" />
+            <V3FrameworkTag label={getExecutionClassLabel(recipe)} tone="neutral" />
+            <V3FrameworkTag label={statusCfg.label} tone={statusCfg.variant === "success" ? "ok" : statusCfg.variant === "warning" ? "high" : statusCfg.variant === "destructive" ? "critical" : "neutral"} />
+          </>
+        }
+        title={finding.title}
+        description={
+          <>
+            {introDescription}
+            <span className="ml-2 inline-flex items-center gap-1.5 font-mono text-[11px] text-eos-text-tertiary">
+              <span>{getFindingAgeLabel(finding.createdAtISO)}</span>
+              {finding.sourceDocument && <span className="text-white/15">·</span>}
+              {finding.sourceDocument && <span>Sursă: {finding.sourceDocument}</span>}
             </span>
-            <Badge variant="outline" className="normal-case tracking-normal text-xs">
-              {getExecutionClassLabel(recipe)}
-            </Badge>
-            <Badge variant={statusCfg.variant} className="normal-case tracking-normal text-xs">
-              {statusCfg.label}
-            </Badge>
+          </>
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            {finding.category === "E_FACTURA" && (
+              <ShareFindingButton findingId={finding.id} findingTitle={finding.title} />
+            )}
+            <Link
+              href={dashboardRoutes.resolve}
+              className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
+            >
+              <ArrowLeft className="size-3.5" strokeWidth={2} />
+              De rezolvat
+            </Link>
           </div>
-          <h1 className="mt-2.5 text-xl font-semibold leading-snug text-eos-text">
-            {finding.title}
-          </h1>
-          {introDescription && (
-            <p className="mt-1.5 text-sm leading-relaxed text-eos-text-muted">
-              {introDescription}
-            </p>
-          )}
-        </div>
-      </div>
+        }
+      />
 
-      {/* ── Status progression rail ──────────────────────────────────────── */}
+      {/* ── V3 stepper ───────────────────────────────────────────────────── */}
       {status !== "dismissed" && (
-        <div className="flex items-center gap-0 overflow-x-auto rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-3">
-          {PROGRESS_STEPS.map((step, i) => {
-            const isPast    = i < currentStepIdx
-            const isCurrent = i === currentStepIdx
-            return (
-              <div key={step.id} className="flex flex-1 items-center">
-                <div className="flex flex-col items-center gap-1.5 shrink-0">
-                  <div className={[
-                    "size-5 rounded-full border-2 grid place-items-center transition-all",
-                    isPast    ? "border-eos-success bg-eos-success"    : "",
-                    isCurrent ? "border-eos-primary bg-eos-primary/15" : "",
-                    !isPast && !isCurrent ? "border-eos-border-subtle bg-eos-surface-variant" : "",
-                  ].join(" ")}>
-                    {isPast
-                      ? <CheckCircle2 className="size-3 text-white" strokeWidth={2.5} />
-                      : <div className={["size-1.5 rounded-full", isCurrent ? "bg-eos-primary" : "bg-eos-border"].join(" ")} />
-                    }
-                  </div>
-                  <span className={[
-                    "text-[10px] font-medium whitespace-nowrap",
-                    isCurrent ? "text-eos-text" : isPast ? "text-eos-success" : "text-eos-text-tertiary",
-                  ].join(" ")}>
-                    {step.label}
-                  </span>
-                </div>
-                {i < PROGRESS_STEPS.length - 1 && (
-                  <div className={[
-                    "h-px flex-1 mx-2 mb-4 rounded-full transition-all",
-                    i < currentStepIdx ? "bg-eos-success" : "bg-eos-border-subtle",
-                  ].join(" ")} />
-                )}
-              </div>
-            )
-          })}
+        <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-3 py-2.5 md:px-4">
+          <V3Stepper steps={v3Steps} />
         </div>
       )}
 
-      {finding.reopenedFromISO && status === "open" ? (
-        <Card className="border-eos-warning-border bg-eos-warning-soft/30">
-          <CardContent className="px-5 py-4">
-            <p className="text-sm text-eos-text">
-              Cazul a mai fost închis pe {new Date(finding.reopenedFromISO).toLocaleDateString("ro-RO")}. Contextul și dovada anterioară rămân disponibile în cockpit pentru comparație și revalidare.
+      {lifecycle ? (
+        <V3Panel
+          eyebrow="Finding lifecycle"
+          title="Detectat → lucrat → dovadă → Dosar, fără pași ascunși"
+          action={<V3FrameworkTag label={lifecycle.statusLabel} tone={lifecycle.dossierReady ? "ok" : "info"} />}
+        >
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(LIFECYCLE_STAGE_LABELS).map(([stage, label]) => {
+              const done = lifecycle.completedStages.includes(stage as FindingLifecycleView["completedStages"][number])
+              return (
+                <span
+                  key={stage}
+                  className={[
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.06em]",
+                    done
+                      ? "border-eos-success/25 bg-eos-success-soft text-eos-success"
+                      : "border-eos-border bg-white/[0.02] text-eos-text-tertiary",
+                  ].join(" ")}
+                >
+                  {done ? <CheckCircle2 className="size-3" strokeWidth={2} /> : <XCircle className="size-3" strokeWidth={2} />}
+                  {label}
+                </span>
+              )
+            })}
+          </div>
+          <div className="mt-4 rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] px-3.5 py-3">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+              Următorul pas
             </p>
-          </CardContent>
-        </Card>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-eos-text-muted">
+              {lifecycle.nextAction}
+            </p>
+            {lifecycle.evidence.sources.length > 0 ? (
+              <p className="mt-2 text-[12px] leading-relaxed text-eos-text-tertiary">
+                Dovadă: {lifecycle.evidence.sources.slice(0, 2).join(" · ")}
+                {lifecycle.evidence.sources.length > 2 ? ` · +${lifecycle.evidence.sources.length - 2}` : ""}
+              </p>
+            ) : null}
+          </div>
+        </V3Panel>
+      ) : null}
+
+      {finding.reopenedFromISO && status === "open" ? (
+        <div className="relative overflow-hidden rounded-eos-lg border border-eos-warning/25 bg-eos-warning-soft/30 px-5 py-3">
+          <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-warning" aria-hidden />
+          <p className="text-[13px] leading-relaxed text-eos-text">
+            Cazul a mai fost închis pe {new Date(finding.reopenedFromISO).toLocaleDateString("ro-RO")}. Contextul și dovada anterioară rămân disponibile în cockpit pentru comparație și revalidare.
+          </p>
+        </div>
       ) : null}
 
       {dossierMomentVisible && linkedGeneratedDocument ? (
@@ -913,106 +985,93 @@ export default function FindingDetailPage() {
             </Button>
           </div>
 
-          <Card className="border-eos-border bg-eos-surface">
-            <CardContent className="space-y-4 px-5 py-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex min-w-0 items-start gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-primary/20 bg-eos-primary-soft text-eos-primary">
-                    <CalendarClock className="size-5" strokeWidth={2} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
-                      Review programat
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-eos-text">
-                      Păstrezi finding-ul pe aceeași urmă de monitorizare și reverificare
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
-                      {manualReviewCycleId
-                        ? "Există deja un review activ pentru acest finding. Îl poți reprograma sau actualiza fără să ieși din cockpit."
-                        : "Dacă vrei o reverificare explicită, o programezi aici și o vezi apoi în Review-uri programate."}
-                    </p>
-                  </div>
-                </div>
-                <Badge variant={manualReviewCycleId ? "outline" : "secondary"} className="normal-case tracking-normal">
-                  {manualReviewCycleId ? "review activ" : "fără review explicit"}
-                </Badge>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
-                <label className="space-y-1.5 text-sm">
-                  <span className="font-medium text-eos-text">Data review-ului</span>
-                  <input
-                    type="date"
-                    value={manualReviewDate}
-                    onChange={(event) => setManualReviewDate(event.target.value)}
-                    className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
-                  />
-                </label>
-                <label className="space-y-1.5 text-sm">
-                  <span className="font-medium text-eos-text">Notă de reverificare</span>
-                  <input
-                    value={manualReviewNotes}
-                    onChange={(event) => setManualReviewNotes(event.target.value)}
-                    placeholder="Ex: reverificăm recipisa SPV, expirarea DPA sau răspunsul vendorului."
-                    className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
-                  />
-                </label>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  data-testid="save-manual-review-cycle"
-                  onClick={() => void saveManualReviewCycle()}
-                  disabled={manualReviewSaving || manualReviewLoading || !manualReviewDate}
-                  className="gap-1.5"
-                >
-                  <CalendarClock className="size-3.5" strokeWidth={2} />
-                  {manualReviewSaving
-                    ? "Se salvează..."
-                    : manualReviewCycleId
-                      ? "Actualizează review-ul"
-                      : "Programează review"}
-                </Button>
-                <Link
-                  href={dashboardRoutes.reviewCycles}
-                  className={buttonVariants({ variant: "outline", className: "gap-1.5" })}
-                >
-                  Vezi toate review-urile
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <V3Panel
+            eyebrow={
+              <span className="inline-flex items-center gap-1.5 text-eos-primary">
+                <CalendarClock className="size-3" strokeWidth={2} />
+                Review programat
+              </span>
+            }
+            title="Păstrezi finding-ul pe aceeași urmă de monitorizare și reverificare"
+            action={
+              <V3FrameworkTag
+                label={manualReviewCycleId ? "Review activ" : "fără review"}
+                tone={manualReviewCycleId ? "ok" : "neutral"}
+              />
+            }
+            className="border-eos-primary/20 bg-eos-primary/[0.03]"
+          >
+            <p className="mb-4 text-[13px] leading-relaxed text-eos-text-muted">
+              {manualReviewCycleId
+                ? "Există deja un review activ pentru acest finding. Îl poți reprograma sau actualiza fără să ieși din cockpit."
+                : "Dacă vrei o reverificare explicită, o programezi aici și o vezi apoi în Review-uri programate."}
+            </p>
+            <div className="grid gap-3 md:grid-cols-[220px_minmax(0,1fr)]">
+              <label className="space-y-1.5 text-[12px]">
+                <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                  Data review-ului
+                </span>
+                <input
+                  type="date"
+                  value={manualReviewDate}
+                  onChange={(event) => setManualReviewDate(event.target.value)}
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[13px] text-eos-text outline-none transition-colors focus:border-eos-border-strong"
+                />
+              </label>
+              <label className="space-y-1.5 text-[12px]">
+                <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+                  Notă de reverificare
+                </span>
+                <input
+                  value={manualReviewNotes}
+                  onChange={(event) => setManualReviewNotes(event.target.value)}
+                  placeholder="Ex: reverificăm recipisa SPV, expirarea DPA sau răspunsul vendorului."
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[13px] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary focus:border-eos-border-strong"
+                />
+              </label>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                data-testid="save-manual-review-cycle"
+                onClick={() => void saveManualReviewCycle()}
+                disabled={manualReviewSaving || manualReviewLoading || !manualReviewDate}
+                className="gap-1.5"
+              >
+                <CalendarClock className="size-3.5" strokeWidth={2} />
+                {manualReviewSaving
+                  ? "Se salvează..."
+                  : manualReviewCycleId
+                    ? "Actualizează review-ul"
+                    : "Programează review"}
+              </Button>
+              <Link
+                href={dashboardRoutes.reviewCycles}
+                className={buttonVariants({ variant: "outline", className: "gap-1.5" })}
+              >
+                Vezi toate review-urile
+              </Link>
+            </div>
+          </V3Panel>
         </div>
       ) : null}
 
       {resolvedMomentVisible && !needsDossierHandoff ? (
-        <Card data-testid="finding-risk-resolved" className="border-eos-success/35 bg-eos-success-soft/60">
-          <CardContent className="space-y-3 px-5 py-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="flex min-w-0 items-start gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-success/25 bg-white/70 text-eos-success">
-                  <CheckCircle2 className="size-5" strokeWidth={2} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
-                    Risc rezolvat
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-eos-text">
-                    {finding.title} a fost rezolvat cu documentul confirmat
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
-                    Documentul a trecut confirmarea și validarea din cockpit. Următorul pas este separat:
-                    îl adaugi la Dosar, iar abia după aceea cazul intră în monitorizare.
-                  </p>
-                </div>
-              </div>
-              <Badge variant="success" className="normal-case tracking-normal">
-                rezolvat
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
+        <V3Panel
+          eyebrow={
+            <span className="inline-flex items-center gap-1.5 text-eos-success">
+              <CheckCircle2 className="size-3" strokeWidth={2.5} />
+              Risc rezolvat
+            </span>
+          }
+          title={`${finding.title} a fost rezolvat cu documentul confirmat`}
+          action={<V3FrameworkTag label="Rezolvat" tone="ok" />}
+          className="border-eos-success/25 bg-eos-success-soft/30"
+        >
+          <p className="text-[13px] leading-relaxed text-eos-text-muted">
+            Documentul a trecut confirmarea și validarea din cockpit. Următorul pas este separat:
+            îl adaugi la Dosar, iar abia după aceea cazul intră în monitorizare.
+          </p>
+        </V3Panel>
       ) : null}
 
       {/* ── Hero Action — above the fold, dominant ────────────────────── */}
@@ -1055,16 +1114,17 @@ export default function FindingDetailPage() {
           {!hasGenerator ? (
             <>
               {recipe.workflowLink ? (
-                <a href={recipe.workflowLink.href} target="_blank" rel="noopener noreferrer">
-                  <Button
-                    data-testid="open-workflow-link"
-                    className="gap-1.5"
-                    variant="outline"
-                  >
+                <Button
+                  asChild
+                  data-testid="open-workflow-link"
+                  className="gap-1.5"
+                  variant="outline"
+                >
+                  <Link href={recipe.workflowLink.href}>
                     <FileText className="size-3.5" strokeWidth={2} />
-                    {recipe.workflowLink.label} (tab nou)
-                  </Button>
-                </a>
+                    {recipe.workflowLink.label}
+                  </Link>
+                </Button>
               ) : null}
               <Button
                 data-testid="mark-finding-resolved"
@@ -1088,17 +1148,21 @@ export default function FindingDetailPage() {
       )}
 
       {needsDossierHandoff ? (
-        <div className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+        <div className="relative overflow-hidden rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.04] px-4 py-4 shadow-[0_0_32px_rgba(59,130,246,0.05)] sm:px-5 sm:py-5">
+          <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+          <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
             Acum faci asta
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-eos-text sm:text-[15px]">
+          <p
+            data-display-text="true"
+            className="mt-1.5 font-display text-[15px] font-medium leading-snug tracking-[-0.015em] text-eos-text sm:text-[16px]"
+          >
             Riscul este deja rezolvat cu documentul confirmat. Ultimul pas este să trimiți documentul la Dosar; abia apoi pornește monitorizarea.
           </p>
-          <p className="mt-1.5 text-sm text-eos-text-muted">
+          <p className="mt-1.5 text-[13px] leading-relaxed text-eos-text-muted">
             Dosarul primește rezultatul, nu procesul. Până nu faci pasul ăsta, cazul nu trebuie tratat ca monitorizat.
           </p>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <Button
               data-testid="send-document-to-dosar"
               onClick={() =>
@@ -1113,33 +1177,45 @@ export default function FindingDetailPage() {
               Adaugă documentul la Dosar
             </Button>
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-eos-text-muted">
+          <p className="mt-3 font-mono text-[11px] leading-relaxed text-eos-text-muted">
             După ce documentul intră în Dosar, cockpitul marchează clar monitoring-ul pe aceeași urmă.
           </p>
         </div>
       ) : null}
 
       {requiresOperationalEvidence ? (
-        <Card className={`bg-eos-surface border-2 transition-colors ${operationalEvidenceNote.trim() ? "border-eos-success/40" : "border-eos-primary/20"}`}>
-          <CardContent className="space-y-3 px-5 py-5">
+        <div
+          className={`relative overflow-hidden rounded-eos-lg border bg-eos-surface transition-colors ${
+            operationalEvidenceNote.trim() ? "border-eos-success/40" : "border-eos-primary/25"
+          }`}
+        >
+          <span
+            className={`absolute left-0 top-0 bottom-0 w-[3px] ${
+              operationalEvidenceNote.trim() ? "bg-eos-success" : "bg-eos-primary"
+            }`}
+            aria-hidden
+          />
+          <div className="space-y-3 px-5 py-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-2.5">
-                <span className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full transition-colors ${operationalEvidenceNote.trim() ? "bg-eos-success/15" : "bg-eos-primary/10"}`}>
-                  <FileText className={`size-3 ${operationalEvidenceNote.trim() ? "text-eos-success" : "text-eos-primary"}`} strokeWidth={2.5} />
+                <span
+                  className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-eos-sm transition-colors ${
+                    operationalEvidenceNote.trim() ? "bg-eos-success-soft text-eos-success" : "bg-eos-primary/10 text-eos-primary"
+                  }`}
+                >
+                  <FileText className="size-3.5" strokeWidth={2.5} />
                 </span>
                 <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
+                  <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
                     {evidenceCardCopy.eyebrow}
                   </p>
-                  <p className="mt-1 text-sm text-eos-text-muted">
+                  <p className="mt-1 text-[13px] leading-relaxed text-eos-text-muted">
                     {evidenceCardCopy.body}
                   </p>
                 </div>
               </div>
               {operationalEvidenceNote.trim() ? (
-                <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.1em] bg-eos-success/10 text-eos-success">
-                  Completat
-                </span>
+                <V3FrameworkTag label="Completat" tone="ok" />
               ) : null}
             </div>
             <textarea
@@ -1147,10 +1223,12 @@ export default function FindingDetailPage() {
               value={operationalEvidenceNote}
               onChange={(event) => setOperationalEvidenceNote(event.target.value)}
               rows={4}
-              className={`ring-focus w-full rounded-eos-md border bg-eos-surface-variant px-3 py-2.5 text-sm text-eos-text outline-none placeholder:text-eos-text-muted resize-none transition-colors ${operationalEvidenceNote.trim() ? "border-eos-success/40" : "border-eos-border"}`}
+              className={`w-full resize-none rounded-eos-sm border bg-white/[0.02] px-2.5 py-2 text-[13px] leading-[1.5] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary ${
+                operationalEvidenceNote.trim() ? "border-eos-success/40" : "border-eos-border hover:border-eos-border-strong"
+              }`}
               placeholder={evidenceCardCopy.placeholder}
             />
-            <p className="text-xs text-eos-text-muted">
+            <p className="font-mono text-[10.5px] text-eos-text-muted">
               {evidenceCardCopy.footer}
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -1170,66 +1248,66 @@ export default function FindingDetailPage() {
                 {recipe.closureCTA ?? recipe.primaryCTA.label}
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : null}
 
       {requiresRevalidation ? (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="space-y-4 px-5 py-5">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Revalidare necesară
-              </p>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                Reconfirmi dovada existentă, stabilești următorul control și lași cazul sub watch pe aceeași urmă.
-              </p>
-            </div>
-            <div className="rounded-eos-md border border-eos-border-subtle bg-eos-bg-inset px-4 py-3">
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-eos-text-tertiary">Dovada anterioară</p>
-              <p className="mt-1 text-sm text-eos-text">
-                {previousEvidence || "Nu există încă o dovadă anterioară explicită; completează nota de revalidare în contextul juridic al cazului."}
-              </p>
-            </div>
-            <label className="flex items-start gap-3 rounded-eos-md border border-eos-border px-4 py-3 text-sm text-eos-text">
-              <input
-                data-testid="revalidation-confirmation"
-                type="checkbox"
-                checked={revalidationConfirmed}
-                onChange={(event) => setRevalidationConfirmed(event.target.checked)}
-                className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
-              />
-              <span>Confirm că am reverificat dovada și că rămâne valabilă pentru perioada următoare.</span>
+        <V3Panel
+          eyebrow="Revalidare necesară"
+          title="Reconfirmi dovada existentă"
+        >
+          <p className="mb-3 text-[13px] text-eos-text-muted">
+            Stabilești următorul control și lași cazul sub watch pe aceeași urmă.
+          </p>
+          <div className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] px-3 py-2.5">
+            <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+              Dovada anterioară
+            </p>
+            <p className="mt-1 text-[13px] text-eos-text">
+              {previousEvidence || "Nu există încă o dovadă anterioară explicită; completează nota de revalidare în contextul juridic al cazului."}
+            </p>
+          </div>
+          <label className="mt-3 flex items-start gap-3 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 py-2.5 text-[13px] text-eos-text">
+            <input
+              data-testid="revalidation-confirmation"
+              type="checkbox"
+              checked={revalidationConfirmed}
+              onChange={(event) => setRevalidationConfirmed(event.target.checked)}
+              className="mt-0.5 size-4 rounded border-eos-border accent-eos-primary"
+            />
+            <span>Confirm că am reverificat dovada și că rămâne valabilă pentru perioada următoare.</span>
+          </label>
+          <div className="mt-3 space-y-1.5">
+            <label className="block font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
+              Următor review
             </label>
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-eos-text">Următor review</label>
-              <input
-                data-testid="revalidation-next-review-date"
-                type="date"
-                value={nextReviewDateISO}
-                onChange={(event) => setNextReviewDateISO(event.target.value)}
-                className="ring-focus h-9 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
-              />
-            </div>
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <Button
-                data-testid="mark-finding-resolved"
-                onClick={() =>
-                  updateStatus("resolved", {
-                    evidenceNote: operationalEvidenceNote.trim() || undefined,
-                    revalidationConfirmed,
-                    newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
-                  })
-                }
-                disabled={resolveDisabled}
-                className="gap-1.5"
-              >
-                <CheckCircle2 className="size-3.5" strokeWidth={2} />
-                {recipe.closureCTA ?? recipe.primaryCTA.label}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            <input
+              data-testid="revalidation-next-review-date"
+              type="date"
+              value={nextReviewDateISO}
+              onChange={(event) => setNextReviewDateISO(event.target.value)}
+              className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[13px] text-eos-text outline-none transition-colors focus:border-eos-border-strong"
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button
+              data-testid="mark-finding-resolved"
+              onClick={() =>
+                updateStatus("resolved", {
+                  evidenceNote: operationalEvidenceNote.trim() || undefined,
+                  revalidationConfirmed,
+                  newReviewDateISO: requiresRevalidation ? nextReviewDateISO : undefined,
+                })
+              }
+              disabled={resolveDisabled}
+              className="gap-1.5"
+            >
+              <CheckCircle2 className="size-3.5" strokeWidth={2} />
+              {recipe.closureCTA ?? recipe.primaryCTA.label}
+            </Button>
+          </div>
+        </V3Panel>
       ) : null}
 
       {statusFeedback &&
@@ -1237,33 +1315,34 @@ export default function FindingDetailPage() {
         !(status === "confirmed" && hasGenerator) &&
         !inlineOperationalAction &&
         !needsDossierHandoff && (
-        <Card className="border-eos-primary/30 bg-eos-primary-soft/20">
-          <CardContent className="px-5 py-4">
-            <p className="text-sm text-eos-text">{statusFeedback}</p>
-          </CardContent>
-        </Card>
-      )}
+          <div className="relative overflow-hidden rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.04] px-5 py-3">
+            <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+            <p className="text-[13px] text-eos-text">{statusFeedback}</p>
+          </div>
+        )}
 
       {documentaryGeneratorVisible && generatorDocumentType ? (
         generatorDocumentType === "ropa" ? (
-          <Card className="border-eos-primary/25 bg-eos-surface-variant">
-            <CardContent className="px-5 py-5 sm:px-6 sm:py-6 space-y-4">
-              <div className="flex items-center gap-2 text-base font-semibold text-eos-text">
-                <FileText className="size-4 text-eos-primary" strokeWidth={2} />
+          <V3Panel
+            eyebrow={
+              <span className="inline-flex items-center gap-1.5 text-eos-primary">
+                <FileText className="size-3" strokeWidth={2} />
                 Registru de Prelucrări (RoPA)
-              </div>
-              <p className="text-sm text-eos-text-muted">
-                Completezi registrul de prelucrări în pagină dedicată, apoi te întorci în cockpit cu dovada atașată.
-              </p>
-              <Link
-                className={buttonVariants({ className: "gap-2" })}
-                href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(dashboardFindingRoute(finding.id))}`}
-              >
-                <FileText className="size-3.5" strokeWidth={2} />
-                Deschide RoPA
-              </Link>
-            </CardContent>
-          </Card>
+              </span>
+            }
+            title="Completează registrul în pagină dedicată"
+          >
+            <p className="mb-3 text-[13px] leading-relaxed text-eos-text-muted">
+              Completezi registrul de prelucrări în pagină dedicată, apoi te întorci în cockpit cu dovada atașată.
+            </p>
+            <Link
+              className={buttonVariants({ className: "gap-1.5" })}
+              href={`/dashboard/ropa?findingId=${encodeURIComponent(finding.id)}&returnTo=${encodeURIComponent(dashboardFindingRoute(finding.id))}`}
+            >
+              <FileText className="size-3.5" strokeWidth={2} />
+              Deschide RoPA
+            </Link>
+          </V3Panel>
         ) : (
         <GeneratorDrawer
           open
@@ -1307,14 +1386,17 @@ export default function FindingDetailPage() {
 
       {/* ── Pending approval banner ─────────────────────────────────────── */}
       {pendingApprovalId && (
-        <Card className="border-eos-warning/30 bg-eos-warning/5">
-          <CardContent className="flex items-center gap-3 px-5 py-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-eos-warning/10">
-              <CheckCircle2 className="h-4 w-4 text-eos-warning" strokeWidth={2} />
+        <div className="relative overflow-hidden rounded-eos-lg border border-eos-warning/25 bg-eos-warning-soft/30 px-5 py-3">
+          <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-warning" aria-hidden />
+          <div className="flex items-center gap-3">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-eos-sm bg-eos-warning-soft text-eos-warning">
+              <CheckCircle2 className="size-3.5" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-eos-text">Acțiune trimisă spre aprobare</p>
-              <p className="mt-0.5 text-xs text-eos-text-tertiary">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
+                Acțiune trimisă spre aprobare
+              </p>
+              <p className="mt-1 text-[13px] leading-relaxed text-eos-text-muted">
                 Rezolvarea necesită aprobare explicită. Următorul pas:{" "}
                 <Link href="/dashboard/approvals" className="font-medium text-eos-primary hover:underline">
                   deschide coada de aprobări
@@ -1322,54 +1404,57 @@ export default function FindingDetailPage() {
                 și aprobă sau respinge. Dacă politica e semi-auto, acțiunea se execută automat în 24h dacă nu este respinsă.
               </p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* ── Evidence completeness ────────────────────────────────────────── */}
       {evidenceCompleteness && evidenceCompleteness.total > 0 && status !== "under_monitoring" && (
-        <Card>
-          <CardContent className="px-5 py-4">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-eos-text-tertiary">
-                Dovadă — {evidenceCompleteness.completed}/{evidenceCompleteness.total}
-              </p>
-              <span className="text-xs font-semibold tabular-nums text-eos-text-tertiary">
-                {evidenceCompleteness.percentage}%
-              </span>
-            </div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-eos-surface-active">
-              <div
-                className="h-full rounded-full bg-eos-primary transition-all"
-                style={{ width: `${evidenceCompleteness.percentage}%` }}
-              />
-            </div>
-            <div className="mt-3 space-y-1.5">
-              {evidenceCompleteness.items.map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-xs">
-                  {item.done ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-eos-success" strokeWidth={2} />
-                  ) : (
-                    <XCircle className="h-3.5 w-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={1.5} />
-                  )}
-                  <span className={item.done ? "text-eos-text-muted" : "text-eos-text-tertiary"}>
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <V3Panel
+          eyebrow={`Dovadă — ${evidenceCompleteness.completed}/${evidenceCompleteness.total}`}
+          action={
+            <span className="font-mono text-[10.5px] font-semibold tabular-nums text-eos-text-muted">
+              {evidenceCompleteness.percentage}%
+            </span>
+          }
+        >
+          <div className="h-[3px] w-full overflow-hidden rounded-full bg-white/[0.04]">
+            <div
+              className="h-full rounded-full bg-eos-primary transition-all duration-700"
+              style={{ width: `${evidenceCompleteness.percentage}%` }}
+            />
+          </div>
+          <div className="mt-3 space-y-1.5">
+            {evidenceCompleteness.items.map((item) => (
+              <div key={item.label} className="flex items-center gap-2 text-[12.5px]">
+                {item.done ? (
+                  <CheckCircle2 className="size-3.5 shrink-0 text-eos-success" strokeWidth={2} />
+                ) : (
+                  <XCircle className="size-3.5 shrink-0 text-eos-text-tertiary" strokeWidth={1.5} />
+                )}
+                <span className={item.done ? "text-eos-text-muted" : "text-eos-text-tertiary"}>
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </V3Panel>
       )}
 
       {/* ── Metadata footer ────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3 text-xs text-eos-text-muted">
+      <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] text-eos-text-muted">
         <span>ID: {finding.id}</span>
         {finding.findingStatusUpdatedAtISO && (
-          <span>Actualizat: {new Date(finding.findingStatusUpdatedAtISO).toLocaleDateString("ro-RO")}</span>
+          <>
+            <span className="text-white/10">·</span>
+            <span>Actualizat: {new Date(finding.findingStatusUpdatedAtISO).toLocaleDateString("ro-RO")}</span>
+          </>
         )}
         {finding.nextMonitoringDateISO && (
-          <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
+          <>
+            <span className="text-white/10">·</span>
+            <span>Următor control: {new Date(finding.nextMonitoringDateISO).toLocaleDateString("ro-RO")}</span>
+          </>
         )}
       </div>
     </div>

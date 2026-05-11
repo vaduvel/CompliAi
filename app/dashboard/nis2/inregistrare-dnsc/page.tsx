@@ -23,10 +23,10 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
+import { V3Intro } from "@/components/compliscan/v3/compat"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import { useCockpitData } from "@/components/compliscan/use-cockpit"
 import { buildDNSCNotificationDraft } from "@/lib/compliance/dnsc-wizard"
@@ -273,31 +273,31 @@ export default function DnscRegistrationPage() {
         </div>
       ) : null}
 
-      <PageIntro
+      <V3Intro
         eyebrow="NIS2 · Înregistrare DNSC"
         title="Wizard de înregistrare la DNSC"
         description="Ghid pas cu pas pentru notificarea obligatorie conform Directivei NIS2 (Legea 58/2023)."
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               Pas {currentIdx} / {STEPS.length}
-            </Badge>
+            </V3Pill>
             {dnscStatus === "confirmed" ? (
-              <Badge dot variant="success" className="normal-case tracking-normal">
+              <V3Pill dot variant="success" className="normal-case tracking-normal">
                 Trimis
-              </Badge>
+              </V3Pill>
             ) : dnscStatus === "submitted" ? (
-              <Badge dot variant="warning" className="normal-case tracking-normal">
+              <V3Pill dot variant="warning" className="normal-case tracking-normal">
                 În așteptare confirmare
-              </Badge>
+              </V3Pill>
             ) : dnscStatus === "in-progress" ? (
-              <Badge dot variant="warning" className="normal-case tracking-normal">
+              <V3Pill dot variant="warning" className="normal-case tracking-normal">
                 În progres
-              </Badge>
+              </V3Pill>
             ) : (
-              <Badge dot variant="outline" className="normal-case tracking-normal">
+              <V3Pill dot variant="outline" className="normal-case tracking-normal">
                 Neînceput
-              </Badge>
+              </V3Pill>
             )}
           </>
         }
@@ -338,16 +338,16 @@ export default function DnscRegistrationPage() {
 
       {/* ── Pas 1: Eligibilitate ───────────────────────────────────────────────── */}
       {step === "eligibility" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="flex items-center gap-2">
               <Shield className="size-5 text-eos-primary" strokeWidth={2} />
               Verificare eligibilitate NIS2
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-6">
             <div
-              className={`rounded-eos-md border p-4 ${
+              className={`rounded-eos-sm border p-4 ${
                 nis2Certainty === "certain"
                   ? "border-eos-success-border bg-eos-success-soft"
                   : nis2Certainty === "probable"
@@ -376,7 +376,7 @@ export default function DnscRegistrationPage() {
             </div>
 
             {!orgProfile && (
-              <div className="rounded-eos-md border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-text">
+              <div className="rounded-eos-sm border border-eos-warning-border bg-eos-warning-soft p-4 text-sm text-eos-text">
                 <strong>Profilul organizației nu este completat.</strong> Completează-l pentru
                 analiză precisă. Poți continua oricum — draft-ul va fi parțial pre-completat.
               </div>
@@ -401,20 +401,20 @@ export default function DnscRegistrationPage() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* ── Pas 2: Date necesare ───────────────────────────────────────────────── */}
       {step === "data-check" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="flex items-center gap-2">
               <ClipboardList className="size-5 text-eos-primary" strokeWidth={2} />
               Date necesare pentru înregistrare
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-6">
             <p className="text-sm text-eos-text-muted">
               Verifică că ai aceste informații la îndemână înainte de a completa formularul pe
               platforma DNSC. Cele marcate cu ✅ sunt deja în profilul tău.
@@ -467,7 +467,7 @@ export default function DnscRegistrationPage() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant p-3"
+                  className="flex items-start gap-3 rounded-eos-sm border border-eos-border bg-eos-surface-variant p-3"
                 >
                   <CheckSquare
                     className={`mt-0.5 size-4 shrink-0 ${item.ok ? "text-eos-success" : "text-eos-text-muted"}`}
@@ -478,16 +478,16 @@ export default function DnscRegistrationPage() {
                     <p className="mt-0.5 text-xs text-eos-text-muted">{item.hint}</p>
                   </div>
                   {item.ok && (
-                    <Badge variant="success" className="shrink-0 text-xs normal-case">
+                    <V3Pill variant="success" className="shrink-0 text-xs normal-case">
                       ✓ disponibil
-                    </Badge>
+                    </V3Pill>
                   )}
                 </div>
               ))}
             </div>
 
             {!orgProfile?.cui && (
-              <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-3 text-sm text-eos-text-muted">
                 Lipsește CUI-ul?{" "}
                 <Link href="/dashboard" className="text-eos-primary underline underline-offset-2">
                   Completează profilul organizației
@@ -506,20 +506,20 @@ export default function DnscRegistrationPage() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* ── Pas 3: Platforma DNSC ─────────────────────────────────────────────── */}
       {step === "platform" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="flex items-center gap-2">
               <ExternalLink className="size-5 text-eos-primary" strokeWidth={2} />
               Platforma NIS2@RO — DNSC
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-6">
             <p className="text-sm text-eos-text-muted leading-relaxed">
               Înregistrarea oficială se face pe platforma DNSC. Generează mai întâi draft-ul cu
               datele tale pre-completate, apoi urmează pașii de pe platformă.
@@ -550,7 +550,7 @@ export default function DnscRegistrationPage() {
                   text: 'Trimite formularul și salvează numărul de înregistrare primit',
                 },
               ].map((item) => (
-                <div key={item.step} className="flex gap-3 rounded-eos-md border border-eos-border p-3">
+                <div key={item.step} className="flex gap-3 rounded-eos-sm border border-eos-border p-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-eos-primary text-[11px] font-bold text-eos-primary-text">
                     {item.step}
                   </span>
@@ -582,27 +582,27 @@ export default function DnscRegistrationPage() {
                 <FileText className="size-4" strokeWidth={2} />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* ── Pas 4: Draft notificare ───────────────────────────────────────────── */}
       {step === "draft" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="flex items-center gap-2">
               <FileText className="size-5 text-eos-primary" strokeWidth={2} />
               Draft notificare NIS2 — DNSC
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-5">
             <p className="text-sm text-eos-text-muted">
               Draft-ul de mai jos este pre-completat cu datele din profilul tău. Câmpurile marcate
               cu <code className="rounded bg-eos-bg-inset px-1 text-xs">[DE COMPLETAT]</code> trebuie
               completate manual înainte de trimitere.
             </p>
 
-            <div className="max-h-[400px] overflow-y-auto rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
+            <div className="max-h-[400px] overflow-y-auto rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4">
               <pre className="whitespace-pre-wrap text-xs leading-relaxed text-eos-text">
                 {draftContent}
               </pre>
@@ -645,22 +645,22 @@ export default function DnscRegistrationPage() {
                 <ArrowRight className="size-4" strokeWidth={2} />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* ── Pas 5: Confirmare ─────────────────────────────────────────────────── */}
       {step === "confirm" && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="flex items-center gap-2">
               <Send className="size-5 text-eos-primary" strokeWidth={2} />
               Confirmare și pași următori
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-6">
             {dnscStatus === "confirmed" ? (
-              <div className="rounded-eos-md border border-eos-success-border bg-eos-success-soft p-4">
+              <div className="rounded-eos-sm border border-eos-success-border bg-eos-success-soft p-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="size-5 text-eos-success" strokeWidth={2} />
                   <span className="font-medium text-eos-text">
@@ -706,14 +706,14 @@ export default function DnscRegistrationPage() {
                       type="button"
                       onClick={() => void saveStatus(opt.s)}
                       disabled={saving}
-                      className={`flex w-full items-center gap-3 rounded-eos-md border px-4 py-3 text-left text-sm transition hover:border-eos-primary/60 hover:bg-eos-primary-soft ${
+                      className={`flex w-full items-center gap-3 rounded-eos-sm border px-4 py-3 text-left text-sm transition hover:border-eos-primary/60 hover:bg-eos-primary-soft ${
                         dnscStatus === opt.s
                           ? "border-eos-primary bg-eos-primary-soft font-medium text-eos-primary"
                           : "border-eos-border bg-eos-surface text-eos-text"
                       }`}
                     >
                       <span
-                        className={`size-4 shrink-0 rounded-full border-2 ${
+                        className={`size-4 shrink-0 rounded-full border ${
                           dnscStatus === opt.s
                             ? "border-eos-primary bg-eos-primary"
                             : "border-eos-border bg-transparent"
@@ -739,7 +739,7 @@ export default function DnscRegistrationPage() {
               </div>
             )}
 
-            <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
+            <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4 text-sm text-eos-text-muted">
               <p className="font-medium text-eos-text">Obligații post-înregistrare:</p>
               <ul className="mt-2 space-y-1">
                 <li>• Raportare incidente în <strong>24h</strong> (avertizare timpurie)</li>
@@ -765,7 +765,7 @@ export default function DnscRegistrationPage() {
                     placeholder="Număr înregistrare DNSC (ex: DNSC-2026-00123)"
                     value={registrationNumber}
                     onChange={(e) => setRegistrationNumber(e.target.value)}
-                    className="flex-1 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none"
+                    className="flex-1 rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-1.5 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none"
                   />
                   <Button
                     size="sm"
@@ -779,7 +779,7 @@ export default function DnscRegistrationPage() {
 
                 {/* Lista corespondență */}
                 {correspondence.length > 0 && (
-                  <div className="divide-y divide-eos-border-subtle rounded-eos-md border border-eos-border bg-eos-surface">
+                  <div className="divide-y divide-eos-border-subtle rounded-eos-sm border border-eos-border bg-eos-surface">
                     {correspondence.map((entry) => (
                       <div key={entry.id} className="flex items-start gap-3 px-3 py-2.5">
                         <span
@@ -810,18 +810,18 @@ export default function DnscRegistrationPage() {
 
                 {/* Add entry form */}
                 {showAddCorrespondence ? (
-                  <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/5 p-3 space-y-2">
+                  <div className="rounded-eos-sm border border-eos-primary/30 bg-eos-primary/5 p-3 space-y-2">
                     <div className="flex gap-2">
                       <input
                         type="date"
                         value={newEntry.date}
                         onChange={(e) => setNewEntry((p) => ({ ...p, date: e.target.value }))}
-                        className="rounded-eos-md border border-eos-border bg-eos-surface px-2 py-1 text-xs text-eos-text focus:border-eos-primary focus:outline-none"
+                        className="rounded-eos-sm border border-eos-border bg-eos-surface px-2 py-1 text-xs text-eos-text focus:border-eos-primary focus:outline-none"
                       />
                       <select
                         value={newEntry.direction}
                         onChange={(e) => setNewEntry((p) => ({ ...p, direction: e.target.value as "sent" | "received" }))}
-                        className="rounded-eos-md border border-eos-border bg-eos-surface px-2 py-1 text-xs text-eos-text focus:border-eos-primary focus:outline-none"
+                        className="rounded-eos-sm border border-eos-border bg-eos-surface px-2 py-1 text-xs text-eos-text focus:border-eos-primary focus:outline-none"
                       >
                         <option value="received">Primit de la DNSC</option>
                         <option value="sent">Trimis la DNSC</option>
@@ -832,7 +832,7 @@ export default function DnscRegistrationPage() {
                       placeholder="Rezumat (ex: Confirmare înregistrare nr. DNSC-2026-00123)"
                       value={newEntry.summary}
                       onChange={(e) => setNewEntry((p) => ({ ...p, summary: e.target.value }))}
-                      className="w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none resize-none"
+                      className="w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-muted focus:border-eos-primary focus:outline-none resize-none"
                     />
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => void addCorrespondenceEntry()} disabled={savingEntry || !newEntry.summary.trim()}>
@@ -869,8 +869,8 @@ export default function DnscRegistrationPage() {
                 </Link>
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
     </div>
   )

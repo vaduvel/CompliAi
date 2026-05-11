@@ -4,7 +4,13 @@ export const maxDuration = 60
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { jsonError } from "@/lib/server/api-response"
-import { requireFreshRole, AuthzError } from "@/lib/server/auth"
+import {
+  requireFreshRole,
+  AuthzError,
+  listUserMemberships,
+  resolveUserMode,
+  type UserMode,
+} from "@/lib/server/auth"
 import { trackEvent } from "@/lib/server/analytics"
 import { mutateStateForOrg } from "@/lib/server/mvp-store"
 import { RequestValidationError } from "@/lib/server/request-validation"
@@ -16,8 +22,29 @@ import {
   type DocumentGenerationInput,
 } from "@/lib/server/document-generator"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
+import { getActiveTemplateForType } from "@/lib/server/cabinet-templates-store"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 const VALID_TYPES = new Set<string>(DOCUMENT_TYPES.map((d) => d.id))
+
+function inferCounterpartyNameFromText(value: string | undefined): string | undefined {
+  if (!value) return undefined
+
+  const patterns = [
+    /\b(?:procesator|processor|furnizor|vendor|provider|contrapartid[ăa]|prestator)\s*[:=\-–]\s*([^\n.;,]+)/i,
+    /\b(?:cu|către|catre|pentru)\s+([A-ZĂÂÎȘȚ][\p{L}\p{N}&.'’ -]{2,80}?(?:SRL|S\.R\.L\.|SA|S\.A\.|IFN|Europe|Ltd|Limited|GmbH|Cloud|Portal|Payments))/iu,
+  ]
+
+  for (const pattern of patterns) {
+    const match = value.match(pattern)
+    const rawCandidate = match?.[1]?.trim().replace(/\s{2,}/g, " ")
+    const legalSuffixMatch = rawCandidate?.match(/^(.+?\b(?:SRL|S\.R\.L\.|SA|S\.A\.|IFN|Ltd|Limited|GmbH|LLC)\b)/i)
+    const candidate = legalSuffixMatch?.[1]?.trim() ?? rawCandidate
+    if (candidate && candidate.length >= 3) return candidate
+  }
+
+  return undefined
+}
 
 export async function POST(request: Request) {
   try {
@@ -43,6 +70,12 @@ export async function POST(request: Request) {
       return jsonError("orgName este obligatoriu.", 400, "ORG_NAME_REQUIRED")
     }
 
+    const whiteLabel = await getWhiteLabelConfig(session.orgId).catch(() => null)
+    const dataFlows = body.dataFlows?.trim() || undefined
+    const counterpartyName =
+      (typeof body.counterpartyName === "string" ? body.counterpartyName.trim() || undefined : undefined) ??
+      (documentType === "dpa" ? inferCounterpartyNameFromText(dataFlows) : undefined)
+
     const input: DocumentGenerationInput = {
       documentType: documentType as DocumentType,
       orgName,
@@ -50,12 +83,13 @@ export async function POST(request: Request) {
       orgSector: body.orgSector?.trim() || undefined,
       orgCui: body.orgCui?.trim() || undefined,
       dpoEmail: body.dpoEmail?.trim() || undefined,
-      dataFlows: body.dataFlows?.trim() || undefined,
-      counterpartyName: typeof body.counterpartyName === "string" ? body.counterpartyName.trim() || undefined : undefined,
+      dataFlows,
+      counterpartyName,
       counterpartyReferenceUrl:
         typeof body.counterpartyReferenceUrl === "string"
           ? body.counterpartyReferenceUrl.trim() || undefined
           : undefined,
+      preparedBy: whiteLabel?.partnerName?.trim() || undefined,
       // Per-role job description fields
       jobTitle: typeof body.jobTitle === "string" ? body.jobTitle.trim() || undefined : undefined,
       department: typeof body.department === "string" ? body.department.trim() || undefined : undefined,
@@ -66,6 +100,28 @@ export async function POST(request: Request) {
       // Contracts
       serviceDescription: typeof body.serviceDescription === "string" ? body.serviceDescription.trim() || undefined : undefined,
       paymentTerms: typeof body.paymentTerms === "string" ? body.paymentTerms.trim() || undefined : undefined,
+      // S1.3 — AI ON/OFF per client. Default true daca whiteLabel lipseste.
+      aiEnabled: whiteLabel?.aiEnabled ?? true,
+      // S2B.1 — Provider override per cabinet (default env: gemini).
+      aiProvider: whiteLabel?.aiProvider ?? undefined,
+    }
+
+    // S1.1 — Daca cabinetul a uploadat template activ pentru acest documentType,
+    // il propagam in input pentru ca generatorul (fallback + prompt Gemini) sa-l
+    // foloseasca.
+    try {
+      const activeTemplate = await resolveActiveTemplateForSession({
+        orgId: session.orgId,
+        userId: session.userId,
+        userMode: session.userMode,
+        documentType: documentType as DocumentType,
+      })
+      if (activeTemplate) {
+        input.cabinetTemplateContent = activeTemplate.content
+        input.cabinetTemplateName = activeTemplate.name
+      }
+    } catch {
+      // missing template store nu blocheaza generarea
     }
 
     const sourceFindingId = body.sourceFindingId?.trim() || undefined
@@ -166,4 +222,40 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Generarea a eșuat."
     return jsonError(message, 500, "DOCUMENT_GENERATION_FAILED")
   }
+}
+
+async function resolveActiveTemplateForSession({
+  orgId,
+  userId,
+  userMode,
+  documentType,
+}: {
+  orgId: string
+  userId: string
+  userMode?: UserMode
+  documentType: DocumentType
+}) {
+  const mode = await resolveUserMode({ userId, userMode }).catch(() => null)
+  if (mode === "partner") {
+    const memberships = await listUserMemberships(userId).catch(() => [])
+    const cabinetMemberships = memberships.filter(
+      (membership) =>
+        membership.status === "active" &&
+        membership.orgId !== orgId &&
+        membership.role === "owner"
+    )
+
+    for (const membership of cabinetMemberships) {
+      const inheritedTemplate = await getActiveTemplateForType(
+        membership.orgId,
+        documentType
+      )
+      if (inheritedTemplate) return inheritedTemplate
+    }
+  }
+
+  const currentOrgTemplate = await getActiveTemplateForType(orgId, documentType)
+  if (currentOrgTemplate) return currentOrgTemplate
+
+  return null
 }

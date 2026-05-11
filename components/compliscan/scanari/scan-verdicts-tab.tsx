@@ -61,7 +61,7 @@ function ManifestMetric({
 }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">{label}</p>
+      <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <p className={`mt-2 text-sm font-semibold ${tone}`}>{value}</p>
     </div>
   )
@@ -93,7 +93,7 @@ function ScanDriftCard({
       </div>
       <div className={`mt-4 grid gap-3 ${compact ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
         <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
             De ce conteaza
           </p>
           <p className="mt-2 text-sm font-medium text-eos-text">
@@ -102,7 +102,7 @@ function ScanDriftCard({
           <p className="mt-1 text-xs text-eos-text-muted">{guidance.severityReason}</p>
         </div>
         <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-          <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+          <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
             Ce faci acum
           </p>
           <p className="mt-2 text-sm font-medium text-eos-text">
@@ -111,7 +111,7 @@ function ScanDriftCard({
         </div>
         {!compact && (
           <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3">
-            <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+            <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
               Dovada
             </p>
             <p className="mt-2 text-sm font-medium text-eos-text">
@@ -200,7 +200,7 @@ function LatestYamlSection({
                   />
                 </div>
                 <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     Preview config
                   </p>
                   <p className="mt-3 line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-eos-text-muted">
@@ -213,7 +213,7 @@ function LatestYamlSection({
                 <p className="text-sm font-medium text-eos-text">Ce controlezi acum</p>
                 <div className="mt-4 space-y-3">
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                    <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                       Articole mapate
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -231,7 +231,7 @@ function LatestYamlSection({
                     </div>
                   </div>
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                    <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                       Ce urmeaza
                     </p>
                     <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">
@@ -401,7 +401,7 @@ function LatestManifestSection({
                   />
                 </div>
                 <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     Preview sursa
                   </p>
                   <p className="mt-3 line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-eos-text-muted">
@@ -416,7 +416,7 @@ function LatestManifestSection({
                 </p>
                 <div className="mt-4 space-y-3">
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                    <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                       Framework-uri
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -434,7 +434,7 @@ function LatestManifestSection({
                     </div>
                   </div>
                   <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                    <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                       Ce faci acum
                     </p>
                     <ul className="mt-3 space-y-2 text-sm text-eos-text-muted">

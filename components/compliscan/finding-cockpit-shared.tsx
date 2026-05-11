@@ -3,9 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, CheckCircle2, FolderKanban, ShieldCheck } from "lucide-react"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { SeverityBadge } from "@/components/evidence-os/SeverityBadge"
+import { V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3"
 import type { ScanFinding } from "@/lib/compliance/types"
 import { DOCUMENT_ADOPTION_LABELS, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
 import {
@@ -87,6 +85,23 @@ function getRecipeBadgePresentation(
     default:
       return { label: recipe.collapsedStatusLabel, variant: "outline" }
   }
+}
+
+function v3ToneFromBadgeVariant(
+  variant: ReturnType<typeof getRecipeBadgePresentation>["variant"]
+): V3SeverityTone {
+  if (variant === "success") return "ok"
+  if (variant === "warning") return "high"
+  if (variant === "destructive") return "critical"
+  if (variant === "default") return "info"
+  return "low"
+}
+
+function v3ToneFromFindingSeverity(severity: ScanFinding["severity"]): V3SeverityTone {
+  if (severity === "critical") return "critical"
+  if (severity === "high") return "high"
+  if (severity === "medium") return "medium"
+  return "low"
 }
 
 function getRecipeMainStepLabel(recipe: CockpitRecipe) {
@@ -234,22 +249,29 @@ export function FindingNarrativeCard({
   )
 
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border-subtle px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <CardTitle className="text-base">{title}</CardTitle>
+            <h3
+              data-display-text="true"
+              className="font-display text-base font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              {title}
+            </h3>
             <p className="max-w-2xl text-sm text-eos-text-muted">{description}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <SeverityBadge severity={finding.severity as "critical" | "high" | "medium" | "low"} />
-            <Badge variant={status.variant} className="normal-case tracking-normal">
+          <div className="flex flex-wrap items-center gap-2">
+            <V3RiskPill tone={v3ToneFromFindingSeverity(finding.severity)}>
+              {finding.severity}
+            </V3RiskPill>
+            <V3RiskPill tone={v3ToneFromBadgeVariant(status.variant)}>
               {status.label}
-            </Badge>
+            </V3RiskPill>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-5">
+      </header>
+      <div className="space-y-4 px-4 py-5">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <NarrativeBlock
             label="Problema"
@@ -270,7 +292,7 @@ export function FindingNarrativeCard({
           </div>
         </div>
 
-        <div className="rounded-eos-md border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
+        <div className="rounded-eos-sm border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-primary">
             Cum arată închiderea
           </p>
@@ -278,18 +300,15 @@ export function FindingNarrativeCard({
         </div>
 
         {hasSecondaryContext ? (
-          <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-3">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
-                  Pregătire, confirmare și revalidare
-                </p>
-                <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-                  Doar contextul care te ajută să închizi corect cazul, fără să aglomereze primul ecran.
-                </p>
-              </div>
-              <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-            </summary>
+          <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
+                Pregătire, confirmare și revalidare
+              </p>
+              <p className="mt-1 text-xs leading-5 text-eos-text-muted">
+                Doar contextul care te ajută să închizi corect cazul, fără să aglomereze primul ecran.
+              </p>
+            </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {narrative.compliSupport ? (
                 <NarrativeBlock
@@ -313,7 +332,7 @@ export function FindingNarrativeCard({
                 />
               ) : null}
             </div>
-          </details>
+          </div>
         ) : null}
 
         <div className="grid gap-3 border-t border-eos-border-subtle pt-4 sm:grid-cols-3">
@@ -321,8 +340,8 @@ export function FindingNarrativeCard({
           <FactLine label="Detectat" value={getFindingAgeLabel(finding.createdAtISO)} />
           <FactLine label="Ref. legală" value={finding.legalReference || "în curs de mapare"} />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -348,22 +367,26 @@ export function FindingHeroAction({
   return (
     <div
       data-testid="finding-hero-action"
-      className="rounded-eos-xl border-2 border-eos-primary/25 bg-gradient-to-br from-eos-primary/[0.06] via-transparent to-transparent px-5 py-5 sm:px-6 sm:py-6"
+      className="relative overflow-hidden rounded-eos-lg border border-eos-primary/25 bg-eos-primary/[0.04] px-4 py-4 shadow-[0_0_32px_rgba(59,130,246,0.05)] sm:px-5 sm:py-5"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-primary">
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary" aria-hidden />
+      <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
         Acum faci asta
       </p>
-      <p className="mt-2 text-sm leading-relaxed text-eos-text sm:text-[15px]">
+      <p
+        data-display-text="true"
+        className="mt-1.5 font-display text-[15px] font-medium leading-snug tracking-[-0.015em] text-eos-text sm:text-[16px]"
+      >
         {cockpitRecipe.whatUserMustDo}
       </p>
       {cockpitRecipe.vendorContext ? (
-        <div className="mt-3 rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3 text-sm text-eos-text">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+        <div className="mt-3 rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-2.5 text-[13px] text-eos-text">
+          <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
             Vendor detectat
           </p>
           <p className="mt-1">{cockpitRecipe.vendorContext.vendorName}</p>
           {cockpitRecipe.vendorContext.dpaUrl ? (
-            <p className="mt-1 text-eos-text-muted">
+            <p className="mt-1 text-[12.5px] text-eos-text-muted">
               Referință publică DPA:{" "}
               <a
                 href={cockpitRecipe.vendorContext.dpaUrl}
@@ -377,11 +400,9 @@ export function FindingHeroAction({
           ) : null}
         </div>
       ) : null}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        {children}
-      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-2">{children}</div>
       {helperText && (
-        <p className="mt-3 text-xs leading-relaxed text-eos-text-muted">
+        <p className="mt-3 font-mono text-[11px] leading-relaxed text-eos-text-muted">
           {helperText}
         </p>
       )}
@@ -432,24 +453,29 @@ export function FindingExecutionCard({
       : null
 
   return (
-    <Card className="border-eos-border bg-eos-surface">
-      <CardHeader className="gap-3 border-b border-eos-border-subtle pb-4">
+    <section className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <header className="border-b border-eos-border-subtle px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-base">Harta cazului</CardTitle>
+            <h3
+              data-display-text="true"
+              className="font-display text-base font-semibold leading-tight tracking-[-0.015em] text-eos-text"
+            >
+              Harta cazului
+            </h3>
             <p className="mt-2 text-sm text-eos-text-muted">
               Vezi progresul, dovada și ce rămâne sub watch, fără să concureze cu acțiunea principală.
             </p>
           </div>
-          <Badge variant={status.variant} className="normal-case tracking-normal">
+          <V3RiskPill tone={v3ToneFromBadgeVariant(status.variant)}>
             {status.label}
-          </Badge>
+          </V3RiskPill>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 pt-5">
+      </header>
+      <div className="space-y-4 px-4 py-5">
         <div
           data-testid="finding-progress-stepper"
-          className="space-y-3 rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4"
+          className="space-y-3 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-4"
         >
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
@@ -474,7 +500,7 @@ export function FindingExecutionCard({
               ))}
             </div>
           </div>
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3">
+          <div className="rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-3">
             <p className="text-xs font-medium text-eos-text">Pas activ: {activeStep.label}</p>
             <p className="mt-1 text-xs leading-5 text-eos-text-muted">{activeStep.hint}</p>
             <p className="mt-2 text-xs leading-5 text-eos-text-muted">
@@ -484,7 +510,7 @@ export function FindingExecutionCard({
         </div>
 
         {artifactLabel ? (
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
+          <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant px-4 py-3">
             <div className="flex items-start gap-2">
               <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
               <div>
@@ -531,7 +557,7 @@ export function FindingExecutionCard({
         ) : null}
 
         {cockpitRecipe.vendorContext ? (
-          <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant px-4 py-3">
+          <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant px-4 py-3">
             <div className="flex items-start gap-2">
               <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-text-muted" strokeWidth={2} />
               <div>
@@ -556,18 +582,15 @@ export function FindingExecutionCard({
           </div>
         ) : null}
 
-        <details className="group rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
-          <summary className="flex cursor-pointer list-none items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
-                Aftercare
-              </p>
-              <p className="mt-1 text-sm text-eos-text-muted">
-                Dosarul și monitoring-ul rămân aici după închidere, fără să concureze cu execuția.
-              </p>
-            </div>
-            <ArrowRight className="size-4 shrink-0 text-eos-text-muted transition-transform group-open:rotate-90" strokeWidth={2} />
-          </summary>
+        <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
+              Aftercare
+            </p>
+            <p className="mt-1 text-sm text-eos-text-muted">
+              Dosarul și monitoring-ul rămân aici după închidere, fără să concureze cu execuția.
+            </p>
+          </div>
           <div className="mt-4 grid gap-3 border-t border-eos-border-subtle pt-4 md:grid-cols-2">
             <RailCard
               title="Ce intră în dosar"
@@ -604,9 +627,9 @@ export function FindingExecutionCard({
               }
             />
           </div>
-        </details>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -649,28 +672,35 @@ export function FindingDossierSuccessCard({
       : "monitorizare activă după închidere"
 
   return (
-    <Card data-testid="finding-dossier-success" className="border-eos-success/35 bg-eos-success-soft/60">
-      <CardContent className="space-y-5 px-5 py-5">
+    <div
+      data-testid="finding-dossier-success"
+      className="relative overflow-hidden rounded-eos-lg border border-eos-success/25 bg-eos-success-soft/30 px-5 py-4"
+    >
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-success" aria-hidden />
+      <div className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-success/25 bg-white/70 text-eos-success">
-              <ShieldCheck className="size-5" strokeWidth={2} />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-eos-sm border border-eos-success/30 bg-eos-success-soft text-eos-success">
+              <ShieldCheck className="size-4" strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-success">
                 Risc rezolvat și dovadă salvată la dosar
               </p>
-              <p className="mt-1 text-lg font-semibold text-eos-text">
+              <p
+                data-display-text="true"
+                className="mt-1.5 font-display text-[15px] font-semibold leading-snug tracking-[-0.015em] text-eos-text"
+              >
                 {findingTitle} este rezolvat, iar {linkedGeneratedDocument.title} a intrat în Dosar
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
+              <p className="mt-1.5 text-[13px] leading-relaxed text-eos-text-muted">
                 Riscul rămâne închis cu documentul salvat la dosar, urmă de aprobare clară și ancoră de monitorizare pe aceeași urmă.
               </p>
             </div>
           </div>
-          <Badge variant="success" className="normal-case tracking-normal">
+          <V3RiskPill tone="ok">
             înregistrat
-          </Badge>
+          </V3RiskPill>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
@@ -679,10 +709,10 @@ export function FindingDossierSuccessCard({
           <FactLine label="Următor control" value={nextReviewLabel} />
         </div>
 
-        <div className="rounded-eos-md border border-eos-success/20 bg-white/55 px-4 py-3">
+        <div className="rounded-eos-sm border border-eos-success/20 bg-eos-surface px-3 py-2.5">
           <div className="flex items-start gap-2">
-            <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
-            <p className="text-sm leading-relaxed text-eos-text-muted">
+            <FolderKanban className="mt-0.5 size-3.5 shrink-0 text-eos-success" strokeWidth={2} />
+            <p className="text-[13px] leading-relaxed text-eos-text-muted">
               {feedbackMessage ??
                 "Dovada rămâne în dosar pentru audit, handoff și reverificare. Dacă apare drift sau expirare, finding-ul poate fi redeschis pe aceeași urmă."}
             </p>
@@ -690,29 +720,29 @@ export function FindingDossierSuccessCard({
         </div>
 
         {(primaryHref || secondaryHref) && (
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {primaryHref ? (
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-success/90"
+                className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm bg-eos-success px-3.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-eos-success/90"
               >
                 Deschide Dosarul
-                <ArrowRight className="size-4" strokeWidth={2} />
+                <ArrowRight className="size-3.5" strokeWidth={2} />
               </Link>
             ) : null}
             {secondaryHref ? (
               <Link
                 href={secondaryHref}
-                className="inline-flex items-center gap-2 text-sm font-medium text-eos-text-muted underline underline-offset-2 transition-colors hover:text-eos-text"
+                className="inline-flex h-[34px] items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-text-muted underline underline-offset-2 transition-colors hover:text-eos-text"
               >
                 Vezi audit log
-                <ArrowRight className="size-4" strokeWidth={2} />
+                <ArrowRight className="size-3" strokeWidth={2} />
               </Link>
             ) : null}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -730,43 +760,47 @@ export function FindingCaseClosedCard({
     : "monitorizare activă după închidere"
 
   return (
-    <Card data-testid="finding-case-closed" className="border-eos-success/35 bg-eos-success-soft/60">
-      <CardContent className="space-y-5 px-5 py-5">
+    <div
+      data-testid="finding-case-closed"
+      className="relative overflow-hidden rounded-eos-lg border border-eos-success/25 bg-eos-success-soft/30 px-5 py-4"
+    >
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-success" aria-hidden />
+      <div className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border border-eos-success/25 bg-white/70 text-eos-success">
-              <ShieldCheck className="size-5" strokeWidth={2} />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-eos-sm border border-eos-success/30 bg-eos-success-soft text-eos-success">
+              <ShieldCheck className="size-4" strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-success">
+              <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-success">
                 Caz închis și trecut în monitorizare
               </p>
-              <p className="mt-1 text-lg font-semibold text-eos-text">
+              <p
+                data-display-text="true"
+                className="mt-1.5 font-display text-[15px] font-semibold leading-snug tracking-[-0.015em] text-eos-text"
+              >
                 {findingTitle} are acum urmă clară în cockpit
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-eos-text-muted">
+              <p className="mt-1.5 text-[13px] leading-relaxed text-eos-text-muted">
                 Dovada operațională sau reconfirmarea rămâne disponibilă pentru audit, iar cazul continuă sub watch pe aceeași urmă.
               </p>
             </div>
           </div>
-          <Badge variant="success" className="normal-case tracking-normal">
+          <V3RiskPill tone="ok">
             monitorizat
-          </Badge>
+          </V3RiskPill>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
           <FactLine label="Finding" value={findingTitle} />
           <FactLine label="Salvat" value={new Date(savedAtISO).toLocaleString("ro-RO")} />
-          <FactLine
-            label="Următor control"
-            value={nextReviewLabel}
-          />
+          <FactLine label="Următor control" value={nextReviewLabel} />
         </div>
 
-        <div className="rounded-eos-md border border-eos-success/20 bg-white/55 px-4 py-3">
+        <div className="rounded-eos-sm border border-eos-success/20 bg-eos-surface px-3 py-2.5">
           <div className="flex items-start gap-2">
-            <FolderKanban className="mt-0.5 size-4 shrink-0 text-eos-success" strokeWidth={2} />
-            <p className="text-sm leading-relaxed text-eos-text-muted">
+            <FolderKanban className="mt-0.5 size-3.5 shrink-0 text-eos-success" strokeWidth={2} />
+            <p className="text-[13px] leading-relaxed text-eos-text-muted">
               {feedbackMessage ??
                 closureEvidence ??
                 "Cazul este închis, dovada rămâne disponibilă pentru audit și următorul control este deja programat în monitoring."}
@@ -775,29 +809,29 @@ export function FindingCaseClosedCard({
         </div>
 
         {(primaryHref || secondaryHref) && (
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {primaryHref ? (
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 rounded-eos-md bg-eos-success px-4 py-2.5 text-sm font-medium text-eos-text transition-colors hover:bg-eos-success/90"
+                className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm bg-eos-success px-3.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-eos-success/90"
               >
                 Deschide Dosarul
-                <ArrowRight className="size-4" strokeWidth={2} />
+                <ArrowRight className="size-3.5" strokeWidth={2} />
               </Link>
             ) : null}
             {secondaryHref ? (
               <Link
                 href={secondaryHref}
-                className="inline-flex items-center gap-2 text-sm font-medium text-eos-text-muted underline underline-offset-2 transition-colors hover:text-eos-text"
+                className="inline-flex h-[34px] items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-eos-text-muted underline underline-offset-2 transition-colors hover:text-eos-text"
               >
                 Vezi audit log
-                <ArrowRight className="size-4" strokeWidth={2} />
+                <ArrowRight className="size-3" strokeWidth={2} />
               </Link>
             ) : null}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -845,7 +879,7 @@ function RailCard({
   items: string[]
 }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-4 py-4">
+    <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset px-4 py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-eos-text-tertiary">
         {eyebrow}
       </p>
@@ -879,7 +913,7 @@ function NarrativeBlock({
         : "border-eos-border bg-eos-bg-inset"
 
   return (
-    <div className={`rounded-eos-md border px-4 py-3 ${toneClass}`}>
+    <div className={`rounded-eos-sm border px-4 py-3 ${toneClass}`}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-eos-text-muted">
         {label}
       </p>
@@ -891,10 +925,10 @@ function NarrativeBlock({
 function FactLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-eos-text-tertiary">
+      <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.13em] text-eos-text-tertiary">
         {label}
       </p>
-      <p className="text-sm text-eos-text-muted">{value}</p>
+      <p className="text-[13px] text-eos-text-muted">{value}</p>
     </div>
   )
 }

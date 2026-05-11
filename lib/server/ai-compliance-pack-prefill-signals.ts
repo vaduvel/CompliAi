@@ -110,7 +110,7 @@ function createAICompliancePackSeedPrefill(pack: AICompliancePack): OrgProfilePr
     source: "ai_compliance_pack",
     fetchedAtISO: pack.generatedAt,
     normalizedCui: null,
-    companyName: pack.workspace.orgName || pack.workspace.workspaceLabel || "Workspace CompliAI",
+    companyName: pack.workspace.orgName || pack.workspace.workspaceLabel || "Workspace CompliScan",
     address: null,
     legalForm: null,
     mainCaen: null,

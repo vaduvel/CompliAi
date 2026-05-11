@@ -190,6 +190,58 @@ describe("PATCH /api/nis2/incidents/[id]", () => {
     expect(body.code).toBe("STAGE_SEQUENCE_VIOLATION")
   })
 
+  it("permite inchiderea unui incident privacy-only dupa notificarea ANSPDCP", async () => {
+    const privacyIncident = {
+      ...BASE_INCIDENT,
+      involvesPersonalData: true,
+      anspdcpNotification: {
+        required: true,
+        deadlineISO: "2026-03-20T10:00:00.000Z",
+        status: "pending",
+        dataCategories: [],
+        estimatedDataSubjects: null,
+        notifyDataSubjects: false,
+      },
+    }
+    const submittedNotification = {
+      required: true,
+      deadlineISO: "2026-03-20T10:00:00.000Z",
+      status: "submitted",
+      dataCategories: ["date medicale"],
+      estimatedDataSubjects: 14,
+      submittedAtISO: "2026-03-18T12:00:00.000Z",
+      notifyDataSubjects: false,
+    }
+
+    mocks.readNis2StateMock.mockResolvedValue(makeState(privacyIncident))
+    mocks.updateIncidentMock.mockImplementation(
+      (_orgId: string, _id: string, patch: Record<string, unknown>) => ({
+        ...privacyIncident,
+        ...patch,
+      })
+    )
+
+    const res = await PATCH(
+      patchRequest(INCIDENT_ID, {
+        status: "closed",
+        anspdcpNotification: submittedNotification,
+      }),
+      { params: Promise.resolve({ id: INCIDENT_ID }) }
+    )
+
+    expect(res.status).toBe(200)
+    expect(mocks.updateIncidentMock).toHaveBeenCalledWith(
+      "org-1",
+      INCIDENT_ID,
+      expect.objectContaining({
+        status: "closed",
+        anspdcpNotification: submittedNotification,
+      })
+    )
+    const body = await res.json()
+    expect(body.incident.status).toBe("closed")
+  })
+
   it("blocheaza regresul de status", async () => {
     mocks.readNis2StateMock.mockResolvedValue(
       makeState({ ...BASE_INCIDENT, status: "reported-24h" })

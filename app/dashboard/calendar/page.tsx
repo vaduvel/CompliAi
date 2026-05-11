@@ -5,9 +5,9 @@ import { useEffect, useState } from "react"
 import { AlertTriangle, Calendar, CheckCircle2, Clock, RefreshCw } from "lucide-react"
 
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { Card, CardContent } from "@/components/evidence-os/Card"
 import { Badge } from "@/components/evidence-os/Badge"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import type { CalendarEvent, CalendarEventGroup } from "@/app/api/dashboard/calendar/route"
 
 type CalendarData = {
@@ -49,20 +49,24 @@ function severityColors(severity: CalendarEvent["severity"]) {
 function DaysLeftBadge({ days }: { days: number }) {
   if (days < 0)
     return (
-      <span className="flex items-center gap-1 text-xs font-semibold text-eos-error">
+      <span className="flex items-center gap-1 font-mono text-[10.5px] font-semibold text-eos-error">
         <AlertTriangle className="size-3" strokeWidth={2} />
         Depășit cu {Math.abs(days)}z
       </span>
     )
   if (days === 0)
     return (
-      <span className="flex items-center gap-1 text-xs font-semibold text-eos-error">
+      <span className="flex items-center gap-1 font-mono text-[10.5px] font-semibold text-eos-error">
         <Clock className="size-3" strokeWidth={2} />
         Azi
       </span>
     )
   return (
-    <span className={`flex items-center gap-1 text-xs font-medium ${days <= 3 ? "text-eos-error" : days <= 7 ? "text-eos-warning" : "text-eos-text-muted"}`}>
+    <span
+      className={`flex items-center gap-1 font-mono text-[10.5px] font-medium ${
+        days <= 3 ? "text-eos-error" : days <= 7 ? "text-eos-warning" : "text-eos-text-muted"
+      }`}
+    >
       <Clock className="size-3" strokeWidth={2} />
       {days}z rămase
     </span>
@@ -71,7 +75,9 @@ function DaysLeftBadge({ days }: { days: number }) {
 
 function EventCard({ event }: { event: CalendarEvent }) {
   const dateLabel = new Date(event.deadlineISO).toLocaleDateString("ro-RO", {
-    day: "numeric", month: "short", year: "numeric",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   })
   const calBorderL =
     event.severity === "critical" || event.severity === "high"
@@ -86,10 +92,12 @@ function EventCard({ event }: { event: CalendarEvent }) {
   return (
     <Link
       href={event.href}
-      className={`flex items-start gap-3 rounded-eos-md border ${calBorderL} ${calUrgentBg} p-3 hover:bg-eos-surface-variant transition-colors`}
+      className={`flex items-start gap-3 rounded-eos-md border ${calBorderL} ${calUrgentBg} p-3 transition-colors hover:bg-eos-surface-variant`}
     >
       <div className="mt-0.5 flex flex-col items-center gap-1">
-        <span className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${severityColors(event.severity)}`}>
+        <span
+          className={`rounded border px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] ${severityColors(event.severity)}`}
+        >
           {TYPE_LABELS[event.type] ?? event.type}
         </span>
       </div>
@@ -97,12 +105,12 @@ function EventCard({ event }: { event: CalendarEvent }) {
         <p className="truncate text-sm font-medium text-eos-text">{event.title}</p>
         <p className="text-xs text-eos-text-muted">{event.detail}</p>
         {event.legalBasis && (
-          <p className="text-[11px] text-eos-text-muted opacity-70">{event.legalBasis}</p>
+          <p className="font-mono text-[10px] text-eos-text-muted opacity-70">{event.legalBasis}</p>
         )}
       </div>
-      <div className="shrink-0 text-right space-y-1">
+      <div className="shrink-0 space-y-1 text-right">
         <DaysLeftBadge days={event.daysLeft} />
-        <p className="text-[11px] text-eos-text-muted">{dateLabel}</p>
+        <p className="font-mono text-[10px] text-eos-text-muted">{dateLabel}</p>
       </div>
     </Link>
   )
@@ -113,23 +121,29 @@ function GroupSection({ group, events }: { group: CalendarEventGroup; events: Ca
   return (
     <section className="space-y-2">
       <div className="flex items-center gap-2">
-        {group === "overdue" && <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />}
-        {group === "today" && <Clock className="size-4 text-eos-warning" strokeWidth={2} />}
+        {group === "overdue" && <AlertTriangle className="size-3.5 text-eos-error" strokeWidth={2} />}
+        {group === "today" && <Clock className="size-3.5 text-eos-warning" strokeWidth={2} />}
         {(group === "this-week" || group === "this-month" || group === "later") && (
-          <Calendar className="size-4 text-eos-text-muted" strokeWidth={2} />
+          <Calendar className="size-3.5 text-eos-text-muted" strokeWidth={2} />
         )}
-        <p className={`text-[11px] font-medium uppercase tracking-[0.2em] ${group === "overdue" ? "text-eos-error" : "text-eos-text-muted"}`}>
+        <p
+          className={`font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] ${
+            group === "overdue" ? "text-eos-error" : "text-eos-text-tertiary"
+          }`}
+        >
           {GROUP_LABELS[group]} · {events.length}
         </p>
       </div>
       <div className="space-y-2">
-        {events.map((event) => <EventCard key={event.id} event={event} />)}
+        {events.map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
       </div>
     </section>
   )
 }
 
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000 // 5 minute
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000
 
 export default function CalendarPage() {
   const [data, setData] = useState<CalendarData | null>(null)
@@ -138,8 +152,11 @@ export default function CalendarPage() {
 
   const fetchData = () => {
     fetch("/api/dashboard/calendar")
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => { setData(d); setLastUpdated(new Date()) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        setData(d)
+        setLastUpdated(new Date())
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }
@@ -153,12 +170,12 @@ export default function CalendarPage() {
   const hasEvents = data && data.total > 0
 
   return (
-    <div className="space-y-8">
-      <PageIntro
-        eyebrow="Calendar conformitate"
+    <div className="space-y-6">
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Calendar", current: true }]}
         title="Ce arde — deadlines active"
         description="Toate termenele din DSAR, NIS2, ANSPDCP și Vendor Review într-un singur loc. Fără să vanezi prin pagini."
-        badges={
+        eyebrowBadges={
           <>
             {data?.overdueCount ? (
               <Badge variant="destructive" className="normal-case tracking-normal">
@@ -175,25 +192,25 @@ export default function CalendarPage() {
                 {data.thisWeekCount} săptămâna asta
               </Badge>
             ) : null}
+          </>
+        }
+        actions={
+          <>
             {lastUpdated && (
               <button
                 type="button"
                 onClick={fetchData}
-                className="inline-flex items-center gap-1 text-xs text-eos-text-muted hover:text-eos-text"
+                className="inline-flex items-center gap-1.5 font-mono text-[10.5px] text-eos-text-muted hover:text-eos-text"
                 title="Actualizează manual"
               >
                 <RefreshCw className="size-3" strokeWidth={2} />
                 {lastUpdated.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" })}
               </button>
             )}
-          </>
-        }
-        actions={
-          <>
-            <Button asChild variant="outline" className="gap-2">
+            <Button asChild variant="outline" size="sm">
               <Link href="/dashboard/review">Review-uri programate</Link>
             </Button>
-            <Button asChild className="gap-2">
+            <Button asChild size="sm">
               <Link href="/dashboard/settings/scheduled-reports">Rapoarte programate</Link>
             </Button>
           </>
@@ -201,60 +218,56 @@ export default function CalendarPage() {
       />
 
       {loading && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-eos-md bg-eos-surface-variant" />
+            <div key={i} className="h-14 animate-pulse rounded-eos-md bg-eos-surface-variant" />
           ))}
         </div>
       )}
 
       {!loading && !hasEvents && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CheckCircle2 className="size-10 text-eos-success" strokeWidth={1.5} />
-            <div className="space-y-1">
-              <p className="text-base font-medium text-eos-text">Niciun deadline activ</p>
-              <p className="text-sm text-eos-text-muted">
-                Deadlines-urile apar automat când ai cereri DSAR active, incidente NIS2, notificări ANSPDCP sau vendori care cer revalidare.
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
-              <Button asChild className="gap-2">
-                <Link href="/dashboard/scan">Scanează primul document</Link>
-              </Button>
-              <Button asChild variant="outline" className="gap-2">
-                <Link href="/dashboard/resolve">Deschide De rezolvat</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center gap-3 rounded-eos-lg border border-eos-border bg-eos-surface py-14 text-center">
+          <CheckCircle2 className="size-9 text-eos-success" strokeWidth={1.5} />
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-eos-text">Niciun deadline activ</p>
+            <p className="max-w-sm text-xs text-eos-text-muted">
+              Deadlines-urile apar automat când ai cereri DSAR active, incidente NIS2, notificări
+              ANSPDCP sau vendori care cer revalidare.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2 pt-1">
+            <Button asChild size="sm">
+              <Link href="/dashboard/scan">Scanează primul document</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/dashboard/resolve">Deschide De rezolvat</Link>
+            </Button>
+          </div>
+        </div>
       )}
 
       {!loading && hasEvents && (
         <div className="space-y-6">
           {GROUP_ORDER.map((group) => (
-            <GroupSection
-              key={group}
-              group={group}
-              events={data.grouped[group]}
-            />
+            <GroupSection key={group} group={group} events={data.grouped[group]} />
           ))}
         </div>
       )}
 
-      {/* Summary card */}
       {!loading && data && data.total > 0 && (
         <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-eos-text-muted">Surse monitorizate</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2 text-xs text-eos-text-muted sm:grid-cols-4">
-            <div>DSAR · GDPR Art. 12</div>
-            <div>NIS2 · Art. 23 (24h/72h)</div>
-            <div>ANSPDCP · GDPR Art. 33</div>
-            <div>Vendor Review DPA</div>
-            <div>Review cycles · monitorizare</div>
-            <div>Scheduled reports · handoff partener</div>
+          <CardContent className="px-4 py-3">
+            <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              Surse monitorizate
+            </p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-eos-text-muted sm:grid-cols-3">
+              <div>DSAR · GDPR Art. 12</div>
+              <div>NIS2 · Art. 23 (24h/72h)</div>
+              <div>ANSPDCP · GDPR Art. 33</div>
+              <div>Vendor Review DPA</div>
+              <div>Review cycles · monitorizare</div>
+              <div>Scheduled reports · handoff partener</div>
+            </div>
           </CardContent>
         </Card>
       )}

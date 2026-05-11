@@ -278,7 +278,7 @@ export function AIDiscoveryPanel({
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-eos-text-muted">
                   Acum
                 </p>
                 <p className="mt-2 text-sm font-medium text-eos-text">
@@ -454,10 +454,8 @@ export function AIDiscoveryPanel({
                         </div>
                       </div>
                     )}
-                    <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3">
-                      <summary className="cursor-pointer text-sm font-medium text-eos-text">
-                        Detalii detectie si evidenta
-                      </summary>
+                    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-eos-text-muted">Detalii detectie si evidenta</p>
                       <div className="mt-3 space-y-3 text-sm text-eos-text-muted">
                         <p>{detectionStatusHint(system.detectionStatus)}</p>
                         <p className="text-xs text-eos-text-muted">
@@ -475,7 +473,7 @@ export function AIDiscoveryPanel({
                           </ul>
                         </div>
                       </div>
-                    </details>
+                    </div>
                     {isEditing && (
                       <div className="grid gap-3 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                         <p className="text-sm font-medium text-eos-text">

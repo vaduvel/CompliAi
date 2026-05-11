@@ -1,16 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Calendar, Check, FileSearch, FolderOpen, Loader2, Paintbrush, Plus, Trash2 } from "lucide-react"
+import { Calendar, Check, Download, FileSearch, FolderOpen, Loader2, Mail, Paintbrush, Plus, ShieldCheck, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3FrameworkTag, V3KpiStrip, V3PageHero, V3Panel, V3RiskPill } from "@/components/compliscan/v3"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent } from "@/components/evidence-os/Card"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import type { PortfolioReportRow } from "@/lib/server/portfolio"
 import type { ScheduledReport, ScheduledReportFrequency, ScheduledReportType } from "@/lib/server/scheduled-reports"
 import { REPORT_TYPE_LABELS, FREQUENCY_LABELS } from "@/lib/server/scheduled-reports"
@@ -24,6 +21,35 @@ type WhiteLabelConfig = {
   brandColor: string
   storageBackend?: "supabase" | "local_fallback"
   persistenceStatus?: "synced" | "fallback"
+}
+
+type MonthlyPreviewClient = {
+  orgId: string
+  orgName: string
+  score: number
+  riskLabel: string
+  openFindings: number
+  validatedEvidence: number
+  pendingEvidence: number
+  auditReadiness: "audit_ready" | "review_required"
+  workDone: string[]
+  nextActions: string[]
+}
+
+type MonthlyPreviewPayload = {
+  preview: true
+  generated: number
+  reports: Array<{
+    consultantEmail: string
+    month: string
+    clientEntries: MonthlyPreviewClient[]
+    clientFacingReports: Array<{
+      orgId: string
+      orgName: string
+      html: string
+      summary: MonthlyPreviewClient
+    }>
+  }>
 }
 
 function WhiteLabelSection() {
@@ -88,21 +114,25 @@ function WhiteLabelSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Paintbrush className="size-4 text-eos-primary" strokeWidth={2} />
-          <p className="text-sm font-semibold text-eos-text">Branding partener (White-label)</p>
+          <div>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+              White-label
+            </p>
+            <p data-display-text="true" className="font-display text-[14px] font-semibold text-eos-text">
+              Branding partener
+            </p>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            variant={config.persistenceStatus === "fallback" ? "warning" : "success"}
-            className="normal-case tracking-normal"
-          >
+          <V3RiskPill tone={config.persistenceStatus === "fallback" ? "high" : "ok"}>
             {config.persistenceStatus === "fallback" ? "fallback local" : "Supabase synced"}
-          </Badge>
-          <p className="text-xs text-eos-text-tertiary">Aplicat pe rapoarte și exporturi</p>
+          </V3RiskPill>
+          <p className="font-mono text-[11px] text-eos-text-tertiary">Aplicat pe rapoarte și exporturi</p>
         </div>
       </div>
 
       {config.persistenceStatus === "fallback" ? (
-        <div className="rounded-eos-md border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-eos-text">
+        <div className="rounded-eos-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-eos-text">
           Brandingul este disponibil, dar persistă momentan pe fallback local. Nu îl trata ca
           sursă finală până când traseul Supabase nu revine la `synced`.
         </div>
@@ -116,8 +146,8 @@ function WhiteLabelSection() {
             type="text"
             value={config.partnerName}
             onChange={(e) => setConfig((c) => ({ ...c, partnerName: e.target.value }))}
-            placeholder="Ex: Consultanță Fiscal SRL"
-            className="w-full rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
+            placeholder="Ex: DPO Complet SRL"
+            className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
           />
         </div>
 
@@ -128,8 +158,8 @@ function WhiteLabelSection() {
             type="text"
             value={config.tagline ?? ""}
             onChange={(e) => setConfig((c) => ({ ...c, tagline: e.target.value || null }))}
-            placeholder="Ex: Conformitate fără efort"
-            className="w-full rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
+            placeholder="Ex: Cabinet DPO pentru IMM-uri"
+            className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
           />
         </div>
 
@@ -141,7 +171,7 @@ function WhiteLabelSection() {
             value={config.logoUrl ?? ""}
             onChange={(e) => setConfig((c) => ({ ...c, logoUrl: e.target.value || null }))}
             placeholder="https://firma.ro/logo.png"
-            className="w-full rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
+            className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-sm text-eos-text placeholder:text-eos-text-tertiary focus:border-eos-primary focus:outline-none"
           />
         </div>
 
@@ -153,7 +183,7 @@ function WhiteLabelSection() {
               type="color"
               value={config.brandColor}
               onChange={(e) => setConfig((c) => ({ ...c, brandColor: e.target.value }))}
-              className="size-9 shrink-0 cursor-pointer rounded-eos-md border border-eos-border bg-eos-surface-active p-0.5"
+              className="size-9 shrink-0 cursor-pointer rounded-eos-sm border border-eos-border bg-eos-surface-active p-0.5"
             />
             <input
               type="text"
@@ -163,14 +193,14 @@ function WhiteLabelSection() {
                 if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setConfig((c) => ({ ...c, brandColor: v }))
               }}
               maxLength={7}
-              className="w-28 rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-2 text-sm font-mono text-eos-text focus:border-eos-primary focus:outline-none"
+              className="h-9 w-28 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-sm font-mono text-eos-text focus:border-eos-primary focus:outline-none"
             />
           </div>
         </div>
       </div>
 
       {/* Preview */}
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border">
         <div
           className="flex items-center gap-3 px-5 py-3"
           style={{ backgroundColor: previewColor + "18", borderBottom: `2px solid ${previewColor}` }}
@@ -211,7 +241,7 @@ function WhiteLabelSection() {
           type="button"
           onClick={() => void handleSave()}
           disabled={saving}
-          className="flex items-center gap-2 rounded-eos-md bg-eos-primary px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-60"
+          className="flex h-[34px] items-center gap-2 rounded-eos-sm bg-eos-primary px-4 text-[12.5px] font-semibold text-white transition-all duration-100 hover:bg-eos-primary-hover disabled:opacity-60"
         >
           {saving ? (
             <Loader2 className="size-4 animate-spin" />
@@ -329,13 +359,12 @@ function ScheduledReportsSection() {
       </div>
 
       {showForm && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardContent className="space-y-3 py-4">
+        <section className="space-y-3 rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="block">
-                <span className="text-xs font-medium text-eos-text">Tip raport</span>
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Tip raport</span>
                 <select
-                  className="mt-1 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="mt-1 h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   value={form.reportType}
                   onChange={(e) => setForm((f) => ({ ...f, reportType: e.target.value as ScheduledReportType }))}
                 >
@@ -345,9 +374,9 @@ function ScheduledReportsSection() {
                 </select>
               </label>
               <label className="block">
-                <span className="text-xs font-medium text-eos-text">Frecvență</span>
+                <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Frecvență</span>
                 <select
-                  className="mt-1 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="mt-1 h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   value={form.frequency}
                   onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value as ScheduledReportFrequency }))}
                 >
@@ -358,9 +387,9 @@ function ScheduledReportsSection() {
               </label>
             </div>
             <label className="block">
-              <span className="text-xs font-medium text-eos-text">Destinatari email (separați prin virgulă)</span>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">Destinatari email</span>
               <input
-                className="mt-1 h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                className="mt-1 h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 placeholder="partner@firma.ro, client@client.ro"
                 value={form.recipientEmails}
                 onChange={(e) => setForm((f) => ({ ...f, recipientEmails: e.target.value }))}
@@ -382,42 +411,38 @@ function ScheduledReportsSection() {
                 Creează
               </Button>
             </div>
-          </CardContent>
-        </Card>
+        </section>
       )}
 
       {reports.length === 0 ? (
-        <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface-variant px-4 py-6 text-center text-sm text-eos-text-muted">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-6 text-center text-sm text-eos-text-muted">
           <Calendar className="mx-auto mb-2 size-6 text-eos-text-tertiary" strokeWidth={1.5} />
           Niciun raport programat. Creează primul raport pentru a trimite periodic la clienți.
         </div>
       ) : (
         <div className="space-y-2">
           {reports.map((r) => (
-            <Card key={r.id} className={`border-eos-border bg-eos-surface ${!r.enabled ? "opacity-60" : ""}`}>
-              <CardContent className="flex flex-wrap items-center gap-3 py-3 px-4">
+            <article
+              key={r.id}
+              className={`rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 ${!r.enabled ? "opacity-60" : ""}`}
+            >
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-eos-text">{REPORT_TYPE_LABELS[r.reportType]}</p>
-                    <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-                      {FREQUENCY_LABELS[r.frequency]}
-                    </Badge>
+                    <V3FrameworkTag label={FREQUENCY_LABELS[r.frequency]} />
                     {r.requiresApproval && (
-                      <Badge variant="secondary" className="text-[10px] normal-case tracking-normal">
-                        cu aprobare
-                      </Badge>
+                      <V3FrameworkTag label="cu aprobare" tone="info" />
                     )}
                     {!r.enabled && (
-                      <Badge variant="outline" className="text-[10px] normal-case tracking-normal text-eos-text-muted">
-                        dezactivat
-                      </Badge>
+                      <V3FrameworkTag label="dezactivat" tone="low" />
                     )}
                   </div>
-                  <p className="text-xs text-eos-text-muted">
+                  <p className="font-mono text-[11px] text-eos-text-muted">
                     {r.recipientEmails.join(", ")}
                   </p>
                   {r.nextRunAt && (
-                    <p className="text-xs text-eos-text-muted">
+                    <p className="font-mono text-[11px] text-eos-text-muted">
                       Următorul: {new Date(r.nextRunAt).toLocaleDateString("ro-RO")}
                       {r.lastRunAt && <> · Ultimul: {new Date(r.lastRunAt).toLocaleDateString("ro-RO")}</>}
                     </p>
@@ -427,7 +452,7 @@ function ScheduledReportsSection() {
                   <button
                     type="button"
                     onClick={() => void handleToggleEnabled(r)}
-                    className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-2.5 py-1 text-xs text-eos-text-muted hover:text-eos-text"
+                    className="h-[30px] rounded-eos-sm border border-eos-border bg-eos-bg-inset px-2.5 font-mono text-[11px] text-eos-text-muted hover:text-eos-text"
                   >
                     {r.enabled ? "Dezactivează" : "Activează"}
                   </button>
@@ -435,15 +460,15 @@ function ScheduledReportsSection() {
                     type="button"
                     disabled={deleting === r.id}
                     onClick={() => void handleDelete(r.id)}
-                    className="rounded-eos-md p-1.5 text-eos-text-tertiary hover:bg-eos-error-soft hover:text-eos-error disabled:opacity-50"
+                    className="rounded-eos-sm p-1.5 text-eos-text-tertiary hover:bg-eos-error-soft hover:text-eos-error disabled:opacity-50"
                   >
                     {deleting === r.id
                       ? <Loader2 className="size-3.5 animate-spin" />
                       : <Trash2 className="size-3.5" />}
                   </button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </article>
           ))}
         </div>
       )}
@@ -455,6 +480,12 @@ export function PortfolioReportsPage() {
   const [reports, setReports] = useState<PortfolioReportRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exportingCabinet, setExportingCabinet] = useState(false)
+  const [exportingTrustPack, setExportingTrustPack] = useState(false)
+  const [testingEmail, setTestingEmail] = useState(false)
+  const [generatingMonthly, setGeneratingMonthly] = useState(false)
+  const [exportingMonthlyPdf, setExportingMonthlyPdf] = useState(false)
+  const [monthlyPreview, setMonthlyPreview] = useState<MonthlyPreviewPayload | null>(null)
 
   useEffect(() => {
     void (async () => {
@@ -476,45 +507,374 @@ export function PortfolioReportsPage() {
   if (loading) return <LoadingScreen variant="section" />
   if (error) return <ErrorScreen message={error} variant="section" />
 
+  const generatedTotal = reports.reduce((sum, report) => sum + report.generatedDocumentsCount, 0)
+  const scannedTotal = reports.reduce((sum, report) => sum + report.scannedDocuments, 0)
+  const openAlertsTotal = reports.reduce((sum, report) => sum + report.openAlerts, 0)
+  const withRecentScan = reports.filter((report) => report.lastScanAtISO).length
+  const withGeneratedDocs = reports.filter((report) => report.generatedDocumentsCount > 0).length
+
+  async function handleCabinetExport() {
+    setExportingCabinet(true)
+    try {
+      const response = await fetch("/api/partner/export", { cache: "no-store" })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Exportul complet cabinet a eșuat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "compliscan-cabinet-export.json"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Export cabinet generat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul cabinetului.")
+    } finally {
+      setExportingCabinet(false)
+    }
+  }
+
+  async function handleTrustPackExport() {
+    setExportingTrustPack(true)
+    try {
+      const response = await fetch("/api/partner/trust-pack", { cache: "no-store" })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Trust Pack-ul DPO nu a putut fi exportat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "compliscan-dpo-trust-pack.pdf"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Trust Pack DPO descărcat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul Trust Pack.")
+    } finally {
+      setExportingTrustPack(false)
+    }
+  }
+
+  async function handleEmailTest() {
+    setTestingEmail(true)
+    try {
+      const response = await fetch("/api/partner/email-test", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      })
+      const data = (await response.json().catch(() => null)) as {
+        ok?: boolean
+        channel?: "resend" | "console"
+        message?: string
+        error?: string
+      } | null
+      if (!response.ok || !data?.ok) {
+        toast.error(data?.error ?? data?.message ?? "Testul de email a eșuat.")
+        return
+      }
+      toast.success(
+        data.channel === "resend"
+          ? "Email test trimis prin Resend."
+          : "Email test logat în consolă: Resend nu este configurat local."
+      )
+    } catch {
+      toast.error("Eroare de rețea la testul de email.")
+    } finally {
+      setTestingEmail(false)
+    }
+  }
+
+  async function handleGenerateMonthlyReport() {
+    setGeneratingMonthly(true)
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), 20_000)
+    try {
+      const response = await fetch("/api/partner/reports/monthly", {
+        method: "POST",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          currentClientFallbackOnly: reports.length === 0,
+        }),
+      })
+      const data = (await response.json().catch(() => null)) as MonthlyPreviewPayload & { error?: string } | null
+      if (!response.ok || !data?.preview) {
+        toast.error(data?.error ?? "Raportul lunar nu a putut fi generat.")
+        return
+      }
+      setMonthlyPreview(data)
+      toast.success("Raport lunar generat pentru portofoliu.")
+    } catch (error) {
+      toast.error(
+        error instanceof DOMException && error.name === "AbortError"
+          ? "Generarea raportului durează prea mult. Reîncearcă sau verifică statusul Supabase."
+          : "Eroare de rețea la generarea raportului lunar."
+      )
+    } finally {
+      window.clearTimeout(timeoutId)
+      setGeneratingMonthly(false)
+    }
+  }
+
+  async function handleMonthlyPdfExport() {
+    setExportingMonthlyPdf(true)
+    try {
+      const response = await fetch("/api/partner/reports/monthly/pdf", { cache: "no-store" })
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        toast.error(data?.error ?? "Exportul PDF al raportului lunar a eșuat.")
+        return
+      }
+      const blob = await response.blob()
+      const fileName =
+        response.headers.get("content-disposition")?.match(/filename=\"?([^\";]+)\"?/)?.[1] ??
+        "raport-lunar-dpo.pdf"
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+      toast.success("Raport lunar PDF descărcat.")
+    } catch {
+      toast.error("Eroare de rețea la exportul PDF.")
+    } finally {
+      setExportingMonthlyPdf(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Portofoliu"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Portofoliu" }, { label: "Rapoarte", current: true }]}
         title="Rapoarte și livrabile"
         description="Metadata agregată pentru rapoarte, documente generate și ultima activitate pe fiecare firmă."
-        badges={
-          <Badge variant="outline" className="normal-case tracking-normal">
-            {reports.length} firme în raportare
-          </Badge>
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-2">
+            <V3FrameworkTag label="firme" count={reports.length} />
+            <V3FrameworkTag label="livrabile" count={generatedTotal} tone={generatedTotal > 0 ? "info" : "neutral"} />
+            {openAlertsTotal > 0 ? <V3RiskPill tone="high">{openAlertsTotal} alerte</V3RiskPill> : null}
+          </div>
+        }
+        actions={
+          <Button
+            type="button"
+            size="sm"
+            disabled={generatingMonthly}
+            onClick={() => void handleGenerateMonthlyReport()}
+            className="gap-1.5"
+          >
+            {generatingMonthly ? <Loader2 className="size-4 animate-spin" /> : <FileSearch className="size-4" />}
+            Generează raport lunar
+          </Button>
         }
       />
 
+      <V3KpiStrip
+        items={[
+          {
+            id: "firms",
+            label: "Firme în raportare",
+            value: reports.length,
+            detail: "cu metadata agregată",
+          },
+          {
+            id: "deliverables",
+            label: "Livrabile",
+            value: generatedTotal,
+            detail: `${withGeneratedDocs} firme cu documente`,
+            stripe: generatedTotal > 0 ? "info" : undefined,
+          },
+          {
+            id: "alerts",
+            label: "Alerte deschise",
+            value: openAlertsTotal,
+            detail: "semnale în rapoarte",
+            stripe: openAlertsTotal > 0 ? "warning" : undefined,
+            valueTone: openAlertsTotal > 0 ? "warning" : "neutral",
+          },
+          {
+            id: "scans",
+            label: "Documente scanate",
+            value: scannedTotal,
+            detail: "total cross-client",
+          },
+          {
+            id: "recent",
+            label: "Cu scanare",
+            value: withRecentScan,
+            detail: "au timestamp recent",
+          },
+        ]}
+      />
+
+      <V3Panel padding="default">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-eos-lg bg-eos-primary/10 text-eos-primary">
+              <ShieldCheck className="size-5" strokeWidth={1.8} />
+            </div>
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Migration confidence pack
+              </p>
+              <h2 data-display-text="true" className="font-display text-[17px] font-semibold tracking-[-0.015em] text-eos-text">
+                Export complet cabinet + security pack
+              </h2>
+              <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-eos-text-muted">
+                Descarcă arhiva JSON cu white-label, template-uri cabinet, clienți, state operațional,
+                security/contractual pack și matrice RBAC. Este pachetul pentru backup, pilot exit
+                și discuția de migrare treptată.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={exportingTrustPack}
+              onClick={() => void handleTrustPackExport()}
+              className="shrink-0"
+            >
+              {exportingTrustPack ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+              Trust Pack PDF
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={testingEmail}
+              onClick={() => void handleEmailTest()}
+              className="shrink-0"
+            >
+              {testingEmail ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
+              Test email
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              disabled={exportingCabinet}
+              onClick={() => void handleCabinetExport()}
+              className="shrink-0"
+            >
+              {exportingCabinet ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+              Export cabinet
+            </Button>
+          </div>
+        </div>
+      </V3Panel>
+
+      {monthlyPreview?.reports?.[0] ? (
+        <V3Panel padding="default">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+                Raport lunar on-demand
+              </p>
+              <h2 data-display-text="true" className="mt-1 font-display text-[17px] font-semibold tracking-[-0.015em] text-eos-text">
+                {monthlyPreview.reports[0].month} · {monthlyPreview.reports[0].clientEntries.length} clienți
+              </h2>
+              <p className="mt-1 text-[13px] text-eos-text-muted">
+                Preview client-facing generat din activitatea reală: documente, aprobări, respingeri, dovezi și next steps.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <V3FrameworkTag label="preview" count={monthlyPreview.generated} tone="info" />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={exportingMonthlyPdf}
+                onClick={() => void handleMonthlyPdfExport()}
+                className="gap-1.5"
+              >
+                {exportingMonthlyPdf ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                Descarcă PDF
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => window.print()}
+              >
+                Print
+              </Button>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-3 lg:grid-cols-3">
+            {monthlyPreview.reports[0].clientEntries.map((client) => (
+              <article key={client.orgId} className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant px-4 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-eos-text">{client.orgName}</p>
+                    <p className="mt-1 font-mono text-[11px] text-eos-text-muted">
+                      Scor {client.score}% · {client.openFindings} findings deschise
+                    </p>
+                  </div>
+                  <V3RiskPill tone={client.auditReadiness === "audit_ready" ? "ok" : "medium"}>
+                    {client.auditReadiness === "audit_ready" ? "audit ready" : "review"}
+                  </V3RiskPill>
+                </div>
+                <div className="mt-3 space-y-2 text-[12px] leading-5 text-eos-text-muted">
+                  <p><strong className="text-eos-text">Lucrat:</strong> {client.workDone[0] ?? "Fără activitate nouă în perioada selectată."}</p>
+                  <p><strong className="text-eos-text">Următor:</strong> {client.nextActions[0] ?? "Monitorizare lunară."}</p>
+                  <p className="font-mono text-[11px]">
+                    Dovezi validate: {client.validatedEvidence} · pendinte: {client.pendingEvidence}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </V3Panel>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {reports.length === 0 ? (
-          <Card className="md:col-span-2 xl:col-span-3">
-            <EmptyState
-              title="Nu există metadate de raportare"
-              label="Generează documente sau rapoarte în firmele din portofoliu pentru a vedea aici activitatea."
-              icon={FolderOpen}
-              className="px-5 py-10"
-            />
-          </Card>
+          <section className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-10 text-center md:col-span-2 xl:col-span-3">
+            <FolderOpen className="mx-auto mb-3 size-6 text-eos-text-tertiary" strokeWidth={1.6} />
+            <h3 data-display-text="true" className="font-display text-[16px] font-semibold text-eos-text">
+              Nu există metadate de raportare
+            </h3>
+            <p className="mx-auto mt-1 max-w-md text-[13px] text-eos-text-muted">
+              Generează documente sau rapoarte în firmele din portofoliu pentru a vedea aici activitatea.
+            </p>
+          </section>
         ) : (
           reports.map((report) => (
-            <Card key={report.orgId} className="border-eos-border bg-eos-surface px-5 py-5">
+            <article key={report.orgId} className="rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-eos-text">{report.orgName}</p>
-                  <p className="mt-1 text-xs text-eos-text-muted">
+                  <p data-display-text="true" className="font-display text-[15px] font-semibold tracking-[-0.015em] text-eos-text">
+                    {report.orgName}
+                  </p>
+                  <p className="mt-1 font-mono text-[11px] text-eos-text-muted">
                     Scor: {report.score !== null ? `${report.score}%` : "fără date"} · {report.openAlerts} alerte
                   </p>
                 </div>
-                <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
-                  {report.generatedDocumentsCount} livrabile
-                </Badge>
+                <V3FrameworkTag label="livrabile" count={report.generatedDocumentsCount} />
               </div>
 
-              <div className="mt-4 space-y-2 text-xs text-eos-text-muted">
+              <div className="mt-4 space-y-2 font-mono text-[11px] text-eos-text-muted">
                 <p>Ultimul document: {report.latestGeneratedTitle ?? "niciun document generat"}</p>
                 <p>Ultima generare: {report.latestGeneratedAtISO ? new Date(report.latestGeneratedAtISO).toLocaleDateString("ro-RO") : "—"}</p>
                 <p>Ultima scanare: {report.lastScanAtISO ? new Date(report.lastScanAtISO).toLocaleDateString("ro-RO") : "—"}</p>
@@ -529,25 +889,25 @@ export function PortfolioReportsPage() {
                   variant="outline"
                 />
               </div>
-            </Card>
+            </article>
           ))
         )}
       </div>
 
       {/* ── White-label branding ── */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+      <V3Panel padding="default">
         <WhiteLabelSection />
-      </div>
+      </V3Panel>
 
       {/* ── Scheduled Reports ── */}
-      <div className="rounded-eos-xl border border-eos-border bg-eos-surface p-5">
+      <V3Panel padding="default">
         <ScheduledReportsSection />
-      </div>
+      </V3Panel>
 
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
+      <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface p-4 text-xs text-eos-text-muted">
         <div className="flex items-center gap-2 text-eos-text">
           <FileSearch className="size-4" strokeWidth={1.8} />
-          <span className="font-medium">Metadata cross-client, nu exporturi brute</span>
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">Metadata cross-client, nu exporturi brute</span>
         </div>
         <p className="mt-1">
           În Wave 2 arătăm ce există și ce lipsește pe fiecare firmă. Exporturile și livrabilele concrete rămân în contextul per-firmă.

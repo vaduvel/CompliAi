@@ -4,9 +4,9 @@ import Link from "next/link"
 import { ClipboardCheck, FileCode2, ShieldCheck, Undo2 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
 import type { FiscalStatusInterpreterGuide } from "@/lib/compliance/efactura-status-interpreter"
 
 type FiscalStatusInterpreterCardProps = {
@@ -55,26 +55,26 @@ export function FiscalStatusInterpreterCard({
   }
 
   return (
-    <Card className="border-eos-border bg-eos-surface" data-testid="fiscal-status-interpreter-card">
-      <CardHeader className="border-b border-eos-border pb-5">
+    <V3Surface className="border-eos-border bg-eos-surface" data-testid="fiscal-status-interpreter-card">
+      <V3SurfaceHead className="border-b border-eos-border pb-5">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="normal-case tracking-normal">
+          <V3Pill variant="outline" className="normal-case tracking-normal">
             {guide.eyebrow}
-          </Badge>
-          <Badge variant="secondary" className="normal-case tracking-normal">
+          </V3Pill>
+          <V3Pill variant="secondary" className="normal-case tracking-normal">
             {guide.findingTypeId}
-          </Badge>
+          </V3Pill>
         </div>
-        <CardTitle className="text-base">{guide.title}</CardTitle>
+        <V3SurfaceTitle className="text-base">{guide.title}</V3SurfaceTitle>
         <p className="text-sm text-eos-text-muted [overflow-wrap:anywhere]">{guide.explanation}</p>
-      </CardHeader>
+      </V3SurfaceHead>
 
-      <CardContent className="space-y-5 pt-6">
+      <V3SurfaceBody className="space-y-5 pt-6">
         <div className="space-y-3">
           {guide.steps.map((step, index) => (
             <div
               key={step}
-              className="flex items-start gap-3 rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 py-3"
+              className="flex items-start gap-3 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-3"
             >
               <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-eos-primary/10 text-[11px] font-semibold text-eos-primary">
                 {index + 1}
@@ -84,25 +84,25 @@ export function FiscalStatusInterpreterCard({
           ))}
         </div>
 
-        <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Dovada pe care o ceri în cockpit</p>
+        <div className="rounded-eos-sm border border-eos-border bg-eos-surface-variant p-4">
+          <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Dovada pe care o ceri în cockpit</p>
           <div className="mt-3 space-y-2">
             {guide.evidenceItems.map((item) => (
-              <div key={item} className="rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text-muted">
+              <div key={item} className="rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-3 text-sm text-eos-text-muted">
                 {item}
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-          <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
+        <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4">
+          <p className="text-xs uppercase tracking-[0.14em] text-eos-text-muted">Nota pregătită pentru cockpit</p>
           <textarea
             data-testid="fiscal-status-note"
             readOnly
             value={guide.cockpitNote}
             rows={5}
-            className="mt-3 min-h-[120px] w-full rounded-eos-md border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text outline-none"
+            className="mt-3 min-h-[120px] w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-3 text-sm text-eos-text outline-none"
           />
         </div>
 
@@ -142,7 +142,7 @@ export function FiscalStatusInterpreterCard({
             </Link>
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </V3SurfaceBody>
+    </V3Surface>
   )
 }

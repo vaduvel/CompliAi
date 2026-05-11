@@ -11,6 +11,11 @@ import { clearPartnerAccountPlan, setOrgPlan, setPartnerAccountPlan } from "@/li
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext } from "@/lib/server/request-context"
 import type { OrgPlan, PartnerAccountPlan } from "@/lib/server/plan"
+import {
+  isAccountScopedTier,
+  tierToOrgPlan,
+  tierToPartnerAccountPlan,
+} from "@/lib/server/stripe-tier-config"
 
 // ── Stripe event types (subset) ───────────────────────────────────────────────
 
@@ -138,16 +143,30 @@ export async function POST(request: Request) {
       const userId = metadata?.userId
       const targetPlan = metadata?.targetPlan
 
-      if (billingScope === "account" && userId && targetPlan && ["partner_10", "partner_25", "partner_50"].includes(targetPlan)) {
-        await setPartnerAccountPlan(userId, targetPlan as PartnerAccountPlan, {
-          stripeCustomerId: session.customer,
-          stripeSubscriptionId: session.subscription,
-        })
-      } else if (orgId && targetPlan && ["pro", "partner"].includes(targetPlan)) {
-        await setOrgPlan(orgId, targetPlan as OrgPlan, {
-          stripeCustomerId: session.customer,
-          stripeSubscriptionId: session.subscription,
-        })
+      // S2A.1 — Mapare ICP tier → plan legacy (schema OrgPlan/PartnerAccountPlan
+      // rămâne neschimbată; tier-urile noi sunt alias-uri rezolvate aici).
+      if (billingScope === "account" && userId && targetPlan && isAccountScopedTier(targetPlan)) {
+        const partnerPlan = tierToPartnerAccountPlan(targetPlan)
+        if (partnerPlan) {
+          await setPartnerAccountPlan(userId, partnerPlan, {
+            stripeCustomerId: session.customer,
+            stripeSubscriptionId: session.subscription,
+          })
+        }
+      } else if (orgId && targetPlan) {
+        const orgPlan = tierToOrgPlan(targetPlan)
+        if (orgPlan) {
+          await setOrgPlan(orgId, orgPlan, {
+            stripeCustomerId: session.customer,
+            stripeSubscriptionId: session.subscription,
+          })
+        } else if (["pro", "partner"].includes(targetPlan)) {
+          // Legacy fallback
+          await setOrgPlan(orgId, targetPlan as OrgPlan, {
+            stripeCustomerId: session.customer,
+            stripeSubscriptionId: session.subscription,
+          })
+        }
       }
     } else if (event.type === "customer.subscription.deleted") {
       const sub = (event as StripeSubscriptionEvent).data.object
@@ -166,18 +185,22 @@ export async function POST(request: Request) {
       const userId = sub.metadata?.userId
       const targetPlan = sub.metadata?.targetPlan
 
-      if (billingScope === "account" && userId && targetPlan && ["partner_10", "partner_25", "partner_50"].includes(targetPlan)) {
+      if (billingScope === "account" && userId && targetPlan && isAccountScopedTier(targetPlan)) {
+        const partnerPlan = tierToPartnerAccountPlan(targetPlan)
         if (sub.status === "active" || sub.status === "trialing") {
-          await setPartnerAccountPlan(userId, targetPlan as PartnerAccountPlan, {
-            stripeCustomerId: sub.customer,
-            stripeSubscriptionId: sub.id,
-          })
+          if (partnerPlan) {
+            await setPartnerAccountPlan(userId, partnerPlan, {
+              stripeCustomerId: sub.customer,
+              stripeSubscriptionId: sub.id,
+            })
+          }
         } else if (sub.status === "canceled" || sub.status === "unpaid") {
           await clearPartnerAccountPlan(userId)
         }
-      } else if (orgId && targetPlan && ["pro", "partner"].includes(targetPlan)) {
-        if (sub.status === "active" || sub.status === "trialing") {
-          await setOrgPlan(orgId, targetPlan as OrgPlan, {
+      } else if (orgId && targetPlan) {
+        const orgPlan = tierToOrgPlan(targetPlan) ?? (["pro", "partner"].includes(targetPlan) ? (targetPlan as OrgPlan) : null)
+        if (orgPlan && (sub.status === "active" || sub.status === "trialing")) {
+          await setOrgPlan(orgId, orgPlan, {
             stripeCustomerId: sub.customer,
             stripeSubscriptionId: sub.id,
           })

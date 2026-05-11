@@ -3,7 +3,9 @@ import { buildAuditQualityGates } from "@/lib/compliance/audit-quality-gates"
 import { toAuditPackWorkspace } from "@/lib/compliance/audit-pack"
 import { getControlFamily, getControlFamilyReusePolicySummary } from "@/lib/compliance/control-families"
 import { normalizeDriftLifecycleStatus } from "@/lib/compliance/drift-lifecycle"
+import { buildFindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import { resolveFindingIdFromTaskId } from "@/lib/compliance/task-ids"
+import { isFindingOperationallyClosed } from "@/lib/compliance/task-resolution"
 import type {
   ComplianceState,
   RemediationAction,
@@ -35,37 +37,63 @@ export function buildAuditPack({
   const validatedBaseline =
     state.snapshotHistory.find((item) => item.snapshotId === state.validatedBaselineSnapshotId) ?? null
   const activeDrifts = state.driftRecords.filter((item) => item.open)
-  const auditQualityGates = buildAuditQualityGates({ state, remediationPlan, nowISO: generatedAt })
-  const controlsMatrix = buildControlsMatrix(state, remediationPlan, auditQualityGates)
-  const evidenceLedger = buildEvidenceLedger(state, remediationPlan)
+  const auditRemediationPlan = validatedBaseline
+    ? remediationPlan.filter((task) => task.id !== "baseline-maintenance")
+    : remediationPlan
+  const auditQualityGates = buildAuditQualityGates({
+    state,
+    remediationPlan: auditRemediationPlan,
+    nowISO: generatedAt,
+  })
+  const controlsMatrix = buildControlsMatrix(state, auditRemediationPlan, auditQualityGates)
+  const evidenceLedger = buildEvidenceLedger(state, auditRemediationPlan)
   const evidenceLedgerSummary = summarizeEvidenceLedger(evidenceLedger)
   const validationLog = buildValidationLog(controlsMatrix)
   const traceabilityMatrix = buildComplianceTraceRecords({
     state,
-    remediationPlan,
+    remediationPlan: auditRemediationPlan,
     snapshot,
   })
+  const findingLifecycle = state.findings.map((finding) =>
+    buildFindingLifecycleView({
+      finding,
+      generatedDocuments: state.generatedDocuments,
+      taskState: state.taskState,
+      events: state.events,
+    })
+  )
   const openControls = controlsMatrix.filter((item) => item.status !== "done").length
-  const validatedEvidenceItems = controlsMatrix.filter((item) => item.auditDecision === "pass").length
-  const missingEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
+  const openBusinessFindings = countOpenBusinessFindings(state, auditRemediationPlan)
+  const missingControlEvidenceItems = controlsMatrix.filter((item) => item.auditDecision !== "pass").length
+  const validatedEvidenceItems = Math.max(
+    controlsMatrix.filter((item) => item.auditDecision === "pass").length,
+    evidenceLedgerSummary.sufficient
+  )
+  const missingEvidenceItems = Math.max(missingControlEvidenceItems, openBusinessFindings)
+  const effectiveCompliancePack = withAuditSummaryOverrides(compliancePack, {
+    openFindings: openBusinessFindings,
+    missingEvidenceItems,
+  })
 
   return {
     version: "2.1",
     generatedAt,
+    issuer: buildDefaultIssuer(workspace),
     workspace: toAuditPackWorkspace(workspace),
     executiveSummary: {
       complianceScore: snapshot?.summary.complianceScore ?? null,
       riskLabel: snapshot?.summary.riskLabel ?? null,
       auditReadiness: deriveAuditReadiness(
-        compliancePack,
+        effectiveCompliancePack,
         activeDrifts,
         missingEvidenceItems,
-        auditQualityGates
+        auditQualityGates,
+        validatedBaseline
       ),
       baselineStatus: validatedBaseline ? "validated" : "missing",
-      systemsInScope: compliancePack.entries.length,
+      systemsInScope: effectiveCompliancePack.entries.length,
       sourcesInScope: snapshot?.sources.length ?? 0,
-      openFindings: compliancePack.summary.openFindings,
+      openFindings: openBusinessFindings,
       activeDrifts: activeDrifts.length,
       remediationOpen: openControls,
       validatedEvidenceItems,
@@ -76,20 +104,20 @@ export function buildAuditPack({
       reviewQualityGates: auditQualityGates.reviewCount,
       topBlockers: buildTopBlockers({
         validatedBaseline,
-        compliancePack,
+        compliancePack: effectiveCompliancePack,
         activeDrifts,
         missingEvidenceItems,
         auditQualityGates,
       }),
       nextActions: buildNextActions({
         validatedBaseline,
-        compliancePack,
+        compliancePack: effectiveCompliancePack,
         activeDrifts,
         missingEvidenceItems,
         auditQualityGates,
       }),
     },
-    bundleEvidenceSummary: buildBundleEvidenceSummary(compliancePack, controlsMatrix),
+    bundleEvidenceSummary: buildBundleEvidenceSummary(effectiveCompliancePack, controlsMatrix, evidenceLedger),
     scope: {
       snapshot: {
         id: snapshot?.snapshotId ?? null,
@@ -210,19 +238,43 @@ export function buildAuditPack({
         metadata: event.metadata ?? null,
       })),
     traceabilityMatrix,
+    findingLifecycle,
     nis2Report: buildNis2Report(nis2State),
     nis2Package: buildNis2Package(nis2State, generatedAt),
     appendix: {
       snapshot,
       validatedBaseline,
-      compliancePack,
+      compliancePack: effectiveCompliancePack,
+    },
+  }
+}
+
+function buildDefaultIssuer(workspace: WorkspaceContext): AuditPackV2["issuer"] {
+  return {
+    issuedBy: workspace.workspaceOwner || workspace.orgName,
+    cabinetName: workspace.workspaceLabel || workspace.orgName,
+    consultantName: workspace.workspaceOwner || null,
+    source: "workspace",
+  }
+}
+
+function withAuditSummaryOverrides(
+  compliancePack: AICompliancePack,
+  overrides: Pick<AICompliancePack["summary"], "openFindings" | "missingEvidenceItems">
+): AICompliancePack {
+  return {
+    ...compliancePack,
+    summary: {
+      ...compliancePack.summary,
+      ...overrides,
     },
   }
 }
 
 function buildBundleEvidenceSummary(
   compliancePack: AICompliancePack,
-  controlsMatrix: ReturnType<typeof buildControlsMatrix>
+  controlsMatrix: ReturnType<typeof buildControlsMatrix>,
+  evidenceLedger: ReturnType<typeof buildEvidenceLedger>
 ): AuditPackV2["bundleEvidenceSummary"] {
   const evidenceByKind = new Map<string, number>()
   const lawCoverage = new Map<
@@ -269,6 +321,13 @@ function buildBundleEvidenceSummary(
     }
   }
 
+  for (const entry of evidenceLedger) {
+    const evidence = entry.evidence
+    if (!evidence) continue
+    evidenceByKind.set(evidence.kind, (evidenceByKind.get(evidence.kind) ?? 0) + 1)
+    includedFiles.add(evidence.fileName)
+  }
+
   for (const control of controlsMatrix) {
     const current = familyCoverage.get(control.controlFamily.key) ?? {
       familyLabel: control.controlFamily.label,
@@ -303,23 +362,21 @@ function buildBundleEvidenceSummary(
     (entry) => entry.evidenceBundle.status === "missing_evidence"
   ).length
 
+  const pendingControls = controlsMatrix.filter((control) => control.auditDecision !== "pass").length
+  const attachedEvidenceItems = evidenceLedger.filter((entry) => entry.evidence).length
+  const validatedEvidenceItems = evidenceLedger.filter(
+    (entry) => entry.evidenceQuality?.status === "sufficient"
+  ).length
   const status: AuditPackV2["bundleEvidenceSummary"]["status"] =
-    missingBundles === 0 && partialBundles === 0 ? "bundle_ready" : "review_required"
+    pendingControls === 0 && missingBundles === 0 && partialBundles === 0
+      ? "bundle_ready"
+      : "review_required"
 
   return {
     status,
-    attachedFiles: compliancePack.entries.reduce(
-      (total, entry) => total + entry.evidenceBundle.attachedItems,
-      0
-    ),
-    validatedFiles: compliancePack.entries.reduce(
-      (total, entry) => total + entry.evidenceBundle.validatedItems,
-      0
-    ),
-    pendingControls: compliancePack.entries.reduce(
-      (total, entry) => total + entry.evidenceBundle.pendingItems,
-      0
-    ),
+    attachedFiles: attachedEvidenceItems,
+    validatedFiles: validatedEvidenceItems,
+    pendingControls,
     readyBundles,
     partialBundles,
     missingBundles,
@@ -410,28 +467,96 @@ function buildControlsMatrix(
 
 function buildEvidenceLedger(state: ComplianceState, remediationPlan: RemediationAction[]) {
   return Object.entries(state.taskState)
-    .filter(([, taskState]) => taskState.attachedEvidenceMeta || taskState.validationStatus)
+    // Evidence ledger must only contain real artifacts. Validation-only task
+    // events belong in validationLog, otherwise dashboard/API counts diverge.
+    .filter(([, taskState]) => taskState.attachedEvidenceMeta)
     .map(([taskId, taskState]) => {
       const remediation = remediationPlan.find((item) => `rem-${item.id}` === taskId)
-      const finding =
-        taskId.startsWith("finding-")
-          ? state.findings.find((item) => item.id === resolveFindingIdFromTaskId(taskId))
-          : undefined
+      const finding = resolveFindingForTaskId(state, taskId)
+      const documentAction = resolveDocumentActionForTaskId(state, taskId)
+      const documentLawReference =
+        documentAction?.document.documentType === "dpa" ? "GDPR Art. 28" : null
 
       return {
         taskId,
-        title: remediation?.title || finding?.title || "Task fara titlu",
-        lawReference: remediation?.lawReference || finding?.legalReference || null,
+        title:
+          remediation?.title ||
+          finding?.title ||
+          (documentAction ? `${documentAction.label}: ${documentAction.document.title}` : "Task fără titlu"),
+        lawReference:
+          remediation?.lawReference || finding?.legalReference || documentLawReference || null,
         status: taskState.status,
         validationStatus: taskState.validationStatus ?? "idle",
         validationMessage: taskState.validationMessage ?? null,
         updatedAtISO: taskState.updatedAtISO,
         evidence: taskState.attachedEvidenceMeta ?? null,
         evidenceQuality: taskState.attachedEvidenceMeta?.quality ?? null,
-        sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || null,
+        sourceDocument: remediation?.sourceDocument || finding?.sourceDocument || documentAction?.document.title || null,
       }
     })
     .sort((left, right) => right.updatedAtISO.localeCompare(left.updatedAtISO))
+}
+
+function countOpenBusinessFindings(state: ComplianceState, remediationPlan: RemediationAction[]) {
+  return state.findings.filter((finding) => {
+    if (
+      finding.findingStatus === "resolved" ||
+      finding.findingStatus === "dismissed" ||
+      finding.findingStatus === "under_monitoring"
+    ) {
+      return false
+    }
+
+    return !isAuditPackFindingOperationallyClosed(state, remediationPlan, finding.id)
+  }).length
+}
+
+function isAuditPackFindingOperationallyClosed(
+  state: ComplianceState,
+  remediationPlan: RemediationAction[],
+  findingId: string
+) {
+  if (isFindingOperationallyClosed(state, findingId)) return true
+
+  const relatedRemediationTaskIds = remediationPlan
+    .filter((task) => (task.relatedFindingIds ?? []).includes(findingId))
+    .map((task) => `rem-${task.id}`)
+
+  return relatedRemediationTaskIds.some((taskId) => {
+    const taskState = state.taskState[taskId]
+    return taskState?.status === "done" && taskState.validationStatus === "passed"
+  })
+}
+
+function resolveFindingForTaskId(state: ComplianceState, taskId: string) {
+  const direct = state.findings.find((item) => item.id === taskId)
+  if (direct) return direct
+
+  if (taskId.startsWith("finding-")) {
+    const canonical = resolveFindingIdFromTaskId(taskId)
+    return (
+      state.findings.find((item) => item.id === canonical) ??
+      state.findings.find((item) => item.id === taskId.replace(/^finding-/, ""))
+    )
+  }
+
+  return undefined
+}
+
+function resolveDocumentActionForTaskId(state: ComplianceState, taskId: string) {
+  const prefixes = [
+    { prefix: "document-approval-", label: "Aprobare client" },
+    { prefix: "document-rejection-", label: "Respingere client" },
+  ]
+
+  for (const { prefix, label } of prefixes) {
+    if (!taskId.startsWith(prefix)) continue
+    const documentId = taskId.replace(prefix, "")
+    const document = state.generatedDocuments.find((item) => item.id === documentId)
+    if (document) return { label, document }
+  }
+
+  return null
 }
 
 function summarizeEvidenceLedger(ledger: AuditPackV2["evidenceLedger"]) {
@@ -481,12 +606,15 @@ function deriveAuditReadiness(
   compliancePack: AICompliancePack,
   activeDrifts: ComplianceState["driftRecords"],
   missingEvidenceItems: number,
-  auditQualityGates: AuditPackV2["auditQualityGates"]
+  auditQualityGates: AuditPackV2["auditQualityGates"],
+  validatedBaseline: CompliScanSnapshot | null
 ): AuditPackV2["executiveSummary"]["auditReadiness"] {
   const activeDriftCount = activeDrifts.length
   const blockingDrifts = activeDrifts.filter((drift) => drift.blocksAudit).length
   const breachedDrifts = activeDrifts.filter((drift) => Boolean(drift.escalationBreachedAtISO)).length
 
+  // Issue 7 DPO — `audit_ready` cere reper stabil validat (baseline freeze).
+  // Fără baseline, nu există comparatie auditabilă; rămâne `review_required`.
   if (
     auditQualityGates.decision === "pass" &&
     compliancePack.summary.reviewRequiredEntries === 0 &&
@@ -494,7 +622,8 @@ function deriveAuditReadiness(
     activeDriftCount === 0 &&
     blockingDrifts === 0 &&
     breachedDrifts === 0 &&
-    missingEvidenceItems === 0
+    missingEvidenceItems === 0 &&
+    validatedBaseline !== null
   ) {
     return "audit_ready"
   }
@@ -538,7 +667,7 @@ function buildTopBlockers({
   if (humanApprovalDrifts.length > 0) {
     blockers.push(`${humanApprovalDrifts.length} drift-uri cer aprobare umana explicita inainte de inchidere.`)
   }
-  if (missingEvidenceItems > 0) blockers.push(`${missingEvidenceItems} controale nu au dovada validata.`)
+  if (missingEvidenceItems > 0) blockers.push(`${missingEvidenceItems} dovezi pendinte trebuie atasate sau validate.`)
   if (blockedQualityItems.length > 0) {
     blockers.push(
       `${blockedQualityItems.length} controale sunt blocate de quality gates (dovada lipsa sau drift nerezolvat).`
@@ -596,7 +725,7 @@ function buildNextActions({
   if (breachedDrifts.length > 0) {
     actions.push("Preia sau escaladeaza drift-urile cu SLA depasit si noteaza explicit owner-ul responsabil in audit trail.")
   }
-  if (missingEvidenceItems > 0) actions.push("Completeaza dovezile lipsa si ruleaza rescan pe task-urile deschise.")
+  if (missingEvidenceItems > 0) actions.push("Completeaza dovezile lipsa pe finding-urile deschise si ruleaza rescan pe task-urile active.")
   if (weakEvidenceItems.length > 0) {
     actions.push("Inlocuieste dovezile slabe cu capturi, loguri sau bundle-uri mai specifice inainte de export.")
   }

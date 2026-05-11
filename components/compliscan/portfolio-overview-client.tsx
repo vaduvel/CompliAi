@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -22,9 +24,13 @@ import {
 } from "lucide-react"
 
 import { ImportWizard } from "@/components/compliscan/import-wizard"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
+import { V3FindingRow, V3FrameworkTag, V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3/finding-row"
 import { toast } from "sonner"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
+import { membershipRoleLabel } from "@/lib/compliscan/membership-role-labels"
 import { PARTNER_ACCOUNT_PLAN_LABELS, type PartnerAccountPlan } from "@/lib/shared/plan-constants"
 import type { PortfolioOverviewClientSummary } from "@/lib/server/portfolio"
 import { BATCH_ACTION_LABELS, type BatchActionType, type BatchResult } from "@/lib/compliance/batch-actions"
@@ -81,7 +87,7 @@ function SortHeader({
     <button
       type="button"
       onClick={() => onSort(sortKey)}
-      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.22em] transition-colors duration-150 ${
+      className={`flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.14em] transition-colors duration-150 ${
         active ? "text-eos-text-muted" : "text-eos-text-tertiary hover:text-eos-text-muted"
       } ${className}`}
     >
@@ -105,12 +111,14 @@ function ClientRow({
   selected,
   onToggleSelect,
   onDelete,
+  fiscalCta = false,
 }: {
   client: PortfolioOverviewClientSummary
   onDrillDown: (id: string) => void
   selected: boolean
   onToggleSelect: (id: string) => void
   onDelete: (orgId: string) => void
+  fiscalCta?: boolean
 }) {
   const c = client.compliance
   const hasData = c?.hasData ?? false
@@ -135,173 +143,110 @@ function ClientRow({
     }
   }
 
+  const severity: V3SeverityTone = !hasData ? "low" : (c?.redAlerts ?? 0) > 0 || (c?.score ?? 0) < 40 ? "critical" : (c?.score ?? 0) < 70 ? "high" : "ok"
+  const riskLabel = !hasData ? "fără date" : (c?.score ?? 0) < 40 ? "Critic" : (c?.score ?? 0) < 70 ? "Ridicat" : "OK"
+  const riskTone: V3SeverityTone = !hasData ? "low" : (c?.score ?? 0) < 40 ? "critical" : (c?.score ?? 0) < 70 ? "high" : "ok"
+
   return (
-    <div
-      className={`group flex cursor-pointer flex-wrap items-center gap-4 px-5 py-3.5 transition-colors duration-150 hover:bg-eos-surface-variant ${selected ? "bg-eos-primary/5" : ""}`}
-      onClick={() => onDrillDown(client.orgId)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          onDrillDown(client.orgId)
-        }
-      }}
-      aria-label={`Deschide ${client.orgName}`}
-    >
-      {/* ── Checkbox ── */}
-      <div onClick={(e) => e.stopPropagation()}>
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={() => onToggleSelect(client.orgId)}
-          className="size-4 rounded border-eos-border accent-eos-primary"
-          aria-label={`Selectează ${client.orgName}`}
-        />
-      </div>
-
-      {/* ── Org name + last scan ── */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-eos-text">{client.orgName}</p>
-          <span className="shrink-0 rounded-full bg-eos-surface-elevated px-2 py-0.5 text-[10px] font-medium text-eos-text-tertiary">
-            {client.role}
-          </span>
+    <div className="space-y-0">
+      <div className="flex items-center gap-2">
+        <div onClick={(e) => e.stopPropagation()} className="shrink-0 pl-1">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect(client.orgId)}
+            className="size-4 rounded border-eos-border accent-eos-primary"
+            aria-label={`Selectează ${client.orgName}`}
+          />
         </div>
-        <p className="mt-0.5 text-xs text-eos-text-tertiary">
-          Ultima scanare: {formatDate(c?.lastScanAtISO)}
-        </p>
-      </div>
-
-      {/* ── Score ── */}
-      <div className="w-28 shrink-0">
-        {hasData && c ? (
-          <div className="space-y-1.5">
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold text-eos-text">{c.score}%</span>
-              <span
-                className={`text-[10px] font-medium ${
-                  c.score >= 70
-                    ? "text-eos-success"
-                    : c.score >= 40
-                      ? "text-eos-warning"
-                      : "text-eos-error"
-                }`}
-              >
-                {c.riskLabel}
+        <div className="min-w-0 flex-1">
+          <V3FindingRow
+            severity={severity}
+            onClick={() => onDrillDown(client.orgId)}
+            title={
+              <span className="flex flex-wrap items-center gap-2">
+                {client.orgName}
+                <span className="rounded-sm border border-eos-border bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tracking-[0.02em] text-eos-text-tertiary">
+                  {membershipRoleLabel(client.role)}
+                </span>
               </span>
-            </div>
-            <ScoreBar score={c.score} />
-          </div>
-        ) : (
-          <span className="text-xs text-eos-text-tertiary">fără date</span>
-        )}
-      </div>
-
-      {/* ── Alerts + tasks + findings ── */}
-      <div className="hidden w-36 shrink-0 space-y-1 sm:block">
-        {c && hasData ? (
-          <>
-            <div className="flex items-center gap-1.5 text-xs">
-              {c.redAlerts > 0 ? (
-                <AlertTriangle className="size-3 shrink-0 text-eos-error" strokeWidth={2} />
-              ) : (
-                <CheckCircle2 className="size-3 shrink-0 text-eos-success" strokeWidth={2} />
-              )}
-              <span className="text-eos-text-muted">
-                {c.openAlerts} alert{c.openAlerts !== 1 ? "e" : "ă"}
-              </span>
-            </div>
-            <p className="text-xs text-eos-text-tertiary">{c.totalTasks} taskuri active</p>
-            <p className="text-xs text-eos-text-tertiary">{c.criticalFindings} findings critice</p>
-          </>
-        ) : null}
-      </div>
-
-      {/* ── Compliance badges ── */}
-      <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-        {c?.efacturaConnected && (c?.efacturaRiskCount ?? 0) === 0 && (
-          <span className="rounded-full bg-eos-success-soft px-2 py-0.5 text-[10px] font-medium text-eos-success">
-            e-Factura
-          </span>
-        )}
-        {(c?.efacturaRiskCount ?? 0) > 0 && (
-          <span className="rounded-full bg-eos-warning-soft px-2 py-0.5 text-[10px] font-medium text-eos-warning">
-            {c!.efacturaRiskCount} e-Factura
-          </span>
-        )}
-        {c && c.gdprProgress >= 70 && (
-          <span className="rounded-full bg-eos-primary-soft px-2 py-0.5 text-[10px] font-medium text-eos-primary">
-            GDPR
-          </span>
-        )}
-        {c && c.highRisk > 0 && (
-          <span className="rounded-full bg-eos-error-soft px-2 py-0.5 text-[10px] font-medium text-eos-error">
-            {c.highRisk} high-risk AI
-          </span>
-        )}
-        {c?.nis2RescueNeeded && (
-          <span className="rounded-full bg-eos-warning-soft px-2 py-0.5 text-[10px] font-medium text-eos-warning">
-            NIS2
-          </span>
-        )}
-        {(c?.urgentDsarCount ?? 0) > 0 && (
-          <span className="rounded-full bg-eos-error-soft px-2 py-0.5 text-[10px] font-medium text-eos-error">
-            {c!.urgentDsarCount} DSAR urgent
-          </span>
-        )}
-        {(c?.activeDsarCount ?? 0) > 0 && (c?.urgentDsarCount ?? 0) === 0 && (
-          <span className="rounded-full bg-eos-surface-elevated px-2 py-0.5 text-[10px] font-medium text-eos-text-tertiary">
-            {c!.activeDsarCount} DSAR
-          </span>
-        )}
-      </div>
-
-      {/* ── Actions ── */}
-      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          onClick={() => onDrillDown(client.orgId)}
-          className="rounded-eos-md border border-eos-border bg-eos-surface-active px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
-        >
-          Intră în firmă
-        </button>
-        <a
-          href={`/trust/${client.orgId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-active hover:text-eos-text-muted"
-          title="Trust Profile"
-        >
-          <ExternalLink className="size-3.5" strokeWidth={2} />
-        </a>
-        {deleteConfirm ? (
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={deleting}
-              onClick={handleDelete}
-              className="rounded-eos-md border border-eos-error/40 bg-eos-error-soft px-2 py-1.5 text-xs font-medium text-eos-error transition-all hover:bg-eos-error hover:text-white disabled:opacity-50"
-            >
-              {deleting ? <Loader2 className="size-3 animate-spin" /> : "Confirmi?"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteConfirm(false)}
-              className="p-1.5 text-eos-text-tertiary hover:text-eos-text-muted"
-            >
-              <X className="size-3.5" />
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setDeleteConfirm(true)}
-            className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-1.5 text-eos-text-tertiary transition-all duration-150 hover:border-eos-error/40 hover:bg-eos-error-soft hover:text-eos-error"
-            title="Elimină firma din portofoliu"
-          >
-            <Trash2 className="size-3.5" strokeWidth={2} />
-          </button>
-        )}
+            }
+            subtitle={`Ultima scanare: ${formatDate(c?.lastScanAtISO)}`}
+            meta={
+              hasData && c ? (
+                <span className="flex flex-wrap items-center gap-3">
+                  <span>
+                    {c.openFindings} {c.openFindings === 1 ? "caz deschis" : "cazuri deschise"}
+                    {c.criticalFindings > 0 ? ` · ${c.criticalFindings} critice` : ""}
+                  </span>
+                  <span>·</span>
+                  <span>{c.totalTasks} taskuri</span>
+                  <span>·</span>
+                  <span>{c.openAlerts} alerte</span>
+                </span>
+              ) : undefined
+            }
+            badges={
+              hasData && c ? (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <V3RiskPill tone={riskTone}>{riskLabel} · {c.score}%</V3RiskPill>
+                  {c.gdprFindings > 0 && (
+                    <V3FrameworkTag
+                      label="GDPR"
+                      count={c.gdprFindings}
+                      tone={c.criticalFindings > 0 ? "critical" : "high"}
+                    />
+                  )}
+                  {c.nis2RescueNeeded && <V3FrameworkTag label="NIS2" tone="high" />}
+                  {c.efacturaRiskCount > 0 && <V3FrameworkTag label="e-Factura" count={c.efacturaRiskCount} tone="high" />}
+                </div>
+              ) : undefined
+            }
+            ctaLabel={fiscalCta ? "Deschide cockpit fiscal" : "Intră în firmă"}
+            trailing={
+              <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                <a
+                  href={`/trust/${client.orgId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="grid size-8 place-items-center rounded-eos-sm border border-eos-border text-eos-text-tertiary transition hover:bg-white/[0.04] hover:text-eos-text-muted"
+                  title="Trust Profile"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ExternalLink className="size-3.5" strokeWidth={2} />
+                </a>
+                {deleteConfirm ? (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={deleting}
+                      onClick={(e) => { e.stopPropagation(); void handleDelete() }}
+                      className="h-8 rounded-eos-sm border border-eos-error/40 bg-eos-error-soft px-2 text-xs font-medium text-eos-error transition hover:bg-eos-error hover:text-white disabled:opacity-50"
+                    >
+                      {deleting ? <Loader2 className="size-3 animate-spin" /> : "Confirmi?"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(false) }}
+                      className="grid size-8 place-items-center text-eos-text-tertiary hover:text-eos-text-muted"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setDeleteConfirm(true) }}
+                    className="grid size-8 place-items-center rounded-eos-sm border border-eos-border text-eos-text-tertiary transition hover:border-eos-error/40 hover:bg-eos-error-soft hover:text-eos-error"
+                    title="Elimină firma"
+                  >
+                    <Trash2 className="size-3.5" strokeWidth={2} />
+                  </button>
+                )}
+              </div>
+            }
+          />
+        </div>
       </div>
     </div>
   )
@@ -321,7 +266,7 @@ function BatchToolbar({
   loading: boolean
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-eos-xl border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/30 bg-eos-primary/5 px-4 py-3">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-6 items-center justify-center rounded-full bg-eos-primary text-xs font-semibold text-white">
           {count}
@@ -338,7 +283,7 @@ function BatchToolbar({
             type="button"
             disabled={loading}
             onClick={() => onAction(type)}
-            className="flex items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 py-1.5 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
           >
             {loading ? <Loader2 className="size-3 animate-spin" /> : <Zap className="size-3" />}
             {label}
@@ -421,7 +366,7 @@ function BatchResultsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-eos-xl border border-eos-border bg-eos-surface p-6 shadow-xl">
+      <div className="w-full max-w-2xl rounded-eos-lg border border-eos-border bg-eos-surface p-6 shadow-xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-semibold text-eos-text">{BATCH_ACTION_LABELS[action]}</p>
@@ -483,7 +428,7 @@ function BatchResultsModal({
                 )}
 
                 {r.nextStep && (
-                  <div className="mt-3 rounded-eos-md border border-eos-border/70 bg-eos-surface/70 px-3 py-2 text-xs text-eos-text-muted">
+                  <div className="mt-3 rounded-eos-sm border border-eos-border/70 bg-eos-surface/70 px-3 py-2 text-xs text-eos-text-muted">
                     <span className="font-medium text-eos-text">Ce urmează:</span> {r.nextStep}
                   </div>
                 )}
@@ -494,7 +439,7 @@ function BatchResultsModal({
 
         <button
           onClick={onClose}
-          className="mt-4 w-full rounded-eos-md border border-eos-border bg-eos-surface-active py-2 text-sm font-medium text-eos-text-muted hover:text-eos-text"
+          className="mt-4 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active py-2 text-sm font-medium text-eos-text-muted hover:text-eos-text"
         >
           Închide
         </button>
@@ -503,41 +448,10 @@ function BatchResultsModal({
   )
 }
 
-function SummaryStrip({ clients }: { clients: PortfolioOverviewClientSummary[] }) {
-  const active = clients.filter((c) => c.status === "active")
-  const withData = active.filter((c) => c.compliance?.hasData)
-  const redClients = active.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
-  const activeTasks = active.reduce((s, c) => s + (c.compliance?.totalTasks ?? 0), 0)
-  const avgScore =
-    withData.length > 0
-      ? Math.round(withData.reduce((s, c) => s + (c.compliance?.score ?? 0), 0) / withData.length)
-      : 0
-  const totalEfacturaRisks = active.reduce((s, c) => s + (c.compliance?.efacturaRiskCount ?? 0), 0)
-
-  const stats = [
-    { label: "Firme active", value: active.length },
-    { label: "Cu date", value: withData.length },
-    { label: "Scor mediu", value: withData.length > 0 ? `${avgScore}%` : "—" },
-    { label: "Taskuri active", value: activeTasks },
-    { label: "Alerte critice", value: redClients.length },
-    ...(totalEfacturaRisks > 0 ? [{ label: "Semnale e-Factura", value: totalEfacturaRisks }] : []),
-  ]
-
-  return (
-    <div className={`grid grid-cols-2 divide-x divide-eos-border-subtle overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant ${stats.length > 5 ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
-      {stats.map((stat) => (
-        <div key={stat.label} className="flex flex-col gap-1 px-5 py-4">
-          <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
-            {stat.label}
-          </span>
-          <span className="text-xl font-semibold text-eos-text">{stat.value}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
 
 export function PortfolioOverviewClient() {
+  const runtime = useDashboardRuntime()
+  const isFiscalCabinet = runtime?.icpSegment === "cabinet-fiscal"
   const [clients, setClients] = useState<PortfolioOverviewClientSummary[]>([])
   const [planData, setPlanData] = useState<PortfolioPlanResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -679,6 +593,25 @@ export function PortfolioOverviewClient() {
 
   const activeClients = clients.filter((c) => c.status === "active")
 
+  const kpiItems: V3KpiItem[] = useMemo(() => {
+    const withData = activeClients.filter((c) => c.compliance?.hasData)
+    const redClients = activeClients.filter((c) => (c.compliance?.redAlerts ?? 0) > 0)
+    const activeTasks = activeClients.reduce((s, c) => s + (c.compliance?.totalTasks ?? 0), 0)
+    const avgScore = withData.length > 0
+      ? Math.round(withData.reduce((s, c) => s + (c.compliance?.score ?? 0), 0) / withData.length)
+      : null
+    const totalEfacturaRisks = activeClients.reduce((s, c) => s + (c.compliance?.efacturaRiskCount ?? 0), 0)
+    return [
+      { id: "active", label: "Firme active", value: activeClients.length, detail: withData.length > 0 ? `${withData.length} cu date` : undefined },
+      { id: "critical", label: "Alerte critice", value: redClients.length, stripe: redClients.length > 0 ? "critical" as const : undefined, valueTone: redClients.length > 0 ? "critical" as const : "neutral" as const },
+      { id: "score", label: "Scor mediu", value: avgScore !== null ? avgScore : "—", valueUnit: avgScore !== null ? "%" : undefined },
+      { id: "tasks", label: "Taskuri active", value: activeTasks },
+      totalEfacturaRisks > 0
+        ? { id: "efactura", label: "Semnale e-Factura", value: totalEfacturaRisks, stripe: "warning" as const, valueTone: "warning" as const }
+        : { id: "firms-data", label: "Firme cu date", value: withData.length },
+    ]
+  }, [activeClients])
+
   const filteredClients = useMemo(() => {
     let list = activeClients
     if (search.trim()) {
@@ -725,62 +658,60 @@ export function PortfolioOverviewClient() {
         />
       ) : null}
 
-      {/* ── Header ── */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">Portofoliu</p>
-          <h1 className="mt-1 text-2xl font-semibold text-eos-text">Portofoliu firme</h1>
-          <p className="mt-1.5 max-w-xl text-sm leading-6 text-eos-text-tertiary">
-            Aici faci triage cross-client. Intri în firmă doar când trebuie să execuți într-un workspace real.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-eos-border px-2.5 py-0.5 text-xs text-eos-text-muted">
-              {activeClients.length} firme active
-            </span>
-            {planData?.planType && planData.maxOrgs !== null && (
-              <span className="rounded-full bg-eos-surface-active px-2.5 py-0.5 text-xs text-eos-text-tertiary">
-                {PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} · {planData.currentOrgs}/{planData.maxOrgs}
-              </span>
+      <V3PageHero
+        breadcrumbs={[{ label: "Portofoliu" }, { label: "Firme", current: true }]}
+        title={isFiscalCabinet ? "Portofoliu fiscal" : "Portofoliu firme"}
+        description={
+          <>
+            {isFiscalCabinet
+              ? "Triage e-Factura + SAF-T + RO e-TVA per client. Intri în cockpitul fiscal al firmei doar când ai de validat sau transmis."
+              : "Triage cross-client. Intri în firmă doar când trebuie să execuți."}
+            {activeClients.length > 0 && (
+              <>
+                {" "}<strong className="text-eos-text">{activeClients.length} firme active</strong>{"."}
+              </>
             )}
-            {alertClients.length > 0 && (
-              <span className="rounded-full bg-eos-error-soft px-2.5 py-0.5 text-xs font-medium text-eos-error">
-                {alertClients.length} cu alerte critice
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowImport(true)}
-            disabled={planData ? !planData.canAddOrg : false}
-            className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text disabled:opacity-40"
-          >
-            <Upload className="size-4" strokeWidth={2} />
-            {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
-          </button>
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            className="flex items-center gap-2 rounded-eos-lg border border-eos-border bg-eos-surface-active px-4 py-2 text-sm font-medium text-eos-text-muted transition-all duration-150 hover:border-eos-border-strong hover:bg-eos-surface-elevated hover:text-eos-text"
-          >
-            <Download className="size-4" strokeWidth={2} />
-            Exportă CSV
-          </button>
-          <button
-            type="button"
-            onClick={() => { void fetchClients(); void fetchPlanData() }}
-            className="flex items-center gap-2 rounded-eos-lg px-3 py-2 text-sm font-medium text-eos-text-tertiary transition-all duration-150 hover:bg-eos-surface-active hover:text-eos-text-muted"
-          >
-            <RefreshCw className="size-4" strokeWidth={2} />
-            Actualizează
-          </button>
-        </div>
-      </div>
+          </>
+        }
+        eyebrowBadges={planData?.planType && planData.maxOrgs !== null ? (
+          <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-tertiary">
+            {PARTNER_ACCOUNT_PLAN_LABELS[planData.planType]} · {planData.currentOrgs}/{planData.maxOrgs}
+          </span>
+        ) : undefined}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowImport(true)}
+              disabled={planData ? !planData.canAddOrg : false}
+              className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-primary bg-eos-primary px-3 text-[12.5px] font-medium text-white transition-all hover:bg-eos-primary-hover disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Upload className="size-3.5" strokeWidth={2} />
+              {planData && !planData.canAddOrg ? "Limita atinsă" : "Import firme"}
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[12.5px] font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+            >
+              <Download className="size-3.5" strokeWidth={2} />
+              Exportă CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => { void fetchClients(); void fetchPlanData() }}
+              className="flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[12.5px] font-medium text-eos-text-tertiary transition-all hover:border-eos-border-strong hover:text-eos-text-muted"
+            >
+              <RefreshCw className="size-3.5" strokeWidth={2} />
+              Actualizează
+            </button>
+          </>
+        }
+      />
 
       {/* ── Capacity warning ── */}
       {planData && !planData.canAddOrg && (
-        <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-xl border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 rounded-eos-lg border border-eos-warning-border bg-eos-warning-soft px-5 py-4">
           <div>
             <p className="text-sm font-semibold text-eos-text">Capacitatea portofoliului este atinsă</p>
             <p className="mt-1 text-xs leading-5 text-eos-text-muted">
@@ -824,7 +755,7 @@ export function PortfolioOverviewClient() {
 
         if (urgencies.length === 0) return null
         return (
-          <div className="rounded-eos-xl border border-eos-error-border bg-eos-error-soft px-5 py-4">
+          <div className="rounded-eos-lg border border-eos-error-border bg-eos-error-soft px-5 py-4">
             <div className="mb-3 flex items-center gap-2">
               <AlertTriangle className="size-4 text-eos-error" strokeWidth={2} />
               <span className="text-sm font-semibold text-eos-error">Urgențe acum</span>
@@ -856,8 +787,8 @@ export function PortfolioOverviewClient() {
         />
       )}
 
-      {/* ── Summary strip ── */}
-      <SummaryStrip clients={activeClients} />
+      {/* ── KPI strip ── */}
+      <V3KpiStrip items={kpiItems} />
 
       {/* ── Batch toolbar ── */}
       {selectedIds.size > 0 && (
@@ -902,16 +833,22 @@ export function PortfolioOverviewClient() {
       </div>
 
       {/* ── Client table ── */}
-      <div className="overflow-hidden rounded-eos-xl border border-eos-border bg-eos-surface-variant">
+      <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         {activeClients.length === 0 ? (
           <div className="flex flex-col items-center gap-4 px-6 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-eos-xl border border-eos-border bg-eos-surface-active">
+            <div className="flex size-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-surface-active">
               <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
             </div>
             <div className="space-y-1.5">
-              <p className="text-base font-semibold text-eos-text">Niciun client încă în portofoliu</p>
+              <p className="text-base font-semibold text-eos-text">
+                {isFiscalCabinet
+                  ? "Niciun client fiscal în portofoliu încă"
+                  : "Niciun client încă în portofoliu"}
+              </p>
               <p className="max-w-md text-sm leading-6 text-eos-text-tertiary">
-                Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual.
+                {isFiscalCabinet
+                  ? "Adaugă primul client cabinet fiscal. Importă bulk dintr-un CSV cu coloanele CUI + Nume firmă — fiecare client va avea cockpit fiscal dedicat (e-Factura, SAF-T, RO e-TVA, cert SPV)."
+                  : "Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual."}
               </p>
             </div>
             <button
@@ -921,7 +858,7 @@ export function PortfolioOverviewClient() {
               className="mt-2 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Upload className="size-4" strokeWidth={2} />
-              Adaugă primul client
+              {isFiscalCabinet ? "Importă primii clienți" : "Adaugă primul client"}
             </button>
           </div>
         ) : filteredClients.length === 0 ? (
@@ -931,7 +868,7 @@ export function PortfolioOverviewClient() {
         ) : (
           <>
             {/* Table header */}
-            <div className="flex flex-wrap items-center gap-4 border-b border-eos-border-subtle bg-eos-surface-variant px-5 py-2.5">
+            <div className="flex items-center gap-4 border-b border-eos-border px-3 py-2">
               <input
                 type="checkbox"
                 className="size-4 rounded border-eos-border accent-eos-primary"
@@ -939,22 +876,12 @@ export function PortfolioOverviewClient() {
                 onChange={() => handleSelectAll(filteredClients.map((c) => c.orgId))}
                 aria-label="Selectează toate"
               />
-              <div className="flex-1">
-                <SortHeader label="Organizație" sortKey="orgName" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
-              </div>
-              <div className="w-28 shrink-0">
-                <SortHeader label="Scor" sortKey="score" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
-              </div>
-              <div className="hidden w-36 shrink-0 sm:block">
-                <SortHeader label="Alerte" sortKey="alerts" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
-              </div>
-              <div className="hidden w-28 shrink-0 sm:block">
-                <SortHeader label="Taskuri" sortKey="tasks" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
-              </div>
-              <div className="hidden w-28 shrink-0 sm:block" />
+              <div className="flex-1 font-mono text-[10px] uppercase tracking-[0.14em] text-eos-text-tertiary">Organizație</div>
+              <div className="hidden sm:block font-mono text-[10px] uppercase tracking-[0.14em] text-eos-text-tertiary">Scor · Findings · Frameworks</div>
+              <div className="hidden sm:block font-mono text-[10px] uppercase tracking-[0.14em] text-eos-text-tertiary">Acțiune</div>
             </div>
 
-            <div className="divide-y divide-eos-border-subtle">
+            <div className="space-y-2 p-3">
               {filteredClients.map((client) => (
                 <ClientRow
                   key={client.orgId}
@@ -963,6 +890,7 @@ export function PortfolioOverviewClient() {
                   selected={selectedIds.has(client.orgId)}
                   onToggleSelect={handleToggleSelect}
                   onDelete={(orgId) => setClients((prev) => prev.filter((c) => c.orgId !== orgId))}
+                  fiscalCta={isFiscalCabinet}
                 />
               ))}
             </div>
@@ -972,14 +900,14 @@ export function PortfolioOverviewClient() {
 
       {/* ── Info cards ── */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
           <Building2 className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Portofoliu-first, fără switch constant</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">
             Triage-ul rămâne aici. Intrarea în firmă deschide doar execuția pe clientul selectat. Poți importa firme în masă și exporta snapshot-ul curent.
           </p>
         </div>
-        <div className="rounded-eos-xl border border-eos-border-subtle bg-eos-surface-variant p-4">
+        <div className="rounded-eos-lg border border-eos-border-subtle bg-eos-surface-variant p-4">
           <CalendarClock className="mb-2 size-4 text-eos-text-tertiary" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-eos-text-muted">Drilldown rapid</p>
           <p className="mt-1 text-xs leading-5 text-eos-text-tertiary">

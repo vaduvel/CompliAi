@@ -48,7 +48,7 @@ export function generateJobDescriptionPack(
     kind: "job-descriptions",
     title: "Pachet minim fișe de post",
     summary:
-      "CompliAI pregătește modelul de fișă, inventarul de roluri și planul de rollout. Firma trebuie să adapteze pe rolurile reale, să confirme lanțul ierarhic și să obțină semnătura internă.",
+      "CompliScan pregătește modelul de fișă, inventarul de roluri și planul de rollout. Firma trebuie să adapteze pe rolurile reale, să confirme lanțul ierarhic și să obțină semnătura internă.",
     assets: [
       {
         id: "job-description-template",
@@ -168,7 +168,7 @@ ${params.hasAiTools ? "- Respectă politica de utilizare AI și nu introduce dat
     generatorDocumentType: "job-description",
     generatorLabel: "Generează prima fișă",
     returnEvidenceNote:
-      "CompliAI a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă.",
+      "CompliScan a pregătit pachetul HR pentru fișe de post: modelul de fișă, inventarul de roluri și checklistul de rollout au fost revizuite. Următorul pas este adaptarea pe rolurile reale și semnarea internă.",
   }
 }
 
@@ -185,7 +185,7 @@ export function generateHrProcedurePack(
     kind: "hr-procedures",
     title: "Pachet minim proceduri interne HR",
     summary:
-      "CompliAI pregătește regulamentul intern, planul de comunicare și checklistul de rollout. Firma trebuie să adapteze politicile la programul real, la relațiile de muncă și la modul în care documentul ajunge la angajați.",
+      "CompliScan pregătește regulamentul intern, planul de comunicare și checklistul de rollout. Firma trebuie să adapteze politicile la programul real, la relațiile de muncă și la modul în care documentul ajunge la angajați.",
     assets: [
       {
         id: "internal-regulation-outline",
@@ -329,7 +329,7 @@ Acest registru confirmă că regulamentul intern a fost comunicat angajaților �
     generatorDocumentType: "hr-internal-procedures",
     generatorLabel: "Generează regulamentul",
     returnEvidenceNote:
-      "CompliAI a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
+      "CompliScan a pregătit pachetul HR pentru regulament intern: structura documentului, planul de comunicare și checklistul de rollout au fost revizuite. Următorul pas este adaptarea la programul real și comunicarea către angajați.",
   }
 }
 
@@ -346,7 +346,7 @@ export function generateRegesCorrectionPack(
     kind: "reges-correction",
     title: "Pachet minim corecție REGES",
     summary:
-      "CompliAI pregătește brief-ul de corecție, checklistul pentru HR / contabil, reconcilierea snapshotului intern și mesajul de handoff. Firma tot trebuie să opereze remedierea reală în REGES și să păstreze exportul sau confirmarea rezultată.",
+      "CompliScan pregătește brief-ul de corecție, checklistul pentru HR / contabil, reconcilierea snapshotului intern și mesajul de handoff. Firma tot trebuie să opereze remedierea reală în REGES și să păstreze exportul sau confirmarea rezultată.",
     assets: [
       {
         id: "reges-correction-brief",
@@ -406,7 +406,7 @@ export function generateRegesCorrectionPack(
 
 Bună,
 
-CompliAI a detectat că evidența contractelor de muncă trebuie verificată și posibil corectată în REGES / Revisal pentru ${orgName}.
+CompliScan a detectat că evidența contractelor de muncă trebuie verificată și posibil corectată în REGES / Revisal pentru ${orgName}.
 
 Te rog să verifici:
 - contractele active
@@ -430,6 +430,6 @@ Mulțumesc.`,
     generatorDocumentType: "reges-correction-brief",
     generatorLabel: "Generează brief-ul",
     returnEvidenceNote:
-      "CompliAI a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR, snapshotul intern și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
+      "CompliScan a pregătit brief-ul de corecție REGES: checklistul pentru contabil / HR, snapshotul intern și mesajul de handoff au fost revizuite. Următorul pas este verificarea registrului real și întoarcerea cu exportul sau confirmarea de corecție.",
   }
 }

@@ -1,8 +1,6 @@
 "use client"
 
-import { ChevronDown, type LucideIcon } from "lucide-react"
-
-import { Badge } from "@/components/evidence-os/Badge"
+import { type LucideIcon } from "lucide-react"
 
 export type RepoSyncStatus = {
   headerName: string
@@ -107,6 +105,34 @@ export type SettingsSummaryResponse = {
   releaseReadinessError?: string | null
 }
 
+export type SettingsPillTone = "success" | "warning" | "destructive" | "outline" | "neutral"
+
+const PILL_CLASSES: Record<SettingsPillTone, string> = {
+  success: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+  warning: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  destructive: "border-eos-error/30 bg-eos-error-soft text-eos-error",
+  outline: "border-eos-border bg-eos-surface-elevated text-eos-text-muted",
+  neutral: "border-eos-border bg-eos-surface-elevated text-eos-text-tertiary",
+}
+
+export function SettingsPill({
+  tone = "outline",
+  children,
+  className = "",
+}: {
+  tone?: SettingsPillTone
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-[0.02em] ${PILL_CLASSES[tone]} ${className}`}
+    >
+      {children}
+    </span>
+  )
+}
+
 export function SettingsTabIntro({
   title,
   description,
@@ -116,10 +142,10 @@ export function SettingsTabIntro({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
         {title}
       </p>
-      <p className="max-w-2xl text-sm leading-6 text-eos-text-muted">
+      <p className="max-w-2xl text-[12.5px] leading-[1.55] text-eos-text-muted">
         {description}
       </p>
     </div>
@@ -136,14 +162,14 @@ export function SettingsTile({
   value: string
 }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-3.5">
+    <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-3.5">
       <div className="flex items-center gap-2 text-eos-text-muted">
-        <span className="grid size-7 place-items-center rounded-eos-md border border-eos-border bg-eos-bg-inset">
+        <span className="grid size-7 place-items-center rounded-eos-sm border border-eos-border bg-eos-bg-inset">
           <Icon className="size-3.5" strokeWidth={2} />
         </span>
-        <p className="text-[11px] uppercase tracking-[0.18em]">{label}</p>
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">{label}</p>
       </div>
-      <p className="mt-3 text-sm font-semibold leading-5 text-eos-text">{value}</p>
+      <p className="mt-3 text-[13px] font-semibold leading-5 text-eos-text">{value}</p>
     </div>
   )
 }
@@ -158,12 +184,12 @@ export function EndpointRow({
   badge: string
 }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
+    <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm font-medium text-eos-text">{label}</span>
-        <Badge variant="outline">{badge}</Badge>
+        <span className="text-[12.5px] font-medium text-eos-text">{label}</span>
+        <SettingsPill>{badge}</SettingsPill>
       </div>
-      <p className="mt-2 break-all text-xs leading-5 text-eos-text-muted">{value}</p>
+      <p className="mt-2 break-all font-mono text-[11px] leading-[1.5] text-eos-text-muted">{value}</p>
     </div>
   )
 }
@@ -173,7 +199,7 @@ export function OperationalLoadingCard({ children }: { children: React.ReactNode
     <div
       role="status"
       aria-live="polite"
-      className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted"
+      className="rounded-eos-sm border border-eos-border bg-eos-surface p-4 text-[12.5px] text-eos-text-muted"
     >
       {children}
     </div>
@@ -192,11 +218,11 @@ export function SettingsStatusBlock({
   children?: React.ReactNode
 }) {
   return (
-    <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">{eyebrow}</p>
-      <p className="mt-2 text-sm font-semibold text-eos-text">{title}</p>
+    <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-4">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">{eyebrow}</p>
+      <p className="mt-2 text-[13px] font-semibold text-eos-text">{title}</p>
       {description ? (
-        <p className="mt-2 text-sm leading-6 text-eos-text-muted">{description}</p>
+        <p className="mt-2 text-[12.5px] leading-[1.55] text-eos-text-muted">{description}</p>
       ) : null}
       {children ? <div className="mt-3">{children}</div> : null}
     </div>
@@ -216,13 +242,13 @@ export function SettingsSignalCard({
 }) {
   const toneClass =
     tone === "destructive"
-      ? "border-eos-error-border bg-eos-error-soft text-eos-error"
+      ? "border-eos-error/30 bg-eos-error-soft text-eos-error"
       : tone === "warning"
-        ? "border-eos-warning-border bg-eos-warning-soft text-eos-warning"
-        : "border-eos-border bg-eos-primary-soft text-eos-success"
+        ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+        : "border-eos-success/30 bg-eos-success-soft text-eos-success"
 
   return (
-    <div className={`rounded-eos-md border p-4 text-sm ${toneClass}`}>
+    <div className={`rounded-eos-sm border p-4 text-[12.5px] ${toneClass}`}>
       <p className="font-semibold text-eos-text">{title}</p>
       {items.length > 0 ? (
         <ul className="mt-2 space-y-1.5">
@@ -249,26 +275,18 @@ export function SettingsDisclosure({
   children: React.ReactNode
 }) {
   return (
-    <details className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-      <summary className="cursor-pointer list-none">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-eos-text-muted">
-              {eyebrow}
-            </p>
-            <p className="mt-1 text-sm font-medium text-eos-text">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-eos-text-muted">
-              {description}
-            </p>
-          </div>
-          <ChevronDown
-            className="mt-1 size-4 shrink-0 text-eos-text-muted"
-            strokeWidth={2}
-          />
-        </div>
-      </summary>
+    <div className="rounded-eos-sm border border-eos-border bg-eos-bg-inset p-4">
+      <div className="min-w-0">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          {eyebrow}
+        </p>
+        <p className="mt-1 text-[12.5px] font-medium text-eos-text">{title}</p>
+        <p className="mt-1 text-[11.5px] leading-[1.5] text-eos-text-muted">
+          {description}
+        </p>
+      </div>
       <div className="mt-4">{children}</div>
-    </details>
+    </div>
   )
 }
 
@@ -302,11 +320,11 @@ export function formatBackendLabel(backend: "local" | "supabase" | "hybrid") {
   }
 }
 
-export function repoSyncBadgeVariant(status: RepoSyncStatus) {
-  if (!status) return "outline" as const
-  if (status.requiresKey) return "success" as const
-  if (status.localAllowedWithoutKey) return "warning" as const
-  return "secondary" as const
+export function repoSyncBadgeVariant(status: RepoSyncStatus): SettingsPillTone {
+  if (!status) return "outline"
+  if (status.requiresKey) return "success"
+  if (status.localAllowedWithoutKey) return "warning"
+  return "neutral"
 }
 
 export function repoSyncBadgeLabel(status: RepoSyncStatus) {
@@ -319,34 +337,34 @@ export function repoSyncBadgeLabel(status: RepoSyncStatus) {
 export function healthBadgeVariant(
   state?: "healthy" | "degraded" | "blocked",
   loading?: boolean
-) {
-  if (loading) return "outline" as const
+): SettingsPillTone {
+  if (loading) return "outline"
 
   switch (state) {
     case "healthy":
-      return "success" as const
+      return "success"
     case "blocked":
-      return "destructive" as const
+      return "destructive"
     case "degraded":
     default:
-      return "warning" as const
+      return "warning"
   }
 }
 
 export function releaseBadgeVariant(
   state?: "ready" | "review" | "blocked",
   loading?: boolean
-) {
-  if (loading) return "outline" as const
+): SettingsPillTone {
+  if (loading) return "outline"
 
   switch (state) {
     case "ready":
-      return "success" as const
+      return "success"
     case "blocked":
-      return "destructive" as const
+      return "destructive"
     case "review":
     default:
-      return "warning" as const
+      return "warning"
   }
 }
 

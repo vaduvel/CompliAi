@@ -20,12 +20,10 @@ import {
 
 import { PortfolioOrgActionButton } from "@/components/compliscan/portfolio-org-action-button"
 import { ErrorScreen, LoadingScreen } from "@/components/compliscan/route-sections"
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3KpiStrip } from "@/components/compliscan/v3/kpi-strip"
 import { Button } from "@/components/evidence-os/Button"
-import { Card } from "@/components/evidence-os/Card"
 import { Checkbox } from "@/components/evidence-os/Checkbox"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import type { InboxItem } from "@/app/api/portfolio/inbox/route"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 
@@ -48,20 +46,28 @@ type InboxResponse = {
 type SeverityFilter = "all" | "critical-high" | "unread"
 type SourceFilter = "all" | "alert" | "notification"
 
-const severityVariant = {
-  critical: "destructive",
-  high: "warning",
-  medium: "secondary",
-  low: "outline",
-  info: "outline",
-} as const
-
 const severityLabel: Record<InboxItem["severity"], string> = {
   critical: "Critic",
   high: "Ridicat",
   medium: "Mediu",
   low: "Scăzut",
   info: "Info",
+}
+
+function SeverityPill({ severity }: { severity: InboxItem["severity"] }) {
+  const cls =
+    severity === "critical"
+      ? "border-eos-error/30 bg-eos-error-soft text-eos-error"
+      : severity === "high"
+        ? "border-eos-warning/30 bg-eos-warning-soft text-eos-warning"
+        : severity === "medium"
+          ? "border-eos-border bg-eos-surface-elevated text-eos-text-muted"
+          : "border-eos-border bg-eos-surface-elevated text-eos-text-tertiary"
+  return (
+    <span className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${cls}`}>
+      {severityLabel[severity]}
+    </span>
+  )
 }
 
 const iconForSource = (item: InboxItem) => {
@@ -126,13 +132,11 @@ export function PortfolioAlertsPage() {
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
-  // Filters
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all")
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all")
   const [firmFilter, setFirmFilter] = useState<string>("all")
   const [frameworkFilter, setFrameworkFilter] = useState<string>("all")
 
-  // Bulk selection (Faza 4)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchBusy, setBatchBusy] = useState(false)
   const [batchFeedback, setBatchFeedback] = useState<BatchFeedback>(null)
@@ -182,7 +186,6 @@ export function PortfolioAlertsPage() {
 
   const grouped = useMemo(() => groupByDay(filteredItems), [filteredItems])
 
-  // Drop stale selections when filters or data change.
   useEffect(() => {
     const visibleIds = new Set(filteredItems.map((i) => i.id))
     setSelectedIds((prev) => {
@@ -302,53 +305,39 @@ export function PortfolioAlertsPage() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Portofoliu"
-        title="Inbox — alerte și notificări cross-client"
+      <V3PageHero
+        breadcrumbs={[{ label: "Dashboard" }, { label: "Portofoliu" }, { label: "Alerte", current: true }]}
+        title="Inbox — alerte și notificări"
         description="Un singur feed cu tot ce apare peste noapte pe toate firmele tale. Drift, alerte, noi legi, schimbări status ANAF — toate într-un singur loc."
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
               {data.total} itemi total
-            </Badge>
+            </span>
             {data.critical > 0 ? (
-              <Badge variant="destructive" dot className="normal-case tracking-normal">
+              <span className="inline-flex items-center rounded-sm border border-eos-error/30 bg-eos-error-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-error">
                 {data.critical} critice / ridicate
-              </Badge>
+              </span>
             ) : null}
             {data.unread > 0 ? (
-              <Badge variant="secondary" className="normal-case tracking-normal">
+              <span className="inline-flex items-center rounded-sm border border-eos-primary/30 bg-eos-primary/[0.06] px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-primary">
                 {data.unread} necitite
-              </Badge>
+              </span>
             ) : null}
-          </>
+          </div>
         }
       />
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card className="border-eos-border bg-eos-surface px-5 py-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Total</p>
-          <p className="mt-2 text-2xl font-semibold text-eos-text">{data.total}</p>
-        </Card>
-        <Card className="border-eos-border bg-eos-surface px-5 py-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Critice</p>
-          <p className="mt-2 text-2xl font-semibold text-eos-error">{data.critical}</p>
-        </Card>
-        <Card className="border-eos-border bg-eos-surface px-5 py-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Necitite</p>
-          <p className="mt-2 text-2xl font-semibold text-eos-text">{data.unread}</p>
-        </Card>
-        <Card className="border-eos-border bg-eos-surface px-5 py-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-eos-text-muted">Firme afectate</p>
-          <p className="mt-2 text-2xl font-semibold text-eos-text">
-            {data.firmsAffected} <span className="text-sm text-eos-text-muted">/ {data.firms.length}</span>
-          </p>
-        </Card>
-      </div>
+      {/* ── KPI strip ── */}
+      <V3KpiStrip items={[
+        { id: "total", label: "Total", value: data.total },
+        { id: "critical", label: "Critice", value: data.critical, stripe: data.critical > 0 ? "critical" : undefined, valueTone: data.critical > 0 ? "critical" : "neutral" },
+        { id: "unread", label: "Necitite", value: data.unread, stripe: data.unread > 0 ? "info" : undefined },
+        { id: "firms", label: "Firme afectate", value: data.firmsAffected, detail: `din ${data.firms.length} total` },
+      ]} />
 
-      {/* Filter bar */}
-      <Card className="border-eos-border bg-eos-surface px-4 py-3">
+      {/* ── Filter bar ── */}
+      <div className="rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-eos-text-muted">
             <Filter className="size-3.5" strokeWidth={2} />
@@ -358,7 +347,7 @@ export function PortfolioAlertsPage() {
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value as SeverityFilter)}
-            className="h-8 rounded-eos-md border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
+            className="h-8 rounded-eos-sm border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
           >
             <option value="all">Toate severitățile</option>
             <option value="critical-high">Doar critice/ridicate</option>
@@ -368,7 +357,7 @@ export function PortfolioAlertsPage() {
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value as SourceFilter)}
-            className="h-8 rounded-eos-md border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
+            className="h-8 rounded-eos-sm border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
           >
             <option value="all">Toate sursele</option>
             <option value="alert">Doar alerte</option>
@@ -378,7 +367,7 @@ export function PortfolioAlertsPage() {
           <select
             value={firmFilter}
             onChange={(e) => setFirmFilter(e.target.value)}
-            className="h-8 rounded-eos-md border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
+            className="h-8 rounded-eos-sm border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
           >
             <option value="all">Toate firmele</option>
             {data.firms.map((f) => (
@@ -392,7 +381,7 @@ export function PortfolioAlertsPage() {
             <select
               value={frameworkFilter}
               onChange={(e) => setFrameworkFilter(e.target.value)}
-              className="h-8 rounded-eos-md border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
+              className="h-8 rounded-eos-sm border border-eos-border bg-eos-surface-active px-2.5 text-xs text-eos-text-muted focus:outline-none"
             >
               <option value="all">Toate framework-urile</option>
               {data.frameworks.map((f) => (
@@ -412,7 +401,7 @@ export function PortfolioAlertsPage() {
                 setFirmFilter("all")
                 setFrameworkFilter("all")
               }}
-              className="h-8 rounded-eos-md px-2.5 text-xs font-medium text-eos-text-muted transition hover:bg-eos-surface-active hover:text-eos-text"
+              className="h-8 rounded-eos-sm px-2.5 text-xs font-medium text-eos-text-muted transition hover:bg-eos-surface-active hover:text-eos-text"
             >
               Șterge filtre
             </button>
@@ -426,18 +415,18 @@ export function PortfolioAlertsPage() {
               type="button"
               onClick={() => void fetchInbox(true)}
               disabled={refreshing}
-              className="flex h-8 items-center gap-1.5 rounded-eos-md border border-eos-border bg-eos-surface-active px-2.5 text-xs font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text disabled:opacity-40"
+              className="flex h-8 items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-2.5 text-xs font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text disabled:opacity-40"
             >
               <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} strokeWidth={2} />
               {refreshing ? "Se actualizează..." : "Actualizează"}
             </button>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Bulk action bar — Faza 4 */}
+      {/* ── Bulk action bar ── */}
       {selectedItems.length > 0 ? (
-        <Card className="sticky top-2 z-10 border-eos-primary/40 bg-eos-primary-soft/40 px-4 py-3 shadow-sm backdrop-blur">
+        <div className="sticky top-2 z-10 rounded-eos-lg border border-eos-primary/40 bg-eos-primary-soft/40 px-4 py-3 shadow-sm backdrop-blur">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <Checkbox
@@ -494,7 +483,7 @@ export function PortfolioAlertsPage() {
                 type="button"
                 onClick={clearSelection}
                 disabled={batchBusy}
-                className="flex h-8 items-center gap-1 rounded-eos-md px-2 text-xs font-medium text-eos-text-muted transition hover:bg-eos-surface-active hover:text-eos-text disabled:opacity-40"
+                className="flex h-8 items-center gap-1 rounded-eos-sm px-2 text-xs font-medium text-eos-text-muted transition hover:bg-eos-surface-active hover:text-eos-text disabled:opacity-40"
               >
                 <X className="size-3.5" strokeWidth={2} />
                 Deselectează
@@ -510,44 +499,52 @@ export function PortfolioAlertsPage() {
               {batchFeedback.message}
             </p>
           ) : null}
-        </Card>
+        </div>
       ) : batchFeedback ? (
-        <Card
-          className={`border-eos-border bg-eos-surface px-4 py-3 ${
+        <div
+          className={`rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3 text-sm ${
             batchFeedback.tone === "success" ? "text-eos-success" : "text-eos-error"
           }`}
         >
-          <p className="text-sm">{batchFeedback.message}</p>
-        </Card>
+          {batchFeedback.message}
+        </div>
       ) : null}
 
-      {/* Feed grouped by day */}
+      {/* ── Feed grouped by day ── */}
       {filteredItems.length === 0 ? (
-        <Card className="overflow-hidden border-eos-border bg-eos-surface">
-          <EmptyState
-            title={data.total === 0 ? "Inbox curat" : "Niciun item pentru filtrele selectate"}
-            label={
-              data.total === 0
-                ? "Nu există alerte sau notificări active în portofoliul tău. Watchdog-ul monitorizează continuu."
-                : "Modifică sau șterge filtrele ca să vezi mai mulți itemi."
-            }
-            icon={data.total === 0 ? CheckCircle2 : InboxIcon}
-            className="px-5 py-12"
-          />
-        </Card>
+        <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface px-5 py-12 text-center">
+          <div className="mx-auto flex size-10 items-center justify-center rounded-eos-sm border border-eos-border bg-white/[0.03] text-eos-text-muted">
+            {data.total === 0 ? (
+              <CheckCircle2 className="size-5" strokeWidth={1.8} />
+            ) : (
+              <InboxIcon className="size-5" strokeWidth={1.8} />
+            )}
+          </div>
+          <h3
+            data-display-text="true"
+            className="mt-4 font-display text-base font-semibold tracking-[-0.015em] text-eos-text"
+          >
+            {data.total === 0 ? "Inbox curat" : "Niciun item pentru filtrele selectate"}
+          </h3>
+          <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-eos-text-muted">
+            {data.total === 0
+              ? "Nu există alerte sau notificări active în portofoliul tău. Watchdog-ul monitorizează continuu."
+              : "Modifică sau șterge filtrele ca să vezi mai mulți itemi."}
+          </p>
+        </div>
       ) : (
         <div className="space-y-5">
           {grouped.map((group) => (
             <div key={group.label} className="space-y-2">
               <div className="flex items-center gap-2 px-1">
-                <h3 className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-muted">
+                <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
                   {group.label}
                 </h3>
-                <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
+                <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-tertiary">
                   {group.items.length}
-                </Badge>
+                </span>
               </div>
-              <Card className="overflow-hidden border-eos-border bg-eos-surface">
+              <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
                 <div className="divide-y divide-eos-border-subtle">
                   {group.items.map((item) => {
                     const Icon = iconForSource(item)
@@ -590,20 +587,15 @@ export function PortfolioAlertsPage() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Badge
-                              variant={severityVariant[item.severity]}
-                              className="text-[10px] normal-case tracking-normal"
-                            >
-                              {severityLabel[item.severity]}
-                            </Badge>
+                            <SeverityPill severity={item.severity} />
                             {item.framework ? (
-                              <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
+                              <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                                 {item.framework}
-                              </Badge>
+                              </span>
                             ) : (
-                              <Badge variant="outline" className="text-[10px] normal-case tracking-normal">
+                              <span className="inline-flex items-center rounded-sm border border-eos-border px-1.5 py-0.5 font-mono text-[10px] font-medium text-eos-text-muted">
                                 {item.source === "alert" ? "Alertă" : item.kind.replace(/_/g, " ")}
-                              </Badge>
+                              </span>
                             )}
                             <div className="flex items-center gap-1.5 text-xs text-eos-text-muted">
                               <Building2 className="size-3" strokeWidth={1.8} />
@@ -635,7 +627,7 @@ export function PortfolioAlertsPage() {
                     )
                   })}
                 </div>
-              </Card>
+              </div>
             </div>
           ))}
         </div>

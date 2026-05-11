@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { ArrowLeft, Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
+import { Check, ChevronsUpDown, LogOut, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { TrialBanner } from "@/components/compliscan/billing/trial-banner"
@@ -21,6 +21,7 @@ import { isNavItemActive, type DashboardNavItem } from "@/components/compliscan/
 import { useOptionalCockpitData } from "@/components/compliscan/use-cockpit"
 import { DashboardBreadcrumb } from "@/components/compliscan/dashboard-breadcrumb"
 import { WorkspaceModeSwitcher } from "@/components/compliscan/workspace-mode-switcher"
+import { V3WorkspaceBanner } from "@/components/compliscan/v3"
 import { Avatar, AvatarFallback } from "@/components/evidence-os/Avatar"
 import {
   DropdownMenu,
@@ -75,6 +76,10 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        // Layer 3 ICP filtering — null = fallback safe (no filter aplicat)
+        icpSegment: currentUser.icpSegment ?? null,
+        subFlag: currentUser.subFlag ?? null,
+        accessMode: currentUser.accessMode ?? "owner",
       })
     : []
   const mobileNavItems = currentUser
@@ -82,6 +87,9 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        icpSegment: currentUser.icpSegment ?? null,
+        subFlag: currentUser.subFlag ?? null,
+        accessMode: currentUser.accessMode ?? "owner",
       })
     : []
 
@@ -168,7 +176,7 @@ export function DashboardShell({
       <div className="mx-auto flex max-w-[1680px]">
 
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-        <aside className="sticky top-0 hidden h-screen w-[220px] shrink-0 flex-col border-r border-eos-border bg-eos-surface md:flex">
+        <aside className="sticky top-0 hidden h-screen w-[232px] shrink-0 flex-col border-r border-eos-border-subtle bg-eos-surface md:flex">
 
           {/* Logo + Bell */}
           <div className="flex items-center justify-between gap-2 border-b border-eos-border px-4 py-4">
@@ -200,7 +208,7 @@ export function DashboardShell({
             {navSections.map((section, sectionIdx) => (
               <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
                 {navSections.length > 1 || section.label !== "Flux principal" ? (
-                  <p className="mb-2 px-2 text-[11px] font-medium uppercase tracking-[0.22em] text-eos-text-tertiary">
+                  <p className="mb-1.5 px-2.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-eos-text-tertiary">
                     {section.label}
                   </p>
                 ) : null}
@@ -222,10 +230,10 @@ export function DashboardShell({
                           if (handleNavItemSelection(item)) e.preventDefault()
                         }}
                         className={[
-                          "group flex w-full items-center gap-3 rounded-eos-lg px-3 py-2.5 text-sm transition-all duration-150",
+                          "group flex w-full items-center gap-2.5 rounded-eos-sm px-2.5 py-1.5 text-[12.5px] transition-all duration-100",
                           active
-                            ? "bg-eos-primary-soft font-semibold text-eos-text shadow-[inset_2px_0_0_rgba(59,130,246,0.7)]"
-                            : "font-medium text-eos-text-tertiary hover:bg-eos-surface-elevated hover:text-eos-text",
+                            ? "bg-white/[0.035] font-semibold text-eos-text"
+                            : "font-medium text-eos-text-tertiary hover:bg-white/[0.025] hover:text-eos-text-muted",
                         ].join(" ")}
                       >
                         <item.icon
@@ -329,30 +337,19 @@ export function DashboardShell({
             </div>
           )}
 
-          <TrialBanner />
-
-          {/* Partner context banner */}
+          {/* V3 Workspace banner — partner în execuție pe o firmă (cobalt strip cap-coadă) */}
           {currentUser?.userMode === "partner" && currentUser.workspaceMode === "org" && (
-            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-eos-lg border border-eos-primary/20 bg-eos-primary/[0.05] px-4 py-3">
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-eos-primary/70">
-                  Execuție în firmă
-                </p>
-                <p className="truncate text-sm font-semibold text-eos-text-muted">{currentUser.orgName}</p>
-                <p className="text-xs text-eos-text-tertiary">
-                  Triage-ul cross-client rămâne în Portofoliu. Aici execuți doar în firma selectată.
-                </p>
-              </div>
-              <button
-                onClick={() => void handleSwitchWorkspaceMode("portfolio")}
-                disabled={switchingWorkspaceMode === "portfolio"}
-                className="ml-auto flex shrink-0 items-center gap-2 rounded-eos-md px-3 py-1 text-xs font-medium text-eos-primary transition hover:bg-eos-primary/10 disabled:opacity-50"
-              >
-                <ArrowLeft className="size-4" strokeWidth={2} />
-                Portofoliu
-              </button>
+            <div className="mb-4">
+              <V3WorkspaceBanner
+                client={currentUser.orgName}
+                exitLabel="Înapoi la portofoliu"
+                onExit={() => void handleSwitchWorkspaceMode("portfolio")}
+                exitDisabled={switchingWorkspaceMode === "portfolio"}
+              />
             </div>
           )}
+
+          <TrialBanner />
 
           <DashboardRuntimeProvider user={currentUser}>
             <DashboardBreadcrumb />
@@ -364,7 +361,9 @@ export function DashboardShell({
         </main>
       </div>
 
-      <FloatingAssistant pathname={pathname} />
+      {/* Pe /dashboard/fiscal montăm asistentul fiscal dedicat (Gemma 4 + context fiscal),
+          deci ascundem generic-ul ca să evităm 2 panouri simultan. */}
+      {!pathname.startsWith("/dashboard/fiscal") && <FloatingAssistant pathname={pathname} />}
       <MobileBottomNav
         items={mobileNavItems}
         activeHref={pathname}

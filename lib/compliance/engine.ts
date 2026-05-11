@@ -14,7 +14,10 @@ import type {
   ScanRecord,
 } from "@/lib/compliance/types"
 import { COMPLIANCE_RULE_LIBRARY } from "@/lib/compliance/rule-library"
-import { applyTaskResolutionToAlerts, getResolvedFindingIds } from "@/lib/compliance/task-resolution"
+import {
+  applyTaskResolutionToAlerts,
+  getOperationallyClosedFindingIds,
+} from "@/lib/compliance/task-resolution"
 import {
   inferPrinciplesFromCategory,
   normalizeCompliancePrinciples,
@@ -62,6 +65,8 @@ export const initialComplianceState: ComplianceState = {
   validatedBaselineSnapshotId: undefined,
   events: [],
   hrRegistryReconciliations: {},
+  gdprTrainingRecords: [],
+  dpiaRecords: [],
 }
 
 export function normalizeComplianceState(state: ComplianceState): ComplianceState {
@@ -87,7 +92,16 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
   const snapshotHistory = normalizeSnapshotHistory(state.snapshotHistory)
   const events = normalizeEvents(state.events)
   const hrRegistryReconciliations = normalizeHrRegistryReconciliations(state.hrRegistryReconciliations)
-  const resolvedFindingIds = getResolvedFindingIds({
+  const gdprTrainingRecords = Array.isArray(state.gdprTrainingRecords)
+    ? state.gdprTrainingRecords
+    : []
+  const dpiaRecords = Array.isArray(state.dpiaRecords)
+    ? state.dpiaRecords
+    : []
+  const dpoMigrationImports = Array.isArray(state.dpoMigrationImports)
+    ? state.dpoMigrationImports
+    : []
+  const resolvedFindingIds = getOperationallyClosedFindingIds({
     ...state,
     alerts: rawAlerts,
     findings,
@@ -105,6 +119,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     snapshotHistory,
     events,
     hrRegistryReconciliations,
+    gdprTrainingRecords,
+    dpiaRecords,
+    dpoMigrationImports,
   })
   const alerts = applyTaskResolutionToAlerts({
     ...state,
@@ -124,6 +141,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     snapshotHistory,
     events,
     hrRegistryReconciliations,
+    gdprTrainingRecords,
+    dpiaRecords,
+    dpoMigrationImports,
   })
 
   const unresolvedFindings = findings.filter((finding) => !resolvedFindingIds.has(finding.id))
@@ -153,6 +173,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
 
   return {
     ...state,
+    alerts,
+    findings,
+    scans,
     highRisk,
     lowRisk,
     scannedDocuments,
@@ -171,6 +194,9 @@ export function normalizeComplianceState(state: ComplianceState): ComplianceStat
     driftRecords,
     snapshotHistory,
     hrRegistryReconciliations,
+    gdprTrainingRecords,
+    dpiaRecords,
+    dpoMigrationImports,
     validatedBaselineSnapshotId:
       typeof state.validatedBaselineSnapshotId === "string" &&
       snapshotHistory.some((snapshot) => snapshot.snapshotId === state.validatedBaselineSnapshotId)
@@ -193,6 +219,8 @@ function normalizeGeneratedDocuments(
         item.documentType === "privacy-policy" ||
         item.documentType === "cookie-policy" ||
         item.documentType === "dpa" ||
+        item.documentType === "dsar-response" ||
+        item.documentType === "dpia" ||
         item.documentType === "retention-policy" ||
         item.documentType === "nis2-incident-response" ||
         item.documentType === "ai-governance" ||
@@ -201,6 +229,8 @@ function normalizeGeneratedDocuments(
         item.documentType === "hr-internal-procedures" ||
         item.documentType === "reges-correction-brief" ||
         item.documentType === "contract-template" ||
+        item.documentType === "nda" ||
+        item.documentType === "supplier-contract" ||
         item.documentType === "deletion-attestation" ||
         item.documentType === "pay-gap-report" ||
         item.documentType === "ropa"
@@ -262,7 +292,8 @@ function normalizeGeneratedDocuments(
         item.adoptionStatus === "reviewed_internally" ||
         item.adoptionStatus === "sent_for_signature" ||
         item.adoptionStatus === "signed" ||
-        item.adoptionStatus === "active"
+        item.adoptionStatus === "active" ||
+        item.adoptionStatus === "rejected"
           ? item.adoptionStatus
           : undefined
       const adoptionUpdatedAtISO = isValidIso(item.adoptionUpdatedAtISO) ? item.adoptionUpdatedAtISO : undefined
@@ -270,6 +301,35 @@ function normalizeGeneratedDocuments(
         typeof item.adoptionEvidenceNote === "string" && item.adoptionEvidenceNote.trim()
           ? item.adoptionEvidenceNote.trim()
           : undefined
+      const shareComments = Array.isArray(item.shareComments)
+        ? item.shareComments.flatMap((comment) => {
+            if (!comment || typeof comment !== "object") return []
+            const id = typeof comment.id === "string" && comment.id.trim()
+              ? comment.id.trim()
+              : `share-comment-${Math.random().toString(36).slice(2, 8)}`
+            const authorName = typeof comment.authorName === "string" && comment.authorName.trim()
+              ? comment.authorName.trim()
+              : "Client (magic link)"
+            const commentText = typeof comment.comment === "string" && comment.comment.trim()
+              ? comment.comment.trim()
+              : null
+            const recipientType = typeof comment.recipientType === "string" && comment.recipientType.trim()
+              ? comment.recipientType.trim()
+              : "partner"
+            const createdAtISO = isValidIso(comment.createdAtISO) ? comment.createdAtISO : null
+            if (!commentText || !createdAtISO) return []
+            return [
+              {
+                id,
+                authorName,
+                comment: commentText,
+                recipientType,
+                createdAtISO,
+                channel: "public_magic_link" as const,
+              },
+            ]
+          })
+        : undefined
       const expiresAtISO = isValidIso(item.expiresAtISO) ? item.expiresAtISO : undefined
       const nextReviewDateISO = isValidIso(item.nextReviewDateISO) ? item.nextReviewDateISO : undefined
       const refreshStatus =
@@ -305,6 +365,7 @@ function normalizeGeneratedDocuments(
           adoptionStatus,
           adoptionUpdatedAtISO,
           adoptionEvidenceNote,
+          shareComments,
           expiresAtISO,
           nextReviewDateISO,
           refreshStatus,
@@ -635,6 +696,167 @@ function normalizeTaskState(
                 entry.attachedEvidenceMeta.publicPath.trim()
                   ? entry.attachedEvidenceMeta.publicPath
                   : undefined,
+              quality:
+                entry.attachedEvidenceMeta.quality &&
+                typeof entry.attachedEvidenceMeta.quality === "object" &&
+                (entry.attachedEvidenceMeta.quality.status === "sufficient" ||
+                  entry.attachedEvidenceMeta.quality.status === "weak")
+                  ? {
+                      status: entry.attachedEvidenceMeta.quality.status,
+                      summary:
+                        typeof entry.attachedEvidenceMeta.quality.summary === "string"
+                          ? entry.attachedEvidenceMeta.quality.summary
+                          : "",
+                      reasonCodes: Array.isArray(entry.attachedEvidenceMeta.quality.reasonCodes)
+                        ? entry.attachedEvidenceMeta.quality.reasonCodes.filter(
+                            (code): code is import("@/lib/compliance/types").EvidenceQualityReasonCode =>
+                              code === "generic_kind" ||
+                              code === "generic_filename" ||
+                              code === "unknown_mime" ||
+                              code === "very_small_file" ||
+                              code === "tiny_text_payload" ||
+                              code === "tiny_bundle"
+                          )
+                        : [],
+                      checkedAtISO: isValidIso(entry.attachedEvidenceMeta.quality.checkedAtISO)
+                        ? entry.attachedEvidenceMeta.quality.checkedAtISO
+                        : updatedAtISO,
+                    }
+                  : undefined,
+            }
+          : undefined
+      const rawDeletedEvidenceMeta = entry.deletedEvidenceMeta
+      const deletedEvidence =
+        typeof entry.deletedEvidence === "string" && entry.deletedEvidence.trim()
+          ? entry.deletedEvidence.trim()
+          : undefined
+      const deletedEvidenceMeta =
+        rawDeletedEvidenceMeta &&
+        typeof rawDeletedEvidenceMeta === "object" &&
+        typeof rawDeletedEvidenceMeta.fileName === "string" &&
+        rawDeletedEvidenceMeta.fileName.trim() &&
+        typeof rawDeletedEvidenceMeta.deleteReason === "string" &&
+        rawDeletedEvidenceMeta.deleteReason.trim()
+          ? {
+              id:
+                typeof rawDeletedEvidenceMeta.id === "string" &&
+                rawDeletedEvidenceMeta.id.trim()
+                  ? rawDeletedEvidenceMeta.id
+                  : `deleted-evidence-${taskId}`,
+              fileName: rawDeletedEvidenceMeta.fileName.trim(),
+              mimeType:
+                typeof rawDeletedEvidenceMeta.mimeType === "string" &&
+                rawDeletedEvidenceMeta.mimeType.trim()
+                  ? rawDeletedEvidenceMeta.mimeType
+                  : "application/octet-stream",
+              sizeBytes:
+                typeof rawDeletedEvidenceMeta.sizeBytes === "number"
+                  ? rawDeletedEvidenceMeta.sizeBytes
+                  : 0,
+              uploadedAtISO: isValidIso(rawDeletedEvidenceMeta.uploadedAtISO)
+                ? rawDeletedEvidenceMeta.uploadedAtISO
+                : updatedAtISO,
+              kind: isTaskEvidenceKind(rawDeletedEvidenceMeta.kind)
+                ? rawDeletedEvidenceMeta.kind
+                : "other",
+              storageProvider:
+                rawDeletedEvidenceMeta.storageProvider === "public_local" ||
+                rawDeletedEvidenceMeta.storageProvider === "local_private" ||
+                rawDeletedEvidenceMeta.storageProvider === "supabase_private"
+                  ? rawDeletedEvidenceMeta.storageProvider
+                  : undefined,
+              storageKey:
+                typeof rawDeletedEvidenceMeta.storageKey === "string" &&
+                rawDeletedEvidenceMeta.storageKey.trim()
+                  ? rawDeletedEvidenceMeta.storageKey
+                  : undefined,
+              accessPath:
+                typeof rawDeletedEvidenceMeta.accessPath === "string" &&
+                rawDeletedEvidenceMeta.accessPath.trim()
+                  ? rawDeletedEvidenceMeta.accessPath
+                  : undefined,
+              publicPath:
+                typeof rawDeletedEvidenceMeta.publicPath === "string" &&
+                rawDeletedEvidenceMeta.publicPath.trim()
+                  ? rawDeletedEvidenceMeta.publicPath
+                  : undefined,
+              quality:
+                rawDeletedEvidenceMeta.quality &&
+                typeof rawDeletedEvidenceMeta.quality === "object" &&
+                (rawDeletedEvidenceMeta.quality.status === "sufficient" ||
+                  rawDeletedEvidenceMeta.quality.status === "weak")
+                  ? {
+                      status: rawDeletedEvidenceMeta.quality.status,
+                      summary:
+                        typeof rawDeletedEvidenceMeta.quality.summary === "string"
+                          ? rawDeletedEvidenceMeta.quality.summary
+                          : "",
+                      reasonCodes: Array.isArray(rawDeletedEvidenceMeta.quality.reasonCodes)
+                        ? rawDeletedEvidenceMeta.quality.reasonCodes.filter(
+                            (code): code is import("@/lib/compliance/types").EvidenceQualityReasonCode =>
+                              code === "generic_kind" ||
+                              code === "generic_filename" ||
+                              code === "unknown_mime" ||
+                              code === "very_small_file" ||
+                              code === "tiny_text_payload" ||
+                              code === "tiny_bundle"
+                          )
+                        : [],
+                      checkedAtISO: isValidIso(rawDeletedEvidenceMeta.quality.checkedAtISO)
+                        ? rawDeletedEvidenceMeta.quality.checkedAtISO
+                        : updatedAtISO,
+                    }
+                  : undefined,
+              deletionStatus:
+                rawDeletedEvidenceMeta.deletionStatus === "permanently_deleted"
+                  ? "permanently_deleted" as const
+                  : "soft_deleted" as const,
+              deletedAtISO: isValidIso(rawDeletedEvidenceMeta.deletedAtISO)
+                ? rawDeletedEvidenceMeta.deletedAtISO
+                : updatedAtISO,
+              deletedByUserId:
+                typeof rawDeletedEvidenceMeta.deletedByUserId === "string" &&
+                rawDeletedEvidenceMeta.deletedByUserId.trim()
+                  ? rawDeletedEvidenceMeta.deletedByUserId.trim()
+                  : undefined,
+              deletedByEmail:
+                typeof rawDeletedEvidenceMeta.deletedByEmail === "string" &&
+                rawDeletedEvidenceMeta.deletedByEmail.trim()
+                  ? rawDeletedEvidenceMeta.deletedByEmail.trim()
+                  : undefined,
+              deletedByRole:
+                rawDeletedEvidenceMeta.deletedByRole === "owner" ||
+                rawDeletedEvidenceMeta.deletedByRole === "partner_manager" ||
+                rawDeletedEvidenceMeta.deletedByRole === "compliance" ||
+                rawDeletedEvidenceMeta.deletedByRole === "reviewer" ||
+                rawDeletedEvidenceMeta.deletedByRole === "viewer"
+                  ? rawDeletedEvidenceMeta.deletedByRole
+                  : undefined,
+              deleteReason: rawDeletedEvidenceMeta.deleteReason.trim(),
+              restoreUntilISO: isValidIso(rawDeletedEvidenceMeta.restoreUntilISO)
+                ? rawDeletedEvidenceMeta.restoreUntilISO
+                : updatedAtISO,
+              restoredAtISO: isValidIso(rawDeletedEvidenceMeta.restoredAtISO)
+                ? rawDeletedEvidenceMeta.restoredAtISO
+                : undefined,
+              restoredByEmail:
+                typeof rawDeletedEvidenceMeta.restoredByEmail === "string" &&
+                rawDeletedEvidenceMeta.restoredByEmail.trim()
+                  ? rawDeletedEvidenceMeta.restoredByEmail.trim()
+                  : undefined,
+              permanentDeletedAtISO: isValidIso(rawDeletedEvidenceMeta.permanentDeletedAtISO)
+                ? rawDeletedEvidenceMeta.permanentDeletedAtISO
+                : undefined,
+              permanentDeletedByEmail:
+                typeof rawDeletedEvidenceMeta.permanentDeletedByEmail === "string" &&
+                rawDeletedEvidenceMeta.permanentDeletedByEmail.trim()
+                  ? rawDeletedEvidenceMeta.permanentDeletedByEmail.trim()
+                  : undefined,
+              permanentDeleteReason:
+                typeof rawDeletedEvidenceMeta.permanentDeleteReason === "string" &&
+                rawDeletedEvidenceMeta.permanentDeleteReason.trim()
+                  ? rawDeletedEvidenceMeta.permanentDeleteReason.trim()
+                  : undefined,
             }
           : undefined
       const validationStatus =
@@ -668,6 +890,8 @@ function normalizeTaskState(
           status,
           attachedEvidence,
           attachedEvidenceMeta,
+          deletedEvidence,
+          deletedEvidenceMeta,
           updatedAtISO,
           validationStatus,
           validationMessage,

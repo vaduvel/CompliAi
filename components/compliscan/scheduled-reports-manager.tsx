@@ -4,10 +4,8 @@ import { useEffect, useMemo, useState } from "react"
 import { CalendarClock, Loader2, Mail, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
+import { V3Panel } from "@/components/compliscan/v3/panel"
 import type { PortfolioReportRow } from "@/lib/server/portfolio"
 import type {
   ScheduledReport,
@@ -40,6 +38,29 @@ const DEFAULT_FORM = {
   recipientEmails: "",
   requiresApproval: true,
 }
+
+const pillBase =
+  "inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-[0.02em]"
+
+function OutlinePill({ children }: { children: React.ReactNode }) {
+  return <span className={`${pillBase} border-eos-border bg-eos-surface-elevated text-eos-text-muted`}>{children}</span>
+}
+
+function SuccessPill({ children }: { children: React.ReactNode }) {
+  return <span className={`${pillBase} border-eos-success/30 bg-eos-success-soft text-eos-success`}>{children}</span>
+}
+
+function WarningPill({ children }: { children: React.ReactNode }) {
+  return <span className={`${pillBase} border-eos-warning/30 bg-eos-warning-soft text-eos-warning`}>{children}</span>
+}
+
+const inputClass =
+  "h-9 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-2.5 text-[12.5px] text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-border-strong transition-colors"
+
+const btnPrimary =
+  "flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-primary bg-eos-primary px-2.5 text-[12px] font-semibold text-white transition hover:bg-eos-primary-hover disabled:opacity-40"
+const btnOutline =
+  "flex h-[30px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 text-[12px] font-medium text-eos-text-muted transition hover:border-eos-border-strong hover:text-eos-text disabled:opacity-40"
 
 export function ScheduledReportsManager() {
   const [reports, setReports] = useState<ScheduledReport[]>([])
@@ -199,56 +220,44 @@ export function ScheduledReportsManager() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
-        eyebrow="Rapoarte programate"
+      <V3PageHero
+        breadcrumbs={[{ label: "Setări" }, { label: "Rapoarte programate", current: true }]}
         title="Programezi livrabile recurente pentru portofoliu"
         description="Configurezi tipul de raport, frecvența, firmele incluse și dacă trimiterea merge direct sau intră mai întâi în Approval Queue."
-        badges={
-          <>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {reports.length} rapoarte active
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
-              {portfolio.length} firme în portofoliu
-            </Badge>
-            <Badge
-              variant={runtimeStatus?.persistenceStatus === "fallback" ? "warning" : "success"}
-              className="normal-case tracking-normal"
-            >
-              {runtimeStatus?.persistenceStatus === "fallback"
-                ? "fallback local"
-                : "Supabase synced"}
-            </Badge>
-          </>
+        eyebrowBadges={
+          <div className="flex flex-wrap items-center gap-1.5">
+            <OutlinePill>{reports.length} rapoarte active</OutlinePill>
+            <OutlinePill>{portfolio.length} firme în portofoliu</OutlinePill>
+            {runtimeStatus?.persistenceStatus === "fallback" ? (
+              <WarningPill>fallback local</WarningPill>
+            ) : (
+              <SuccessPill>Supabase synced</SuccessPill>
+            )}
+          </div>
         }
         actions={
-          <Button onClick={() => setShowForm((current) => !current)}>
-            <Plus className="size-4" strokeWidth={2} />
+          <button type="button" onClick={() => setShowForm((current) => !current)} className={btnPrimary}>
+            <Plus className="size-3.5" strokeWidth={2} />
             Raport nou
-          </Button>
+          </button>
         }
       />
 
       {runtimeStatus?.persistenceStatus === "fallback" ? (
-        <Card className="border-amber-500/30 bg-amber-500/5">
-          <CardContent className="pt-6 text-sm text-eos-text">
-            Rapoartele programate rulează momentan pe fallback local. Configurația rămâne utilizabilă,
-            dar nu o trata ca truth de producție până când traseul Supabase nu revine la `synced`.
-          </CardContent>
-        </Card>
+        <div className="rounded-eos-lg border border-eos-warning/30 bg-eos-warning-soft/50 px-4 py-3 text-[12.5px] text-eos-text">
+          Rapoartele programate rulează momentan pe fallback local. Configurația rămâne utilizabilă,
+          dar nu o trata ca truth de producție până când traseul Supabase nu revine la `synced`.
+        </div>
       ) : null}
 
       {showForm ? (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">Configurează un raport programat</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="space-y-1.5 text-sm">
-                <span className="font-medium text-eos-text">Tip raport</span>
+        <V3Panel eyebrow="Raport nou" title="Configurează un raport programat">
+          <div className="space-y-4 pt-1">
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="space-y-1.5">
+                <span className="block text-[12.5px] font-medium text-eos-text">Tip raport</span>
                 <select
-                  className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  className={inputClass}
                   value={form.reportType}
                   onChange={(event) => setForm((current) => ({ ...current, reportType: event.target.value as ScheduledReportType }))}
                 >
@@ -258,10 +267,10 @@ export function ScheduledReportsManager() {
                 </select>
               </label>
 
-              <label className="space-y-1.5 text-sm">
-                <span className="font-medium text-eos-text">Frecvență</span>
+              <label className="space-y-1.5">
+                <span className="block text-[12.5px] font-medium text-eos-text">Frecvență</span>
                 <select
-                  className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                  className={inputClass}
                   value={form.frequency}
                   onChange={(event) => setForm((current) => ({ ...current, frequency: event.target.value as ScheduledReportFrequency }))}
                 >
@@ -272,25 +281,25 @@ export function ScheduledReportsManager() {
               </label>
             </div>
 
-            <label className="space-y-1.5 text-sm">
-              <span className="font-medium text-eos-text">Destinatari email</span>
+            <label className="space-y-1.5">
+              <span className="block text-[12.5px] font-medium text-eos-text">Destinatari email</span>
               <input
                 value={form.recipientEmails}
                 onChange={(event) => setForm((current) => ({ ...current, recipientEmails: event.target.value }))}
                 placeholder="owner@firma.ro, audit@client.ro"
-                className="h-10 w-full rounded-eos-md border border-eos-border bg-eos-surface-variant px-3 text-sm text-eos-text outline-none"
+                className={inputClass}
               />
             </label>
 
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
+            <div className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-eos-text">Firme incluse</p>
-                  <p className="mt-1 text-xs text-eos-text-muted">
+                  <p className="text-[12.5px] font-medium text-eos-text">Firme incluse</p>
+                  <p className="mt-0.5 text-[11px] text-eos-text-muted">
                     {selectedClientCount} firme vor intra în raportul programat.
                   </p>
                 </div>
-                <label className="flex items-center gap-2 text-sm text-eos-text">
+                <label className="flex items-center gap-2 text-[12.5px] text-eos-text">
                   <input
                     type="checkbox"
                     checked={selectAllClients}
@@ -302,9 +311,9 @@ export function ScheduledReportsManager() {
               </div>
 
               {!selectAllClients ? (
-                <div className="mt-4 grid gap-2 md:grid-cols-2">
+                <div className="mt-3 grid gap-1.5 md:grid-cols-2">
                   {portfolio.map((org) => (
-                    <label key={org.orgId} className="flex items-center gap-2 rounded-eos-md border border-eos-border bg-eos-surface px-3 py-2 text-sm text-eos-text">
+                    <label key={org.orgId} className="flex items-center gap-2 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 py-1.5 text-[12.5px] text-eos-text">
                       <input
                         type="checkbox"
                         checked={selectedClients.includes(org.orgId)}
@@ -318,7 +327,7 @@ export function ScheduledReportsManager() {
               ) : null}
             </div>
 
-            <label className="flex items-center gap-2 text-sm text-eos-text">
+            <label className="flex items-center gap-2 text-[12.5px] text-eos-text">
               <input
                 type="checkbox"
                 checked={form.requiresApproval}
@@ -329,134 +338,119 @@ export function ScheduledReportsManager() {
             </label>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowForm(false)}>
+              <button type="button" onClick={() => setShowForm(false)} className={btnOutline}>
                 Anulează
-              </Button>
-              <Button onClick={() => void handleCreate()} disabled={creating}>
-                {creating ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" strokeWidth={2} />}
+              </button>
+              <button type="button" onClick={() => void handleCreate()} disabled={creating} className={btnPrimary}>
+                {creating ? <Loader2 className="size-3.5 animate-spin" /> : <Plus className="size-3.5" strokeWidth={2} />}
                 Creează
-              </Button>
+              </button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </V3Panel>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">Rapoarte active</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-6">
+        <V3Panel eyebrow="Rapoarte" title="Rapoarte active" padding="default">
+          <div className="space-y-3 pt-1">
             {loading ? (
-              <div className="flex items-center gap-2 text-sm text-eos-text-muted">
+              <div className="flex items-center gap-2 text-[12.5px] text-eos-text-muted">
                 <Loader2 className="size-4 animate-spin" />
                 Încărcăm rapoartele programate...
               </div>
             ) : reports.length === 0 ? (
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3 text-[12.5px] text-eos-text-muted">
                 Nu există încă rapoarte programate.
               </div>
             ) : (
               reports.map((report) => (
-                <div key={report.id} className={`rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 ${report.enabled ? "" : "opacity-70"}`}>
+                <div key={report.id} className={`rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3 ${report.enabled ? "" : "opacity-70"}`}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-eos-text">{REPORT_TYPE_LABELS[report.reportType]}</p>
-                        <Badge variant="outline" className="normal-case tracking-normal">
-                          {FREQUENCY_LABELS[report.frequency]}
-                        </Badge>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="text-[13px] font-semibold text-eos-text">{REPORT_TYPE_LABELS[report.reportType]}</p>
+                        <OutlinePill>{FREQUENCY_LABELS[report.frequency]}</OutlinePill>
                         {report.requiresApproval ? (
-                          <Badge variant="outline" className="normal-case tracking-normal">
-                            Approval Queue
-                          </Badge>
+                          <OutlinePill>Approval Queue</OutlinePill>
                         ) : (
-                          <Badge variant="success" className="normal-case tracking-normal">
-                            auto-send
-                          </Badge>
+                          <SuccessPill>auto-send</SuccessPill>
                         )}
                       </div>
-                      <p className="mt-2 text-xs text-eos-text-muted">
+                      <p className="mt-2 font-mono text-[11px] text-eos-text-muted">
                         {report.recipientEmails.join(", ")}
                       </p>
-                      <p className="mt-1 text-xs text-eos-text-muted">
+                      <p className="mt-1 font-mono text-[11px] text-eos-text-muted">
                         {report.clientOrgIds.length} firme · următorul run {report.nextRunAt ? new Date(report.nextRunAt).toLocaleString("ro-RO") : "nedefinit"}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" disabled={busyId === report.id} onClick={() => void toggleEnabled(report)}>
-                        {busyId === report.id ? <Loader2 className="size-4 animate-spin" /> : <CalendarClock className="size-4" strokeWidth={2} />}
+                    <div className="flex shrink-0 gap-1.5">
+                      <button type="button" disabled={busyId === report.id} onClick={() => void toggleEnabled(report)} className={btnOutline}>
+                        {busyId === report.id ? <Loader2 className="size-3.5 animate-spin" /> : <CalendarClock className="size-3.5" strokeWidth={2} />}
                         {report.enabled ? "Dezactivează" : "Activează"}
-                      </Button>
-                      <Button variant="outline" disabled={deletingId === report.id} onClick={() => void deleteReport(report.id)}>
-                        {deletingId === report.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" strokeWidth={2} />}
+                      </button>
+                      <button type="button" disabled={deletingId === report.id} onClick={() => void deleteReport(report.id)} className={btnOutline}>
+                        {deletingId === report.id ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" strokeWidth={2} />}
                         Șterge
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </V3Panel>
 
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="border-b border-eos-border pb-5">
-            <CardTitle className="text-base">Istoric rulări</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-6">
+        <V3Panel eyebrow="Istoric" title="Rulări recente" padding="default">
+          <div className="space-y-3 pt-1">
             {recentRuns.length === 0 ? (
-              <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+              <div className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3 text-[12.5px] text-eos-text-muted">
                 Încă nu există rulări înregistrate pentru rapoartele programate.
               </div>
             ) : (
-              recentRuns.slice(0, 8).map((run) => (
-                <div key={run.id} className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-eos-text">
-                        {REPORT_TYPE_LABELS[run.reportType as ScheduledReportType] ?? run.reportType}
-                      </p>
-                      <p className="mt-1 text-xs text-eos-text-muted">{run.message}</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <Badge
-                        variant={
-                          run.status === "failed"
-                            ? "warning"
-                            : run.status === "queued_for_approval"
-                              ? "outline"
-                              : run.status === "approved_then_executed"
-                                ? "success"
-                              : "success"
-                        }
-                        className="normal-case tracking-normal"
-                      >
-                        {run.status === "failed"
-                          ? "failed"
-                          : run.status === "queued_for_approval"
-                            ? "queued"
-                            : run.status === "approved_then_executed"
-                              ? "executat după aprobare"
-                            : "executat"}
-                      </Badge>
-                      <span className="text-xs text-eos-text-muted">
-                        {new Date(run.createdAtISO).toLocaleString("ro-RO")}
-                      </span>
+              recentRuns.slice(0, 8).map((run) => {
+                const statusLabel =
+                  run.status === "failed"
+                    ? "failed"
+                    : run.status === "queued_for_approval"
+                      ? "queued"
+                      : run.status === "approved_then_executed"
+                        ? "executat după aprobare"
+                        : "executat"
+                const StatusBadge =
+                  run.status === "failed"
+                    ? WarningPill
+                    : run.status === "queued_for_approval"
+                      ? OutlinePill
+                      : SuccessPill
+                return (
+                  <div key={run.id} className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[12.5px] font-medium text-eos-text">
+                          {REPORT_TYPE_LABELS[run.reportType as ScheduledReportType] ?? run.reportType}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-eos-text-muted">{run.message}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <StatusBadge>{statusLabel}</StatusBadge>
+                        <span className="font-mono text-[10px] text-eos-text-muted">
+                          {new Date(run.createdAtISO).toLocaleString("ro-RO")}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
 
-            <div className="rounded-eos-md border border-eos-border bg-eos-surface-variant p-4 text-sm text-eos-text-muted">
+            <div className="rounded-eos-sm border border-eos-border-subtle bg-white/[0.02] p-3 text-[12px] text-eos-text-muted">
               <div className="flex items-center gap-2">
-                <Mail className="size-4 text-eos-text-tertiary" strokeWidth={2} />
+                <Mail className="size-3.5 text-eos-text-tertiary" strokeWidth={2} />
                 Trimiterile cu `requiresApproval` intră întâi în Approval Queue și rămân urmărite aici ca `queued`.
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </V3Panel>
       </div>
     </div>
   )

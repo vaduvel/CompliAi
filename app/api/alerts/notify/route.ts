@@ -44,7 +44,7 @@ async function dispatchWebhook(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "CompliAI-Alerts/1.0",
+        "User-Agent": "CompliScan-Alerts/1.0",
       },
       body,
       signal: AbortSignal.timeout(8_000),

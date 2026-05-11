@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
   Loader2,
   Plus,
@@ -15,11 +14,10 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { Breadcrumb } from "@/components/evidence-os"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
+import { V3Intro } from "@/components/compliscan/v3/compat"
 import { LoadingScreen } from "@/components/compliscan/route-sections"
 import type { BoardMember } from "@/lib/server/nis2-store"
 
@@ -47,9 +45,9 @@ function certStatus(member: BoardMember): { label: string; expired: boolean } | 
 }
 
 function TrainingBadge({ status }: { status: ReturnType<typeof trainingStatus> }) {
-  if (status.missing) return <Badge variant="destructive">Lipsă</Badge>
-  if (status.expired) return <Badge variant="warning">Expirat</Badge>
-  return <Badge variant="success">Completat</Badge>
+  if (status.missing) return <V3Pill variant="destructive">Lipsă</V3Pill>
+  if (status.expired) return <V3Pill variant="warning">Expirat</V3Pill>
+  return <V3Pill variant="success">Completat</V3Pill>
 }
 
 function deriveGovernanceMemberId(findingId?: string | null) {
@@ -249,29 +247,24 @@ export default function GovernancePage() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumb items={[
-        { label: "NIS2", href: "/dashboard/nis2" },
-        { label: "Guvernanță" },
-      ]} />
-
-      <PageIntro
+      <V3Intro
         eyebrow="NIS2 — Guvernanță"
         title="Training Board & CISO"
         description="Monitorizare training-uri de securitate cibernetică pentru conducere. Bază: OUG 155/2024 Art. 14 ✅"
         badges={
           <>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               OUG 155/2024 Art. 14
-            </Badge>
-            <Badge variant="outline" className="normal-case tracking-normal">
+            </V3Pill>
+            <V3Pill variant="outline" className="normal-case tracking-normal">
               NIS2 Art.20
-            </Badge>
+            </V3Pill>
           </>
         }
       />
 
       {openedFromCockpit && findingId && (
-        <div className="rounded-eos-md border border-eos-border bg-eos-surface px-4 py-3">
+        <div className="rounded-eos-sm border border-eos-border bg-eos-surface px-4 py-3">
           <p className="text-sm font-semibold text-eos-text">Deschis din cockpit</p>
           <p className="mt-1 text-sm text-eos-text-muted">
             {focusCopy}
@@ -279,7 +272,7 @@ export default function GovernancePage() {
           <div className="mt-3">
             <Link
               href={returnTo || `/dashboard/resolve/${findingId}`}
-              className="inline-flex h-9 items-center justify-center rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm font-medium text-eos-text transition-colors hover:bg-eos-surface-hover"
+              className="inline-flex h-9 items-center justify-center rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm font-medium text-eos-text transition-colors hover:bg-eos-surface-hover"
             >
               Înapoi la finding
             </Link>
@@ -288,13 +281,13 @@ export default function GovernancePage() {
       )}
 
       {openedFromCockpit && targetedMember ? (
-        <Card className="border-eos-primary/30 bg-eos-primary/5">
-          <CardHeader className="px-5 pt-4 pb-0">
-            <CardTitle className="text-sm font-semibold">
+        <V3Surface className="border-eos-primary/30 bg-eos-primary/5">
+          <V3SurfaceHead className="px-5 pt-4 pb-0">
+            <V3SurfaceTitle className="text-sm font-semibold">
               {focus === "certification" ? "Actualizează certificarea în acest pas" : "Actualizează training-ul în acest pas"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 px-5 pb-5 pt-3">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-3 px-5 pb-5 pt-3">
             <p className="text-sm text-eos-text-muted">
               {targetedMember.name} · {targetedMember.role}
             </p>
@@ -305,7 +298,7 @@ export default function GovernancePage() {
                   <select
                     value={inlineCertification}
                     onChange={(e) => setInlineCertification(e.target.value)}
-                    className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                    className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   >
                     {CERT_OPTIONS.map((c) => (
                       <option key={c} value={c}>
@@ -320,7 +313,7 @@ export default function GovernancePage() {
                     type="date"
                     value={inlineCertExpiry}
                     onChange={(e) => setInlineCertExpiry(e.target.value)}
-                    className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                    className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                   />
                 </div>
               </div>
@@ -331,7 +324,7 @@ export default function GovernancePage() {
                   type="date"
                   value={inlineTrainingDate}
                   onChange={(e) => setInlineTrainingDate(e.target.value)}
-                  className="h-9 w-full max-w-56 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full max-w-56 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 />
               </div>
             )}
@@ -346,8 +339,8 @@ export default function GovernancePage() {
                 Salvează și revino în cockpit
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       ) : null}
 
       {/* Summary strip */}
@@ -373,7 +366,7 @@ export default function GovernancePage() {
       )}
 
       {totalIssues > 0 && (
-        <div className="flex items-center gap-2 rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft px-4 py-2.5 text-sm text-eos-warning">
+        <div className="flex items-center gap-2 rounded-eos-sm border border-eos-warning/20 bg-eos-warning-soft px-4 py-2.5 text-sm text-eos-warning">
           <AlertTriangle className="size-4 shrink-0" />
           <span>
             {totalIssues} problemă{totalIssues > 1 ? "i" : ""} detectată{totalIssues > 1 ? "e" : ""} — findings automate generate în tabloul de remediere
@@ -399,11 +392,11 @@ export default function GovernancePage() {
 
       {/* Add member form */}
       {showForm && (
-        <Card className="border-eos-border bg-eos-surface">
-          <CardHeader className="px-5 pt-4 pb-0">
-            <CardTitle className="text-sm font-semibold">Adaugă membru conducere</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 px-5 pb-5 pt-3">
+        <V3Surface className="border-eos-border bg-eos-surface">
+          <V3SurfaceHead className="px-5 pt-4 pb-0">
+            <V3SurfaceTitle className="text-sm font-semibold">Adaugă membru conducere</V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-4 px-5 pb-5 pt-3">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs text-eos-text-muted">Nume *</label>
@@ -412,7 +405,7 @@ export default function GovernancePage() {
                   placeholder="ex: Ion Popescu"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 />
               </div>
               <div>
@@ -423,7 +416,7 @@ export default function GovernancePage() {
                   placeholder="ex: Administrator"
                   value={form.role}
                   onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 />
                 <datalist id="role-suggestions">
                   {ROLE_SUGGESTIONS.map((r) => <option key={r} value={r} />)}
@@ -440,7 +433,7 @@ export default function GovernancePage() {
                   type="date"
                   value={form.nis2TrainingCompleted}
                   onChange={(e) => setForm((f) => ({ ...f, nis2TrainingCompleted: e.target.value }))}
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 />
               </div>
               <div>
@@ -448,7 +441,7 @@ export default function GovernancePage() {
                 <select
                   value={form.cisoCertification}
                   onChange={(e) => setForm((f) => ({ ...f, cisoCertification: e.target.value }))}
-                  className="h-9 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 >
                   {CERT_OPTIONS.map((c) => (
                     <option key={c} value={c}>
@@ -468,7 +461,7 @@ export default function GovernancePage() {
                   type="date"
                   value={form.cisoCertExpiry}
                   onChange={(e) => setForm((f) => ({ ...f, cisoCertExpiry: e.target.value }))}
-                  className="h-9 w-48 rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
+                  className="h-9 w-48 rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 text-sm text-eos-text outline-none"
                 />
               </div>
             )}
@@ -487,13 +480,13 @@ export default function GovernancePage() {
                 Salvează
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* Members list */}
       {members.length === 0 ? (
-        <div className="rounded-eos-md border border-eos-border bg-eos-surface p-8 text-center">
+        <div className="rounded-eos-sm border border-eos-border bg-eos-surface p-8 text-center">
           <Users className="mx-auto mb-3 size-10 text-eos-text-muted" strokeWidth={1.5} />
           <p className="font-semibold text-eos-text">Niciun membru adăugat</p>
           <p className="mt-1 text-sm text-eos-text-muted">
@@ -501,7 +494,7 @@ export default function GovernancePage() {
           </p>
         </div>
       ) : (
-        <Card className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
+        <V3Surface className="divide-y divide-eos-border-subtle border-eos-border bg-eos-surface">
           {members.map((member) => {
             const ts = trainingStatus(member)
             const cs = certStatus(member)
@@ -562,11 +555,11 @@ export default function GovernancePage() {
               </div>
             )
           })}
-        </Card>
+        </V3Surface>
       )}
 
       {/* Legal notice */}
-      <div className="rounded-eos-md border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
+      <div className="rounded-eos-sm border border-eos-border-subtle bg-eos-surface px-4 py-3 text-xs text-eos-text-muted">
         <p className="font-medium text-eos-text">
           Bază legală: OUG 155/2024 Art. 14 ✅
         </p>

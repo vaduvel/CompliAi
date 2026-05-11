@@ -18,13 +18,13 @@ function formatValue(n: number | null, suffix?: string): string {
 
 function AccumulationSkeleton() {
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-secondary p-5 animate-pulse">
-      <div className="mb-4 h-4 w-40 rounded bg-eos-border" />
-      <div className="space-y-3">
+    <div className="animate-pulse rounded-eos-lg border border-eos-border bg-eos-surface px-4 py-3.5">
+      <div className="mb-3 h-3 w-40 rounded-sm bg-white/[0.04]" />
+      <div className="space-y-2">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="flex items-center justify-between">
-            <div className="h-3 w-32 rounded bg-eos-border" />
-            <div className="h-3 w-8 rounded bg-eos-border" />
+            <div className="h-3 w-32 rounded-sm bg-white/[0.04]" />
+            <div className="h-3 w-8 rounded-sm bg-white/[0.04]" />
           </div>
         ))}
       </div>
@@ -89,23 +89,26 @@ export function AccumulationCard() {
   if (!hasAnyActivity) return null
 
   return (
-    <div className="rounded-eos-xl border border-eos-border bg-eos-surface-secondary p-5">
-      <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-eos-text-muted">
-        Ce am construit pentru tine
-      </p>
-      <ul className="space-y-2.5">
-        {metrics.map((m) => (
-          <li key={m.label} className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-2 text-xs text-eos-text-secondary">
-              {m.icon}
-              {m.label}
-            </span>
-            <span className="text-xs font-semibold tabular-nums text-eos-text-primary">
-              {m.value}
-            </span>
-          </li>
-        ))}
-      </ul>
+    <div className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+      <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary/70" aria-hidden />
+      <div className="px-4 py-3.5">
+        <p className="mb-3 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
+          Ce am construit pentru tine
+        </p>
+        <ul className="divide-y divide-eos-border-subtle">
+          {metrics.map((m) => (
+            <li key={m.label} className="flex items-center justify-between gap-2 py-2">
+              <span className="flex items-center gap-2 text-[12.5px] text-eos-text-muted">
+                {m.icon}
+                {m.label}
+              </span>
+              <span className="font-mono text-[12px] font-semibold tabular-nums text-eos-text">
+                {m.value}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }

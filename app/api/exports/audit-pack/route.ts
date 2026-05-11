@@ -1,19 +1,53 @@
 import { buildCompliScanSnapshot } from "@/lib/server/compliscan-export"
 import { buildDashboardPayload } from "@/lib/server/dashboard-response"
-import { AuthzError, requireFreshRole } from "@/lib/server/auth"
+import {
+  AuthzError,
+  listUserMemberships,
+  requireFreshRole,
+  resolveUserMode,
+} from "@/lib/server/auth"
 import { jsonError } from "@/lib/server/api-response"
 import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { buildAuditPack } from "@/lib/server/audit-pack"
 import { readNis2State } from "@/lib/server/nis2-store"
-import { requirePlan, PlanError } from "@/lib/server/plan"
+import {
+  getPartnerAccountPlanStatus,
+  hasLegacyPartnerOrgPlan,
+  requirePlan,
+  PlanError,
+} from "@/lib/server/plan"
 import { getWhiteLabelConfig } from "@/lib/server/white-label"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
 import { getOrgContext } from "@/lib/server/org-context"
 
+async function canExportForPartnerClient(session: Awaited<ReturnType<typeof requireFreshRole>>) {
+  if (session.role !== "partner_manager") return false
+  const userMode = await resolveUserMode(session).catch(() => null)
+  if (userMode !== "partner") return false
+
+  const memberships = (await listUserMemberships(session.userId)).filter(
+    (membership) => membership.status === "active" && membership.role === "partner_manager"
+  )
+  const clientOrgIds = Array.from(new Set(memberships.map((membership) => membership.orgId)))
+  const status = await getPartnerAccountPlanStatus({
+    userId: session.userId,
+    currentOrgs: clientOrgIds.length,
+    legacyPartnerEnabled: await hasLegacyPartnerOrgPlan(clientOrgIds),
+  })
+
+  return status.source === "trial" || status.source === "legacy_org_partner" || status.source === "account"
+}
+
 export async function GET(request: Request) {
   try {
     const session = await requireFreshRole(request, ["owner", "partner_manager", "compliance"], "exportul Audit Pack")
-    await requirePlan(request, "pro", "Audit Pack complet")
+    try {
+      await requirePlan(request, "pro", "Audit Pack complet")
+    } catch (error) {
+      if (!(error instanceof PlanError) || !(await canExportForPartnerClient(session))) {
+        throw error
+      }
+    }
 
     const rawState =
       (await readFreshStateForOrg(session.orgId, session.orgName)) ??
@@ -31,7 +65,7 @@ export async function GET(request: Request) {
     }
     const payload = await buildDashboardPayload(state, workspaceOverride)
     const snapshot = payload.state.snapshotHistory[0] ?? buildCompliScanSnapshot(payload)
-    const auditPack = buildAuditPack({
+    const baseAuditPack = buildAuditPack({
       state: payload.state,
       remediationPlan: payload.remediationPlan,
       workspace: payload.workspace,
@@ -47,6 +81,16 @@ export async function GET(request: Request) {
           logoUrl: whiteLabel.logoUrl ?? null,
         }
       : null
+    const issuedBy = branding?.partnerName || payload.workspace.workspaceLabel || session.orgName
+    const auditPack = {
+      ...baseAuditPack,
+      issuer: {
+        issuedBy,
+        cabinetName: issuedBy,
+        consultantName: payload.workspace.workspaceOwner || null,
+        source: branding?.partnerName ? "white_label" as const : "workspace" as const,
+      },
+    }
     const dateLabel = auditPack.generatedAt.slice(0, 10)
     const fileName = `audit-pack-v2-1-${payload.workspace.orgName
       .toLowerCase()

@@ -130,6 +130,12 @@ describe("GET /api/exports/audit-pack", () => {
     )
     expect(JSON.parse(body)).toEqual({
       generatedAt: "2026-03-13T09:00:00.000Z",
+      issuer: {
+        issuedBy: "Org Demo",
+        cabinetName: "Org Demo",
+        consultantName: null,
+        source: "workspace",
+      },
       summary: { status: "ok" },
     })
   })

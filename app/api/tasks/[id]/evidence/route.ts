@@ -216,6 +216,8 @@ export async function POST(
             ...previous,
             attachedEvidence: evidence.fileName,
             attachedEvidenceMeta: evidence,
+            deletedEvidence: undefined,
+            deletedEvidenceMeta: undefined,
             updatedAtISO: nowISO,
           },
         },

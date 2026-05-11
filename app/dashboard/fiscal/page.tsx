@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
   AlertTriangle,
@@ -9,16 +10,16 @@ import {
   FileCode2,
   FileText,
   Loader2,
+  PlugZap,
   Radio,
   Send,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
-import { EmptyState } from "@/components/evidence-os/EmptyState"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
+import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
 import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
 import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
@@ -26,7 +27,18 @@ import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTa
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
 import { SpvCheckTab } from "@/components/compliscan/fiscal/SpvCheckTab"
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
+import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
+import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
+import { ErpSpvReconcileCard } from "@/components/compliscan/fiscal/ErpSpvReconcileCard"
+import { FrequencyCheckCard } from "@/components/compliscan/fiscal/FrequencyCheckCard"
+import { FiscalAssistantTrigger } from "@/components/compliscan/fiscal/FiscalAssistantPanel"
+import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
+import { PfaForm082Panel } from "@/components/compliscan/fiscal/PfaForm082Panel"
+import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
+import { SagaImportCard } from "@/components/compliscan/fiscal/SagaImportCard"
+import { SmartBillConnectCard } from "@/components/compliscan/fiscal/SmartBillConnectCard"
 import { SubmitSpvTab } from "@/components/compliscan/fiscal/SubmitSpvTab"
+import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { buildCockpitRecipe } from "@/lib/compliscan/finding-kernel"
 import { buildFiscalStatusInterpreterGuide } from "@/lib/compliance/efactura-status-interpreter"
 import type {
@@ -55,7 +67,12 @@ export default function FiscalPage() {
     tabParam === "validator" ||
     tabParam === "status" ||
     tabParam === "transmitere" ||
-    tabParam === "semnale"
+    tabParam === "semnale" ||
+    tabParam === "saft" ||
+    tabParam === "integrari" ||
+    tabParam === "discrepante" ||
+    tabParam === "depuneri" ||
+    tabParam === "pfa"
       ? tabParam
       : "discrepante"
 
@@ -122,13 +139,19 @@ export default function FiscalPage() {
       if (payload.validation) {
         setValidations((current) => [payload.validation!, ...current.filter((item) => item.id !== payload.validation!.id)].slice(0, 10))
       }
-      toast.success(payload.validation?.valid ? "XML validat" : "XML cu probleme", {
-        description:
-          payload.message ||
-          (payload.validation?.valid
-            ? "Factura trece validarea structurală de bază."
-            : "Corectează XML-ul și validează din nou înainte de transmitere."),
-      })
+      const isValid = payload.validation?.valid ?? false
+      const description =
+        payload.message ||
+        (isValid
+          ? "Factura trece validarea structurală de bază."
+          : "Corectează XML-ul și validează din nou înainte de transmitere.")
+      // id deduplică toast-urile — re-validarea înlocuiește toast-ul curent
+      // în loc să-l stivuiască peste cele existente.
+      if (isValid) {
+        toast.success("XML validat", { id: "efactura-validation", description })
+      } else {
+        toast.error("XML cu probleme", { id: "efactura-validation", description })
+      }
       return payload.validation ?? null
     } catch (error) {
       const message = error instanceof Error ? error.message : "Eroare la validarea XML."
@@ -183,96 +206,172 @@ export default function FiscalPage() {
       ? buildFiscalStatusInterpreterGuide(statusRecipe.findingTypeId, statusFinding)
       : null
 
+  const fromCockpitHintText =
+    tabParam === "validator"
+      ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliScan când revii în finding cu confirmarea retransmiterii și statusul SPV."
+      : tabParam === "status"
+        ? "Urmează protocolul fiscal de mai jos, apoi revino în cockpit cu nota pregătită și dovada finală din SPV."
+        : tabParam === "transmitere"
+          ? "Creezi și execuți draftul de transmitere pentru cazul fiscal curent. Draftul rămâne legat de finding și poți reveni aici după aprobare sau verdict."
+          : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <FiscalAssistantTrigger />
+      <V3PageHero
+        breadcrumbs={[{ label: "Firma mea" }, { label: "Fiscal", current: true }]}
+        title="Monitorizezi conformitatea fiscală"
+        description="Discrepanțe e-TVA, depuneri fiscale și scor de disciplină. Urmărești termenele ANAF și documentezi răspunsurile."
+        eyebrowBadges={
+          <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
+            ANAF · e-TVA · SAF-T
+          </span>
+        }
+      />
+
       {fromCockpit && (
-        <div className="flex items-start gap-3 rounded-eos-md border border-eos-warning/30 bg-eos-warning/5 px-4 py-3">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-warning" />
+        <section className="flex items-start gap-3 overflow-hidden rounded-eos-lg border border-eos-warning/30 bg-eos-warning-soft px-4 py-3.5">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-eos-warning" strokeWidth={2} />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-eos-text">
+            <p
+              data-display-text="true"
+              className="font-display text-[13.5px] font-semibold tracking-[-0.015em] text-eos-text"
+            >
               Vii din cockpit pentru un finding fiscal
             </p>
-            <p className="mt-0.5 text-xs text-eos-text-muted">
-              {tabParam === "validator"
-                ? "Validează sau repară XML-ul de mai jos, apoi folosește nota pregătită de CompliAI când revii în finding cu confirmarea retransmiterii și statusul SPV."
-                : tabParam === "status"
-                  ? "Urmează protocolul fiscal de mai jos, apoi revino în cockpit cu nota pregătită și dovada finală din SPV."
-                  : tabParam === "transmitere"
-                    ? "Creezi și execuți draftul de transmitere pentru cazul fiscal curent. Draftul rămâne legat de finding și poți reveni aici după aprobare sau verdict."
-                    : "Rulează verificarea SPV de mai jos pentru a confirma statusul. Dovada obținută o poți adăuga direct în finding."}
+            <p className="mt-1 text-[12px] leading-[1.55] text-eos-text-muted">
+              {fromCockpitHintText}
             </p>
           </div>
           <a
             href={`/dashboard/resolve/${findingIdParam}`}
-            className="flex shrink-0 items-center gap-1 text-xs text-eos-primary hover:underline"
+            className="inline-flex h-[30px] shrink-0 items-center gap-1 rounded-eos-sm border border-eos-border bg-eos-surface px-2.5 font-mono text-[11px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
           >
-            <ArrowLeft className="size-3" />
-            Înapoi la finding
+            <ArrowLeft className="size-3" strokeWidth={2} />
+            Inapoi la finding
           </a>
-        </div>
+        </section>
       )}
 
-      <PageIntro
-        eyebrow="Fiscal"
-        title="Monitorizezi conformitatea fiscala"
-        description="Discrepante e-TVA, depuneri fiscale si scor de disciplina. Urmaresti termenele ANAF si documentezi raspunsurile."
-        badges={
-          <Badge variant="outline" className="normal-case tracking-normal">
-            ANAF · e-TVA · SAF-T
-          </Badge>
-        }
-      />
+      {/* Audit Risk Score — F#1 Sprint 8-9 (2026-05-11).
+          Hero card cu scor 0-100 + breakdown explicabil (CECCAR Art. 14).
+          Vizibil doar pe overview (fără tabParam) ca să nu dubleze contextul. */}
+      {!tabParam && (
+        <section>
+          <AuditRiskPanel />
+        </section>
+      )}
 
-      <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className="gap-0 border-b border-eos-border text-eos-text-muted">
+      {/* Cockpit Quick Actions — Sprint 0 IA restructure (2026-05-11).
+          Vizibil DOAR în mod overview (fără tabParam din URL). Pe sub-rute
+          (?tab=X) acest card ascuns ca să nu dubleze contextul. */}
+      {!tabParam && (
+        <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/validare"
+            title="Validare & emitere"
+            description="Validator UBL CIUS-RO + Bulk ZIP + Semnale e-Factura."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/transmitere"
+            title="Transmitere & SPV"
+            description="Submit ANAF cu dublă aprobare + status SPV real-time."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/tva-declaratii"
+            title="TVA & declarații"
+            description="Discrepanțe e-TVA + depuneri D300/D406 + SAF-T hygiene."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/integrari"
+            title="Integrări ERP"
+            description="SmartBill / Oblio / Saga + reconciliere SPV."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/deadline-urgent"
+            title="Deadline urgent"
+            description="PFA Form 082 (26 mai 2026) + calendar termene."
+            urgent
+          />
+        </section>
+      )}
+
+      {/* Audit fiscal 2026-05-11: pe overview (fără tabParam) nu mai randăm Tabs
+          deloc — toate sub-secțiunile sunt acum pagini dedicate accesate din
+          sidebar. Tabs rămân pentru deep-links din findings (?tab=X&findingId=Y),
+          retro-compat pentru EF-004/EF-005 protocol flow. */}
+      {tabParam && (
+      <Tabs defaultValue={defaultTab} className="space-y-4">
+        <TabsList className="sr-only !min-h-0 !border-b-0 !bg-transparent">
           <TabsTrigger
             value="discrepante"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <AlertTriangle className="mr-1.5 size-3.5" />
-            Discrepante e-TVA
+            <AlertTriangle className="size-3.5" strokeWidth={2} />
+            Discrepanțe e-TVA
           </TabsTrigger>
           <TabsTrigger
             value="depuneri"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <FileText className="mr-1.5 size-3.5" />
+            <FileText className="size-3.5" strokeWidth={2} />
             Depuneri fiscale
           </TabsTrigger>
           <TabsTrigger
             value="spv"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <ShieldCheck className="mr-1.5 size-3.5" />
+            <ShieldCheck className="size-3.5" strokeWidth={2} />
             SPV Check
           </TabsTrigger>
           <TabsTrigger
             value="status"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <Clock className="mr-1.5 size-3.5" />
+            <Clock className="size-3.5" strokeWidth={2} />
             Protocol fiscal
           </TabsTrigger>
           <TabsTrigger
             value="validator"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <FileCode2 className="mr-1.5 size-3.5" />
+            <FileCode2 className="size-3.5" strokeWidth={2} />
             Validator XML
           </TabsTrigger>
           <TabsTrigger
             value="semnale"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <Radio className="mr-1.5 size-3.5" />
+            <Radio className="size-3.5" strokeWidth={2} />
             Semnale e-Factura
           </TabsTrigger>
           <TabsTrigger
             value="transmitere"
-            className="min-h-10 min-w-[140px] px-4 py-2 data-[state=active]:border-eos-primary data-[state=active]:text-eos-text"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
-            <Send className="mr-1.5 size-3.5" />
+            <Send className="size-3.5" strokeWidth={2} />
             Transmitere ANAF
+          </TabsTrigger>
+          <TabsTrigger
+            value="saft"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
+          >
+            <Sparkles className="size-3.5" strokeWidth={2} />
+            SAF-T Hygiene
+          </TabsTrigger>
+          <TabsTrigger
+            value="integrari"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
+          >
+            <PlugZap className="size-3.5" strokeWidth={2} />
+            Integrări
+          </TabsTrigger>
+          <TabsTrigger
+            value="pfa"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
+          >
+            <FileText className="size-3.5" strokeWidth={2} />
+            PFA / Form 082
           </TabsTrigger>
         </TabsList>
 
@@ -281,7 +380,11 @@ export default function FiscalPage() {
         </TabsContent>
 
         <TabsContent value="depuneri">
-          <FilingRecordsTab />
+          <div className="space-y-4">
+            <FrequencyCheckCard />
+            <CrossFilingCheckCard />
+            <FilingRecordsTab />
+          </div>
         </TabsContent>
 
         <TabsContent value="spv">
@@ -290,22 +393,44 @@ export default function FiscalPage() {
 
         <TabsContent value="status">
           {statusLoading ? (
-            <div className="flex items-center gap-2 py-8 text-sm text-eos-text-muted">
-              <Loader2 className="size-4 animate-spin" />
-              Se încarcă protocolul fiscal...
+            <div className="flex items-center gap-2 py-8 text-[12.5px] text-eos-text-muted">
+              <Loader2 className="size-4 animate-spin" strokeWidth={2} />
+              Se incarca protocolul fiscal...
             </div>
           ) : !findingIdParam ? (
-            <EmptyState
-              icon={Clock}
-              title="Deschide protocolul fiscal dintr-un finding"
-              label="Tab-ul acesta se folosește când vii din cockpit pentru EF-004 sau EF-005."
-            />
+            <div className="flex flex-col items-center justify-center gap-3 rounded-eos-lg border border-dashed border-eos-border bg-eos-surface/40 px-6 py-12 text-center">
+              <div className="flex size-10 items-center justify-center rounded-full border border-eos-border bg-eos-surface">
+                <Clock className="size-4 text-eos-text-tertiary" strokeWidth={1.8} />
+              </div>
+              <div className="max-w-md space-y-1">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+                >
+                  Deschide protocolul fiscal dintr-un finding
+                </p>
+                <p className="text-[12.5px] leading-[1.55] text-eos-text-muted">
+                  Tab-ul acesta se foloseste cand vii din cockpit pentru EF-004 sau EF-005.
+                </p>
+              </div>
+            </div>
           ) : !statusGuide ? (
-            <EmptyState
-              icon={AlertTriangle}
-              title="Protocol indisponibil pentru finding-ul curent"
-              label="Protocolul fiscal din această suprafață este disponibil momentan pentru cazurile EF-004 și EF-005."
-            />
+            <div className="flex flex-col items-center justify-center gap-3 rounded-eos-lg border border-dashed border-eos-border bg-eos-surface/40 px-6 py-12 text-center">
+              <div className="flex size-10 items-center justify-center rounded-full border border-eos-warning/30 bg-eos-warning-soft">
+                <AlertTriangle className="size-4 text-eos-warning" strokeWidth={1.8} />
+              </div>
+              <div className="max-w-md space-y-1">
+                <p
+                  data-display-text="true"
+                  className="font-display text-[14.5px] font-semibold tracking-[-0.015em] text-eos-text"
+                >
+                  Protocol indisponibil pentru finding-ul curent
+                </p>
+                <p className="text-[12.5px] leading-[1.55] text-eos-text-muted">
+                  Protocolul fiscal din aceasta suprafata este disponibil momentan pentru cazurile EF-004 si EF-005.
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
               <FiscalStatusInterpreterCard guide={statusGuide} findingId={findingIdParam} />
@@ -318,13 +443,16 @@ export default function FiscalPage() {
         </TabsContent>
 
         <TabsContent value="validator">
-          <EFacturaValidatorCard
-            validations={validations}
-            busy={validatorBusy}
-            repairBusy={repairBusy}
-            onValidate={handleValidateXml}
-            onRepair={handleRepairXml}
-          />
+          <div className="space-y-4">
+            <BulkZipUploadCard />
+            <EFacturaValidatorCard
+              validations={validations}
+              busy={validatorBusy}
+              repairBusy={repairBusy}
+              onValidate={handleValidateXml}
+              onRepair={handleRepairXml}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="semnale">
@@ -338,7 +466,66 @@ export default function FiscalPage() {
             returnToFindingHref={findingIdParam ? `/dashboard/resolve/${findingIdParam}` : null}
           />
         </TabsContent>
+
+        <TabsContent value="saft">
+          <SaftHygieneTab />
+        </TabsContent>
+
+        <TabsContent value="integrari">
+          <div className="space-y-4">
+            <SmartBillConnectCard />
+            <OblioConnectCard />
+            <ErpSpvReconcileCard />
+            <SagaImportCard />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="pfa">
+          <PfaForm082Panel />
+        </TabsContent>
       </Tabs>
+      )}
     </div>
+  )
+}
+
+// Sprint 0 IA — card simplu folosit în cockpit overview pentru sub-pagini fiscal.
+function CockpitQuickActionCard({
+  href,
+  title,
+  description,
+  urgent = false,
+}: {
+  href: string
+  title: string
+  description: string
+  urgent?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group block rounded-eos-lg border bg-eos-surface p-4 transition-all duration-150 hover:bg-eos-surface-elevated ${
+        urgent
+          ? "border-eos-warning/30 hover:border-eos-warning"
+          : "border-eos-border hover:border-eos-border-strong"
+      }`}
+    >
+      <p
+        data-display-text="true"
+        className={`font-display text-[14px] font-semibold tracking-[-0.015em] ${
+          urgent ? "text-eos-warning" : "text-eos-text"
+        }`}
+      >
+        {title}
+      </p>
+      <p className="mt-1 text-[11.5px] leading-[1.5] text-eos-text-muted">{description}</p>
+      <p
+        className={`mt-3 inline-flex items-center gap-1 font-mono text-[10.5px] font-medium ${
+          urgent ? "text-eos-warning" : "text-eos-primary"
+        }`}
+      >
+        Deschide →
+      </p>
+    </Link>
   )
 }

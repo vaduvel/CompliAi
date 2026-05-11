@@ -55,12 +55,12 @@ describe("buildDNSCNotificationDraft", () => {
     expect(draft.length).toBeGreaterThan(200)
   })
 
-  it("include disclaimer CompliAI la final", () => {
+  it("include disclaimer CompliScan la final", () => {
     const draft = buildDNSCNotificationDraft({
       orgName: "Test",
       orgProfile: null,
     })
-    expect(draft).toContain("CompliAI")
+    expect(draft).toContain("CompliScan")
     expect(draft).toContain("nu constituie consiliere juridică")
   })
 })

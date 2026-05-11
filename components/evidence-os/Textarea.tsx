@@ -13,8 +13,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     <textarea
       ref={ref}
       className={cn(
-        "min-h-[80px] w-full resize-y rounded-eos-md border bg-eos-surface px-3 py-2 text-sm text-eos-text placeholder:text-eos-text-tertiary",
-        "transition-[border-color,box-shadow] duration-150",
+        "min-h-[80px] w-full resize-y rounded-eos-sm border bg-eos-surface px-2.5 py-2 text-[13px] leading-[1.5] text-eos-text placeholder:text-eos-text-tertiary",
+        "transition-[border-color,box-shadow] duration-[120ms]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-primary-focus focus-visible:ring-offset-2 focus-visible:ring-offset-eos-bg",
         "disabled:pointer-events-none disabled:opacity-40",
         error

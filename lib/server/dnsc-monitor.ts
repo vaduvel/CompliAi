@@ -76,7 +76,7 @@ export async function fetchDnscAnnouncements(
       signal: controller.signal,
       headers: {
         // Mimic a browser to avoid bot blocks
-        "User-Agent": "Mozilla/5.0 (compatible; CompliAI-RadarBot/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; CompliScan-RadarBot/1.0)",
         Accept: "text/html",
       },
     })

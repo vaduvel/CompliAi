@@ -1,6 +1,5 @@
 "use client"
 
-import { Badge } from "@/components/evidence-os/Badge"
 import type { Nis2Incident } from "@/lib/server/nis2-store"
 import { buildDNSCReport } from "@/lib/compliance/dnsc-report"
 import type { Nis2Answer, Nis2Result } from "@/lib/compliance/nis2-rules"
@@ -24,6 +23,7 @@ export function downloadDNSCReport(incident: Nis2Incident, orgName?: string) {
 }
 
 
+// Severity tone keys used across NIS2 incident views (mapped to V3 pill / inline tag colors).
 export const SEVERITY_BADGE: Record<string, "default" | "warning" | "destructive" | "success" | "outline"> = {
   low: "outline",
   medium: "warning",
@@ -68,14 +68,35 @@ export function buildAssessmentReturnEvidence(result: Nis2Result) {
 }
 
 
-export function MaturityBadge({ label }: { label: Nis2Result["maturityLabel"] }) {
-  const map: Record<string, { variant: "success" | "warning" | "destructive" | "outline"; text: string }> = {
-    robust: { variant: "success", text: "Robust" },
-    partial: { variant: "warning", text: "Parțial" },
-    initial: { variant: "destructive", text: "Inițial" },
-    "non-conform": { variant: "destructive", text: "Neconform" },
-  }
-  const { variant, text } = map[label]
-  return <Badge variant={variant}>{text}</Badge>
+const MATURITY_STYLES: Record<
+  Nis2Result["maturityLabel"],
+  { wrapper: string; text: string }
+> = {
+  robust: {
+    wrapper: "border-eos-success/30 bg-eos-success-soft text-eos-success",
+    text: "Robust",
+  },
+  partial: {
+    wrapper: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+    text: "Parțial",
+  },
+  initial: {
+    wrapper: "border-eos-error/30 bg-eos-error-soft text-eos-error",
+    text: "Inițial",
+  },
+  "non-conform": {
+    wrapper: "border-eos-error/30 bg-eos-error-soft text-eos-error",
+    text: "Neconform",
+  },
 }
 
+export function MaturityBadge({ label }: { label: Nis2Result["maturityLabel"] }) {
+  const { wrapper, text } = MATURITY_STYLES[label]
+  return (
+    <span
+      className={`inline-flex items-center rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-medium ${wrapper}`}
+    >
+      {text}
+    </span>
+  )
+}

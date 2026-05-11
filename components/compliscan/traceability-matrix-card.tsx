@@ -60,7 +60,7 @@ export function TraceabilityMatrixCard({
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                   Familie de controale
                 </p>
                 <p className="mt-2 text-sm leading-6 text-eos-text-muted">
@@ -191,7 +191,7 @@ export function TraceabilityMatrixCard({
           <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                   Confirmare pe articol / control
                 </p>
                 <p className="mt-2 text-sm leading-6 text-eos-text-muted">
@@ -372,7 +372,7 @@ export function TraceabilityMatrixCard({
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                  <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                     Coverage pe control
                   </p>
                   <Badge variant={controlCoverageBadgeVariant(record.bundleCoverageStatus)}>
@@ -400,7 +400,7 @@ export function TraceabilityMatrixCard({
                 )}
               </div>
               <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                   Referinte si surse
                 </p>
                 <p className="mt-3 text-sm leading-6 text-eos-text-muted">
@@ -414,14 +414,14 @@ export function TraceabilityMatrixCard({
               </div>
             </div>
             <div className="mt-4 rounded-eos-md border border-eos-border bg-eos-bg-inset p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+              <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                 Ce urmeaza
               </p>
               <p className="mt-2 text-sm leading-6 text-eos-text-muted">
                 {record.nextStep}
               </p>
               <div className="mt-4 space-y-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-eos-text-muted">
+                <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">
                   Confirmare control / articol
                 </p>
                 <textarea
@@ -663,7 +663,7 @@ function TraceMiniCard({
 }) {
   return (
     <div className="rounded-eos-md border border-eos-border bg-eos-bg-inset p-3">
-      <p className="text-xs uppercase tracking-[0.22em] text-eos-text-muted">{label}</p>
+      <p className="text-xs font-mono uppercase tracking-[0.14em] text-eos-text-muted">{label}</p>
       <p className="mt-2 text-sm font-medium text-eos-text">{value}</p>
       <p className="mt-2 text-xs text-eos-text-muted">{hint}</p>
     </div>

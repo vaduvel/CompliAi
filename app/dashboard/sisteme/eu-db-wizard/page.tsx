@@ -13,10 +13,10 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { Badge } from "@/components/evidence-os/Badge"
+import { V3Pill } from "@/components/compliscan/v3/compat"
 import { Button } from "@/components/evidence-os/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/evidence-os/Card"
-import { PageIntro } from "@/components/evidence-os/PageIntro"
+import { V3Surface, V3SurfaceBody, V3SurfaceHead, V3SurfaceTitle } from "@/components/compliscan/v3/compat"
+import { V3Intro } from "@/components/compliscan/v3/compat"
 import type { AISystemPurpose } from "@/lib/compliance/types"
 import type { EUDatabaseEntry } from "@/lib/compliance/ai-act-exporter"
 
@@ -99,7 +99,7 @@ export default function EUDatabaseWizardPage() {
         </Link>
       </div>
 
-      <PageIntro
+      <V3Intro
         title="Înregistrare EU AI Database"
         description="Wizard pentru pregătirea înregistrării sistemului AI high-risk conform Art. 71 AI Act. Deadline: 2 august 2026."
       />
@@ -118,16 +118,16 @@ export default function EUDatabaseWizardPage() {
 
       {/* Step 1: System data */}
       {step === 1 && (
-        <Card>
-          <CardHeader><CardTitle className="text-sm">Pas 1: Datele sistemului AI</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+        <V3Surface>
+          <V3SurfaceHead><V3SurfaceTitle className="text-sm">Pas 1: Datele sistemului AI</V3SurfaceTitle></V3SurfaceHead>
+          <V3SurfaceBody className="space-y-3">
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Numele sistemului</label>
-              <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" placeholder="HR Scorer, Chatbot Intern..." value={form.systemName} onChange={(e) => setForm((p) => ({ ...p, systemName: e.target.value }))} />
+              <input className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" placeholder="HR Scorer, Chatbot Intern..." value={form.systemName} onChange={(e) => setForm((p) => ({ ...p, systemName: e.target.value }))} />
             </div>
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Scop / Categorie</label>
-              <select className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.purpose} onChange={(e) => setForm((p) => ({ ...p, purpose: e.target.value as AISystemPurpose }))}>
+              <select className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.purpose} onChange={(e) => setForm((p) => ({ ...p, purpose: e.target.value as AISystemPurpose }))}>
                 {Object.entries(PURPOSE_LABELS).map(([val, label]) => (
                   <option key={val} value={val}>{label}</option>
                 ))}
@@ -135,43 +135,43 @@ export default function EUDatabaseWizardPage() {
             </div>
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Descriere sistem</label>
-              <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" rows={3} placeholder="Ce face sistemul, ce date procesează..." value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
+              <textarea className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" rows={3} placeholder="Ce face sistemul, ce date procesează..." value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
             </div>
             <div className="flex justify-end">
               <Button size="sm" className="gap-2" onClick={() => setStep(2)} disabled={!form.systemName.trim()}>
                 Continuă <ArrowRight className="size-3.5" />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* Step 2: Provider + deployment */}
       {step === 2 && (
-        <Card>
-          <CardHeader><CardTitle className="text-sm">Pas 2: Provider și deployment</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+        <V3Surface>
+          <V3SurfaceHead><V3SurfaceTitle className="text-sm">Pas 2: Provider și deployment</V3SurfaceTitle></V3SurfaceHead>
+          <V3SurfaceBody className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Numele organizației</label>
-                <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.orgName} onChange={(e) => setForm((p) => ({ ...p, orgName: e.target.value }))} />
+                <input className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.orgName} onChange={(e) => setForm((p) => ({ ...p, orgName: e.target.value }))} />
               </div>
               <div>
                 <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Email contact</label>
-                <input type="email" className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.orgEmail} onChange={(e) => setForm((p) => ({ ...p, orgEmail: e.target.value }))} />
+                <input type="email" className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.orgEmail} onChange={(e) => setForm((p) => ({ ...p, orgEmail: e.target.value }))} />
               </div>
             </div>
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Adresa sediului social</label>
-              <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.orgAddress} onChange={(e) => setForm((p) => ({ ...p, orgAddress: e.target.value }))} />
+              <input className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" value={form.orgAddress} onChange={(e) => setForm((p) => ({ ...p, orgAddress: e.target.value }))} />
             </div>
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">State membre UE (unde e folosit sistemul)</label>
-              <input className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" placeholder="RO, DE, FR" value={form.memberStates} onChange={(e) => setForm((p) => ({ ...p, memberStates: e.target.value }))} />
+              <input className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" placeholder="RO, DE, FR" value={form.memberStates} onChange={(e) => setForm((p) => ({ ...p, memberStates: e.target.value }))} />
             </div>
             <div>
               <label className="text-[10px] font-medium uppercase tracking-[0.12em] text-eos-text-muted">Măsuri de supraveghere umană (human oversight)</label>
-              <textarea className="mt-1 w-full rounded-eos-md border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" rows={2} placeholder="Confirmare umană obligatorie, audit periodic..." value={form.humanOversightMeasures} onChange={(e) => setForm((p) => ({ ...p, humanOversightMeasures: e.target.value }))} />
+              <textarea className="mt-1 w-full rounded-eos-sm border border-eos-border bg-eos-bg-inset px-3 py-2 text-xs text-eos-text" rows={2} placeholder="Confirmare umană obligatorie, audit periodic..." value={form.humanOversightMeasures} onChange={(e) => setForm((p) => ({ ...p, humanOversightMeasures: e.target.value }))} />
             </div>
             <div className="flex justify-between">
               <Button size="sm" variant="outline" onClick={() => setStep(1)}>
@@ -182,24 +182,24 @@ export default function EUDatabaseWizardPage() {
                 Generează JSON
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* Step 3: Preview + missing fields */}
       {step === 3 && entry && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
+        <V3Surface>
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="text-sm flex items-center gap-2">
               Pas 3: Preview înregistrare
-              <Badge variant={entry.completenessPercent >= 80 ? "success" : "warning"}>
+              <V3Pill variant={entry.completenessPercent >= 80 ? "success" : "warning"}>
                 {entry.completenessPercent}% completat
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+              </V3Pill>
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-4">
             {entry.missingFields.length > 0 && (
-              <div className="rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft/50 px-3 py-2">
+              <div className="rounded-eos-sm border border-eos-warning/20 bg-eos-warning-soft/50 px-3 py-2">
                 <p className="text-[10px] font-medium uppercase text-eos-warning">Câmpuri lipsă</p>
                 <ul className="mt-1 space-y-0.5">
                   {entry.missingFields.map((f) => (
@@ -209,7 +209,7 @@ export default function EUDatabaseWizardPage() {
               </div>
             )}
 
-            <pre className="max-h-80 overflow-auto rounded-eos-md border border-eos-border bg-eos-bg-inset p-3 text-[11px] text-eos-text">
+            <pre className="max-h-80 overflow-auto rounded-eos-sm border border-eos-border bg-eos-bg-inset p-3 text-[11px] text-eos-text">
               {JSON.stringify(entry, null, 2)}
             </pre>
 
@@ -229,22 +229,22 @@ export default function EUDatabaseWizardPage() {
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
 
       {/* Step 4: Submit instructions */}
       {step === 4 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
+        <V3Surface>
+          <V3SurfaceHead>
+            <V3SurfaceTitle className="text-sm flex items-center gap-2">
               <CheckCircle2 className="size-4 text-eos-success" />
               Pas 4: Instrucțiuni de submit
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </V3SurfaceTitle>
+          </V3SurfaceHead>
+          <V3SurfaceBody className="space-y-4">
             {/* Sprint 10: Boundary clarity — legal safety */}
-            <div className="rounded-eos-md border border-eos-error/20 bg-eos-error-soft/50 px-4 py-3 space-y-1">
+            <div className="rounded-eos-sm border border-eos-error/20 bg-eos-error-soft/50 px-4 py-3 space-y-1">
               <p className="text-xs font-semibold text-eos-error">Limitele acestui instrument</p>
               <p className="text-xs text-eos-error">
                 JSON-ul generat este un <strong>draft de pregătire</strong>, nu o înregistrare validată oficial.
@@ -254,7 +254,7 @@ export default function EUDatabaseWizardPage() {
               </p>
             </div>
 
-            <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary/5 px-4 py-3 space-y-2">
+            <div className="rounded-eos-sm border border-eos-primary/30 bg-eos-primary/5 px-4 py-3 space-y-2">
               <p className="text-xs font-semibold text-eos-text">Pași pentru submit MANUAL pe EU AI Database:</p>
               <ol className="list-decimal pl-4 space-y-1 text-xs text-eos-text-muted">
                 <li>Verifică documentația tehnică Annex IV (descarcă din inventar)</li>
@@ -266,7 +266,7 @@ export default function EUDatabaseWizardPage() {
               </ol>
             </div>
 
-            <div className="rounded-eos-md border border-eos-warning/20 bg-eos-warning-soft/50 px-4 py-3">
+            <div className="rounded-eos-sm border border-eos-warning/20 bg-eos-warning-soft/50 px-4 py-3">
               <p className="text-xs font-semibold text-eos-warning">Important</p>
               <p className="mt-1 text-xs text-eos-warning">
                 CompliScan NU trimite automat la EU AI Database. Submiterea este responsabilitatea organizației.
@@ -291,8 +291,8 @@ export default function EUDatabaseWizardPage() {
                 <Button size="sm" variant="outline">Înapoi la inventar</Button>
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </V3SurfaceBody>
+        </V3Surface>
       )}
     </div>
   )

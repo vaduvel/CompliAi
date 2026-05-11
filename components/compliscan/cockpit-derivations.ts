@@ -206,6 +206,7 @@ function applyPersistedTaskState(
             kind: task.evidenceKinds[0] ?? "other",
           }
         : undefined),
+    deletedEvidence: persistedState.deletedEvidenceMeta,
     validationStatus: persistedState.validationStatus ?? "idle",
     validationMessage: persistedState.validationMessage,
     validationConfidence: persistedState.validationConfidence,
