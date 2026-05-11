@@ -23,6 +23,13 @@ export const dashboardRoutes = {
   training: "/dashboard/training",
   dpoMigration: "/dashboard/migration",
   fiscal: "/dashboard/fiscal",
+  // Sprint 0 (2026-05-11) — fiscal sidebar restructure IA cu sub-rute
+  fiscalCockpit: "/dashboard/fiscal", // alias pentru overview
+  fiscalValidation: "/dashboard/fiscal/validare",
+  fiscalTransmission: "/dashboard/fiscal/transmitere",
+  fiscalTva: "/dashboard/fiscal/tva-declaratii",
+  fiscalIntegrations: "/dashboard/fiscal/integrari",
+  fiscalDeadlines: "/dashboard/fiscal/deadline-urgent",
   vendorReview: "/dashboard/vendor-review",
   payTransparency: "/dashboard/pay-transparency",
   // Dosar unificat — Wave 1 cleanup

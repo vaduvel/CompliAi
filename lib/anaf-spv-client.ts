@@ -260,6 +260,29 @@ export async function fetchSpvMessages(
 }
 
 /**
+ * Probe token validity by making a minimal GET against ANAF SPV.
+ * Used after OAuth exchange to verify ANAF accepted the token before we
+ * mark the integration as connected. Returns status code (or null on network
+ * failure) so the caller can distinguish "rejected" from "transient".
+ */
+export async function probeAnafToken(
+  accessToken: string,
+  cif: string
+): Promise<{ valid: boolean; status: number | null }> {
+  if (!cif) return { valid: false, status: null }
+  try {
+    const url = `${getAnafFctelBaseUrl()}/listaMesajeFactura?cif=${encodeURIComponent(cif)}&zile=1`
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(10_000),
+    })
+    return { valid: res.status === 200, status: res.status }
+  } catch {
+    return { valid: false, status: null }
+  }
+}
+
+/**
  * F4: Download a specific invoice/message from SPV.
  */
 export async function downloadSpvMessage(
@@ -358,6 +381,27 @@ export async function loadTokenFromSupabase(
     }
   } catch {
     return null
+  }
+}
+
+export async function markTokenUsed(orgId: string, nowISO: string): Promise<void> {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return
+
+  try {
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/anaf_tokens?org_id=eq.${encodeURIComponent(orgId)}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ last_used_at: nowISO }),
+      }
+    )
+  } catch {
+    // Non-critical — telemetry only
   }
 }
 

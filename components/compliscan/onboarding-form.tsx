@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
@@ -238,10 +239,34 @@ function getPhaseIndex(mode: ModeId | null, wizardStep: ApplicabilityWizardStep 
 
 export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps) {
   const router = useRouter()
-  const [currentMode, setCurrentMode] = useState<ModeId | null>(initialUserMode)
-  const [selectedMode, setSelectedMode] = useState<ModeId | null>(initialUserMode)
+  const searchParams = useSearchParams()
+  // Mircea UX fix (2026-05-11): preselect ICP from ?icp= URL param (vine din
+  // landing page /fiscal cu icp=cabinet-fiscal). Userul nu trebuie să aleagă
+  // ICP-ul de două ori dacă a venit deja din segmentul landing dedicat.
+  const initialIcpFromUrl: IcpSegmentId | null = (() => {
+    const raw = searchParams.get("icp")
+    const valid: IcpSegmentId[] = [
+      "solo",
+      "cabinet-dpo",
+      "cabinet-fiscal",
+      "cabinet-hr",
+      "imm-internal",
+      "imm-hr",
+      "enterprise",
+    ]
+    return raw && valid.includes(raw as IcpSegmentId) ? (raw as IcpSegmentId) : null
+  })()
+  const initialModeFromIcp = initialIcpFromUrl
+    ? ICP_OPTIONS.find((o) => o.id === initialIcpFromUrl)?.mapsTo ?? null
+    : null
+  const [currentMode, setCurrentMode] = useState<ModeId | null>(
+    initialUserMode ?? initialModeFromIcp,
+  )
+  const [selectedMode, setSelectedMode] = useState<ModeId | null>(
+    initialUserMode ?? initialModeFromIcp,
+  )
   // S1.6 — ICP segment selectat (5 carduri, mapează la 3 userMode-uri).
-  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(null)
+  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(initialIcpFromUrl)
   const [wizardStep, setWizardStep] = useState<ApplicabilityWizardStep | null>(
     initialUserMode ? "cui" : null
   )
@@ -355,14 +380,22 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             data-display-text="true"
             className="mt-1.5 font-display text-[20px] font-semibold leading-tight tracking-[-0.02em] text-eos-text"
           >
-            Pasul {phaseIndex + 1} din {phases.length}
+            {/* Mircea fix (2026-05-11): show "Pasul 1" simplu cât timp user-ul
+                n-a ales încă rolul (selectedMode = null). După alegere,
+                phases.length reflectă numărul real (2 pentru partner,
+                3 pentru solo/compliance). */}
+            {!selectedMode && !currentMode
+              ? "Pasul 1"
+              : `Pasul ${phaseIndex + 1} din ${phases.length}`}
           </h2>
           <p className="mt-1.5 text-[12.5px] leading-[1.55] text-eos-text-muted">
-            {phases.length - phaseIndex - 1 > 0
-              ? `Încă ${phases.length - phaseIndex - 1} ${
-                  phases.length - phaseIndex - 1 === 1 ? "pas" : "pași"
-                }. Totul poate fi modificat retroactiv.`
-              : "Aproape gata — confirmă și pornim primul scan."}
+            {!selectedMode && !currentMode
+              ? "Alege rolul tău. Totul poate fi modificat retroactiv."
+              : phases.length - phaseIndex - 1 > 0
+                ? `Încă ${phases.length - phaseIndex - 1} ${
+                    phases.length - phaseIndex - 1 === 1 ? "pas" : "pași"
+                  }. Totul poate fi modificat retroactiv.`
+                : "Aproape gata — confirmă și pornim primul scan."}
           </p>
 
           {/* Vertical stepper */}
@@ -453,19 +486,27 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
               {phases[phaseIndex]?.label}
             </span>
-            {currentMeta && (
+            {(selectedIcp ?? currentMeta) && (
               <span
                 className={[
                   "ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1",
                   accent.iconBox,
                 ].join(" ")}
               >
-                <currentMeta.icon
-                  className={["size-3.5", accent.iconColor].join(" ")}
-                  strokeWidth={1.75}
-                />
+                {/* Bug fix 2026-05-11: foloseam currentMeta.icon/badge din MODE_OPTIONS care
+                    deduplica după mapsTo şi pierdea distincţia cabinet-dpo vs cabinet-fiscal.
+                    Acum folosim ICP-ul ales direct, fallback la mode meta dacă lipseşte. */}
+                {(() => {
+                  const Icon = (selectedIcp?.icon ?? currentMeta?.icon)
+                  return Icon ? (
+                    <Icon
+                      className={["size-3.5", accent.iconColor].join(" ")}
+                      strokeWidth={1.75}
+                    />
+                  ) : null
+                })()}
                 <span className={["font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em]", accent.text].join(" ")}>
-                  {currentMeta.badge}
+                  {selectedIcp?.badge ?? currentMeta?.badge}
                 </span>
               </span>
             )}

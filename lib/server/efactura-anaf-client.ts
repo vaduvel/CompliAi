@@ -130,7 +130,18 @@ export type AnafUploadMockResult = {
 }
 
 /**
- * Submit a UBL XML invoice to ANAF SPV.
+ * Detect the ANAF upload standard parameter from the XML root element.
+ * Confirmed live with sandbox 2026-05-11: a CreditNote XML submitted with
+ * `?standard=UBL` is rejected at XSD level ("Cannot find the declaration of
+ * element 'CreditNote'"). The endpoint requires `standard=CN` for credit
+ * notes — same path, different schema selector.
+ */
+export function detectAnafUploadStandard(xmlContent: string): "UBL" | "CN" {
+  return /<(?:[\w-]+:)?CreditNote[\s>]/i.test(xmlContent) ? "CN" : "UBL"
+}
+
+/**
+ * Submit a UBL XML invoice (or CreditNote) to ANAF SPV.
  * In mock mode returns a fake upload index without making any network call.
  */
 export async function uploadInvoiceToAnaf(params: {
@@ -143,7 +154,8 @@ export async function uploadInvoiceToAnaf(params: {
     return { uploadIndex: "mock-0000000001", rawResponse: "mock", mock: true }
   }
 
-  const url = `${getAnafFctelBaseUrl()}/upload?standard=UBL&cif=${params.cif}`
+  const standard = detectAnafUploadStandard(params.xmlContent)
+  const url = `${getAnafFctelBaseUrl()}/upload?standard=${standard}&cif=${params.cif}`
   const response = await fetch(url, {
     method: "POST",
     headers: {

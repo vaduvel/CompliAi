@@ -159,6 +159,16 @@ function UploadStep({
           de cum sunt numite coloanele în fișierul tău.
         </p>
       </div>
+
+      <div className="rounded-eos-sm border border-eos-primary/20 bg-eos-primary/[0.05] p-4 text-xs text-eos-text-muted">
+        <p className="font-medium text-eos-text">Export rapid din SmartBill / Saga / Oblio</p>
+        <p className="mt-1">
+          Dacă ai clienții în ERP fiscal, exportă lista de contacte în CSV (de obicei
+          <strong className="text-eos-text"> Setări → Export → Contacte</strong> sau{" "}
+          <strong className="text-eos-text">Clienți → Export → CSV</strong>) și apoi importă
+          aici. Sincronizare automată direct prin API este în roadmap.
+        </p>
+      </div>
     </div>
   )
 }

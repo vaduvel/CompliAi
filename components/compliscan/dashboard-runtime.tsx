@@ -3,6 +3,8 @@
 import { createContext, useContext } from "react"
 
 import type { UserMode, UserRole, WorkspaceMode } from "@/lib/server/auth"
+import type { IcpSegment } from "@/lib/server/white-label"
+import type { AccessMode, SubFlag } from "@/lib/compliscan/icp-modules"
 
 export type DashboardRuntimeUser = {
   email: string
@@ -12,6 +14,11 @@ export type DashboardRuntimeUser = {
   membershipId: string | null
   userMode: UserMode | null
   workspaceMode: WorkspaceMode
+  // ICP filtering (Layer 3 din IA spec) — populat din white-label config la load.
+  // null = fallback safe (no filter aplicat, sidebar vede tot ca acum).
+  icpSegment?: IcpSegment | null
+  subFlag?: SubFlag | null
+  accessMode?: AccessMode
 } | null
 
 export type DashboardRuntimeMembership = {

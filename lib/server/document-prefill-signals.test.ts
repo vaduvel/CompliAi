@@ -126,6 +126,7 @@ describe("document-prefill-signals", () => {
         address: "BUCURESTI",
         legalForm: "SA",
         mainCaen: "6201",
+        caenDescription: null,
         fiscalStatus: "INREGISTRAT",
         vatRegistered: true,
         vatOnCashAccounting: false,

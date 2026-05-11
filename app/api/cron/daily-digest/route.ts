@@ -14,6 +14,7 @@ import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { readAlertPreferences } from "@/lib/server/alert-preferences-store"
 import { getScoreDelta } from "@/lib/score-snapshot"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import { buildOrgKnowledgeStaleFinding } from "@/lib/compliance/org-knowledge"
 import { buildSAFTD406Finding } from "@/lib/compliance/saft-hygiene"
 import { readNis2State } from "@/lib/server/nis2-store"
@@ -244,6 +245,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; sent: boolean; reason?: string }[] = []
   let capturedCronErrors = false
 
@@ -376,12 +379,45 @@ export async function POST(request: Request) {
 
     const sent = results.filter((r) => r.sent).length
     const skipped = results.filter((r) => !r.sent).length
+    const errors = results.filter(
+      (r) =>
+        !r.sent &&
+        r.reason &&
+        r.reason !== "email disabled" &&
+        r.reason !== "no state" &&
+        r.reason !== "nothing new",
+    ).length
 
     console.log(`[DailyDigest] Run completat: ${sent} trimise, ${skipped} sărite`)
 
     if (capturedCronErrors) {
       await flushCronTelemetry()
     }
+
+    await safeRecordCronRun({
+      name: "daily-digest",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} trimise, ${skipped} sărite${errors > 0 ? `, ${errors} erori` : ""}.`,
+      stats: {
+        sent,
+        skipped,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find(
+              (r) =>
+                !r.sent &&
+                r.reason &&
+                r.reason !== "email disabled" &&
+                r.reason !== "no state" &&
+                r.reason !== "nothing new",
+            )?.reason
+          : undefined,
+    })
 
     return NextResponse.json({ ok: true, sent, skipped, total: results.length })
   } catch (error) {
@@ -393,6 +429,16 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "daily-digest",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la daily digest: ${msg}`, 500, "DAILY_DIGEST_FAILED")
   }

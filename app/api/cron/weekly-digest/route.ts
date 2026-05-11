@@ -18,6 +18,7 @@ import { readNis2State } from "@/lib/server/nis2-store"
 import { buildDigestEmail, type WeeklyDigest, type DigestFinding } from "@/lib/server/weekly-digest"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 const FROM_ADDRESS = process.env.ALERT_EMAIL_FROM ?? "CompliScan Digest <onboarding@resend.dev>"
 
@@ -61,6 +62,8 @@ export async function POST(request: Request) {
   }
 
   const generatedAt = new Date().toISOString()
+  const nowISO = generatedAt
+  const startMs = Date.now()
   const results: { orgId: string; sent: boolean; reason?: string }[] = []
   let capturedCronErrors = false
 
@@ -141,12 +144,45 @@ export async function POST(request: Request) {
 
     const sent = results.filter((r) => r.sent).length
     const skipped = results.filter((r) => !r.sent).length
+    const errors = results.filter(
+      (r) =>
+        !r.sent &&
+        r.reason &&
+        r.reason !== "email disabled" &&
+        r.reason !== "digest disabled" &&
+        r.reason !== "no state",
+    ).length
 
     console.log(`[WeeklyDigest] Run completat: ${sent} trimise, ${skipped} sărite`)
 
     if (capturedCronErrors) {
       await flushCronTelemetry()
     }
+
+    await safeRecordCronRun({
+      name: "weekly-digest",
+      lastRunAtISO: nowISO,
+      ok: errors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${sent} trimise, ${skipped} sărite${errors > 0 ? `, ${errors} erori` : ""}.`,
+      stats: {
+        sent,
+        skipped,
+        total: results.length,
+        errors,
+      },
+      errorMessage:
+        errors > 0
+          ? results.find(
+              (r) =>
+                !r.sent &&
+                r.reason &&
+                r.reason !== "email disabled" &&
+                r.reason !== "digest disabled" &&
+                r.reason !== "no state",
+            )?.reason
+          : undefined,
+    })
 
     return NextResponse.json({
       ok: true,
@@ -164,6 +200,16 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "weekly-digest",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: { processed: results.length },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la generarea digest-ului: ${msg}`, 500, "WEEKLY_DIGEST_FAILED")
   }

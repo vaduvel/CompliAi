@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const mocks = vi.hoisted(() => ({
   ensureValidTokenMock: vi.fn(),
   fetchSpvMessagesMock: vi.fn(),
+  markTokenUsedMock: vi.fn(),
   readStateForOrgMock: vi.fn(),
   requireRoleMock: vi.fn(),
   writeStateForOrgMock: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock("@/lib/server/mvp-store", () => ({
 vi.mock("@/lib/anaf-spv-client", () => ({
   ensureValidToken: mocks.ensureValidTokenMock,
   fetchSpvMessages: mocks.fetchSpvMessagesMock,
+  markTokenUsed: mocks.markTokenUsedMock,
 }))
 
 import { POST } from "./route"

@@ -13,7 +13,7 @@ describe("ai-compliance-pack-prefill-signals", () => {
         systemName: "ChatGPT Support Assistant",
         governance: {
           personalDataUsed: true,
-        },
+        } as never,
       }),
     ])
 
@@ -62,12 +62,12 @@ describe("ai-compliance-pack-prefill-signals", () => {
         },
         governance: {
           personalDataUsed: false,
-        },
+        } as never,
         prefill: {
           fieldStatus: [
-            buildFieldStatus("personal_data", "Date personale", "Nu", "inferred", false, "inferred"),
+            buildFieldStatus("personal_data", "Date personale", "Nu", "inferred", false, "inferred") as never,
           ],
-        },
+        } as never,
       }),
     ])
 
@@ -221,9 +221,9 @@ function buildEntry(
       completenessScore: overrides.prefill?.completenessScore ?? 85,
       filledFields: overrides.prefill?.filledFields ?? ["provider", "model", "purpose", "personal_data"],
       missingFields: overrides.prefill?.missingFields ?? [],
-      fieldStatus:
-        overrides.prefill?.fieldStatus ??
-        [buildFieldStatus("personal_data", "Date personale", "Da", "confirmed", true, "confirmed_by_user")],
+      fieldStatus: (overrides.prefill?.fieldStatus ?? [
+        buildFieldStatus("personal_data", "Date personale", "Da", "confirmed", true, "confirmed_by_user"),
+      ]) as never,
     },
     annexLiteDraft: overrides.annexLiteDraft ?? {
       systemDescription: "Descriere",

@@ -7,7 +7,7 @@ type DisclaimerVariant = "short" | "medium" | "long"
 
 const TEXTS: Record<DisclaimerVariant, string> = {
   short:
-    "CompliScan organizează dovezi și pregătește dosare. Nu constituie opinie juridică; validarea de specialitate rămâne în responsabilitatea cabinetului DPO sau a juristului.",
+    "CompliScan organizează dovezi și pregătește dosare. Nu constituie opinie juridică sau opinie fiscală; validarea de specialitate rămâne în responsabilitatea cabinetului contabil CECCAR, cabinetului DPO sau a juristului.",
   medium:
     "Acest document a fost generat automat pe baza datelor introduse. Nu constituie opinie juridică și nu garantează conformitatea. Cazul este pregătit pentru validare de specialitate — documentele și red flags sunt deja organizate.",
   long:

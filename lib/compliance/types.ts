@@ -475,6 +475,21 @@ export type EFacturaValidationRecord = {
   supplierCui?: string
   customerName?: string
   customerCui?: string
+  /**
+   * "b2b" = client are CIF (PartyTaxScheme prezent)
+   * "b2c" = persoană fizică (fără PartyTaxScheme / CompanyID)
+   * "unknown" = nu s-a putut determina (date insuficiente)
+   *
+   * Per OUG 120/2021 modif. OUG 69/2024, facturile B2C trebuie raportate
+   * în SPV în maxim 5 zile lucrătoare de la emitere (din 1 ian 2025).
+   */
+  customerType?: "b2b" | "b2c" | "unknown"
+  /**
+   * Termen ISO calculat ca 5 zile lucrătoare de la `issueDate` pentru B2C,
+   * 5 zile calendaristice pentru B2B (echivalent OUG 120/2021 Art. 10^1).
+   * Dacă issueDate lipsește, termenul nu se calculează.
+   */
+  reportingDeadlineISO?: string
   errors: string[]
   warnings: string[]
   createdAtISO: string
@@ -693,6 +708,64 @@ export type ComplianceState = {
     clientScale?: "1-5" | "5-20" | "20+"
     configuredAtISO: string
   }
+  // ── Sprint 7: ANAF retry queue (buffer pentru transmiteri eșuate temporar) ─
+  anafRetryQueue?: import("@/lib/compliance/anaf-retry-queue").AnafRetryItem[]
+  // ── Sprint 7.6: Real-time SPV monitor — track seen messages ──────────────
+  spvSeenMessageIds?: string[]
+  spvLastPollAtISO?: string
+  // ── Sprint 7.7: Client portal — docs + comments per finding ──────────────
+  clientPortalDocuments?: Array<{
+    id: string
+    findingId: string
+    fileName: string
+    contentType: string
+    sizeBytes: number
+    uploadedByEmail?: string
+    uploadedAtISO: string
+    note?: string
+    storageKey: string
+  }>
+  clientPortalComments?: Array<{
+    id: string
+    findingId: string
+    authorEmail?: string
+    authorRole: "cabinet" | "client"
+    body: string
+    createdAtISO: string
+  }>
+  // ── Bundle D: Integrări ERP (cabinet-fiscal) ─────────────────────────────
+  integrations?: {
+    smartbill?: {
+      email: string
+      token: string
+      cif: string
+      connectedAtISO: string
+      lastSyncAtISO?: string
+      lastSyncCount?: number
+      lastSyncError?: string
+    }
+    oblio?: {
+      email: string
+      accessToken: string
+      tokenExpiresAtISO: string
+      cif: string
+      connectedAtISO: string
+      lastSyncAtISO?: string
+      lastSyncCount?: number
+    }
+  }
+  // ── AI assistant privacy mode (cabinete cu secret profesional CECCAR) ────
+  // "local-only" = forțează Gemma 4 prin Ollama; refuză Gemini/Mistral.
+  // "cloud-allowed" (default) = preferă Gemma local, fallback cloud când nu rulează.
+  aiPrivacyMode?: "local-only" | "cloud-allowed"
+  // ── PFA / CNP Form 082 tracker (OG 6/2026 + Ordin ANAF 378/2026) ─────────
+  // Listă clienți PFA / persoane fizice cu CNP care necesită registrare în
+  // Registrul RO e-Factura via Form 082. Deadline: 26 mai 2026.
+  pfaForm082Clients?: import("@/lib/compliance/pfa-form082-tracker").PfaClientRecord[]
+  // ── F#4 Certificate SPV manager — Sprint 1 (2026-05-11) ──────────────────
+  // Tracking certificate digitale calificate per client; alerts expiry + SPV
+  // re-enrollment grace period detection.
+  certSpvRecords?: import("@/lib/compliance/cert-spv-tracker").CertSpvRecord[]
 }
 
 export type SiteScanSummary = {

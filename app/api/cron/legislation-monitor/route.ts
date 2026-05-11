@@ -16,6 +16,7 @@ import { isLegislationRelevant } from "@/lib/compliscan/feed-sources"
 import type { ApplicabilityTag } from "@/lib/compliance/applicability"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 import { fireDriftTrigger } from "@/lib/server/drift-trigger-engine"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 
 export async function POST(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -26,11 +27,22 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
+
   try {
     const changes = await checkLegislationChanges()
 
     if (changes.length === 0) {
       console.log("[LegislationMonitor] Nicio schimbare detectată.")
+      await safeRecordCronRun({
+        name: "legislation-monitor",
+        lastRunAtISO: nowISO,
+        ok: true,
+        durationMs: Date.now() - startMs,
+        summary: "Nicio schimbare legislativă detectată.",
+        stats: { changes: 0, notifications: 0 },
+      })
       return NextResponse.json({ ok: true, changes: 0 })
     }
 
@@ -76,6 +88,18 @@ export async function POST(request: Request) {
       `[LegislationMonitor] ${changes.length} schimbări, ${notificationsSent} notificări trimise.`
     )
 
+    await safeRecordCronRun({
+      name: "legislation-monitor",
+      lastRunAtISO: nowISO,
+      ok: true,
+      durationMs: Date.now() - startMs,
+      summary: `${changes.length} schimbări detectate, ${notificationsSent} notificări trimise.`,
+      stats: {
+        changes: changes.length,
+        notifications: notificationsSent,
+      },
+    })
+
     return NextResponse.json({
       ok: true,
       changes: changes.length,
@@ -84,6 +108,16 @@ export async function POST(request: Request) {
   } catch (error) {
     captureCronError(error, { cron: "/api/cron/legislation-monitor", step: "critical" })
     await flushCronTelemetry()
+    const msg = error instanceof Error ? error.message : "unknown"
+    await safeRecordCronRun({
+      name: "legislation-monitor",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: {},
+      errorMessage: msg,
+    })
     return jsonError("Eroare la legislation monitor.", 500, "LEGISLATION_MONITOR_FAILED")
   }
 }

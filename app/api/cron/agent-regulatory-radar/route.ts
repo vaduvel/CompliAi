@@ -14,6 +14,7 @@ import { executeAgent } from "@/lib/server/agent-orchestrator"
 import { captureCronError, flushCronTelemetry } from "@/lib/server/sentry-cron"
 import { fetchRecentEurLexActs } from "@/lib/server/eurlex-client"
 import { fetchDnscAnnouncements } from "@/lib/server/dnsc-monitor"
+import { safeRecordCronRun } from "@/lib/server/cron-status-store"
 import type { EurLexDocument } from "@/lib/server/eurlex-client"
 import type { DnscAnnouncement } from "@/lib/server/dnsc-monitor"
 
@@ -26,6 +27,8 @@ export async function POST(request: Request) {
     }
   }
 
+  const nowISO = new Date().toISOString()
+  const startMs = Date.now()
   const results: { orgId: string; issuesFound: number; actionsCount: number; error?: string }[] = []
   let capturedCronErrors = false
 
@@ -90,6 +93,27 @@ export async function POST(request: Request) {
       await flushCronTelemetry()
     }
 
+    const orgsWithErrors = results.filter((r) => r.error).length
+    await safeRecordCronRun({
+      name: "agent-regulatory-radar",
+      lastRunAtISO: nowISO,
+      ok: orgsWithErrors === 0,
+      durationMs: Date.now() - startMs,
+      summary: `${results.length} orgs procesate, ${totalIssues} probleme, ${totalActions} acțiuni${orgsWithErrors > 0 ? `, ${orgsWithErrors} erori` : ""}.`,
+      stats: {
+        orgsProcessed: results.length,
+        totalIssues,
+        totalActions,
+        errors: orgsWithErrors,
+        eurLexDocs: eurLexDocs.length,
+        dnscAnnouncements: dnscAnnouncements.length,
+      },
+      errorMessage:
+        orgsWithErrors > 0
+          ? results.find((r) => r.error)?.error
+          : undefined,
+    })
+
     return NextResponse.json({
       ok: true,
       orgsProcessed: results.length,
@@ -107,6 +131,18 @@ export async function POST(request: Request) {
       step: "critical",
     })
     await flushCronTelemetry()
+
+    await safeRecordCronRun({
+      name: "agent-regulatory-radar",
+      lastRunAtISO: nowISO,
+      ok: false,
+      durationMs: Date.now() - startMs,
+      summary: `Eroare critică: ${msg}`,
+      stats: {
+        orgsProcessed: results.length,
+      },
+      errorMessage: msg,
+    })
 
     return jsonError(`Eroare la execuția Regulatory Radar: ${msg}`, 500, "REGULATORY_RADAR_CRON_FAILED")
   }

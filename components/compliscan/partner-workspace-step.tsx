@@ -164,7 +164,7 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
           {/* CUI optional */}
           <div className="space-y-1.5">
             <label className="block text-[12.5px] font-medium text-eos-text">
-              CUI propriu{" "}
+              CUI cabinet{" "}
               <span className="font-normal text-eos-text-tertiary">(opțional)</span>
             </label>
             <input
@@ -175,7 +175,9 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
               className={inputClass}
             />
             <p className="text-[11px] text-eos-text-tertiary">
-              Folosit doar pentru identificarea contului și eventuale facturi emise de noi.
+              Doar CUI-ul cabinetului tău — pentru factura ta lunară de la CompliScan.
+              CUI-urile clienților se sincronizează separat din SmartBill/Saga/Oblio
+              sau din import portofoliu.
             </p>
           </div>
 

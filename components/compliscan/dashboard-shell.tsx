@@ -76,6 +76,10 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        // Layer 3 ICP filtering — null = fallback safe (no filter aplicat)
+        icpSegment: currentUser.icpSegment ?? null,
+        subFlag: currentUser.subFlag ?? null,
+        accessMode: currentUser.accessMode ?? "owner",
       })
     : []
   const mobileNavItems = currentUser
@@ -83,6 +87,9 @@ export function DashboardShell({
         userMode: currentUser.userMode,
         workspaceMode: currentUser.workspaceMode,
         role: currentUser.role,
+        icpSegment: currentUser.icpSegment ?? null,
+        subFlag: currentUser.subFlag ?? null,
+        accessMode: currentUser.accessMode ?? "owner",
       })
     : []
 
@@ -354,7 +361,9 @@ export function DashboardShell({
         </main>
       </div>
 
-      <FloatingAssistant pathname={pathname} />
+      {/* Pe /dashboard/fiscal montăm asistentul fiscal dedicat (Gemma 4 + context fiscal),
+          deci ascundem generic-ul ca să evităm 2 panouri simultan. */}
+      {!pathname.startsWith("/dashboard/fiscal") && <FloatingAssistant pathname={pathname} />}
       <MobileBottomNav
         items={mobileNavItems}
         activeHref={pathname}

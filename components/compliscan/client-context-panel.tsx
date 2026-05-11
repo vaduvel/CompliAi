@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { BATCH_ACTION_LABELS, type BatchActionType } from "@/lib/compliance/batch-actions"
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import { dashboardFindingRoute, dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
 import { membershipRoleLabel } from "@/lib/compliscan/membership-role-labels"
 
@@ -126,6 +127,8 @@ export function ClientContextPanel({
   orgId: string
   focusedFindingId?: string
 }) {
+  const runtime = useDashboardRuntime()
+  const isFiscalCabinet = runtime?.icpSegment === "cabinet-fiscal"
   const [data, setData] = useState<ClientContextData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -349,12 +352,27 @@ export function ClientContextPanel({
               </div>
             </div>
             <div className="space-y-1">
-              <p className={`text-sm font-semibold ${scoreColor(c.score)}`}>{c.riskLabel}</p>
+              <p className={`text-sm font-semibold ${scoreColor(c.score)}`}>
+                {/* Mircea fix (2026-05-11): "Risc Mediu" pe 0/0 readiness era
+                    confuz. Pentru clienți complet nescanati (scor 0 + 0 findings
+                    + 0 alerte + 0 documente) afișăm "Nescanat încă" în loc de
+                    eticheta de risc calculată din date inexistente. */}
+                {c.score === 0 && data.openFindings.length === 0 && c.openAlerts === 0 && c.scannedDocuments === 0
+                  ? "Nescanat încă"
+                  : c.riskLabel}
+              </p>
               <p className="text-xs text-eos-text-tertiary">
                 {data.openFindings.length} {data.openFindings.length === 1 ? "caz deschis" : "cazuri deschise"} · {c.openAlerts} alerte · {c.scannedDocuments} documente
               </p>
               <p className="text-xs text-eos-text-tertiary">
-                Acoperire GDPR: {c.gdprProgress}% · {c.aiSystemsCount} sisteme AI
+                {isFiscalCabinet ? (
+                  <>
+                    e-Factura ANAF: {c.efacturaConnected ? "✓ conectat" : "neconfigurat"} ·{" "}
+                    {c.highRisk > 0 ? `${c.highRisk} riscuri high` : "fără riscuri high"}
+                  </>
+                ) : (
+                  <>Acoperire GDPR: {c.gdprProgress}% · {c.aiSystemsCount} sisteme AI</>
+                )}
               </p>
             </div>
           </div>
@@ -363,8 +381,8 @@ export function ClientContextPanel({
         )}
       </div>
 
-      {/* ── 3-col grid: findings + NIS2 + vendors ── */}
-      <div className="grid gap-5 md:grid-cols-3">
+      {/* ── 3-col grid: findings + NIS2 + vendors (NIS2/vendors hidden pentru cabinet-fiscal) ── */}
+      <div className={`grid gap-5 ${isFiscalCabinet ? "md:grid-cols-1" : "md:grid-cols-3"}`}>
         {/* Findings */}
         <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="mb-4 flex items-center justify-between">
@@ -408,7 +426,8 @@ export function ClientContextPanel({
           )}
         </div>
 
-        {/* NIS2 */}
+        {/* NIS2 — hidden pentru cabinet-fiscal */}
+        {!isFiscalCabinet && (
         <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="mb-4 flex items-center gap-2">
             <Shield className="size-4 text-eos-primary" strokeWidth={2} />
@@ -459,8 +478,10 @@ export function ClientContextPanel({
             </div>
           </div>
         </div>
+        )}
 
-        {/* Vendor reviews */}
+        {/* Vendor reviews — hidden pentru cabinet-fiscal */}
+        {!isFiscalCabinet && (
         <div className="rounded-eos-lg border border-eos-border bg-eos-surface p-5">
           <div className="mb-4 flex items-center gap-2">
             <Users className="size-4 text-eos-text-muted" strokeWidth={2} />
@@ -498,6 +519,7 @@ export function ClientContextPanel({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* ── Quick actions ── */}
@@ -505,30 +527,91 @@ export function ClientContextPanel({
         <div className="mb-4 flex items-center gap-2">
           <Zap className="size-4 text-eos-primary" strokeWidth={2} />
           <p className="text-sm font-semibold text-eos-text">Acțiuni rapide</p>
-          <span className="text-xs text-eos-text-tertiary">— fără a intra în firma clientului</span>
+          <span className="text-xs text-eos-text-tertiary">
+            {isFiscalCabinet ? "— intră în cockpit pentru flux complet" : "— fără a intra în firma clientului"}
+          </span>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {(Object.entries(BATCH_ACTION_LABELS) as [BatchActionType, string][]).map(([type, label]) => (
-            <button
-              key={type}
-              type="button"
-              disabled={batchLoading}
-              onClick={() => void handleQuickAction(type)}
-              className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
-            >
-              {batchLoading ? <Loader2 className="size-3 animate-spin" /> : <FileText className="size-3" />}
-              {label}
-            </button>
-          ))}
+          {isFiscalCabinet ? (
+            <>
+              <button
+                type="button"
+                onClick={() => void openOrgDestination("/dashboard/fiscal")}
+                disabled={enteringWorkspace}
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-primary/40 bg-eos-primary/[0.08] px-3 py-2 text-xs font-medium text-eos-text transition-all hover:bg-eos-primary/[0.15] disabled:opacity-50"
+              >
+                <Zap className="size-3" />
+                Cockpit fiscal
+              </button>
+              <button
+                type="button"
+                onClick={() => void openOrgDestination("/dashboard/fiscal/validare")}
+                disabled={enteringWorkspace}
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:text-eos-text disabled:opacity-50"
+              >
+                <FileText className="size-3" />
+                Validare & emitere
+              </button>
+              <button
+                type="button"
+                onClick={() => void openOrgDestination("/dashboard/fiscal/transmitere")}
+                disabled={enteringWorkspace}
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:text-eos-text disabled:opacity-50"
+              >
+                <FileText className="size-3" />
+                Transmitere SPV
+              </button>
+              <button
+                type="button"
+                onClick={() => void openOrgDestination("/dashboard/fiscal/tva-declaratii")}
+                disabled={enteringWorkspace}
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:text-eos-text disabled:opacity-50"
+              >
+                <FileText className="size-3" />
+                TVA & declarații
+              </button>
+              <button
+                type="button"
+                onClick={() => void openOrgDestination("/dashboard/fiscal/deadline-urgent")}
+                disabled={enteringWorkspace}
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:text-eos-text disabled:opacity-50"
+              >
+                <FileText className="size-3" />
+                Deadline urgent
+              </button>
+              <Link
+                href="/dashboard/approvals"
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+              >
+                <CheckCircle2 className="size-3" />
+                Aprobări SPV
+              </Link>
+            </>
+          ) : (
+            <>
+              {(Object.entries(BATCH_ACTION_LABELS) as [BatchActionType, string][]).map(([type, label]) => (
+                <button
+                  key={type}
+                  type="button"
+                  disabled={batchLoading}
+                  onClick={() => void handleQuickAction(type)}
+                  className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-primary/30 hover:bg-eos-primary/5 hover:text-eos-text disabled:opacity-50"
+                >
+                  {batchLoading ? <Loader2 className="size-3 animate-spin" /> : <FileText className="size-3" />}
+                  {label}
+                </button>
+              ))}
 
-          <Link
-            href="/dashboard/approvals"
-            className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
-          >
-            <CheckCircle2 className="size-3" />
-            Coada de aprobare
-          </Link>
+              <Link
+                href="/dashboard/approvals"
+                className="flex items-center gap-1.5 rounded-eos-sm border border-eos-border bg-eos-surface-variant px-3 py-2 text-xs font-medium text-eos-text-muted transition-all hover:border-eos-border-strong hover:text-eos-text"
+              >
+                <CheckCircle2 className="size-3" />
+                Coada de aprobare
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

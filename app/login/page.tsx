@@ -157,7 +157,11 @@ function LoginContent() {
               <CompliScanLogoLockup variant="flat" size="sm" />
             </Link>
             <span className="ml-auto font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-eos-text-tertiary">
-              Conformitate · GDPR · NIS2 · AI Act
+              {icpSegment === "cabinet-fiscal"
+                ? "e-Factura · SAF-T · RO e-TVA · CECCAR"
+                : icpSegment === "cabinet-dpo"
+                  ? "GDPR · DPO · DSAR · Audit"
+                  : "Conformitate · GDPR · NIS2 · AI Act"}
             </span>
           </div>
 
@@ -222,7 +226,9 @@ function LoginContent() {
                     htmlFor="orgName"
                     className="block font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary"
                   >
-                    Denumirea firmei
+                    {icpSegment === "cabinet-fiscal" || icpSegment === "cabinet-dpo"
+                      ? "Numele cabinetului tău"
+                      : "Denumirea firmei"}
                   </label>
                   <input
                     id="orgName"
@@ -230,7 +236,13 @@ function LoginContent() {
                     type="text"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="Ex: Apex Logistic SRL"
+                    placeholder={
+                      icpSegment === "cabinet-fiscal"
+                        ? "Ex: Cabinet Contabil Popescu SRL"
+                        : icpSegment === "cabinet-dpo"
+                          ? "Ex: Cabinet DPO Ionescu SRL"
+                          : "Ex: Apex Logistic SRL"
+                    }
                     required
                     autoComplete="organization"
                     className="h-11 w-full rounded-eos-sm border border-eos-border bg-eos-surface px-3 text-[13.5px] text-eos-text outline-none transition-colors placeholder:text-eos-text-tertiary focus:border-eos-primary/50"

@@ -70,11 +70,11 @@ describe("POST /api/org/profile — CUI", () => {
     vi.clearAllMocks()
     vi.mocked(readNis2State).mockResolvedValue({ assessment: null, incidents: [], vendors: [] } as never)
     vi.mocked(readFreshStateForOrg).mockResolvedValue({
-      orgProfile: null,
-      applicability: null,
+      orgProfile: undefined,
+      applicability: undefined,
       findings: [],
-      orgProfilePrefill: null,
-    })
+      orgProfilePrefill: undefined,
+    } as never)
   })
 
   it("returnează prefill-ul org salvat la GET", async () => {
@@ -95,9 +95,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("salvează CUI valid (format RO + cifre)", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         const initialState = { findings: [], orgKnowledge: { items: [] } }
@@ -116,9 +116,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("salvează CUI valid fără prefix RO", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -136,9 +136,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("salvează profil fără CUI când câmpul lipsește", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -156,9 +156,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("ignoră CUI gol (string gol sau doar spații)", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -176,9 +176,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("normalizează și salvează website-ul public când este valid", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -196,9 +196,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("ignoră CUI cu format invalid (litere aleatorii)", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -222,9 +222,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("salvează intakeAnswers și generează findings inițiale", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -261,7 +261,7 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("adaugă findings NIS2 suplimentare în intake când există semnal din modulul NIS2", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
     vi.mocked(readNis2State).mockResolvedValue({
       assessment: { score: 32 },
@@ -269,7 +269,7 @@ describe("POST /api/org/profile — CUI", () => {
       vendors: [],
       dnscRegistrationStatus: "not-started",
     } as never)
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({ findings: [], orgKnowledge: { items: [] } } as any)
@@ -300,9 +300,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("înlocuiește findings-urile intake vechi, fără să le dubleze", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -342,9 +342,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("păstrează toate findings-urile (inclusiv intake) când profilul se salvează fără intakeAnswers", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -376,9 +376,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("păstrează prefill-ul doar când CUI-ul salvat se potrivește cu lookup-ul anterior", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -402,9 +402,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("curăță prefill-ul vechi dacă profilul se salvează cu alt CUI", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -426,7 +426,7 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("îmbogățește applicability cu semnalul fiscal din prefill când există match", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
     vi.mocked(readFreshStateForOrg).mockResolvedValue({
       orgProfile: null,
@@ -439,7 +439,7 @@ describe("POST /api/org/profile — CUI", () => {
         companyName: "Test SRL",
       },
     } as never)
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -467,9 +467,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("păstrează prefill-ul website-only când website-ul salvat se potrivește", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -495,9 +495,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("curăță prefill-ul website-only dacă website-ul salvat nu se mai potrivește", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({
@@ -521,9 +521,9 @@ describe("POST /api/org/profile — CUI", () => {
   })
 
   it("păstrează prefill-ul intern din AI Compliance Pack chiar fără CUI sau website", async () => {
-    let saved: unknown = null
+    let saved: any = null
     let callCount = 0
-    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn) => {
+    vi.mocked(mutateStateForOrg).mockImplementation(async (_orgId, fn, _orgName) => {
       callCount++
       if (callCount === 1) {
         saved = fn({

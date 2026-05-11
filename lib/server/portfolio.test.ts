@@ -26,6 +26,9 @@ describe("lib/server/portfolio", () => {
       yellowAlerts: 1,
       openAlerts: 2,
     },
+    // Stripped-down ComplianceState fixture — fields not exercised by the
+    // portfolio builders are intentionally omitted; `as never` keeps tsc quiet
+    // without churning every test when ComplianceState grows new properties.
     state: {
       scannedDocuments: 4,
       gdprProgress: 74,
@@ -57,7 +60,7 @@ describe("lib/server/portfolio", () => {
           findingStatus: "open",
           title: "AI critic",
           detail: "detaliu",
-        },
+        } as never,
         {
           id: "finding-high-dismissed",
           severity: "high",
@@ -65,7 +68,7 @@ describe("lib/server/portfolio", () => {
           findingStatus: "dismissed",
           title: "dismissed",
           detail: "detaliu",
-        },
+        } as never,
         {
           id: "finding-gdpr",
           severity: "medium",
@@ -73,7 +76,7 @@ describe("lib/server/portfolio", () => {
           findingStatus: "open",
           title: "GDPR",
           detail: "detaliu",
-        },
+        } as never,
       ],
       scans: [
         {
@@ -103,7 +106,7 @@ describe("lib/server/portfolio", () => {
           updatedAtISO: "2026-03-22T10:40:00.000Z",
         },
       },
-    },
+    } as never,
     dsar: { requests: [], updatedAtISO: "2026-03-22T08:00:00.000Z" },
     remediationPlan: [
       {
@@ -113,7 +116,7 @@ describe("lib/server/portfolio", () => {
         severity: "high",
         owner: "Legal",
         evidence: "Procedură aprobată",
-      },
+      } as never,
       {
         id: "baseline-maintenance",
         title: "Baseline",
@@ -121,11 +124,13 @@ describe("lib/server/portfolio", () => {
         severity: "low",
         owner: "Ops",
         evidence: "Review periodic",
-      },
+      } as never,
     ],
     nis2: {
-      assessment: { score: 80 },
+      assessment: { score: 80 } as never,
       dnscRegistrationStatus: "not-started",
+      incidents: [],
+      updatedAtISO: "2026-03-22T08:00:00.000Z",
       vendors: [
         {
           id: "vendor-1",

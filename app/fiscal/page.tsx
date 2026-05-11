@@ -7,7 +7,7 @@ import { LandingPageShell } from "@/components/compliscan/landing-page-shell"
 export const metadata: Metadata = {
   title: "CompliScan Fiscal — layer compliance peste SmartBill / Saga / Oblio",
   description:
-    "Validator UBL CIUS-RO + e-TVA + GDPR lite per client contabil. Layer compliance peste tool-urile fiscale existente. Pricing self-serve €299-699/lună.",
+    "Validator UBL CIUS-RO + e-TVA + GDPR lite per client contabil. Layer compliance peste tool-urile fiscale existente. Pricing self-serve: Free, Pro €99/lună sau Partner €249/lună pentru cabinete cu mai mulți clienți.",
   alternates: { canonical: "/fiscal" },
   openGraph: {
     title: "CompliScan Fiscal — layer compliance pentru contabili CECCAR",
@@ -31,8 +31,20 @@ export default function FiscalLandingPage() {
           description: "Verifică structural fiecare factură: CustomizationID, InvoiceTypeCode, parties, TaxTotal, LegalMonetaryTotal, PaymentMeans. Erori clare cu localizare în XML.",
         },
         {
-          title: "ANAF SPV connector",
-          description: "Conexiune securizată cu SPV pentru e-Factura status, e-TVA discrepancy, REGES export. Cron lunar auto-validare facturi.",
+          title: "ANAF SPV connector + cron lunar",
+          description: "Conexiune SPV pentru e-Factura status, e-TVA discrepancy, REGES export. Cron lunar real ANAF cu fallback graceful când token-ul lipsește.",
+        },
+        {
+          title: "SAF-T D406 hygiene 0-100",
+          description: "Upload XML SAF-T → parser instant + scor de igienă fiscală + indicatori. Detectează rectificările repetate ÎNAINTE de notificarea ANAF.",
+        },
+        {
+          title: "P300 vs D300 preventiv",
+          description: "Comparator preventiv RO e-TVA (OUG 70/2024 + 89/2025): praguri >20% AND ≥5K RON, finding cu countdown 20 zile înainte ca ANAF să te notifice oficial.",
+        },
+        {
+          title: "Bulk ZIP upload e-Factura",
+          description: "Drag-drop ZIP cu până la 200 facturi XML, validare paralelă UBL CIUS-RO V001-V011 în secunde — quick win pentru contabili cu 50+ facturi/lună.",
         },
         {
           title: "GDPR lite per client",
@@ -48,7 +60,7 @@ export default function FiscalLandingPage() {
         },
         {
           title: "Pricing self-serve transparent",
-          description: "€299-699/lună, fără sales call. Cancel oricând. Trial 14 zile.",
+          description: "Free pentru diagnostic. Pro €99/lună sau Partner €249/lună pentru cabinete cu mai mulți clienți. Cancel oricând. Trial 14 zile.",
         },
       ]}
       steps={[

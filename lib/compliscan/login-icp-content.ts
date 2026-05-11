@@ -26,8 +26,8 @@ export type LoginPaneContent = {
     author: string
     role: string
   }
-  /** Accent color for blob (primary/violet/amber/emerald/indigo). */
-  accent: "primary" | "violet" | "amber" | "emerald" | "indigo"
+  /** Accent color for blob (primary/violet/amber/emerald/indigo/rose/pink). */
+  accent: "primary" | "violet" | "amber" | "emerald" | "indigo" | "rose" | "pink"
 }
 
 const DEFAULT_CONTENT: LoginPaneContent = {
@@ -128,13 +128,47 @@ const ICP_CONTENT_MAP: Record<IcpSegment, LoginPaneContent> = {
     },
     accent: "indigo",
   },
+  "imm-hr": {
+    eyebrow: "— HR Director / CHRO firme 100-500 ang",
+    title: "Pay Transparency 2026 în 30 minute, nu 8 ore. Deadline 7 iunie 2026.",
+    kpis: [
+      { framework: "Gap salarial", value: "4.2%", tone: "ok", label: "sub prag 5%" },
+      { framework: "Cereri angajați", value: "3", tone: "warning", label: "în 30 zile" },
+      { framework: "Anunțuri job", value: "12/12", tone: "ok", label: "cu salary range" },
+      { framework: "Raport ITM", value: "draft", tone: "ok", label: "gata de approve" },
+    ],
+    testimonial: {
+      quote: "Aveam 247 de angajați și calculam gap-ul salarial cu 8 ore în Excel. CompliScan îl face în 30 secunde și generează raportul ITM cu un click.",
+      author: "Andreea V.",
+      role: "HR Director · firmă mid-market",
+    },
+    accent: "rose",
+  },
+  "cabinet-hr": {
+    eyebrow: "— Cabinete HR consultanți",
+    title: "Multi-client Pay Transparency cu logo cabinetul tău. 5-25 firme.",
+    kpis: [
+      { framework: "Firme client", value: "12/25", tone: "ok", label: "în portofoliu" },
+      { framework: "Rapoarte ITM", value: "8", tone: "ok", label: "livrate luna asta" },
+      { framework: "Cereri pending", value: "5", tone: "warning", label: "cross-client" },
+      { framework: "MRR", value: "+34K lei", tone: "ok", label: "rebill clienți" },
+    ],
+    testimonial: {
+      quote: "Cabinetul meu servea 8 firme cu Excel. Cu CompliScan am ajuns la 22 fără să angajez pe nimeni — rapoartele lunare se generează batch cu logo cabinet.",
+      author: "Alexandra D.",
+      role: "Cabinet HR · 22 clienți",
+    },
+    accent: "pink",
+  },
 }
 
 const VALID_ICP: readonly IcpSegment[] = [
   "solo",
   "cabinet-dpo",
   "cabinet-fiscal",
+  "cabinet-hr",
   "imm-internal",
+  "imm-hr",
   "enterprise",
 ] as const
 
@@ -169,6 +203,14 @@ const ACCENT_BLOB_CLASSES: Record<LoginPaneContent["accent"], { primary: string;
     primary: "bg-indigo-500/15",
     secondary: "bg-violet-500/10",
   },
+  rose: {
+    primary: "bg-rose-500/15",
+    secondary: "bg-pink-500/10",
+  },
+  pink: {
+    primary: "bg-pink-500/20",
+    secondary: "bg-rose-500/10",
+  },
 }
 
 export function getAccentBlobClasses(accent: LoginPaneContent["accent"]) {
@@ -181,6 +223,8 @@ const ACCENT_TEXT_CLASSES: Record<LoginPaneContent["accent"], string> = {
   amber: "text-amber-400",
   emerald: "text-emerald-400",
   indigo: "text-indigo-400",
+  rose: "text-rose-400",
+  pink: "text-pink-400",
 }
 
 export function getAccentTextClass(accent: LoginPaneContent["accent"]): string {
@@ -193,6 +237,8 @@ const ACCENT_BORDER_CLASSES: Record<LoginPaneContent["accent"], string> = {
   amber: "border-amber-500",
   emerald: "border-emerald-500",
   indigo: "border-indigo-500",
+  rose: "border-rose-500",
+  pink: "border-pink-500",
 }
 
 export function getAccentBorderClass(accent: LoginPaneContent["accent"]): string {
