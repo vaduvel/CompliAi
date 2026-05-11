@@ -4,8 +4,9 @@
 // Conține: PFA Form 082 tracker (deadline 26 mai 2026) + link calendar termene
 
 import Link from "next/link"
-import { AlertCircle, CalendarClock, FileText } from "lucide-react"
+import { AlertCircle, CalendarClock, FileText, ShieldAlert } from "lucide-react"
 
+import { CertSpvPanel } from "@/components/compliscan/fiscal/CertSpvPanel"
 import { FiscalSubpageShell } from "@/components/compliscan/fiscal/FiscalSubpageShell"
 import { PfaForm082Panel } from "@/components/compliscan/fiscal/PfaForm082Panel"
 import { dashboardRoutes } from "@/lib/compliscan/dashboard-routes"
@@ -33,6 +34,14 @@ export default function FiscalDeadlinesPage() {
           </div>
         </div>
       </section>
+
+      <Section
+        icon={<ShieldAlert className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Certificate SPV manager (F#4)"
+        subtitle="Tracking certificate digitale per client. Reminders 30/14/7/3/1 zile + detector 'utilizator neautorizat' post-reînnoire."
+      >
+        <CertSpvPanel />
+      </Section>
 
       <Section
         icon={<FileText className="size-4 text-eos-primary" strokeWidth={2} />}

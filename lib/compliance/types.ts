@@ -762,6 +762,10 @@ export type ComplianceState = {
   // Listă clienți PFA / persoane fizice cu CNP care necesită registrare în
   // Registrul RO e-Factura via Form 082. Deadline: 26 mai 2026.
   pfaForm082Clients?: import("@/lib/compliance/pfa-form082-tracker").PfaClientRecord[]
+  // ── F#4 Certificate SPV manager — Sprint 1 (2026-05-11) ──────────────────
+  // Tracking certificate digitale calificate per client; alerts expiry + SPV
+  // re-enrollment grace period detection.
+  certSpvRecords?: import("@/lib/compliance/cert-spv-tracker").CertSpvRecord[]
 }
 
 export type SiteScanSummary = {

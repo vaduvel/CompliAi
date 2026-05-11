@@ -146,6 +146,12 @@ export const CONFIGURED_CRONS: Array<{
     description: "Email zilnic la 06:00 RO — reminders PFA/CNP pentru Form 082 (deadline 26 mai 2026).",
   },
   {
+    name: "cert-spv-expiry-watcher",
+    path: "/api/cron/cert-spv-expiry-watcher",
+    schedule: "0 7 * * *",
+    description: "F#4 — Zilnic 07:00 RO: monitor expirare certificate digitale SPV + reminders 30/14/7/3/1/0 zile + detector 'utilizator neautorizat'.",
+  },
+  {
     name: "spv-realtime-monitor",
     path: "/api/cron/spv-realtime-monitor",
     schedule: "0 4,10,14,18 * * *",
