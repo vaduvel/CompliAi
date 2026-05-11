@@ -252,7 +252,12 @@ export default function FiscalPage() {
       )}
 
       <Tabs defaultValue={defaultTab} className="space-y-4">
-        <TabsList className="min-h-0 flex flex-wrap gap-1 rounded-eos-sm border-b-0 bg-white/[0.03] p-0.5">
+        {/* Sprint 0 IA restructure (2026-05-11): TabsList ascuns vizual cu sr-only.
+            Navigarea se face din sidebar (7 sub-link-uri grupate). Radix Tabs
+            păstrează TabsList pentru accesibilitate (keyboard nav, screen readers)
+            dar nu mai e render-uit vizual ca să elimine cognitive overload-ul
+            celor 10 tab-uri orizontale. */}
+        <TabsList className="sr-only !min-h-0 !border-b-0 !bg-transparent">
           <TabsTrigger
             value="discrepante"
             className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
