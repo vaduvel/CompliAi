@@ -7,7 +7,7 @@ import { LandingPageShell } from "@/components/compliscan/landing-page-shell"
 export const metadata: Metadata = {
   title: "CompliScan Fiscal — layer compliance peste SmartBill / Saga / Oblio",
   description:
-    "Validator UBL CIUS-RO + e-TVA + GDPR lite per client contabil. Layer compliance peste tool-urile fiscale existente. Pricing self-serve €299-699/lună.",
+    "Validator UBL CIUS-RO + e-TVA + GDPR lite per client contabil. Layer compliance peste tool-urile fiscale existente. Pricing self-serve: Free, Pro €99/lună sau Partner €249/lună pentru cabinete cu mai mulți clienți.",
   alternates: { canonical: "/fiscal" },
   openGraph: {
     title: "CompliScan Fiscal — layer compliance pentru contabili CECCAR",
@@ -60,7 +60,7 @@ export default function FiscalLandingPage() {
         },
         {
           title: "Pricing self-serve transparent",
-          description: "€299-699/lună, fără sales call. Cancel oricând. Trial 14 zile.",
+          description: "Free pentru diagnostic. Pro €99/lună sau Partner €249/lună pentru cabinete cu mai mulți clienți. Cancel oricând. Trial 14 zile.",
         },
       ]}
       steps={[

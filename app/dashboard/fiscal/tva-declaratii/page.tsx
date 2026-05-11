@@ -4,8 +4,9 @@
 // Conține: Discrepanțe e-TVA + Depuneri fiscale + SAF-T Hygiene
 // Toate sub un layout cu secțiuni clare delimitate.
 
-import { Receipt, Calendar, FileText } from "lucide-react"
+import { Receipt, Calendar, FileText, Globe2 } from "lucide-react"
 
+import { CrossBorderAdvisorCard } from "@/components/compliscan/fiscal/CrossBorderAdvisorCard"
 import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTab"
 import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
@@ -46,6 +47,14 @@ export default function FiscalTvaPage() {
         subtitle="Scor 0-100 pentru fișierul D406 + draft D300/D394 generat din SAF-T XML."
       >
         <SaftHygieneTab />
+      </Section>
+
+      <Section
+        icon={<Globe2 className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Vânzări UE — verifică reverse charge & e-Factura"
+        subtitle="Advisor cross-border pentru tranzacții RO→UE B2B/B2C, RO→non-UE export, sau import UE→RO cu reverse charge. OUG 89/2025 + Cod Fiscal Art. 319-329."
+      >
+        <CrossBorderAdvisorCard />
       </Section>
     </FiscalSubpageShell>
   )

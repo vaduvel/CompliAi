@@ -3,7 +3,7 @@
 // Sub-pagina IA fiscal: Integrări ERP
 // Conține: SmartBill + Oblio + Saga + ERP↔SPV reconcile
 
-import { PlugZap, Zap, FileCode2, GitCompareArrows, Landmark } from "lucide-react"
+import { PlugZap, Zap, FileCode2, GitCompareArrows, Landmark, Copy } from "lucide-react"
 
 import { BankReconcilePanel } from "@/components/compliscan/fiscal/BankReconcilePanel"
 import { ErpSpvReconcileCard } from "@/components/compliscan/fiscal/ErpSpvReconcileCard"
@@ -11,6 +11,7 @@ import { FiscalSubpageShell } from "@/components/compliscan/fiscal/FiscalSubpage
 import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
 import { SagaImportCard } from "@/components/compliscan/fiscal/SagaImportCard"
 import { SmartBillConnectCard } from "@/components/compliscan/fiscal/SmartBillConnectCard"
+import { SpvDuplicateDetectorCard } from "@/components/compliscan/fiscal/SpvDuplicateDetectorCard"
 
 export default function FiscalIntegrationsPage() {
   return (
@@ -57,6 +58,14 @@ export default function FiscalIntegrationsPage() {
         subtitle="Upload MT940 / CAMT.053 / CSV → motor AI 90%+ match facturi cu plăți. Cash-flow forecast 30/60/90 zile. Import bancar gratuit (Nordigen PSD2 sau upload manual)."
       >
         <BankReconcilePanel />
+      </Section>
+
+      <Section
+        icon={<Copy className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Detector duplicate SPV"
+        subtitle="Bug ANAF cunoscut: aceeași factură poate apărea în SPV cu ID-uri diferite, inflando TVA dedus. Caută grupuri cu același invoiceNumber + CIF + dată, recomandă originalul + excluderi pentru calcule fiscale."
+      >
+        <SpvDuplicateDetectorCard />
       </Section>
     </FiscalSubpageShell>
   )

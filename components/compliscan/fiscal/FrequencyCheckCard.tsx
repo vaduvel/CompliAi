@@ -118,7 +118,9 @@ export function FrequencyCheckCard() {
       )}
 
       <p className="mt-3 text-[10.5px] text-eos-text-tertiary">
-        Analizat {data.filingsAnalyzed} depuneri istorice.
+        {data.filingsAnalyzed === 0
+          ? "Niciun istoric de depuneri încă. Frecvența așteptată este estimată din numărul de angajați. Pentru detectare exactă, adaugă cifra de afaceri din profilul organizației sau încarcă declarațiile istorice."
+          : `Analizat ${data.filingsAnalyzed} depuneri istorice.`}
       </p>
     </section>
   )

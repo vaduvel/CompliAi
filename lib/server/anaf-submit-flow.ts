@@ -176,12 +176,61 @@ export function diagnoseAnafSubmissionError(errorDetail: string | null | undefin
 }
 
 // ── Local fallback ───────────────────────────────────────────────────────────
+//
+// Mircea fix (2026-05-11): persist submissions to disk pentru fallback dev/
+// offline. Memory-only se pierde la Fast Refresh / restart. Cu disk JSON,
+// submissions create-uite persistă chiar și fără Supabase reachable.
+// În production cu Supabase live, branch-ul ăsta nu se atinge.
+
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
+import { join } from "path"
 
 const localSubmissions = new Map<string, SPVSubmissionRow[]>()
+const SUBMISSIONS_DIR = join(process.cwd(), ".data")
+let submissionsLoaded = false
+
+function submissionsFilePath(orgId: string): string {
+  return join(SUBMISSIONS_DIR, `spv-submissions-${orgId}.json`)
+}
+
+function loadSubmissionsFromDisk(orgId: string): SPVSubmissionRow[] {
+  try {
+    const file = submissionsFilePath(orgId)
+    if (!existsSync(file)) return []
+    const raw = readFileSync(file, "utf8")
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? (parsed as SPVSubmissionRow[]) : []
+  } catch {
+    return []
+  }
+}
+
+function persistSubmissionsToDisk(orgId: string, rows: SPVSubmissionRow[]): void {
+  try {
+    if (!existsSync(SUBMISSIONS_DIR)) {
+      mkdirSync(SUBMISSIONS_DIR, { recursive: true })
+    }
+    writeFileSync(submissionsFilePath(orgId), JSON.stringify(rows, null, 2), "utf8")
+  } catch {
+    // Disk write may fail on read-only filesystems (Vercel) — ignore.
+    // Memory cache still has the data for the rest of the process lifetime.
+  }
+}
 
 function getLocalSubmissions(orgId: string): SPVSubmissionRow[] {
-  if (!localSubmissions.has(orgId)) localSubmissions.set(orgId, [])
+  if (!localSubmissions.has(orgId)) {
+    // First access pentru acest org — încearcă să încarci de pe disk (recuperare
+    // post Fast Refresh / dev restart).
+    const fromDisk = loadSubmissionsFromDisk(orgId)
+    localSubmissions.set(orgId, fromDisk)
+  }
   return localSubmissions.get(orgId)!
+}
+
+/** Persist current memory state to disk pentru orgId. Called după mutații. */
+function syncLocalSubmissionsToDisk(orgId: string): void {
+  const rows = localSubmissions.get(orgId)
+  if (rows) persistSubmissionsToDisk(orgId, rows)
 }
 
 // Detect transient network failures (ENOTFOUND, fetch failed) — Supabase URL
@@ -261,9 +310,11 @@ export async function initiateSubmit(params: {
     } catch (err) {
       if (!isSupabaseUnreachable(err)) throw err
       getLocalSubmissions(orgId).push(row)
+      syncLocalSubmissionsToDisk(orgId)
     }
   } else {
     getLocalSubmissions(orgId).push(row)
+    syncLocalSubmissionsToDisk(orgId)
   }
 
   // Store XML in a separate local map for execution (not persisted in Supabase row)
@@ -690,6 +741,7 @@ async function updateSubmissionStatus(
     if (row) {
       row.status = status
       if (extra) Object.assign(row, extra)
+      syncLocalSubmissionsToDisk(orgId)
     }
   }
   if (hasSupabaseConfig()) {
