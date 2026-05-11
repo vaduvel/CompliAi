@@ -3,6 +3,10 @@ import JSZip from "jszip"
 
 import { processEFacturaZip } from "./efactura-bulk-zip"
 
+// Fixture aligned with what ANAF actually accepts at the sandbox (CIUS-RO 1.0.1).
+// Structure verified live 2026-05-11 cycle 3 — see docs/anaf-efactura-validation-rules.md.
+// Previous "minimal" fixture lacked PostalAddress, Item, Price, ClassifiedTaxCategory,
+// TaxSubtotal — all of which V012-V038 reject because ANAF rejects them too.
 const VALID_INVOICE_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
@@ -14,31 +18,69 @@ const VALID_INVOICE_XML = `<?xml version="1.0" encoding="UTF-8"?>
   <cbc:DocumentCurrencyCode>RON</cbc:DocumentCurrencyCode>
   <cac:AccountingSupplierParty>
     <cac:Party>
+      <cac:PostalAddress>
+        <cbc:StreetName>Strada Furnizor 1</cbc:StreetName>
+        <cbc:CityName>SECTOR1</cbc:CityName>
+        <cbc:CountrySubentity>RO-B</cbc:CountrySubentity>
+        <cac:Country><cbc:IdentificationCode>RO</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
       <cac:PartyTaxScheme>
         <cbc:CompanyID>RO12345678</cbc:CompanyID>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
       </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Furnizor Test SRL</cbc:RegistrationName>
+        <cbc:CompanyID>RO12345678</cbc:CompanyID>
+      </cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
     <cac:Party>
-      <cac:PartyTaxScheme>
+      <cac:PostalAddress>
+        <cbc:StreetName>Strada Client 1</cbc:StreetName>
+        <cbc:CityName>SECTOR2</cbc:CityName>
+        <cbc:CountrySubentity>RO-B</cbc:CountrySubentity>
+        <cac:Country><cbc:IdentificationCode>RO</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Client Test SRL</cbc:RegistrationName>
         <cbc:CompanyID>RO87654321</cbc:CompanyID>
-      </cac:PartyTaxScheme>
+      </cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+  </cac:PaymentMeans>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="RON">19.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="RON">100.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="RON">19.00</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID>S</cbc:ID><cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="RON">100.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="RON">100.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="RON">119.00</cbc:TaxInclusiveAmount>
     <cbc:PayableAmount currencyID="RON">119.00</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="H87">1</cbc:InvoicedQuantity>
     <cbc:LineExtensionAmount currencyID="RON">100.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Serviciu test</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>S</cbc:ID><cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="RON">100.00</cbc:PriceAmount></cac:Price>
   </cac:InvoiceLine>
-  <cac:PaymentMeans>
-    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
-  </cac:PaymentMeans>
 </Invoice>`
 
 const INVALID_XML = `<NotInvoice><x>broken</x></NotInvoice>`
