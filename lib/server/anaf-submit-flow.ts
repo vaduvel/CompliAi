@@ -27,6 +27,7 @@ import {
 } from "@/lib/fiscal/spv-submission"
 import {
   ensureValidToken,
+  markTokenUsed,
   refreshAccessToken,
 } from "@/lib/anaf-spv-client"
 import {
@@ -427,6 +428,10 @@ export async function executeSubmit(params: {
 
     const uploadIndex = result.uploadIndex
 
+    if (getAnafMode() !== "mock") {
+      await markTokenUsed(orgId, now)
+    }
+
     // Mark as submitted
     await updateSubmissionStatus(orgId, submissionId, "submitted", {
       index_descarcare: uploadIndex,
@@ -528,6 +533,10 @@ export async function checkSubmitStatus(params: {
         uploadIndex: submission.indexDescarcare,
         accessToken: refreshed.accessToken,
       })
+    }
+
+    if (getAnafMode() !== "mock" && !submission.indexDescarcare.startsWith("mock-")) {
+      await markTokenUsed(orgId, now)
     }
 
     const newStatus: SPVSubmissionStatus =
