@@ -5,12 +5,13 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
-import { FileCode2, Package, Radio } from "lucide-react"
+import { Camera, FileCode2, Package, Radio } from "lucide-react"
 
 import { EFacturaSignalsTab } from "@/components/compliscan/fiscal/EFacturaSignalsTab"
 import { BulkZipUploadCard } from "@/components/compliscan/fiscal/BulkZipUploadCard"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
 import { FiscalSubpageShell } from "@/components/compliscan/fiscal/FiscalSubpageShell"
+import { InvoiceOcrPanel } from "@/components/compliscan/fiscal/InvoiceOcrPanel"
 import type { EFacturaValidationRecord, EFacturaXmlRepairRecord } from "@/lib/compliance/types"
 
 export default function FiscalValidationPage() {
@@ -104,6 +105,14 @@ export default function FiscalValidationPage() {
       description="Validează XML-uri UBL CIUS-RO V001-V011 înainte de transmitere SPV. Bulk upload ZIP pentru până la 200 facturi. Monitorizează semnalele e-Factura."
       breadcrumb="Validare & emitere"
     >
+      <Section
+        icon={<Camera className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="OCR & Voice → Factură (F#8 KILLER)"
+        subtitle="Foto factură / bon (mobil camera direct) sau dictare voce → AI extrage CIF, sume, articole. Privacy by default: Gemma 4 local prima, Gemini Vision fallback."
+      >
+        <InvoiceOcrPanel />
+      </Section>
+
       <Section
         icon={<Package className="size-4 text-eos-primary" strokeWidth={2} />}
         title="Bulk ZIP upload"
