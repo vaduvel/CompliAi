@@ -132,6 +132,27 @@ function addWorkingDays(start: Date, count: number): Date {
   return cur
 }
 
+/**
+ * Pain validat (#12 research): contabilii pierd ore din cauza confuziei
+ * "GMT vs EET" — un timestamp UTC pare uneori "ziua trecută" în RO.
+ *
+ * Soluție: deadline-ul de raportare e END OF DAY ÎN ROMÂNIA, NU UTC midnight.
+ * Returnăm 21:59:59 UTC (= 23:59:59 EET winter, sau 00:59:59 EEST summer +1 zi).
+ *
+ * Pentru accountants: când e afișat "deadline: 11 mai 2026", ei știu că au
+ * până la 23:59 ora României în acea zi — nu trebuie să convertească UTC.
+ * Pentru cron-uri server-side care verifică "e past deadline?", folosesc
+ * direct .getTime() comparison cu nowMs.
+ */
+function endOfRomanianDay(date: Date): Date {
+  // 21:59:59.999 UTC pe ziua dată = 23:59:59 EET winter / +1h în EEST summer
+  // (acoperă safe end-of-day RO; DST shift considerat minor vs precizia
+  // contabilă day-level care e suficientă pentru deadlines fiscale).
+  const out = new Date(date)
+  out.setUTCHours(21, 59, 59, 999)
+  return out
+}
+
 function computeReportingDeadline(
   issueDate: string,
   customerType: "b2b" | "b2c" | "unknown",
@@ -145,14 +166,14 @@ function computeReportingDeadline(
   const newRulesActive = issueDate >= NEW_DEADLINE_RULE_FROM_ISO
 
   if (newRulesActive || customerType === "b2c") {
-    return addWorkingDays(start, 5).toISOString()
+    return endOfRomanianDay(addWorkingDays(start, 5)).toISOString()
   }
 
   // Legacy (facturi emise înainte de 2026-01-01) pentru B2B/unknown:
   // 5 zile calendaristice (OUG 120/2021 Art. 10 înainte de modif. OUG 89/2025).
   const calendar = new Date(start)
   calendar.setUTCDate(calendar.getUTCDate() + 5)
-  return calendar.toISOString()
+  return endOfRomanianDay(calendar).toISOString()
 }
 
 export function validateEFacturaXml({

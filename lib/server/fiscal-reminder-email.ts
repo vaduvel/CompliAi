@@ -260,6 +260,72 @@ export async function sendFiscalReminderEmail(
   }
 }
 
+// ── Generic operational email helper ─────────────────────────────────────────
+//
+// Folosit de alte cron-uri pentru reminders ad-hoc (ex: PFA Form 082, e-Transport
+// UIT expirat). Subject + body plain-text; același fallback Resend/console.
+
+export type OperationalEmailInput = {
+  to: string
+  subject: string
+  /** Body plain text — fără HTML. */
+  body: string
+  /** Label pentru log (cron name etc.). */
+  label?: string
+}
+
+export async function sendOperationalEmail(
+  input: OperationalEmailInput,
+): Promise<FiscalEmailResult> {
+  const label = input.label ?? "operational-email"
+
+  if (!RESEND_API_KEY) {
+    console.log(
+      `[${label}] EMAIL → ${input.to} | subject="${input.subject}" | (no RESEND_API_KEY)`,
+    )
+    return { ok: true, channel: "console", reason: "no_resend_key" }
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: FROM_ADDRESS,
+        to: [input.to],
+        subject: input.subject,
+        text: input.body,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    })
+
+    if (!res.ok) {
+      const err = await res.text()
+      // Resend sandbox fallback (vezi sendFiscalReminderEmail pentru context).
+      const isResendSandboxRestriction =
+        res.status === 403 && err.includes("validation_error")
+      if (isResendSandboxRestriction) {
+        console.log(
+          `[${label}] EMAIL → ${input.to} | Resend sandbox restriction — fallback console`,
+        )
+        return { ok: true, channel: "console", reason: "resend_sandbox_fallback" }
+      }
+      return { ok: false, channel: "resend", reason: `HTTP ${res.status}: ${err.slice(0, 100)}` }
+    }
+
+    return { ok: true, channel: "resend" }
+  } catch (err) {
+    return {
+      ok: false,
+      channel: "resend",
+      reason: err instanceof Error ? err.message : "fetch failed",
+    }
+  }
+}
+
 // ── Test helpers ─────────────────────────────────────────────────────────────
 
 export const __test__ = {

@@ -31,6 +31,7 @@ import { ErpSpvReconcileCard } from "@/components/compliscan/fiscal/ErpSpvReconc
 import { FrequencyCheckCard } from "@/components/compliscan/fiscal/FrequencyCheckCard"
 import { FiscalAssistantTrigger } from "@/components/compliscan/fiscal/FiscalAssistantPanel"
 import { OblioConnectCard } from "@/components/compliscan/fiscal/OblioConnectCard"
+import { PfaForm082Panel } from "@/components/compliscan/fiscal/PfaForm082Panel"
 import { SaftHygieneTab } from "@/components/compliscan/fiscal/SaftHygieneTab"
 import { SagaImportCard } from "@/components/compliscan/fiscal/SagaImportCard"
 import { SmartBillConnectCard } from "@/components/compliscan/fiscal/SmartBillConnectCard"
@@ -312,6 +313,13 @@ export default function FiscalPage() {
             <PlugZap className="size-3.5" strokeWidth={2} />
             Integrări
           </TabsTrigger>
+          <TabsTrigger
+            value="pfa"
+            className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
+          >
+            <FileText className="size-3.5" strokeWidth={2} />
+            PFA / Form 082
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discrepante">
@@ -417,6 +425,10 @@ export default function FiscalPage() {
             <ErpSpvReconcileCard />
             <SagaImportCard />
           </div>
+        </TabsContent>
+
+        <TabsContent value="pfa">
+          <PfaForm082Panel />
         </TabsContent>
       </Tabs>
     </div>

@@ -80,7 +80,7 @@ describe("efactura-validator", () => {
     })
     expect(result.customerType).toBe("b2b")
     // Issue 2026-03-15 (duminică) → 5 zile lucrătoare = 16 (lu) 17 (ma) 18 (mi) 19 (jo) 20 (vi)
-    expect(result.reportingDeadlineISO).toBe("2026-03-20T00:00:00.000Z")
+    expect(result.reportingDeadlineISO).toBe("2026-03-20T21:59:59.999Z")
     expect(result.warnings.some((w) => w.includes("OUG 89/2025"))).toBe(true)
   })
 
@@ -106,7 +106,7 @@ describe("efactura-validator", () => {
     })
     expect(result.customerType).toBe("b2b")
     // 5 zile calendaristice: 2025-12-29 + 5 = 2026-01-03
-    expect(result.reportingDeadlineISO).toBe("2026-01-03T00:00:00.000Z")
+    expect(result.reportingDeadlineISO).toBe("2026-01-03T21:59:59.999Z")
   })
 
   it("detectează B2C când customer-ul nu are PartyTaxScheme (persoană fizică)", () => {
@@ -121,7 +121,7 @@ describe("efactura-validator", () => {
     })
     expect(result.customerType).toBe("b2c")
     // 5 zile lucrătoare de la 2026-03-15 (duminică) → 16, 17, 18, 19, 20 (vineri) = 2026-03-20
-    expect(result.reportingDeadlineISO).toBe("2026-03-20T00:00:00.000Z")
+    expect(result.reportingDeadlineISO).toBe("2026-03-20T21:59:59.999Z")
     expect(result.warnings.some((w) => w.includes("B2C"))).toBe(true)
   })
 
@@ -140,7 +140,7 @@ describe("efactura-validator", () => {
     })
     expect(result.customerType).toBe("b2c")
     // Luni 30/03 + 5 zile lucrătoare (sare peste sâmbătă-duminică) = Luni 06/04
-    expect(result.reportingDeadlineISO).toBe("2026-04-06T00:00:00.000Z")
+    expect(result.reportingDeadlineISO).toBe("2026-04-06T21:59:59.999Z")
   })
 
   it("B2C: detectează CNP (13 cifre) ca persoană fizică chiar dacă există PartyTaxScheme", () => {

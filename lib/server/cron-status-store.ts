@@ -140,6 +140,12 @@ export const CONFIGURED_CRONS: Array<{
     description: "La fiecare 15 minute — retry pentru transmisii ANAF eșuate.",
   },
   {
+    name: "pfa-form082-deadline-alert",
+    path: "/api/cron/pfa-form082-deadline-alert",
+    schedule: "0 6 * * *",
+    description: "Email zilnic la 06:00 RO — reminders PFA/CNP pentru Form 082 (deadline 26 mai 2026).",
+  },
+  {
     name: "spv-realtime-monitor",
     path: "/api/cron/spv-realtime-monitor",
     schedule: "0 4,10,14,18 * * *",

@@ -758,6 +758,10 @@ export type ComplianceState = {
   // "local-only" = forțează Gemma 4 prin Ollama; refuză Gemini/Mistral.
   // "cloud-allowed" (default) = preferă Gemma local, fallback cloud când nu rulează.
   aiPrivacyMode?: "local-only" | "cloud-allowed"
+  // ── PFA / CNP Form 082 tracker (OG 6/2026 + Ordin ANAF 378/2026) ─────────
+  // Listă clienți PFA / persoane fizice cu CNP care necesită registrare în
+  // Registrul RO e-Factura via Form 082. Deadline: 26 mai 2026.
+  pfaForm082Clients?: import("@/lib/compliance/pfa-form082-tracker").PfaClientRecord[]
 }
 
 export type SiteScanSummary = {
