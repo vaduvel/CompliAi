@@ -55,7 +55,105 @@ const BUCHAREST_SECTOR_CODES = new Set([
   "SECTOR6",
 ])
 
-// V015–V018: address mandatory per BR-08/BR-10/BR-RO-080/BR-RO-090/BR-RO-100.
+const MONEY_TOLERANCE = 0.011 // 1.1 cent — accommodates 2dp rounding per BR-DEC-XX
+
+function parseMoney(value: string): number | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const n = Number.parseFloat(trimmed)
+  return Number.isFinite(n) ? n : null
+}
+
+function roundCents(n: number): number {
+  return Math.round(n * 100) / 100
+}
+
+// V021–V025: cross-sum & math validations per BR-CO-10/13/14/15/17.
+// These catch the largest class of ANAF rejections after structural errors —
+// invoices with mismatched totals get rejected even when structurally valid.
+function validateInvoiceMath(source: string, errors: string[]): void {
+  const totalsBlock = findTagBlock(source, "LegalMonetaryTotal")
+  if (!totalsBlock) return // V010 already reports missing block
+
+  const lineBlocks = findAllTagBlocks(source, "InvoiceLine")
+  const creditNoteLineBlocks = findAllTagBlocks(source, "CreditNoteLine")
+  const allLineBlocks = lineBlocks.length > 0 ? lineBlocks : creditNoteLineBlocks
+
+  const lineSum = allLineBlocks.reduce((acc, line) => {
+    const value = parseMoney(findTagValue(line, "LineExtensionAmount"))
+    return acc + (value ?? 0)
+  }, 0)
+
+  const documentLineTotal = parseMoney(findTagValue(totalsBlock, "LineExtensionAmount"))
+  if (documentLineTotal !== null && allLineBlocks.length > 0) {
+    if (Math.abs(documentLineTotal - lineSum) > MONEY_TOLERANCE) {
+      errors.push(
+        `V021 BR-CO-10 LegalMonetaryTotal/LineExtensionAmount=${documentLineTotal.toFixed(2)} ` +
+          `nu egaleaza suma liniilor=${lineSum.toFixed(2)}.`,
+      )
+    }
+  }
+
+  const allowanceTotal = parseMoney(findTagValue(totalsBlock, "AllowanceTotalAmount")) ?? 0
+  const chargeTotal = parseMoney(findTagValue(totalsBlock, "ChargeTotalAmount")) ?? 0
+  const taxExclusive = parseMoney(findTagValue(totalsBlock, "TaxExclusiveAmount"))
+  if (taxExclusive !== null && documentLineTotal !== null) {
+    const expected = roundCents(documentLineTotal - allowanceTotal + chargeTotal)
+    if (Math.abs(taxExclusive - expected) > MONEY_TOLERANCE) {
+      errors.push(
+        `V022 BR-CO-13 TaxExclusiveAmount=${taxExclusive.toFixed(2)} ` +
+          `≠ LineExtensionAmount − Allowance + Charge = ${expected.toFixed(2)}.`,
+      )
+    }
+  }
+
+  const taxTotalBlock = findTagBlock(source, "TaxTotal")
+  const taxTotalAmount = parseMoney(findTagValue(taxTotalBlock, "TaxAmount"))
+  if (taxTotalBlock) {
+    const subtotals = findAllTagBlocks(taxTotalBlock, "TaxSubtotal")
+    if (subtotals.length > 0 && taxTotalAmount !== null) {
+      const subSum = subtotals.reduce((acc, sub) => {
+        const v = parseMoney(findTagValue(sub, "TaxAmount"))
+        return acc + (v ?? 0)
+      }, 0)
+      if (Math.abs(taxTotalAmount - subSum) > MONEY_TOLERANCE) {
+        errors.push(
+          `V023 BR-CO-14 TaxTotal/TaxAmount=${taxTotalAmount.toFixed(2)} ` +
+            `≠ suma TaxSubtotal/TaxAmount=${subSum.toFixed(2)}.`,
+        )
+      }
+    }
+
+    // V024 BR-CO-17: per-subtotal math TaxAmount = TaxableAmount * Percent / 100
+    subtotals.forEach((sub, idx) => {
+      const taxable = parseMoney(findTagValue(sub, "TaxableAmount"))
+      const subTax = parseMoney(findTagValue(sub, "TaxAmount"))
+      const percent = parseMoney(findTagValue(sub, "Percent"))
+      if (taxable !== null && subTax !== null && percent !== null) {
+        const expected = roundCents((taxable * percent) / 100)
+        if (Math.abs(subTax - expected) > MONEY_TOLERANCE) {
+          errors.push(
+            `V024 BR-CO-17 TaxSubtotal #${idx + 1}: TaxAmount=${subTax.toFixed(2)} ` +
+              `≠ round(TaxableAmount × Percent / 100)=${expected.toFixed(2)}.`,
+          )
+        }
+      }
+    })
+  }
+
+  const taxInclusive = parseMoney(findTagValue(totalsBlock, "TaxInclusiveAmount"))
+  if (taxInclusive !== null && taxExclusive !== null) {
+    const expected = roundCents(taxExclusive + (taxTotalAmount ?? 0))
+    if (Math.abs(taxInclusive - expected) > MONEY_TOLERANCE) {
+      errors.push(
+        `V025 BR-CO-15 TaxInclusiveAmount=${taxInclusive.toFixed(2)} ` +
+          `≠ TaxExclusiveAmount + TaxTotal = ${expected.toFixed(2)}.`,
+      )
+    }
+  }
+}
+
+// V015–V018 + V028: address mandatory per BR-08/BR-10/BR-RO-080/090/100/110.
 // Confirmat live in sandbox 2026-05-11.
 function validatePostalAddress(partyBlock: string, role: string, errors: string[]): void {
   if (!partyBlock) return // V007/V008 already report missing block
@@ -80,6 +178,8 @@ function validatePostalAddress(partyBlock: string, role: string, errors: string[
   }
 
   const countrySubentity = findTagValue(addressBlock, "CountrySubentity")
+  const countryCode = findTagValue(addressBlock, "IdentificationCode")
+
   if (
     /^RO-?B$/i.test(countrySubentity) &&
     !BUCHAREST_SECTOR_CODES.has(cityName.toUpperCase())
@@ -88,6 +188,16 @@ function validatePostalAddress(partyBlock: string, role: string, errors: string[
       `V018 BR-RO-100 ${role} are tara RO-B (Bucuresti) dar CityName "${cityName}" ` +
         "nu e cod SECTOR-RO. Foloseste SECTOR1, SECTOR2, SECTOR3, SECTOR4, SECTOR5 sau SECTOR6.",
     )
+  }
+
+  // V028 BR-RO-110/111: if country=RO, CountrySubentity must be ISO 3166-2:RO format.
+  if (countryCode.toUpperCase() === "RO" && countrySubentity) {
+    if (!/^RO-[A-Z]{1,2}$/i.test(countrySubentity)) {
+      errors.push(
+        `V028 BR-RO-110 ${role} CountrySubentity "${countrySubentity}" nu e format ISO 3166-2:RO. ` +
+          "Exemple: RO-B, RO-CJ, RO-TM, RO-IS.",
+      )
+    }
   }
 }
 
@@ -318,19 +428,40 @@ export function validateEFacturaXml({
   } else if (invoiceTypeCode && !/^\d{3}$/.test(invoiceTypeCode)) {
     warnings.push(`V003 InvoiceTypeCode '${invoiceTypeCode}' nu pare un cod numeric standard (ex: 380).`)
   }
+  // V026 BR-RO-020: RO restrictions on invoice type codes.
+  const RO_INVOICE_TYPE_CODES = new Set(["380", "384", "389", "751"])
+  const RO_CREDIT_NOTE_TYPE_CODES = new Set(["381"])
+  if (isInvoice && invoiceTypeCode && !RO_INVOICE_TYPE_CODES.has(invoiceTypeCode)) {
+    errors.push(
+      `V026 BR-RO-020 InvoiceTypeCode '${invoiceTypeCode}' nu e permis in RO. ` +
+        "Valori valide: 380, 384, 389, 751.",
+    )
+  }
+  const creditNoteTypeCode = findTagValue(source, "CreditNoteTypeCode")
+  if (isCreditNote && creditNoteTypeCode && !RO_CREDIT_NOTE_TYPE_CODES.has(creditNoteTypeCode)) {
+    errors.push(
+      `V026 BR-RO-020 CreditNoteTypeCode '${creditNoteTypeCode}' nu e permis in RO. ` +
+        "Valoare valida: 381.",
+    )
+  }
 
   // --- ID ---
   const invoiceNumber = findTagValue(source, "ID")
   if (!invoiceNumber) {
     errors.push("V004 Lipseste cbc:ID pentru factura.")
+  } else if (!/\d/.test(invoiceNumber)) {
+    // V027 BR-RO-010: invoice number must contain at least one digit
+    errors.push(
+      `V027 BR-RO-010 Numarul facturii '${invoiceNumber}' trebuie sa contina cel putin o cifra.`,
+    )
   }
 
-  // --- IssueDate ---
+  // --- IssueDate (V031 BR-RO-DT001 strict YYYY-MM-DD) ---
   const issueDate = findTagValue(source, "IssueDate")
   if (!issueDate) {
     errors.push("V005 Lipseste cbc:IssueDate.")
   } else if (!/^\d{4}-\d{2}-\d{2}$/.test(issueDate)) {
-    warnings.push("V005 IssueDate exista, dar formatul nu pare YYYY-MM-DD.")
+    errors.push("V031 BR-RO-DT001 IssueDate trebuie format strict YYYY-MM-DD.")
   }
 
   // --- DueDate ---
@@ -455,6 +586,38 @@ export function validateEFacturaXml({
   // CityName din Bucuresti nu era cod SECTOR1..SECTOR6.
   validatePostalAddress(supplierPartyBlock || "", "Vanzator", errors)
   validatePostalAddress(customerPartyBlock || "", "Cumparator", errors)
+
+  // --- Math cross-validations (V021–V025) — BR-CO-10/13/14/15/17 ---
+  validateInvoiceMath(source, errors)
+
+  // V029 BR-RO-120: Buyer trebuie sa aibe legal-reg-ID sau VAT ID.
+  if (customerPartyBlock) {
+    const legalEntity = findTagBlock(customerPartyBlock, "PartyLegalEntity")
+    const taxScheme = findTagBlock(customerPartyBlock, "PartyTaxScheme")
+    const hasLegalId = !!findTagValue(legalEntity, "CompanyID")
+    const hasVatId = !!findTagValue(taxScheme, "CompanyID")
+    if (!hasLegalId && !hasVatId) {
+      errors.push(
+        "V029 BR-RO-120 Cumparatorul trebuie sa aibe legal-reg-ID " +
+          "(PartyLegalEntity/CompanyID) sau VAT ID (PartyTaxScheme/CompanyID).",
+      )
+    }
+  }
+
+  // V030 BR-CO-09: VAT identifiers prefixed with ISO 3166-1 alpha-2 country code.
+  const vatIds = Array.from(
+    source.matchAll(
+      /<cac:PartyTaxScheme\b[\s\S]*?<cbc:CompanyID[^>]*>([\s\S]*?)<\/cbc:CompanyID>/gi,
+    ),
+  ).map((m) => m[1]?.trim() || "")
+  vatIds.forEach((vatId, idx) => {
+    if (vatId && !/^[A-Z]{2}/i.test(vatId)) {
+      errors.push(
+        `V030 BR-CO-09 VAT identifier #${idx + 1} '${vatId}' nu are prefix ISO de tara ` +
+          "(ex: RO12345678, FR12345678).",
+      )
+    }
+  })
 
   return {
     id: `efxml-${Math.random().toString(36).slice(2, 10)}`,
