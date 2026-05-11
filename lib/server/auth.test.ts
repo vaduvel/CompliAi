@@ -10,11 +10,17 @@ const supabaseRestMocks = vi.hoisted(() => ({
 }))
 
 const supabaseTenancyReadMocks = vi.hoisted(() => ({
-  loadTenancyGraphFromSupabase: vi.fn(async () => ({
-    organizations: [],
-    memberships: [],
-    profiles: [],
-  })),
+  loadTenancyGraphFromSupabase: vi.fn(
+    async (): Promise<{
+      organizations: Array<Record<string, unknown>>
+      memberships: Array<Record<string, unknown>>
+      profiles: Array<Record<string, unknown>>
+    }> => ({
+      organizations: [],
+      memberships: [],
+      profiles: [],
+    }),
+  ),
   shouldReadTenancyFromSupabase: vi.fn(() => false),
 }))
 
