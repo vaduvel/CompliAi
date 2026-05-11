@@ -154,7 +154,7 @@ export function AuditRiskPanel() {
             </div>
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-eos-text-tertiary">
-                Risc audit ANAF — F#1 Predictive
+                Risc audit ANAF — scoring predictiv
               </p>
               <h3
                 data-display-text="true"

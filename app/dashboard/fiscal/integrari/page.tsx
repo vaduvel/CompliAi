@@ -53,8 +53,8 @@ export default function FiscalIntegrationsPage() {
 
       <Section
         icon={<Landmark className="size-4 text-eos-primary" strokeWidth={2} />}
-        title="Reconciliere Bancă ↔ SPV (F#2 KILLER)"
-        subtitle="Upload MT940/CAMT.053/CSV → motor AI 90%+ match facturi cu plăți. Cash-flow forecast 30/60/90 zile. ZERO API banking cost (Nordigen FREE / upload manual)."
+        title="Reconciliere bancă ↔ SPV + cash-flow forecast"
+        subtitle="Upload MT940 / CAMT.053 / CSV → motor AI 90%+ match facturi cu plăți. Cash-flow forecast 30/60/90 zile. Import bancar gratuit (Nordigen PSD2 sau upload manual)."
       >
         <BankReconcilePanel />
       </Section>

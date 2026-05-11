@@ -37,7 +37,7 @@ export default function FiscalDeadlinesPage() {
 
       <Section
         icon={<ShieldAlert className="size-4 text-eos-primary" strokeWidth={2} />}
-        title="Certificate SPV manager (F#4)"
+        title="Certificate SPV — expirare & reînnoire"
         subtitle="Tracking certificate digitale per client. Reminders 30/14/7/3/1 zile + detector 'utilizator neautorizat' post-reînnoire."
       >
         <CertSpvPanel />

@@ -240,10 +240,10 @@ export function InvoiceOcrPanel() {
     <div className="space-y-4">
       <section className="rounded-eos-lg border border-eos-primary/30 bg-eos-primary/[0.06] px-4 py-3 text-[12px] leading-[1.5] text-eos-text">
         <p>
-          <strong>F#8 OCR + Voice → Factură:</strong> uploadează poză cu bonul/factura sau dictează
-          în română. AI extrage CIF, sume, articole în format structurat — gata pentru validare
-          e-Factura (UBL CIUS-RO). Privacy by default: încercăm Gemma 4 local prima dată; dacă nu e
-          disponibil, fallback Gemini Vision cloud.
+          <strong>OCR + dictare voce → factură:</strong> uploadează poză cu bonul/factura sau
+          dictează în română. AI extrage CIF, sume, articole în format structurat — gata pentru
+          validare e-Factura (UBL CIUS-RO). Privacy by default: încercăm Gemma 4 local prima dată;
+          dacă nu e disponibil, fallback Gemini Vision cloud.
         </p>
       </section>
 

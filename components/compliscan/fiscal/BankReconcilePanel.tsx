@@ -104,7 +104,7 @@ export function BankReconcilePanel() {
     <div className="space-y-4">
       <section className="rounded-eos-lg border border-eos-primary/30 bg-eos-primary/[0.06] px-4 py-3 text-[12px] leading-[1.5] text-eos-text">
         <p>
-          <strong>F#2 Bank-SPV Reconciliation:</strong> uploadează extrasul bancar (MT940, CAMT.053
+          <strong>Reconciliere bancă ↔ SPV:</strong> uploadează extrasul bancar (MT940, CAMT.053
           sau CSV) + transmite lista facturilor din ERP. Motor AI fuzzy-match potrivește automat
           90%+ din tranzacții cu facturile (criterii: CUI + sumă ±0.01 + dată ±3 zile + nr. factură).
           100% on-device — NU trimitem extrasul bancar la nicio API externă.

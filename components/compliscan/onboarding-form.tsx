@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
@@ -238,10 +239,34 @@ function getPhaseIndex(mode: ModeId | null, wizardStep: ApplicabilityWizardStep 
 
 export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps) {
   const router = useRouter()
-  const [currentMode, setCurrentMode] = useState<ModeId | null>(initialUserMode)
-  const [selectedMode, setSelectedMode] = useState<ModeId | null>(initialUserMode)
+  const searchParams = useSearchParams()
+  // Mircea UX fix (2026-05-11): preselect ICP from ?icp= URL param (vine din
+  // landing page /fiscal cu icp=cabinet-fiscal). Userul nu trebuie să aleagă
+  // ICP-ul de două ori dacă a venit deja din segmentul landing dedicat.
+  const initialIcpFromUrl: IcpSegmentId | null = (() => {
+    const raw = searchParams.get("icp")
+    const valid: IcpSegmentId[] = [
+      "solo",
+      "cabinet-dpo",
+      "cabinet-fiscal",
+      "cabinet-hr",
+      "imm-internal",
+      "imm-hr",
+      "enterprise",
+    ]
+    return raw && valid.includes(raw as IcpSegmentId) ? (raw as IcpSegmentId) : null
+  })()
+  const initialModeFromIcp = initialIcpFromUrl
+    ? ICP_OPTIONS.find((o) => o.id === initialIcpFromUrl)?.mapsTo ?? null
+    : null
+  const [currentMode, setCurrentMode] = useState<ModeId | null>(
+    initialUserMode ?? initialModeFromIcp,
+  )
+  const [selectedMode, setSelectedMode] = useState<ModeId | null>(
+    initialUserMode ?? initialModeFromIcp,
+  )
   // S1.6 — ICP segment selectat (5 carduri, mapează la 3 userMode-uri).
-  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(null)
+  const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(initialIcpFromUrl)
   const [wizardStep, setWizardStep] = useState<ApplicabilityWizardStep | null>(
     initialUserMode ? "cui" : null
   )

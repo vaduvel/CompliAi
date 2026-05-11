@@ -52,9 +52,16 @@ export default async function PortfolioLayout({
 
   // Sprint cleanup fiscal-first (2026-05-11): include icpSegment în initialUser
   // ca DashboardShell să poată aplica filter cabinet-fiscal pe sidebar/labels.
+  // Mircea fix: pentru partner, ICP-ul vine din CABINET's own org (owner
+  // membership), nu din session.orgId care e clientul curent.
   let icpSegment: import("@/lib/server/white-label").IcpSegment | null = null
   try {
-    const wl = await getWhiteLabelConfig(session.orgId)
+    let lookupOrgId = session.orgId
+    if (userMode === "partner") {
+      const ownerMembership = memberships.find((m) => m.role === "owner")
+      if (ownerMembership) lookupOrgId = ownerMembership.orgId
+    }
+    const wl = await getWhiteLabelConfig(lookupOrgId)
     icpSegment = wl.icpSegment ?? null
   } catch {
     icpSegment = null

@@ -107,7 +107,7 @@ export default function FiscalValidationPage() {
     >
       <Section
         icon={<Camera className="size-4 text-eos-primary" strokeWidth={2} />}
-        title="OCR & Voice → Factură (F#8 KILLER)"
+        title="OCR & dictare voce → factură"
         subtitle="Foto factură / bon (mobil camera direct) sau dictare voce → AI extrage CIF, sume, articole. Privacy by default: Gemma 4 local prima, Gemini Vision fallback."
       >
         <InvoiceOcrPanel />

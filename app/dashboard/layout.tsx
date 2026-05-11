@@ -42,7 +42,13 @@ export default async function DashboardLayout({
   const onboardingDone = Boolean(userMode && onboardingGate.hasCompletedOnboarding)
 
   if (session && !isDemoSession(session)) {
-    if (!onboardingDone) {
+    // Mircea cabinet-fiscal fix (2026-05-11): partner mode entering client org
+    // nu trebuie să facă onboarding pentru fiecare client. Onboarding-ul cabinet
+    // s-a făcut deja; clienții importați via CSV pot fi accesați direct.
+    // Solo/compliance/enterprise rămân pe gate-ul standard.
+    const isPartnerEnteringClient =
+      userMode === "partner" && session.workspaceMode === "org"
+    if (!onboardingDone && !isPartnerEnteringClient) {
       redirect("/onboarding")
     }
     if (session.workspaceMode === "portfolio" && userMode === "partner") {
@@ -70,10 +76,22 @@ export default async function DashboardLayout({
   }
   // Layer 3 ICP filtering — icpSegment vine din white-label config per org.
   // Fără el, sidebar-ul cade pe fallback DPO chiar și pentru cabinet-fiscal.
+  //
+  // Mircea fix (2026-05-11): pentru partner, ICP-ul vine din CABINET's own org
+  // (membership cu role owner), NU din client org curent. Altfel, cabinet-fiscal
+  // intrând în client org vede "Instrumente DPO" pentru că client org n-are
+  // white-label configurat.
   let icpSegment: import("@/lib/server/white-label").IcpSegment | null = null
   if (session) {
     try {
-      const wl = await getWhiteLabelConfig(session.orgId)
+      // Try cabinet's home org first (owner role membership)
+      let lookupOrgId = session.orgId
+      if (userMode === "partner") {
+        const memberships = await listUserMemberships(session.userId)
+        const ownerMembership = memberships.find((m) => m.role === "owner")
+        if (ownerMembership) lookupOrgId = ownerMembership.orgId
+      }
+      const wl = await getWhiteLabelConfig(lookupOrgId)
       icpSegment = wl.icpSegment ?? null
     } catch {
       icpSegment = null
