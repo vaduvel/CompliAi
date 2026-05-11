@@ -37,6 +37,95 @@ function countTags(xml: string, tag: string) {
   return (xml.match(pattern) || []).length
 }
 
+function findAllTagBlocks(xml: string, tag: string): string[] {
+  const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const pattern = new RegExp(
+    `<(?:(?:\\w|-)+:)?${escapedTag}(?=[\\s>])[^>]*>([\\s\\S]*?)<\\/(?:(?:\\w|-)+:)?${escapedTag}>`,
+    "gi",
+  )
+  return Array.from(xml.matchAll(pattern)).map((m) => m[1] || "")
+}
+
+const BUCHAREST_SECTOR_CODES = new Set([
+  "SECTOR1",
+  "SECTOR2",
+  "SECTOR3",
+  "SECTOR4",
+  "SECTOR5",
+  "SECTOR6",
+])
+
+// V015–V018: address mandatory per BR-08/BR-10/BR-RO-080/BR-RO-090/BR-RO-100.
+// Confirmat live in sandbox 2026-05-11.
+function validatePostalAddress(partyBlock: string, role: string, errors: string[]): void {
+  if (!partyBlock) return // V007/V008 already report missing block
+
+  const addressBlock = findTagBlock(partyBlock, "PostalAddress")
+  if (!addressBlock) {
+    errors.push(`V015 BR-08/BR-10 Lipseste cac:PostalAddress pentru ${role}.`)
+    return
+  }
+
+  const streetName = findTagValue(addressBlock, "StreetName")
+  if (!streetName) {
+    errors.push(
+      `V016 BR-RO-080 Lipseste cbc:StreetName (adresa line 1) pentru ${role}.`,
+    )
+  }
+
+  const cityName = findTagValue(addressBlock, "CityName")
+  if (!cityName) {
+    errors.push(`V017 BR-RO-090 Lipseste cbc:CityName pentru ${role}.`)
+    return
+  }
+
+  const countrySubentity = findTagValue(addressBlock, "CountrySubentity")
+  if (
+    /^RO-?B$/i.test(countrySubentity) &&
+    !BUCHAREST_SECTOR_CODES.has(cityName.toUpperCase())
+  ) {
+    errors.push(
+      `V018 BR-RO-100 ${role} are tara RO-B (Bucuresti) dar CityName "${cityName}" ` +
+        "nu e cod SECTOR-RO. Foloseste SECTOR1, SECTOR2, SECTOR3, SECTOR4, SECTOR5 sau SECTOR6.",
+    )
+  }
+}
+
+// V012 + V013: ANAF refuza la XSD daca InvoiceLine n-are cac:Item (cu Name).
+// Validatorul anterior tot omitea — un sample "valid" trecea local dar ANAF il
+// respingea cu cvc-complex-type.2.4.b. Confirmat live in sandbox 2026-05-11.
+function validateInvoiceLine(block: string, lineIndex: number, errors: string[]): void {
+  if (!hasTag(block, "Item")) {
+    errors.push(
+      `V012 InvoiceLine #${lineIndex} nu contine cac:Item. ANAF respinge XSD: ` +
+        "fiecare linie trebuie sa descrie produsul/serviciul facturat.",
+    )
+    return
+  }
+  const itemBlock = findTagBlock(block, "Item")
+  if (!findTagValue(itemBlock, "Name")) {
+    errors.push(
+      `V013 InvoiceLine #${lineIndex} are cac:Item dar fara cbc:Name. ` +
+        "Adauga numele produsului/serviciului.",
+    )
+  }
+  // V019 BR-CO-04 / UBL-SR-48: ClassifiedTaxCategory obligatoriu pe linie.
+  // Confirmat live: ANAF respinge daca lipseste.
+  if (!hasTag(itemBlock, "ClassifiedTaxCategory")) {
+    errors.push(
+      `V019 BR-CO-04 InvoiceLine #${lineIndex} are cac:Item dar fara ` +
+        "cac:ClassifiedTaxCategory. Adauga categoria TVA (ex: <cbc:ID>S</cbc:ID>).",
+    )
+  }
+  // V020 BR-26: Item price obligatoriu (cac:Price/cbc:PriceAmount).
+  if (!hasTag(block, "Price") || !findTagValue(block, "PriceAmount")) {
+    errors.push(
+      `V020 BR-26 InvoiceLine #${lineIndex} lipseste cac:Price/cbc:PriceAmount. ` +
+        "ANAF cere pretul per unitate pe fiecare linie.",
+    )
+  }
+}
+
 function normalizePartyTaxId(value: string) {
   const trimmed = value.replace(/\s+/g, "").toUpperCase()
   if (!trimmed) return ""
@@ -199,11 +288,22 @@ export function validateEFacturaXml({
   }
 
   // --- CustomizationID ---
+  // ANAF cere format EXACT: urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1
+  // (BR-RO-001 — confirmat live in sandbox 2026-05-11, factura respinsa daca lipseste "efactura.mfinante.ro").
   const customizationId = findTagValue(source, "CustomizationID")
+  const CIUS_RO_OFFICIAL =
+    "urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1"
   if (!customizationId) {
     errors.push("V002 Lipseste cbc:CustomizationID.")
-  } else if (!/cius|ro/i.test(customizationId)) {
-    warnings.push("V002 CustomizationID nu pare sa indice profil CIUS-RO.")
+  } else if (customizationId !== CIUS_RO_OFFICIAL) {
+    if (!/cius|ro/i.test(customizationId)) {
+      warnings.push("V002 CustomizationID nu pare sa indice profil CIUS-RO.")
+    } else {
+      errors.push(
+        `V014 BR-RO-001 CustomizationID trebuie sa fie exact "${CIUS_RO_OFFICIAL}". ` +
+          `Gasit: "${customizationId}". ANAF respinge daca nu match perfect.`,
+      )
+    }
   }
 
   // --- ProfileID (optional but good to have) ---
@@ -285,12 +385,18 @@ export function validateEFacturaXml({
     const lineCount = countTags(source, "InvoiceLine")
     if (lineCount === 0) {
       errors.push("V011 Factura nu contine nicio linie InvoiceLine.")
+    } else {
+      const lineBlocks = findAllTagBlocks(source, "InvoiceLine")
+      lineBlocks.forEach((block, idx) => validateInvoiceLine(block, idx + 1, errors))
     }
   }
   if (isCreditNote) {
     const lineCount = countTags(source, "CreditNoteLine")
     if (lineCount === 0) {
       errors.push("V011 Nota de credit nu contine nicio linie CreditNoteLine.")
+    } else {
+      const lineBlocks = findAllTagBlocks(source, "CreditNoteLine")
+      lineBlocks.forEach((block, idx) => validateInvoiceLine(block, idx + 1, errors))
     }
   }
 
@@ -343,6 +449,12 @@ export function validateEFacturaXml({
       "B2C detectat. Termen raportare SPV: 5 zile LUCRĂTOARE de la emitere (OUG 120/2021 modif. OUG 69/2024, din 1 ian 2025).",
     )
   }
+
+  // --- Postal address (V015–V018) — BR-08/BR-10/BR-RO-080/BR-RO-090/BR-RO-100 ---
+  // Confirmat live in sandbox 2026-05-11: factura respinsa cu BR-RO-100 cand
+  // CityName din Bucuresti nu era cod SECTOR1..SECTOR6.
+  validatePostalAddress(supplierPartyBlock || "", "Vanzator", errors)
+  validatePostalAddress(customerPartyBlock || "", "Cumparator", errors)
 
   return {
     id: `efxml-${Math.random().toString(36).slice(2, 10)}`,
