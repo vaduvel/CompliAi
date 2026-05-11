@@ -352,7 +352,15 @@ export function ClientContextPanel({
               </div>
             </div>
             <div className="space-y-1">
-              <p className={`text-sm font-semibold ${scoreColor(c.score)}`}>{c.riskLabel}</p>
+              <p className={`text-sm font-semibold ${scoreColor(c.score)}`}>
+                {/* Mircea fix (2026-05-11): "Risc Mediu" pe 0/0 readiness era
+                    confuz. Pentru clienți complet nescanati (scor 0 + 0 findings
+                    + 0 alerte + 0 documente) afișăm "Nescanat încă" în loc de
+                    eticheta de risc calculată din date inexistente. */}
+                {c.score === 0 && data.openFindings.length === 0 && c.openAlerts === 0 && c.scannedDocuments === 0
+                  ? "Nescanat încă"
+                  : c.riskLabel}
+              </p>
               <p className="text-xs text-eos-text-tertiary">
                 {data.openFindings.length} {data.openFindings.length === 1 ? "caz deschis" : "cazuri deschise"} · {c.openAlerts} alerte · {c.scannedDocuments} documente
               </p>

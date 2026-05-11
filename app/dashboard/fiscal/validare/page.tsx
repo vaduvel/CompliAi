@@ -108,7 +108,7 @@ export default function FiscalValidationPage() {
       <Section
         icon={<Camera className="size-4 text-eos-primary" strokeWidth={2} />}
         title="OCR & dictare voce → factură"
-        subtitle="Foto factură / bon (mobil camera direct) sau dictare voce → AI extrage CIF, sume, articole. Privacy by default: Gemma 4 local prima, Gemini Vision fallback."
+        subtitle="Click pe cameră direct de pe mobil sau încarcă PDF/JPG cu bonul. Sau dictează în română. AI extrage CIF, sume, articole — gata pentru validare e-Factura."
       >
         <InvoiceOcrPanel />
       </Section>

@@ -220,8 +220,8 @@ export default function FiscalPage() {
       <FiscalAssistantTrigger />
       <V3PageHero
         breadcrumbs={[{ label: "Firma mea" }, { label: "Fiscal", current: true }]}
-        title="Monitorizezi conformitatea fiscala"
-        description="Discrepante e-TVA, depuneri fiscale si scor de disciplina. Urmaresti termenele ANAF si documentezi raspunsurile."
+        title="Monitorizezi conformitatea fiscală"
+        description="Discrepanțe e-TVA, depuneri fiscale și scor de disciplină. Urmărești termenele ANAF și documentezi răspunsurile."
         eyebrowBadges={
           <span className="inline-flex items-center rounded-sm border border-eos-border bg-eos-surface-elevated px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-text-muted">
             ANAF · e-TVA · SAF-T
@@ -308,7 +308,7 @@ export default function FiscalPage() {
             className="h-[30px] gap-1.5 rounded-eos-sm border-b-0 px-2.5 py-0 text-[12px] font-medium data-[state=active]:border-b-0 data-[state=active]:bg-white/[0.06] data-[state=active]:font-semibold data-[state=active]:text-eos-text"
           >
             <AlertTriangle className="size-3.5" strokeWidth={2} />
-            Discrepante e-TVA
+            Discrepanțe e-TVA
           </TabsTrigger>
           <TabsTrigger
             value="depuneri"

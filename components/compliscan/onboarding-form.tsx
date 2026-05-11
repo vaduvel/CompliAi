@@ -380,14 +380,22 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             data-display-text="true"
             className="mt-1.5 font-display text-[20px] font-semibold leading-tight tracking-[-0.02em] text-eos-text"
           >
-            Pasul {phaseIndex + 1} din {phases.length}
+            {/* Mircea fix (2026-05-11): show "Pasul 1" simplu cât timp user-ul
+                n-a ales încă rolul (selectedMode = null). După alegere,
+                phases.length reflectă numărul real (2 pentru partner,
+                3 pentru solo/compliance). */}
+            {!selectedMode && !currentMode
+              ? "Pasul 1"
+              : `Pasul ${phaseIndex + 1} din ${phases.length}`}
           </h2>
           <p className="mt-1.5 text-[12.5px] leading-[1.55] text-eos-text-muted">
-            {phases.length - phaseIndex - 1 > 0
-              ? `Încă ${phases.length - phaseIndex - 1} ${
-                  phases.length - phaseIndex - 1 === 1 ? "pas" : "pași"
-                }. Totul poate fi modificat retroactiv.`
-              : "Aproape gata — confirmă și pornim primul scan."}
+            {!selectedMode && !currentMode
+              ? "Alege rolul tău. Totul poate fi modificat retroactiv."
+              : phases.length - phaseIndex - 1 > 0
+                ? `Încă ${phases.length - phaseIndex - 1} ${
+                    phases.length - phaseIndex - 1 === 1 ? "pas" : "pași"
+                  }. Totul poate fi modificat retroactiv.`
+                : "Aproape gata — confirmă și pornim primul scan."}
           </p>
 
           {/* Vertical stepper */}
