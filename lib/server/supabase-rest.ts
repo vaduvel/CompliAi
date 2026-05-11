@@ -14,7 +14,16 @@ const CIRCUIT_OPEN_MS = 60_000
 let circuitOpenedAt = 0
 
 export function hasSupabaseConfig() {
+  // Circuit open ⇒ pretindem că nu există config, ca toți consumatorii cu
+  // pattern `if (hasSupabaseConfig()) {...} else {local}` să meargă pe ramura
+  // locală automat. După CIRCUIT_OPEN_MS Supabase devine din nou eligibil.
+  if (isCircuitOpen()) return false
   return Boolean(SUPABASE_URL && SERVICE_ROLE_KEY)
+}
+
+// Helper pentru testare: forțează închiderea circuitului.
+export function _resetSupabaseCircuit() {
+  circuitOpenedAt = 0
 }
 
 function isCircuitOpen(): boolean {
