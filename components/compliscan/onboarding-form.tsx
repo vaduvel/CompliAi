@@ -453,19 +453,27 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
             <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-eos-text-tertiary">
               {phases[phaseIndex]?.label}
             </span>
-            {currentMeta && (
+            {(selectedIcp ?? currentMeta) && (
               <span
                 className={[
                   "ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1",
                   accent.iconBox,
                 ].join(" ")}
               >
-                <currentMeta.icon
-                  className={["size-3.5", accent.iconColor].join(" ")}
-                  strokeWidth={1.75}
-                />
+                {/* Bug fix 2026-05-11: foloseam currentMeta.icon/badge din MODE_OPTIONS care
+                    deduplica după mapsTo şi pierdea distincţia cabinet-dpo vs cabinet-fiscal.
+                    Acum folosim ICP-ul ales direct, fallback la mode meta dacă lipseşte. */}
+                {(() => {
+                  const Icon = (selectedIcp?.icon ?? currentMeta?.icon)
+                  return Icon ? (
+                    <Icon
+                      className={["size-3.5", accent.iconColor].join(" ")}
+                      strokeWidth={1.75}
+                    />
+                  ) : null
+                })()}
                 <span className={["font-mono text-[10.5px] font-semibold uppercase tracking-[0.06em]", accent.text].join(" ")}>
-                  {currentMeta.badge}
+                  {selectedIcp?.badge ?? currentMeta?.badge}
                 </span>
               </span>
             )}
