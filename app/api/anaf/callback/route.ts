@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { initialComplianceState, normalizeComplianceState } from "@/lib/compliance/engine"
-import { exchangeCodeForTokens } from "@/lib/anaf-spv-client"
+import { exchangeCodeForTokens, markTokenUsed, probeAnafToken } from "@/lib/anaf-spv-client"
 import { readFreshSessionFromRequest } from "@/lib/server/auth"
 import { decodeAnafOauthState, sanitizeInternalReturnTo } from "@/lib/server/anaf-oauth-state"
 import { systemEventActor, eventActorFromSession } from "@/lib/server/event-actor"
@@ -35,14 +35,26 @@ export async function GET(request: Request) {
     return NextResponse.redirect(redirectBase)
   }
 
-  const token = await exchangeCodeForTokens(code, orgId, new Date().toISOString()).catch(() => null)
+  const nowISO = new Date().toISOString()
+  const token = await exchangeCodeForTokens(code, orgId, nowISO).catch(() => null)
   if (!token) {
     redirectBase.searchParams.set("anaf", "token-failed")
     return NextResponse.redirect(redirectBase)
   }
 
-  const nowISO = new Date().toISOString()
   const currentState = (await readStateForOrg(orgId)) ?? normalizeComplianceState(initialComplianceState)
+  const cif = currentState.orgProfile?.cui?.replace(/^RO/i, "") ?? ""
+
+  const probe = cif ? await probeAnafToken(token.accessToken, cif) : null
+  if (probe && probe.status === 401) {
+    redirectBase.searchParams.set("anaf", "token-invalid")
+    redirectBase.searchParams.set("reason", "anaf-rejected-token")
+    return NextResponse.redirect(redirectBase)
+  }
+  if (probe?.valid) {
+    await markTokenUsed(orgId, nowISO)
+  }
+
   const actor = session ? eventActorFromSession(session) : systemEventActor("ANAF OAuth callback")
   await writeStateForOrg(
     orgId,
@@ -65,6 +77,9 @@ export async function GET(request: Request) {
               mode: getAnafMode(),
               tokenType: token.tokenType,
               expiresAtISO: token.expiresAtISO,
+              probeStatus: probe?.status ?? 0,
+              probeValid: probe?.valid ?? false,
+              probed: probe !== null,
             },
           },
           actor
@@ -76,5 +91,8 @@ export async function GET(request: Request) {
 
   redirectBase.searchParams.set("anaf", "connected")
   redirectBase.searchParams.set("mode", getAnafMode())
+  if (probe && !probe.valid) {
+    redirectBase.searchParams.set("probe", "unverified")
+  }
   return NextResponse.redirect(redirectBase)
 }
