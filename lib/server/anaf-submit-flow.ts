@@ -184,6 +184,23 @@ function getLocalSubmissions(orgId: string): SPVSubmissionRow[] {
   return localSubmissions.get(orgId)!
 }
 
+// Detect transient network failures (ENOTFOUND, fetch failed) — Supabase URL
+// configured but unreachable in dev/offline scenarios. Caller falls back to
+// local store. Real HTTP errors (4xx/5xx) propagate normally.
+function isSupabaseUnreachable(err: unknown): boolean {
+  if (!(err instanceof Error)) return false
+  const msg = err.message.toLowerCase()
+  if (msg.includes("fetch failed")) return true
+  if (msg.includes("enotfound")) return true
+  if (msg.includes("econnrefused")) return true
+  if (msg.includes("network error")) return true
+  if (msg.includes("etimedout")) return true
+  // Recurse into cause chain (fetch wraps the real error in `cause`)
+  const cause = (err as { cause?: unknown }).cause
+  if (cause && cause !== err) return isSupabaseUnreachable(cause)
+  return false
+}
+
 // ── 1. Initiate submit — creates pending_action (always manual) ──────────────
 
 export async function initiateSubmit(params: {
@@ -239,7 +256,12 @@ export async function initiateSubmit(params: {
   const row = submissionToRow(submission)
 
   if (hasSupabaseConfig()) {
-    await supabaseInsert("spv_submissions", [row], "public")
+    try {
+      await supabaseInsert("spv_submissions", [row], "public")
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      getLocalSubmissions(orgId).push(row)
+    }
   } else {
     getLocalSubmissions(orgId).push(row)
   }
@@ -508,18 +530,29 @@ export async function listSubmissions(
   orgId: string,
   limit = 20
 ): Promise<SPVSubmission[]> {
-  const submissions = hasSupabaseConfig()
-    ? (
+  const fromLocal = () =>
+    getLocalSubmissions(orgId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, limit)
+      .map(rowToSubmission)
+
+  let submissions: SPVSubmission[]
+  if (hasSupabaseConfig()) {
+    try {
+      submissions = (
         await supabaseSelect<SPVSubmissionRow>(
           "spv_submissions",
           `select=*&org_id=eq.${orgId}&order=created_at.desc&limit=${limit}`,
           "public"
         )
       ).map(rowToSubmission)
-    : getLocalSubmissions(orgId)
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .slice(0, limit)
-        .map(rowToSubmission)
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      submissions = fromLocal()
+    }
+  } else {
+    submissions = fromLocal()
+  }
 
   return Promise.all(submissions.map((submission) => reconcileSubmissionApprovalState(submission)))
 }
@@ -530,17 +563,26 @@ export async function getSubmission(
   orgId: string,
   submissionId: string
 ): Promise<SPVSubmission | null> {
-  if (hasSupabaseConfig()) {
-    const rows = await supabaseSelect<SPVSubmissionRow>(
-      "spv_submissions",
-      `select=*&org_id=eq.${orgId}&id=eq.${submissionId}&limit=1`,
-      "public"
-    )
-    return rows[0] ? reconcileSubmissionApprovalState(rowToSubmission(rows[0])) : null
+  const fromLocal = () => {
+    const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
+    return row ? reconcileSubmissionApprovalState(rowToSubmission(row)) : null
   }
 
-  const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
-  return row ? reconcileSubmissionApprovalState(rowToSubmission(row)) : null
+  if (hasSupabaseConfig()) {
+    try {
+      const rows = await supabaseSelect<SPVSubmissionRow>(
+        "spv_submissions",
+        `select=*&org_id=eq.${orgId}&id=eq.${submissionId}&limit=1`,
+        "public"
+      )
+      return rows[0] ? reconcileSubmissionApprovalState(rowToSubmission(rows[0])) : null
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return fromLocal()
+    }
+  }
+
+  return fromLocal()
 }
 
 export async function syncSubmissionApprovalDecision(params: {
@@ -581,17 +623,24 @@ async function getSubmissionByApprovalActionId(
   orgId: string,
   approvalActionId: string
 ): Promise<SPVSubmission | null> {
-  if (hasSupabaseConfig()) {
-    const rows = await supabaseSelect<SPVSubmissionRow>(
-      "spv_submissions",
-      `select=*&org_id=eq.${orgId}&approval_action_id=eq.${approvalActionId}&limit=1`,
-      "public"
-    )
-    return rows[0] ? rowToSubmission(rows[0]) : null
+  const fromLocal = () => {
+    const row = getLocalSubmissions(orgId).find((r) => r.approval_action_id === approvalActionId)
+    return row ? rowToSubmission(row) : null
   }
-
-  const row = getLocalSubmissions(orgId).find((r) => r.approval_action_id === approvalActionId)
-  return row ? rowToSubmission(row) : null
+  if (hasSupabaseConfig()) {
+    try {
+      const rows = await supabaseSelect<SPVSubmissionRow>(
+        "spv_submissions",
+        `select=*&org_id=eq.${orgId}&approval_action_id=eq.${approvalActionId}&limit=1`,
+        "public"
+      )
+      return rows[0] ? rowToSubmission(rows[0]) : null
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      return fromLocal()
+    }
+  }
+  return fromLocal()
 }
 
 // ── Internal helpers ────────────────────────────────────────────────────────
@@ -636,19 +685,27 @@ async function updateSubmissionStatus(
   status: SPVSubmissionStatus,
   extra?: Partial<SPVSubmissionRow>
 ): Promise<void> {
-  if (hasSupabaseConfig()) {
-    await supabaseUpdate(
-      "spv_submissions",
-      `org_id=eq.${orgId}&id=eq.${submissionId}`,
-      { status, ...extra },
-      "public"
-    )
-  } else {
+  const updateLocal = () => {
     const row = getLocalSubmissions(orgId).find((r) => r.id === submissionId)
     if (row) {
       row.status = status
       if (extra) Object.assign(row, extra)
     }
+  }
+  if (hasSupabaseConfig()) {
+    try {
+      await supabaseUpdate(
+        "spv_submissions",
+        `org_id=eq.${orgId}&id=eq.${submissionId}`,
+        { status, ...extra },
+        "public"
+      )
+    } catch (err) {
+      if (!isSupabaseUnreachable(err)) throw err
+      updateLocal()
+    }
+  } else {
+    updateLocal()
   }
 }
 

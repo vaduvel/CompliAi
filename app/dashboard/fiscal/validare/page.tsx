@@ -123,7 +123,7 @@ export default function FiscalValidationPage() {
 
       <Section
         icon={<FileCode2 className="size-4 text-eos-primary" strokeWidth={2} />}
-        title="Validator e-Factura XML"
+        title="Validare manuală XML"
         subtitle="Validare UBL CIUS-RO + auto-repair sugestii pentru V002 (CustomizationID), V003, V005, T003."
       >
         <EFacturaValidatorCard

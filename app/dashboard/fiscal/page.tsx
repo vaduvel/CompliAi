@@ -296,12 +296,12 @@ export default function FiscalPage() {
         </section>
       )}
 
+      {/* Audit fiscal 2026-05-11: pe overview (fără tabParam) nu mai randăm Tabs
+          deloc — toate sub-secțiunile sunt acum pagini dedicate accesate din
+          sidebar. Tabs rămân pentru deep-links din findings (?tab=X&findingId=Y),
+          retro-compat pentru EF-004/EF-005 protocol flow. */}
+      {tabParam && (
       <Tabs defaultValue={defaultTab} className="space-y-4">
-        {/* Sprint 0 IA restructure (2026-05-11): TabsList ascuns vizual cu sr-only.
-            Navigarea se face din sidebar (7 sub-link-uri grupate). Radix Tabs
-            păstrează TabsList pentru accesibilitate (keyboard nav, screen readers)
-            dar nu mai e render-uit vizual ca să elimine cognitive overload-ul
-            celor 10 tab-uri orizontale. */}
         <TabsList className="sr-only !min-h-0 !border-b-0 !bg-transparent">
           <TabsTrigger
             value="discrepante"
@@ -484,6 +484,7 @@ export default function FiscalPage() {
           <PfaForm082Panel />
         </TabsContent>
       </Tabs>
+      )}
     </div>
   )
 }
