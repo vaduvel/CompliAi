@@ -157,7 +157,11 @@ function LoginContent() {
               <CompliScanLogoLockup variant="flat" size="sm" />
             </Link>
             <span className="ml-auto font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-eos-text-tertiary">
-              Conformitate · GDPR · NIS2 · AI Act
+              {icpSegment === "cabinet-fiscal"
+                ? "e-Factura · SAF-T · RO e-TVA · CECCAR"
+                : icpSegment === "cabinet-dpo"
+                  ? "GDPR · DPO · DSAR · Audit"
+                  : "Conformitate · GDPR · NIS2 · AI Act"}
             </span>
           </div>
 
