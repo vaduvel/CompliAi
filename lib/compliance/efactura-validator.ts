@@ -590,6 +590,36 @@ export function validateEFacturaXml({
   // --- Math cross-validations (V021–V025) — BR-CO-10/13/14/15/17 ---
   validateInvoiceMath(source, errors)
 
+  // V032 UBL element ordering in LegalMonetaryTotal.
+  // Confirmat live in sandbox 2026-05-11 cycle 4: ANAF respinge XSD daca elementele
+  // nu sunt in ordinea UBL 2.1 (LineExt -> TaxExcl -> TaxIncl -> Allowance -> ...).
+  const lmtBlock = findTagBlock(source, "LegalMonetaryTotal")
+  if (lmtBlock) {
+    const UBL_LMT_ORDER = [
+      "LineExtensionAmount",
+      "TaxExclusiveAmount",
+      "TaxInclusiveAmount",
+      "AllowanceTotalAmount",
+      "ChargeTotalAmount",
+      "PrepaidAmount",
+      "PayableRoundingAmount",
+      "PayableAmount",
+    ]
+    const positions = UBL_LMT_ORDER.map((tag) => ({
+      tag,
+      pos: lmtBlock.search(new RegExp(`<(?:[\\w-]+:)?${tag}[\\s>]`)),
+    })).filter((p) => p.pos >= 0)
+    for (let i = 1; i < positions.length; i++) {
+      if (positions[i]!.pos < positions[i - 1]!.pos) {
+        errors.push(
+          `V032 LegalMonetaryTotal: ${positions[i]!.tag} apare inainte de ` +
+            `${positions[i - 1]!.tag}. ANAF respinge XSD daca ordinea UBL 2.1 nu e respectata.`,
+        )
+        break
+      }
+    }
+  }
+
   // V029 BR-RO-120: Buyer trebuie sa aibe legal-reg-ID sau VAT ID.
   if (customerPartyBlock) {
     const legalEntity = findTagBlock(customerPartyBlock, "PartyLegalEntity")
