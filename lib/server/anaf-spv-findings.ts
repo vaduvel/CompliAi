@@ -1,5 +1,36 @@
 import type { SpvMessage } from "@/lib/anaf-spv-client"
+import type {
+  EFacturaInvoiceSignal,
+  EFacturaSignalStatus,
+} from "@/lib/compliance/efactura-risk"
 import type { ScanFinding } from "@/lib/compliance/types"
+
+function parseAnafDate(dataCreare: string | undefined | null): string {
+  if (!dataCreare) return new Date().toISOString().slice(0, 10)
+  const match = String(dataCreare).match(/^(\d{4})(\d{2})(\d{2})/)
+  if (!match) return new Date().toISOString().slice(0, 10)
+  return `${match[1]}-${match[2]}-${match[3]}`
+}
+
+function classifySpvStatus(tip: string): EFacturaSignalStatus {
+  const lower = tip.toLowerCase()
+  if (lower.includes("erori")) return "xml-error"
+  if (lower.includes("respins") || lower.includes("nok")) return "rejected"
+  if (lower.includes("prelucrare")) return "processing-delayed"
+  return "unsubmitted"
+}
+
+export function spvMessageToInvoiceSignal(msg: SpvMessage): EFacturaInvoiceSignal {
+  return {
+    id: `spv-${msg.id}`,
+    vendorName: "Furnizor SPV (din ANAF)",
+    invoiceNumber: msg.id,
+    date: parseAnafDate(msg.dataCreare),
+    status: classifySpvStatus(msg.tip),
+    reason: msg.detalii?.slice(0, 240) ?? msg.tip,
+    isTechVendor: false,
+  }
+}
 
 export function spvMessageToFinding(msg: SpvMessage, nowISO: string): ScanFinding {
   const isRejected =
