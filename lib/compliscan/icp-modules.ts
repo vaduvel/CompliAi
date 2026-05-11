@@ -101,8 +101,13 @@ export const MODULES_PER_ICP: Record<IcpSegment, ReadonlyArray<DashboardNavId>> 
     "dosar",
     "settings",
     "calendar",
-    // Fiscal core
+    // Fiscal core + Sprint 0 sub-sections IA (2026-05-11)
     "fiscal",
+    "fiscal-validation",
+    "fiscal-transmission",
+    "fiscal-tva",
+    "fiscal-integrations",
+    "fiscal-deadlines",
     // Cabinet workflows aplicabile
     "approvals", // patron approval pe cabinet contabil
     "scheduled-reports", // rapoarte fiscal lunar

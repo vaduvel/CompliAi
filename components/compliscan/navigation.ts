@@ -59,6 +59,12 @@ export type DashboardNavId =
   | "scheduled-reports"
   | "agenti"
   | "fiscal"
+  // Sprint 0 (2026-05-11) — fiscal IA restructure cu sub-secțiuni
+  | "fiscal-validation"
+  | "fiscal-transmission"
+  | "fiscal-tva"
+  | "fiscal-integrations"
+  | "fiscal-deadlines"
   | "nis2"
 
 export type DashboardNavItem = {

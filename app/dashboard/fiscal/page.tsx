@@ -67,7 +67,10 @@ export default function FiscalPage() {
     tabParam === "transmitere" ||
     tabParam === "semnale" ||
     tabParam === "saft" ||
-    tabParam === "integrari"
+    tabParam === "integrari" ||
+    tabParam === "discrepante" ||
+    tabParam === "depuneri" ||
+    tabParam === "pfa"
       ? tabParam
       : "discrepante"
 

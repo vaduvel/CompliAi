@@ -5,6 +5,7 @@ import {
   FileSearch,
   GraduationCap,
   Landmark,
+  PlugZap,
   Send,
   ShieldAlert,
   ShieldCheck,
@@ -45,33 +46,59 @@ const MODULE_NAV_ITEMS: DashboardNavItem[] = [
   },
 ]
 
-// Cabinet-fiscal — instrumente specifice CECCAR (NU duplicate cu modulul Fiscal
-// principal, ci complementare: calendar termene, agent fiscal, scheduled reports).
+// Cabinet-fiscal — instrumente specifice CECCAR.
+// Sprint 0 (2026-05-11) — restructurare IA: 6 sub-secțiuni grupate pe workflow
+// real al contabilului (validare → transmitere → monitorizare → corecție).
+//
+// Înainte: 10 tab-uri orizontale plate în /dashboard/fiscal (cognitive overload,
+// regulă 7±2 violation, fără ierarhie).
+// Acum: 6 sub-rute drill-down + Cockpit overview.
 const FISCAL_TOOLS_NAV_ITEMS: DashboardNavItem[] = [
   {
     id: "fiscal",
-    label: "Fiscal core",
-    href: dashboardRoutes.fiscal,
+    label: "Cockpit fiscal",
+    href: dashboardRoutes.fiscalCockpit,
     icon: Landmark,
-    matchers: [dashboardRoutes.fiscal],
+    matchers: [dashboardRoutes.fiscalCockpit],
   },
   {
-    id: "calendar",
-    label: "Calendar termene",
-    href: dashboardRoutes.calendar,
-    icon: CalendarClock,
-    matchers: [dashboardRoutes.calendar],
-  },
-  {
-    id: "scheduled-reports",
-    label: "Rapoarte programate",
-    href: dashboardRoutes.settingsScheduledReports,
+    id: "fiscal-validation",
+    label: "Validare & emitere",
+    href: dashboardRoutes.fiscalValidation,
     icon: FileSearch,
-    matchers: [dashboardRoutes.settingsScheduledReports],
+    matchers: [dashboardRoutes.fiscalValidation],
+  },
+  {
+    id: "fiscal-transmission",
+    label: "Transmitere & SPV",
+    href: dashboardRoutes.fiscalTransmission,
+    icon: Send,
+    matchers: [dashboardRoutes.fiscalTransmission],
+  },
+  {
+    id: "fiscal-tva",
+    label: "TVA & declarații",
+    href: dashboardRoutes.fiscalTva,
+    icon: ShieldCheck,
+    matchers: [dashboardRoutes.fiscalTva],
+  },
+  {
+    id: "fiscal-integrations",
+    label: "Integrări ERP",
+    href: dashboardRoutes.fiscalIntegrations,
+    icon: PlugZap,
+    matchers: [dashboardRoutes.fiscalIntegrations],
+  },
+  {
+    id: "fiscal-deadlines",
+    label: "Deadline urgent",
+    href: dashboardRoutes.fiscalDeadlines,
+    icon: CalendarClock,
+    matchers: [dashboardRoutes.fiscalDeadlines],
   },
   {
     id: "agenti",
-    label: "Agent fiscal",
+    label: "Agent fiscal AI",
     href: dashboardRoutes.agents,
     icon: Sparkles,
     matchers: [dashboardRoutes.agents],
