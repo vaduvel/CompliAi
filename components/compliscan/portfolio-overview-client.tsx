@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -109,12 +111,14 @@ function ClientRow({
   selected,
   onToggleSelect,
   onDelete,
+  fiscalCta = false,
 }: {
   client: PortfolioOverviewClientSummary
   onDrillDown: (id: string) => void
   selected: boolean
   onToggleSelect: (id: string) => void
   onDelete: (orgId: string) => void
+  fiscalCta?: boolean
 }) {
   const c = client.compliance
   const hasData = c?.hasData ?? false
@@ -198,7 +202,7 @@ function ClientRow({
                 </div>
               ) : undefined
             }
-            ctaLabel="Intră în firmă"
+            ctaLabel={fiscalCta ? "Deschide cockpit fiscal" : "Intră în firmă"}
             trailing={
               <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
                 <a
@@ -446,6 +450,8 @@ function BatchResultsModal({
 
 
 export function PortfolioOverviewClient() {
+  const runtime = useDashboardRuntime()
+  const isFiscalCabinet = runtime?.icpSegment === "cabinet-fiscal"
   const [clients, setClients] = useState<PortfolioOverviewClientSummary[]>([])
   const [planData, setPlanData] = useState<PortfolioPlanResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -654,10 +660,12 @@ export function PortfolioOverviewClient() {
 
       <V3PageHero
         breadcrumbs={[{ label: "Portofoliu" }, { label: "Firme", current: true }]}
-        title="Portofoliu firme"
+        title={isFiscalCabinet ? "Portofoliu fiscal" : "Portofoliu firme"}
         description={
           <>
-            Triage cross-client. Intri în firmă doar când trebuie să execuți.
+            {isFiscalCabinet
+              ? "Triage e-Factura + SAF-T + RO e-TVA per client. Intri în cockpitul fiscal al firmei doar când ai de validat sau transmis."
+              : "Triage cross-client. Intri în firmă doar când trebuie să execuți."}
             {activeClients.length > 0 && (
               <>
                 {" "}<strong className="text-eos-text">{activeClients.length} firme active</strong>{"."}
@@ -832,9 +840,15 @@ export function PortfolioOverviewClient() {
               <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
             </div>
             <div className="space-y-1.5">
-              <p className="text-base font-semibold text-eos-text">Niciun client încă în portofoliu</p>
+              <p className="text-base font-semibold text-eos-text">
+                {isFiscalCabinet
+                  ? "Niciun client fiscal în portofoliu încă"
+                  : "Niciun client încă în portofoliu"}
+              </p>
               <p className="max-w-md text-sm leading-6 text-eos-text-tertiary">
-                Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual.
+                {isFiscalCabinet
+                  ? "Adaugă primul client cabinet fiscal. Importă bulk dintr-un CSV cu coloanele CUI + Nume firmă — fiecare client va avea cockpit fiscal dedicat (e-Factura, SAF-T, RO e-TVA, cert SPV)."
+                  : "Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual."}
               </p>
             </div>
             <button
@@ -844,7 +858,7 @@ export function PortfolioOverviewClient() {
               className="mt-2 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Upload className="size-4" strokeWidth={2} />
-              Adaugă primul client
+              {isFiscalCabinet ? "Importă primii clienți" : "Adaugă primul client"}
             </button>
           </div>
         ) : filteredClients.length === 0 ? (
@@ -876,6 +890,7 @@ export function PortfolioOverviewClient() {
                   selected={selectedIds.has(client.orgId)}
                   onToggleSelect={handleToggleSelect}
                   onDelete={(orgId) => setClients((prev) => prev.filter((c) => c.orgId !== orgId))}
+                  fiscalCta={isFiscalCabinet}
                 />
               ))}
             </div>

@@ -216,6 +216,21 @@ const PORTFOLIO_NAV_ACTIVE: DashboardNavItem[] = portfolioNavItems.map((item) =>
   workspaceModeTarget: undefined,
 }))
 
+// Cabinet-fiscal: rename portfolio items pentru context fiscal (Schimbări detectate
+// → Semnale ANAF; Remediere clienți → Remedieri fiscal). Păstrăm href + id.
+// Sprint cleanup fiscal-first (2026-05-11).
+const FISCAL_PORTFOLIO_LABEL_OVERRIDES: Record<string, string> = {
+  "portfolio-alerts": "Semnale ANAF & e-Factura",
+  "portfolio-tasks": "Remedieri fiscal",
+  "portfolio-reports": "Rapoarte fiscal",
+}
+function applyFiscalPortfolioLabels(items: DashboardNavItem[]): DashboardNavItem[] {
+  return items.map((item) => {
+    const override = FISCAL_PORTFOLIO_LABEL_OVERRIDES[item.id]
+    return override ? { ...item, label: override } : item
+  })
+}
+
 export function canSwitchToPortfolio(userMode: UserMode | null) {
   return userMode === "partner"
 }
@@ -231,21 +246,29 @@ export function getSidebarNavSections({
   // Build base sections per userMode + workspaceMode + role (logic existing)
   const baseSections: AdaptiveNavSection[] = (() => {
     if (userMode === "partner" && workspaceMode === "portfolio") {
+      const portfolioItems =
+        icpSegment === "cabinet-fiscal"
+          ? applyFiscalPortfolioLabels(PORTFOLIO_NAV_ACTIVE)
+          : PORTFOLIO_NAV_ACTIVE
       return [
         {
           id: "portfolio",
-          label: "Portofoliu",
-          items: PORTFOLIO_NAV_ACTIVE,
+          label: icpSegment === "cabinet-fiscal" ? "Portofoliu fiscal" : "Portofoliu",
+          items: portfolioItems,
         },
       ]
     }
 
     if (userMode === "partner") {
+      const portfolioOrgTargetItems =
+        icpSegment === "cabinet-fiscal"
+          ? applyFiscalPortfolioLabels(PORTFOLIO_NAV_ORG_TARGET)
+          : PORTFOLIO_NAV_ORG_TARGET
       const base: AdaptiveNavSection[] = [
         {
           id: "portfolio",
-          label: "Portofoliu",
-          items: PORTFOLIO_NAV_ORG_TARGET,
+          label: icpSegment === "cabinet-fiscal" ? "Portofoliu fiscal" : "Portofoliu",
+          items: portfolioOrgTargetItems,
         },
         {
           id: "org",
@@ -333,7 +356,9 @@ export function getMobileNavItems({
 }: AdaptiveNavContext): DashboardNavItem[] {
   const baseItems: DashboardNavItem[] = (() => {
     if (userMode === "partner" && workspaceMode === "portfolio") {
-      return PORTFOLIO_NAV_ACTIVE
+      return icpSegment === "cabinet-fiscal"
+        ? applyFiscalPortfolioLabels(PORTFOLIO_NAV_ACTIVE)
+        : PORTFOLIO_NAV_ACTIVE
     }
 
     if (userMode === "solo") {
