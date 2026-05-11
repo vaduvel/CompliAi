@@ -234,6 +234,106 @@ function validateInvoiceLine(block: string, lineIndex: number, errors: string[])
         "ANAF cere pretul per unitate pe fiecare linie.",
     )
   }
+  // V033–V038: VAT category families (BR-S, BR-Z, BR-E, BR-AE, BR-IC, BR-G, BR-O).
+  // Per-family business rules from CIUS-RO 1.0.9 + EN 16931. Catches the most
+  // frequent cabinet errors: standard rate set to 0%, exempt without reason,
+  // reverse charge with VAT amount, etc.
+  validateLineVatCategory(itemBlock, lineIndex, errors)
+}
+
+// VAT category codes per UNCL 5305:
+//   S  = Standard rate
+//   Z  = Zero rate
+//   E  = Exempt from VAT
+//   AE = Reverse charge (services intracomunitare B2B)
+//   K  = Intra-community supply of goods
+//   G  = Export outside EU
+//   O  = Outside scope of VAT
+//   L  = IGIC (Canary Islands)
+//   M  = IPSI (Ceuta/Melilla)
+//   B  = Split payment
+const VAT_CATEGORIES_WITH_RATE = new Set(["S", "L", "M"])
+const VAT_CATEGORIES_ZERO_RATE = new Set(["Z", "E", "AE", "K", "G", "O", "B"])
+const VAT_CATEGORIES_REQUIRE_EXEMPTION_REASON = new Set(["E", "AE", "K", "G", "O"])
+
+function validateLineVatCategory(itemBlock: string, lineIndex: number, errors: string[]): void {
+  const taxCategoryBlock = findTagBlock(itemBlock, "ClassifiedTaxCategory")
+  if (!taxCategoryBlock) return // V019 already reports missing block
+  const id = findTagValue(taxCategoryBlock, "ID").toUpperCase()
+  const percentRaw = findTagValue(taxCategoryBlock, "Percent")
+  const percent = parseMoney(percentRaw)
+
+  if (!id) {
+    errors.push(
+      `V033 InvoiceLine #${lineIndex}: ClassifiedTaxCategory fara cbc:ID. ` +
+        "Adauga codul TVA (S, Z, E, AE, K, G, O).",
+    )
+    return
+  }
+  if (VAT_CATEGORIES_WITH_RATE.has(id)) {
+    // BR-S/BR-L/BR-M: rate must be > 0
+    if (percent === null) {
+      errors.push(
+        `V034 BR-S InvoiceLine #${lineIndex}: categoria TVA "${id}" (cota standard) ` +
+          "cere cbc:Percent (ex: 19, 9, 5).",
+      )
+    } else if (percent <= 0) {
+      errors.push(
+        `V034 BR-S InvoiceLine #${lineIndex}: categoria "${id}" are Percent=${percent}, ` +
+          "dar standard rate trebuie > 0. Foloseste Z/E daca e 0%.",
+      )
+    }
+  } else if (VAT_CATEGORIES_ZERO_RATE.has(id)) {
+    // BR-Z/BR-E/BR-AE etc.: rate must be 0 (or absent)
+    if (percent !== null && percent > 0) {
+      errors.push(
+        `V035 BR-${id} InvoiceLine #${lineIndex}: categoria "${id}" are Percent=${percent}, ` +
+          "dar trebuie 0% (sau absent). Pentru cota nenula foloseste S.",
+      )
+    }
+  }
+}
+
+function validateInvoiceVatBreakdowns(source: string, errors: string[]): void {
+  const taxTotalBlock = findTagBlock(source, "TaxTotal")
+  if (!taxTotalBlock) return
+  const subtotals = findAllTagBlocks(taxTotalBlock, "TaxSubtotal")
+  subtotals.forEach((subtotal, idx) => {
+    const taxCategoryBlock = findTagBlock(subtotal, "TaxCategory")
+    const id = findTagValue(taxCategoryBlock, "ID").toUpperCase()
+    if (!id) return
+
+    if (VAT_CATEGORIES_REQUIRE_EXEMPTION_REASON.has(id)) {
+      const reason = findTagValue(taxCategoryBlock, "TaxExemptionReason")
+      const reasonCode = findTagValue(taxCategoryBlock, "TaxExemptionReasonCode")
+      if (!reason && !reasonCode) {
+        errors.push(
+          `V036 BR-${id} TaxSubtotal #${idx + 1}: categoria "${id}" cere ` +
+            "cbc:TaxExemptionReason sau cbc:TaxExemptionReasonCode (VATEX-EU-AE, VATEX-EU-IC, etc.).",
+        )
+      }
+    }
+    if (id === "AE") {
+      // BR-AE-09: TaxSubtotal pentru AE trebuie să aibă TaxAmount = 0
+      const taxAmount = parseMoney(findTagValue(subtotal, "TaxAmount"))
+      if (taxAmount !== null && Math.abs(taxAmount) > MONEY_TOLERANCE) {
+        errors.push(
+          `V037 BR-AE-09 TaxSubtotal #${idx + 1}: reverse charge (AE) ` +
+            `trebuie TaxAmount=0, dar e ${taxAmount.toFixed(2)}.`,
+        )
+      }
+    }
+    if (id === "K") {
+      // BR-IC-11: intra-community VAT amount = 0
+      const taxAmount = parseMoney(findTagValue(subtotal, "TaxAmount"))
+      if (taxAmount !== null && Math.abs(taxAmount) > MONEY_TOLERANCE) {
+        errors.push(
+          `V038 BR-IC-11 TaxSubtotal #${idx + 1}: livrare intracomunitara (K) ` +
+            `trebuie TaxAmount=0, dar e ${taxAmount.toFixed(2)}.`,
+        )
+      }
+    }
+  })
 }
 
 function normalizePartyTaxId(value: string) {
@@ -589,6 +689,9 @@ export function validateEFacturaXml({
 
   // --- Math cross-validations (V021–V025) — BR-CO-10/13/14/15/17 ---
   validateInvoiceMath(source, errors)
+
+  // --- VAT category families (V036–V038) — BR-S/Z/E/AE/IC/G/O/B ---
+  validateInvoiceVatBreakdowns(source, errors)
 
   // V032 UBL element ordering in LegalMonetaryTotal.
   // Confirmat live in sandbox 2026-05-11 cycle 4: ANAF respinge XSD daca elementele
