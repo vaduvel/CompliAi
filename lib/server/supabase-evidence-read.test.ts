@@ -67,6 +67,7 @@ function createState(): ComplianceState {
     snapshotHistory: [],
     validatedBaselineSnapshotId: undefined,
     events: [],
+    generatedDocuments: [],
   }
 }
 

@@ -115,6 +115,7 @@ describe("ai-prefill-signals", () => {
         address: "BUCURESTI",
         legalForm: "SA",
         mainCaen: "4754",
+        caenDescription: null,
         fiscalStatus: "INREGISTRAT",
         vatRegistered: true,
         vatOnCashAccounting: false,
