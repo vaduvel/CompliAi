@@ -52,13 +52,13 @@ const SLIDES: WalkthroughSlide[] = [
   {
     id: "import-clients",
     eyebrow: "Pas 1 — Aduce clienții în CompliScan",
-    title: "Importă primii clienți",
+    title: "Importă primii clienți (Excel / CSV)",
     description:
-      "Pentru a începe să-ți urmărim portofoliul fiscal, avem nevoie de lista clienților tăi cu CUI-urile lor. Două căi rapide:",
+      "Pentru a începe să-ți urmărim portofoliul fiscal, ai nevoie de lista clienților tăi cu CUI-urile lor. Cea mai rapidă cale:",
     bullets: [
-      "Adaugă manual 1 client cu CUI — auto-completăm denumire, status TVA, sector CAEN din ANAF API public.",
-      "Upload bulk CSV cu coloane orgName + CUI + sector + employeeCount + email — maxim 50 rânduri pe import.",
-      "După adăugare, fiecare client capătă un cockpit fiscal dedicat (e-Factura, SAF-T, e-TVA).",
+      "Drag-drop Excel sau CSV — chiar și cu 1 singur rând. Coloane auto-detectate: orgName, CUI, sector, employeeCount, email.",
+      "Auto-fill din ANAF API public per CUI: denumire oficială, status TVA, sector CAEN — fără să-l completezi tu manual.",
+      "După import, fiecare client capătă un cockpit fiscal dedicat (e-Factura, SAF-T, e-TVA, cert SPV).",
     ],
     icon: FileSpreadsheet,
     accent: "primary",

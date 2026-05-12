@@ -1,19 +1,23 @@
 "use client"
 
 // PortfolioFiscalEmptyState — empty state pentru cabinet-fiscal când portofoliul
-// e gol (0 clienți). Înlocuiește butonul singular "Adaugă primul client" cu 4
+// e gol (0 clienți). Înlocuiește butonul singular "Adaugă primul client" cu 3
 // căi vizibile inline (per workflow Mircea validat cu fondatorul):
 //
 //   1. 🏛 ANAF SPV — 1 OAuth → pull mesaje pentru toate CUI împuternicite
 //   2. 📊 ERP — SmartBill / Oblio / SAGA (per cont/client, optional)
-//   3. ➕ Manual — 1 CUI cu auto-fill ANAF API public
-//   4. 📄 CSV — Excel propriu cabinet → drag-drop bulk
+//   3. 📄 CSV — Excel propriu cabinet → drag-drop bulk (1-50 rânduri)
+//
+// Manual "1 CUI" e redundant cu CSV (omul scoate 1 rând din Excel și-l urcă).
+// `/dashboard/scan` e pentru scanare site/documente own-org, NU pentru import
+// clienți cabinet.
 //
 // Mircea poate combina căile (ex: ANAF SPV + restul completate din CSV).
 // Nu blocăm — dacă vrea să exploreze fără date, butonul "demo data" îi
 // populează 5 clienți fictivi.
 //
 // Faza 1.2 din fiscal-module-final-sprint-2026-05-12.md.
+// Updated 2026-05-12: dropped manual 1-CUI path (redundant cu CSV).
 
 import { useState } from "react"
 import {
@@ -24,17 +28,14 @@ import {
   PlugZap,
   Sparkles,
   Upload,
-  UserPlus,
 } from "lucide-react"
 import { toast } from "sonner"
 
-type ImportPath = "anaf-spv" | "erp" | "manual" | "csv" | "demo"
+type ImportPath = "anaf-spv" | "erp" | "csv" | "demo"
 
 type PortfolioFiscalEmptyStateProps = {
-  /** Trigger pentru deschiderea modalei CSV import (existing flow). */
+  /** Trigger pentru deschiderea modalei CSV import (existing flow ImportWizard). */
   onOpenCsvImport: () => void
-  /** Trigger pentru deschiderea form-ului manual de adăugare 1 client. */
-  onOpenManualAdd: () => void
   /** True dacă plan-ul curent nu mai permite adăugare clienți (limit hit). */
   importDisabled?: boolean
   /** Mesaj custom dacă import e disabled (de ex. "Upgrade pentru a adăuga"). */
@@ -43,7 +44,6 @@ type PortfolioFiscalEmptyStateProps = {
 
 export function PortfolioFiscalEmptyState({
   onOpenCsvImport,
-  onOpenManualAdd,
   importDisabled = false,
   importDisabledReason,
 }: PortfolioFiscalEmptyStateProps) {
@@ -110,14 +110,14 @@ export function PortfolioFiscalEmptyState({
         </p>
       </div>
 
-      {/* 4 import paths grid */}
+      {/* 3 import paths grid — Manual 1-CUI redundant cu CSV (1-50 rânduri) */}
       <div className="grid w-full max-w-3xl gap-3 sm:grid-cols-2">
-        {/* Path 1: ANAF SPV OAuth (recomandat) */}
+        {/* Path 1: ANAF SPV OAuth (recomandat — full-width pe mobile, primul rând) */}
         <button
           type="button"
           onClick={handleAnafSpvConnect}
           disabled={busyPath !== null || importDisabled}
-          className="group relative flex flex-col items-start gap-2 overflow-hidden rounded-eos-lg border border-eos-warning/30 bg-eos-warning/[0.05] p-4 text-left transition hover:border-eos-warning hover:bg-eos-warning/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+          className="group relative flex flex-col items-start gap-2 overflow-hidden rounded-eos-lg border border-eos-warning/30 bg-eos-warning/[0.05] p-4 text-left transition hover:border-eos-warning hover:bg-eos-warning/[0.08] disabled:cursor-not-allowed disabled:opacity-50 sm:col-span-2"
         >
           <span className="absolute right-3 top-3 rounded-full bg-eos-warning/20 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
             Recomandat
@@ -166,31 +166,7 @@ export function PortfolioFiscalEmptyState({
           </span>
         </a>
 
-        {/* Path 3: Manual add 1 client */}
-        <button
-          type="button"
-          onClick={() => {
-            if (importDisabled) {
-              toast.warning(importDisabledReason ?? "Limita planului curent atinsă.")
-              return
-            }
-            onOpenManualAdd()
-          }}
-          disabled={busyPath !== null || importDisabled}
-          className="group flex flex-col items-start gap-2 rounded-eos-lg border border-eos-border bg-eos-surface p-4 text-left transition hover:border-eos-primary hover:bg-eos-primary/[0.04] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <UserPlus className="size-5 text-eos-text-muted" strokeWidth={1.5} />
-          <p className="text-sm font-semibold text-eos-text">➕ Adaugă manual 1 CUI</p>
-          <p className="text-xs leading-5 text-eos-text-tertiary">
-            Introdu CUI-ul clientului → auto-completez denumire, status TVA, sector CAEN
-            din ANAF API public (gratuit, fără OAuth).
-          </p>
-          <span className="mt-1 text-[11.5px] font-medium text-eos-text-muted">
-            Adaugă 1 client →
-          </span>
-        </button>
-
-        {/* Path 4: CSV upload */}
+        {/* Path 3: CSV upload (handles 1 sau 50 rânduri — manual single-CUI redundant) */}
         <button
           type="button"
           onClick={() => {
@@ -204,16 +180,16 @@ export function PortfolioFiscalEmptyState({
           className="group flex flex-col items-start gap-2 rounded-eos-lg border border-eos-border bg-eos-surface p-4 text-left transition hover:border-eos-primary hover:bg-eos-primary/[0.04] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <FileSpreadsheet className="size-5 text-eos-text-muted" strokeWidth={1.5} />
-          <p className="text-sm font-semibold text-eos-text">📄 Upload CSV</p>
+          <p className="text-sm font-semibold text-eos-text">📄 Upload Excel / CSV</p>
           <p className="text-xs leading-5 text-eos-text-tertiary">
-            Excel-ul cabinetului → drag-drop. Format:{" "}
-            <code className="font-mono text-[11px] text-eos-text-muted">
-              orgName,cui,sector,employeeCount,email
-            </code>{" "}
-            — maxim 50 rânduri / import.
+            Drag-drop Excel-ul cabinetului — chiar și cu 1 singur rând. Format auto-detectat:
+            <code className="ml-1 font-mono text-[11px] text-eos-text-muted">
+              orgName, cui, sector, employeeCount, email
+            </code>
+            . Auto-fill ANAF API public per CUI.
           </p>
           <span className="mt-1 text-[11.5px] font-medium text-eos-text-muted">
-            Upload bulk →
+            Upload 1-50 firme →
           </span>
         </button>
       </div>

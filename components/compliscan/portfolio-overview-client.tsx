@@ -874,7 +874,6 @@ export function PortfolioOverviewClient() {
             // inline (ANAF SPV / ERP / Manual / CSV) + demo escape hatch.
             <PortfolioFiscalEmptyState
               onOpenCsvImport={() => setShowImport(true)}
-              onOpenManualAdd={() => setShowImport(true)}
               importDisabled={planData ? !planData.canAddOrg : false}
               importDisabledReason={
                 planData && !planData.canAddOrg
