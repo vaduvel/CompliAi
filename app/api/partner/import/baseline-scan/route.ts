@@ -68,6 +68,16 @@ export async function POST(request: Request) {
     }
     console.log("[baseline-scan] Initial findings count:", state.findings?.length ?? 0)
 
+    // Faza 3.5g fix (2026-05-12): scope baseline findings by cabinet ICP.
+    // Pentru cabinet-fiscal, SKIP findings DPO/GDPR/NIS2 — Mircea nu vrea zgomot
+    // non-fiscal pe clienții lui. Findings fiscal vin din Faza 2 scan orchestrator
+    // care apelează ANAF SPV real per CUI.
+    const cabinetIcpSegment = request.headers.get("x-compliscan-icp-segment")
+    const isCabinetFiscal = cabinetIcpSegment === "cabinet-fiscal"
+    if (isCabinetFiscal) {
+      console.log("[baseline-scan] Cabinet-fiscal detected — skipping DPO/GDPR/NIS2 findings.")
+    }
+
     let prefill = state.orgProfilePrefill ?? null
     let updatedProfile = state.orgProfile
     const nowISO = new Date().toISOString()
@@ -162,14 +172,32 @@ export async function POST(request: Request) {
       state.intakeAnswers = mergedAnswers
       state.intakeCompletedAtISO = nowISO
       console.log("[baseline-scan] efacturaActive (from ANAF):", efacturaActive)
-      const nis2State = await readNis2State(body.orgId)
-      const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
-      const romanianPrivacyFindings = buildRomanianPrivacyFindings(updatedProfile, nowISO)
-      const findings = buildInitialFindings(mergedAnswers, {
-        supplementalFindings: [...nis2Findings, ...romanianPrivacyFindings],
-      })
 
-      console.log("[baseline-scan] Generated findings:", findings.length, "for org:", body.orgId)
+      // Faza 3.5g fix: pentru cabinet-fiscal SKIP findings DPO/GDPR/NIS2/privacy.
+      // Mircea (contabil CECCAR) NU vrea zgomot non-fiscal pe clienții lui.
+      // Findings fiscal vin separat din /api/portfolio/fiscal-scan (Faza 2) care
+      // apelează ANAF SPV real per CUI.
+      let findings: typeof state.findings = []
+      let romanianPrivacyFindings: typeof state.findings = []
+
+      if (!isCabinetFiscal) {
+        const nis2State = await readNis2State(body.orgId)
+        const nis2Findings = buildNis2Findings(nis2State, new Date().toISOString())
+        romanianPrivacyFindings = buildRomanianPrivacyFindings(updatedProfile, nowISO)
+        findings = buildInitialFindings(mergedAnswers, {
+          supplementalFindings: [...nis2Findings, ...romanianPrivacyFindings],
+        })
+      }
+
+      console.log(
+        "[baseline-scan] Generated findings:",
+        findings.length,
+        "for org:",
+        body.orgId,
+        "(cabinet-fiscal scoping:",
+        isCabinetFiscal,
+        ")",
+      )
 
       if (findings.length > 0) {
         // Merge findings — don't duplicate if already exist
@@ -178,7 +206,10 @@ export async function POST(request: Request) {
         state.findings = [...state.findings, ...newFindings]
       }
 
-      if (romanianPrivacyFindings.some((finding) => finding.id === "intake-gdpr-training-tracker")) {
+      if (
+        !isCabinetFiscal &&
+        romanianPrivacyFindings.some((finding) => finding.id === "intake-gdpr-training-tracker")
+      ) {
         const hasDefaultTraining = (state.gdprTrainingRecords ?? []).some(
           (record) => record.id === "gdpr-training-baseline-required"
         )
