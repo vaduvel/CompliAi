@@ -9,8 +9,14 @@ import { readFreshStateForOrg } from "@/lib/server/mvp-store"
 import { normalizeComplianceState } from "@/lib/compliance/engine"
 import { getAgentLog } from "@/lib/server/agent-run-store"
 import { calculateRiskTrajectory } from "@/lib/compliance/risk-trajectory"
+import { getIcpContextFromRequest } from "@/lib/server/icp-permissions"
 import { logRouteError } from "@/lib/server/operational-logger"
 import { createRequestContext, getRequestDurationMs } from "@/lib/server/request-context"
+
+// Iminent risks NON-FISCAL — pentru cabinet-fiscal le scoatem din răspuns.
+// Mircea (contabil CECCAR) NU operează pe Pay Transparency / AI Act / DPO
+// timeline; afișarea lor ca "trajectory degradation drivers" e zgomot.
+const NON_FISCAL_IMINENT_RISK_PREFIXES = ["pay-transparency-", "ai-act-"] as const
 
 export async function GET(request: Request) {
   const context = createRequestContext(request, "/api/risk/trajectory")
@@ -43,6 +49,17 @@ export async function GET(request: Request) {
 
     const state = normalizeComplianceState(rawState)
     const trajectory = calculateRiskTrajectory(state, agentLog, new Date().toISOString())
+
+    // Cabinet-fiscal scope: drop iminentRisks non-fiscal (Pay Transparency,
+    // AI Act timeline) — irelevant pentru contabil. Recalculate trend dacă
+    // toate iminentRisks rămase sunt fiscal.
+    const { icpSegment } = getIcpContextFromRequest(request)
+    if (icpSegment === "cabinet-fiscal" && trajectory.iminentRisks.length > 0) {
+      const filtered = trajectory.iminentRisks.filter(
+        (risk) => !NON_FISCAL_IMINENT_RISK_PREFIXES.some((prefix) => risk.id.startsWith(prefix)),
+      )
+      trajectory.iminentRisks = filtered
+    }
 
     return NextResponse.json(trajectory, withRequestIdHeaders(undefined, context))
   } catch (error) {
