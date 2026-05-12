@@ -43,12 +43,23 @@ export function PatternDSearchLookup({ finding, onResolved }: PatternDProps) {
     setSearching(true)
     setError(null)
     try {
-      const url = `${config.searchEndpoint}?q=${encodeURIComponent(query.trim())}`
-      const res = await fetch(url, { cache: "no-store" })
+      // Try POST first (sequence-gap, cpv-suggest endpoints expect POST)
+      const isPostEndpoint = config.searchMethod === "POST"
+      const res = isPostEndpoint
+        ? await fetch(config.searchEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: query.trim(), findingId: finding.id }),
+          })
+        : await fetch(`${config.searchEndpoint}?q=${encodeURIComponent(query.trim())}`, {
+            cache: "no-store",
+          })
       if (!res.ok) throw new Error("Căutarea a eșuat.")
-      const data = (await res.json()) as { results?: LookupResult[] }
-      setResults(data.results ?? [])
-      if ((data.results ?? []).length === 0) {
+      const raw = (await res.json()) as Record<string, unknown>
+      // Adapter — endpoint-urile au shape diferit (results / suggestions / found / gaps)
+      const items = normalizeResults(raw, finding.findingTypeId ?? "")
+      setResults(items)
+      if (items.length === 0) {
         toast.info("Niciun rezultat găsit. Încearcă alt termen.")
       }
     } catch (err) {
@@ -58,6 +69,39 @@ export function PatternDSearchLookup({ finding, onResolved }: PatternDProps) {
     } finally {
       setSearching(false)
     }
+  }
+
+  function normalizeResults(raw: Record<string, unknown>, typeId: string): LookupResult[] {
+    // Heuristic — endpoint-urile fiscale au shape-uri diverse. Mapăm la
+    // LookupResult comun.
+    if (Array.isArray(raw.results)) return raw.results as LookupResult[]
+    if (Array.isArray(raw.suggestions)) {
+      return (raw.suggestions as Array<{ code?: string; label?: string; description?: string }>).map(
+        (s, idx) => ({
+          id: s.code ?? String(idx),
+          primary: s.label ?? s.code ?? "—",
+          secondary: s.description,
+        }),
+      )
+    }
+    if (typeId === "EF-SEQUENCE" && Array.isArray(raw.gaps)) {
+      return (raw.gaps as Array<{ number?: string; series?: string }>).map((g, idx) => ({
+        id: g.number ?? String(idx),
+        primary: `Factură lipsă: ${g.series ?? ""}${g.number ?? ""}`,
+        secondary: "Neidentificată în ERP. Generăm notă explicativă.",
+      }))
+    }
+    if (raw.found && typeof raw.found === "object") {
+      const found = raw.found as Record<string, unknown>
+      return [
+        {
+          id: String(found.cui ?? found.id ?? "1"),
+          primary: String(found.denumire ?? found.name ?? "Rezultat"),
+          secondary: String(found.cuiNorm ?? found.tva ?? ""),
+        },
+      ]
+    }
+    return []
   }
 
   async function handleApply() {
@@ -207,6 +251,7 @@ type LookupConfig = {
   placeholder: string
   initialQuery: string
   searchEndpoint: string
+  searchMethod?: "GET" | "POST"
   fallbackHint?: string
 }
 
@@ -219,6 +264,7 @@ function resolveLookupConfig(finding: ScanFinding): LookupConfig {
       placeholder: "ex: F2026-0042",
       initialQuery: extractMissingInvoice(finding) ?? "",
       searchEndpoint: "/api/fiscal/sequence-gap",
+      searchMethod: "POST",
       fallbackHint:
         "Dacă factura nu există în ERP, generăm o notă explicativă „serie ratată” pentru audit log.",
     }
@@ -230,6 +276,7 @@ function resolveLookupConfig(finding: ScanFinding): LookupConfig {
       placeholder: "ex: servicii consultanță IT",
       initialQuery: "",
       searchEndpoint: "/api/fiscal/cpv-suggest",
+      searchMethod: "POST",
     }
   }
   if (typeId === "EF-006") {
@@ -239,6 +286,7 @@ function resolveLookupConfig(finding: ScanFinding): LookupConfig {
       placeholder: "ex: RO12345678",
       initialQuery: extractCui(finding) ?? "",
       searchEndpoint: "/api/anaf/lookup",
+      searchMethod: "GET",
     }
   }
   return {
@@ -247,6 +295,7 @@ function resolveLookupConfig(finding: ScanFinding): LookupConfig {
     placeholder: "Introdu termen",
     initialQuery: "",
     searchEndpoint: `/api/findings/${encodeURIComponent(finding.id)}/search`,
+    searchMethod: "GET",
   }
 }
 
