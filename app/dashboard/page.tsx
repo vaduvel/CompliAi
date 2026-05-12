@@ -22,6 +22,7 @@ import { DriftActiveCard } from "@/components/compliscan/drift-active-card"
 import { Nis2CockpitCard } from "@/components/compliscan/nis2-cockpit-card"
 import { RiskTrajectoryWidget } from "@/components/compliscan/risk-trajectory-widget"
 import { ErrorScreen } from "@/components/compliscan/route-sections"
+import { useDashboardRuntime } from "@/components/compliscan/dashboard-runtime"
 import {
   V3FindingRow,
   V3FrameworkTag,
@@ -97,6 +98,13 @@ export default function DashboardPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const cockpit = useCockpitData()
+  const runtime = useDashboardRuntime()
+  // Layer 2 defense — middleware redirect-uiește cabinet-fiscal `/dashboard` →
+  // `/dashboard/fiscal`. Acest hook e un layer suplimentar de protecție: dacă
+  // user-ul aterizează totuși aici (ex: deep-link cu ?focus=, hot reload, bug),
+  // filtrăm conținutul DPO-centric (GDPR · Pay Transparency · NIS2 · audit
+  // readiness) ca să nu surfacem framework-uri non-fiscal pentru Mircea.
+  const isCabinetFiscal = runtime?.icpSegment === "cabinet-fiscal"
   const [highlightAccumulation, setHighlightAccumulation] = useState(false)
   const [externalNotifications, setExternalNotifications] = useState<AppNotification[]>([])
 
@@ -224,8 +232,15 @@ export default function DashboardPage() {
               ? "În progres"
               : "Neînceput"
 
+  // Cabinet-fiscal scope: filtrăm applicabilitatea la fiscal-only.
+  // Restul tag-urilor (gdpr/nis2/ai-act/cer) nu sunt relevante pentru contabil.
+  const FISCAL_ONLY_TAGS = new Set<ApplicabilityTag>(["efactura", "saft"])
+  const scopedApplicableEntries = isCabinetFiscal
+    ? applicableEntries.filter((e) => FISCAL_ONLY_TAGS.has(e.tag))
+    : applicableEntries
+
   // Per-framework status derived from findings
-  const frameworkItems = applicableEntries
+  const frameworkItems = scopedApplicableEntries
     .filter((e) => TAG_TO_CATEGORY[e.tag])
     .map((entry) => {
       const cat = TAG_TO_CATEGORY[entry.tag]!
@@ -245,8 +260,8 @@ export default function DashboardPage() {
       }
     })
   const applicabilitySummary =
-    applicableEntries.length > 0
-      ? applicableEntries.map((entry) => APPLICABILITY_TAG_LABELS[entry.tag]).join(" · ")
+    scopedApplicableEntries.length > 0
+      ? scopedApplicableEntries.map((entry) => APPLICABILITY_TAG_LABELS[entry.tag]).join(" · ")
       : "Se completează după primul snapshot"
   const nextActionSummary = nextBestAction
     ? nextBestAction.title
@@ -259,13 +274,25 @@ export default function DashboardPage() {
   })
   const externalFeedItems = buildExternalFeedItems(externalNotifications, state)
   const systemCheckItems = buildProactiveSystemChecks(state, data.summary.score, data.summary.redAlerts)
-  const activityFeedItems = [
+  const allFeedItems = [
     ...internalFeedItems,
     ...externalFeedItems.map((i) => ({ id: i.id, eyebrow: i.eyebrow, title: i.title, detail: i.detail, dateISO: i.dateISO, tone: i.tone, href: i.href })),
     ...systemCheckItems.map((i) => ({ id: i.id, eyebrow: i.eyebrow, title: i.title, detail: i.detail, dateISO: i.dateISO, tone: i.tone, href: i.href })),
-  ]
-    .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
-    .slice(0, 4)
+  ].sort((a, b) => b.dateISO.localeCompare(a.dateISO))
+
+  // Cabinet-fiscal: drop activity items care menționează GDPR / NIS2 / AI Act /
+  // Pay Transparency / DPO / DSAR / DPIA / RoPA — Mircea NU vrea zgomot non-fiscal.
+  // Defense in depth — middleware deja redirect-uiește, dar dacă cumva ajunge aici,
+  // feed-ul rămâne curat.
+  const NON_FISCAL_KEYWORDS_RE = /\b(GDPR|NIS2|AI Act|Pay Transparency|Pay-Transparency|DPO|DSAR|DPIA|RoPA|breach ANSPDCP|whistleblowing|cookie|consimț[aâ]mânt)\b/i
+  const activityFeedItems = (
+    isCabinetFiscal
+      ? allFeedItems.filter((it) => {
+          const haystack = `${it.eyebrow ?? ""} ${it.title ?? ""} ${it.detail ?? ""}`
+          return !NON_FISCAL_KEYWORDS_RE.test(haystack)
+        })
+      : allFeedItems
+  ).slice(0, 4)
 
   // ── No profile ────────────────────────────────────────────────────────────
   if (!state.orgProfile) {
