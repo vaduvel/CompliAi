@@ -33,16 +33,28 @@ export function spvMessageToInvoiceSignal(msg: SpvMessage): EFacturaInvoiceSigna
 }
 
 export function spvMessageToFinding(msg: SpvMessage, nowISO: string): ScanFinding {
-  const isRejected =
-    msg.tip.toLowerCase().includes("erori") || msg.tip.toLowerCase().includes("respins")
+  const tipLower = msg.tip.toLowerCase()
+  const detLower = msg.detalii.toLowerCase()
+  const isRejected = tipLower.includes("erori") || tipLower.includes("respins")
+  const isXmlError = tipLower.includes("xml") || detLower.includes("xml")
   const severity = isRejected ? "high" : "medium"
+
+  // Faza 3.5h (2026-05-12): map SPV signals to canonical EF findingTypeId so the
+  // Fiscal Resolve Cockpit can dispatch the correct Pattern (A for rejected,
+  // I for xml retransmit, Fallback otherwise).
+  const findingTypeId = isXmlError ? "EF-005" : isRejected ? "EF-003" : "EF-OCR-FAILED"
+
+  // ANAF returns dataCreare as YYYYMMDDHHmm (e.g. "202605111706"); format to
+  // human-readable RO date if numeric, fallback to raw on unexpected shape.
+  const dataDisplay = formatAnafDate(msg.dataCreare)
 
   return {
     id: `spv-${msg.id}`,
+    findingTypeId,
     title: isRejected
       ? `Factură respinsă ANAF — ${msg.detalii.slice(0, 80)}`
       : `Semnal SPV: ${msg.tip} — ${msg.detalii.slice(0, 80)}`,
-    detail: `Mesaj SPV din ${msg.dataCreare}: ${msg.detalii}`,
+    detail: `Mesaj SPV din ${dataDisplay}: ${msg.detalii}`,
     category: "E_FACTURA",
     severity,
     risk: severity === "high" ? "high" : "low",
@@ -82,4 +94,14 @@ export function pickRejectionMessages(messages: SpvMessage[]): SpvMessage[] {
     (m) =>
       m.tip.toLowerCase().includes("erori") || m.tip.toLowerCase().includes("respins")
   )
+}
+
+function formatAnafDate(raw: string | undefined | null): string {
+  if (!raw) return "—"
+  // ANAF format: YYYYMMDDHHmm (e.g. "202605111706")
+  const m = /^(\d{4})(\d{2})(\d{2})(?:(\d{2})(\d{2}))?$/.exec(raw)
+  if (!m) return raw
+  const [, y, mo, d, h, min] = m
+  const monthName = ["ianuarie","februarie","martie","aprilie","mai","iunie","iulie","august","septembrie","octombrie","noiembrie","decembrie"][parseInt(mo, 10) - 1] ?? mo
+  return h ? `${parseInt(d,10)} ${monthName} ${y}, ${h}:${min}` : `${parseInt(d,10)} ${monthName} ${y}`
 }

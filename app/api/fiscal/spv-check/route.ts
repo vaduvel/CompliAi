@@ -80,11 +80,17 @@ export async function POST(request: Request) {
         const errorMessages = pickRejectionMessages(messages.mesaje)
         const existingFindingIds = new Set(state.findings.map((f) => f.id))
         const newFindings: ScanFinding[] = []
+        const updatedExisting = new Map<string, ScanFinding>()
 
         for (const msg of errorMessages) {
           const finding = spvMessageToFinding(msg, nowISO)
           if (!existingFindingIds.has(finding.id)) {
             newFindings.push(finding)
+          } else {
+            // Idempotent re-scan — refresh classifier outputs (findingTypeId,
+            // severity, remediationHint) on the existing entry so cockpit
+            // dispatchers always see the latest pattern mapping.
+            updatedExisting.set(finding.id, finding)
           }
           result.signals.push({
             messageId: msg.id,
@@ -95,12 +101,28 @@ export async function POST(request: Request) {
           })
         }
 
-        if (newFindings.length > 0) {
+        if (newFindings.length > 0 || updatedExisting.size > 0) {
+          const mergedFindings = state.findings.map((f) => {
+            const next = updatedExisting.get(f.id)
+            if (!next) return f
+            // Preserve existing status/closureEvidence — only refresh
+            // classification + display fields.
+            return {
+              ...f,
+              findingTypeId: next.findingTypeId ?? f.findingTypeId,
+              title: next.title,
+              detail: next.detail,
+              severity: next.severity,
+              risk: next.risk,
+              remediationHint: next.remediationHint,
+              impactSummary: next.impactSummary,
+            }
+          })
           await writeStateForOrg(
             orgId,
             {
               ...state,
-              findings: [...state.findings, ...newFindings],
+              findings: [...mergedFindings, ...newFindings],
             },
             orgName
           )

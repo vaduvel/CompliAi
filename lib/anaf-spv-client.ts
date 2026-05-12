@@ -252,8 +252,21 @@ export async function fetchSpvMessages(
 
     if (!res.ok) return null
 
-    const json = (await res.json()) as SpvListResponse
-    return json
+    const json = (await res.json()) as SpvListResponse & {
+      mesaje?: Array<Record<string, unknown>>
+    }
+    // ANAF SPV returns snake_case `data_creare`; our types use camelCase
+    // `dataCreare`. Normalize so downstream consumers see a single shape.
+    if (Array.isArray(json.mesaje)) {
+      json.mesaje = json.mesaje.map((m) => {
+        const dataCreare =
+          (m.dataCreare as string | undefined) ??
+          (m.data_creare as string | undefined) ??
+          ""
+        return { ...m, dataCreare } as unknown as SpvMessage
+      }) as SpvMessage[]
+    }
+    return json as SpvListResponse
   } catch {
     return null
   }

@@ -1606,12 +1606,16 @@ function deriveTypeId(record: ScanFinding, framework: FindingFramework): string 
     if (framework === "AI Act") return "AI-OPS"
   }
   if (id === "saft-d406-registration") return "EF-001"
+  // Faza 3.5h fix (2026-05-12): respect upstream findingTypeId când există.
+  // SPV rejection findings (spvMessageToFinding) deja seteaza EF-003/EF-005.
+  // Aici tratăm DOAR cazuri de "SPV missing/unverified", NU facturi respinse.
+  const isFacturaRespinsa = title.includes("factură respinsă") || title.includes("factura respinsa")
   // SPV-specific findings from /api/fiscal/spv-check → EF-001
   if (
     framework === "eFactura" &&
+    !isFacturaRespinsa &&
     (
       id.startsWith("spv-missing-") ||
-      (id.startsWith("spv-") && !id.includes("ok")) ||
       title.includes("înregistrare spv lipsă") ||
       title.includes("inregistrare spv lipsa") ||
       title.includes("spv neverificat") ||
