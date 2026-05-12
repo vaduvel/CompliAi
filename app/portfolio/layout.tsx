@@ -1,4 +1,4 @@
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { LegacyWorkspaceBridge } from "@/components/compliscan/legacy-workspace-bridge"
@@ -10,6 +10,7 @@ import {
   resolveUserMode,
   verifySessionToken,
 } from "@/lib/server/auth"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 export const dynamic = "force-dynamic"
@@ -55,16 +56,51 @@ export default async function PortfolioLayout({
   // Mircea fix: pentru partner, ICP-ul vine din CABINET's own org (owner
   // membership), nu din session.orgId care e clientul curent.
   let icpSegment: import("@/lib/server/white-label").IcpSegment | null = null
+  let cabinetOrgId = session.orgId
   try {
-    let lookupOrgId = session.orgId
     if (userMode === "partner") {
       const ownerMembership = memberships.find((m) => m.role === "owner")
-      if (ownerMembership) lookupOrgId = ownerMembership.orgId
+      if (ownerMembership) cabinetOrgId = ownerMembership.orgId
     }
-    const wl = await getWhiteLabelConfig(lookupOrgId)
+    const wl = await getWhiteLabelConfig(cabinetOrgId)
     icpSegment = wl.icpSegment ?? null
   } catch {
     icpSegment = null
+  }
+
+  // Faza 1.5c (2026-05-12): routing guard cabinet-fiscal incomplete →
+  // /onboarding/setup-fiscal. Mircea NU vede portofoliu gol fără context;
+  // setup-fiscal îl duce prin import → ANAF → scan → wow moment.
+  //
+  // Trigger doar dacă URL-ul NU are deja `?skip=setup` (escape hatch din
+  // footer-ul setup-fiscal pentru cazuri rare când user-ul vrea explicit
+  // să vadă portofoliul gol).
+  if (icpSegment === "cabinet-fiscal") {
+    const requestHeaders = await headers()
+    const referer = requestHeaders.get("referer") ?? ""
+    const isSkipSetup = referer.includes("skip=setup") ||
+      requestHeaders.get("x-compliscan-skip-setup") === "true"
+    if (!isSkipSetup) {
+      const portfolioClientCount = memberships.filter(
+        (m) =>
+          m.status === "active" && m.role === "partner_manager" && m.orgId !== cabinetOrgId,
+      ).length
+      const cabinetState = await readStateForOrg(cabinetOrgId).catch(() => null)
+      const hasAnafToken = cabinetState?.efacturaConnected === true
+      const scanCompleted = Boolean(
+        cabinetState?.events?.some(
+          (evt) =>
+            typeof evt === "object" &&
+            evt !== null &&
+            "type" in evt &&
+            (evt as { type?: string }).type === "fiscal.setup.scan.completed",
+        ),
+      )
+      const setupComplete = portfolioClientCount > 0 && hasAnafToken && scanCompleted
+      if (!setupComplete) {
+        redirect("/onboarding/setup-fiscal")
+      }
+    }
   }
 
   const initialUser = {

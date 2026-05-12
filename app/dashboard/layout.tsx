@@ -14,6 +14,7 @@ import {
 import { buildDashboardCorePayload } from "@/lib/server/dashboard-response"
 import { getOrgContext } from "@/lib/server/org-context"
 import { loadOnboardingGateState, loadOnboardingGateStateForOrg } from "@/lib/server/onboarding-gate"
+import { readStateForOrg } from "@/lib/server/mvp-store"
 import { getWhiteLabelConfig } from "@/lib/server/white-label"
 
 function isDemoSession(session: { userId: string; orgId: string }) {
@@ -82,6 +83,7 @@ export default async function DashboardLayout({
   // intrând în client org vede "Instrumente DPO" pentru că client org n-are
   // white-label configurat.
   let icpSegment: import("@/lib/server/white-label").IcpSegment | null = null
+  let cabinetOrgId: string | null = null
   if (session) {
     try {
       // Try cabinet's home org first (owner role membership)
@@ -91,10 +93,42 @@ export default async function DashboardLayout({
         const ownerMembership = memberships.find((m) => m.role === "owner")
         if (ownerMembership) lookupOrgId = ownerMembership.orgId
       }
+      cabinetOrgId = lookupOrgId
       const wl = await getWhiteLabelConfig(lookupOrgId)
       icpSegment = wl.icpSegment ?? null
     } catch {
       icpSegment = null
+    }
+  }
+
+  // Faza 1.5c (2026-05-12): routing guard cabinet-fiscal incomplete →
+  // /onboarding/setup-fiscal. Mircea NU vede dashboard fiscal gol fără context;
+  // setup-fiscal îl duce prin import → ANAF → scan → wow moment cu findings reale.
+  if (session && icpSegment === "cabinet-fiscal" && cabinetOrgId) {
+    try {
+      const memberships = await listUserMemberships(session.userId)
+      const portfolioClientCount = memberships.filter(
+        (m) =>
+          m.status === "active" && m.role === "partner_manager" && m.orgId !== cabinetOrgId,
+      ).length
+      const cabinetState = await readStateForOrg(cabinetOrgId).catch(() => null)
+      const hasAnafToken = cabinetState?.efacturaConnected === true
+      const scanCompleted = Boolean(
+        cabinetState?.events?.some(
+          (evt) =>
+            typeof evt === "object" &&
+            evt !== null &&
+            "type" in evt &&
+            (evt as { type?: string }).type === "fiscal.setup.scan.completed",
+        ),
+      )
+      const setupComplete = portfolioClientCount > 0 && hasAnafToken && scanCompleted
+      if (!setupComplete) {
+        redirect("/onboarding/setup-fiscal")
+      }
+    } catch {
+      // Defensive fallback — dacă state lookup eșuează, lasă request-ul să
+      // treacă (mai bine să vadă dashboard gol decât să fie blocat).
     }
   }
 
