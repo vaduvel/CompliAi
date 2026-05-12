@@ -44,6 +44,7 @@ import { GeneratorDrawer } from "@/components/compliscan/generator-drawer"
 import { supportsDocumentAdoption, type DocumentAdoptionStatus } from "@/lib/compliance/document-adoption"
 import type { FindingLifecycleView } from "@/lib/compliance/finding-lifecycle"
 import type { DocumentType } from "@/lib/server/document-generator"
+import { FiscalResolveCockpit } from "@/components/compliscan/fiscal/resolve/FiscalResolveCockpit"
 
 const GENERATOR_PROGRESS_TOAST_ID = "resolve-document-progress"
 
@@ -576,6 +577,13 @@ export default function FindingDetailPage() {
     )
   }
 
+  // Faza 3.1 (2026-05-12): findings cu categoria E_FACTURA → Fiscal Resolve
+  // Cockpit dedicat (Pattern dispatch A/B/C/D/E/F/G/H/I per finding type).
+  // Restul (GDPR / NIS2 / AI Act / HR / etc.) păstrează flow-ul DPO existent.
+  if (finding.category === "E_FACTURA") {
+    return <FiscalResolveCockpit finding={finding} backHref="/dashboard/fiscal" />
+  }
+
   const status = (finding.findingStatus ?? "open") as "open" | "confirmed" | "dismissed" | "resolved" | "under_monitoring"
   const statusCfg = getFindingStatusPresentation(finding.findingStatus)
   const recipe = buildCockpitRecipe(finding, {
@@ -862,9 +870,7 @@ export default function FindingDetailPage() {
         }
         actions={
           <div className="flex items-center gap-2">
-            {finding.category === "E_FACTURA" && (
-              <ShareFindingButton findingId={finding.id} findingTitle={finding.title} />
-            )}
+            {/* E_FACTURA findings are handled by FiscalResolveCockpit (early return). */}
             <Link
               href={dashboardRoutes.resolve}
               className="inline-flex h-[34px] items-center gap-1.5 rounded-eos-sm border border-eos-border bg-white/[0.02] px-3 text-[12px] font-medium text-eos-text-muted transition-colors hover:border-eos-border-strong hover:text-eos-text"
