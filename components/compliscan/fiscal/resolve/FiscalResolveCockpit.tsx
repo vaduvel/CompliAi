@@ -29,6 +29,9 @@ import type { ScanFinding } from "@/lib/compliance/types"
 import { AIExplainBlock } from "@/components/compliscan/fiscal/resolve/AIExplainBlock"
 import { AuditLogInline } from "@/components/compliscan/fiscal/resolve/AuditLogInline"
 import { PatternAAutoApprove } from "@/components/compliscan/fiscal/resolve/patterns/PatternAAutoApprove"
+import { PatternBManualInput } from "@/components/compliscan/fiscal/resolve/patterns/PatternBManualInput"
+import { PatternGUpload } from "@/components/compliscan/fiscal/resolve/patterns/PatternGUpload"
+import { PatternIRetransmit } from "@/components/compliscan/fiscal/resolve/patterns/PatternIRetransmit"
 import { PatternFallback } from "@/components/compliscan/fiscal/resolve/patterns/PatternFallback"
 
 type FiscalResolveCockpitProps = {
@@ -138,16 +141,30 @@ function PatternDispatcher({
   }
 
   // Pattern I — retransmit (EF-005, EF-004 after 72h)
-  // Pattern G — upload (CERT-*, SAFT-DEADLINE)
-  // Pattern E — compare (ETVA-GAP, ERP-SPV-MISMATCH, BANK-SPV-MISMATCH)
-  // Pattern F — generate-doc (ETVA-LATE, D300-MISSING, PFA-FORM082)
-  // Pattern D — search (EF-SEQUENCE, EMPUTERNICIRE-MISSING)
-  // Pattern C — skip-wait (EF-004 <72h)
+  if (typeId === "EF-005" || typeId === "EF-004") {
+    return <PatternIRetransmit finding={finding} onResolved={onResolved} />
+  }
+
+  // Pattern G — upload-evidence (CERT-*, SAFT-DEADLINE)
+  if (
+    typeId === "CERT-EXPIRING" ||
+    typeId === "CERT-EXPIRED" ||
+    typeId === "CERT-AUTH-FAILED" ||
+    typeId === "SAFT-DEADLINE"
+  ) {
+    return <PatternGUpload finding={finding} onResolved={onResolved} />
+  }
+
   // Pattern B — manual-input (D300-LINE-ERROR, SAFT-ACCOUNTS-INVALID)
-  // Pattern H — external-contact (EMPUTERNICIRE-MISSING)
-  //
-  // Restul pattern-urilor sunt fallback la generic în Faza 3.1; vor fi
-  // implementate în Faza 3.5 + următoarele.
+  if (typeId === "D300-LINE-ERROR" || typeId === "SAFT-ACCOUNTS-INVALID") {
+    return <PatternBManualInput finding={finding} onResolved={onResolved} />
+  }
+
+  // Pattern E — compare (ETVA-GAP, ERP-SPV-MISMATCH, BANK-SPV-MISMATCH) — Faza 3.3
+  // Pattern F — generate-doc (ETVA-LATE, D300-MISSING, PFA-FORM082) — Faza 3.3
+  // Pattern D — search (EF-SEQUENCE, EMPUTERNICIRE-MISSING) — Faza 3.4
+  // Pattern C — skip-wait (EF-004 <72h alternativ) — Faza 3.4
+  // Pattern H — external-contact (EMPUTERNICIRE-MISSING) — Faza 3.4
 
   return <PatternFallback finding={finding} onResolved={onResolved} />
 }
