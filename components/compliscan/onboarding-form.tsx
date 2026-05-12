@@ -708,6 +708,11 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
                     initialOrgName={orgName ?? ""}
                     onComplete={() => void handleOnboardingComplete()}
                     onBack={handleBackToModeSelection}
+                    // Faza 0.5: cabinet-fiscal venit din /fiscal landing cu icp=
+                    // în URL → auto-submit cu defaults (clientScale="1-5",
+                    // cui="" — vine ulterior din Stripe). Nu mai întrebăm câmpuri
+                    // redundante; clientScale se updatează automat după import CSV.
+                    autoSubmit={shouldSkipRoleSelection && selectedSegment === "cabinet-fiscal"}
                   />
                 ) : (
                   <ApplicabilityWizard

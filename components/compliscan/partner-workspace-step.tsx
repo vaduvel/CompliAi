@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowRight, Briefcase, Building2, Loader2, Users } from "lucide-react"
 
 type ClientScale = "1-5" | "5-20" | "20+"
@@ -15,6 +15,14 @@ type Props = {
   initialOrgName?: string
   onComplete: () => void
   onBack?: () => void
+  /**
+   * Mircea UX fix Faza 0.5 (2026-05-12): pentru cabinet-fiscal venit din
+   * /fiscal landing cu ?icp=cabinet-fiscal în URL register, sărim formularul
+   * (orgName e deja din register, CUI optional vine din Stripe/audit log
+   * după plată, clientScale derivat din numărul de clienți importați).
+   * Auto-submit cu defaults (clientScale="1-5", cui="") la mount.
+   */
+  autoSubmit?: boolean
 }
 
 const CLIENT_SCALE_OPTIONS: {
@@ -46,20 +54,30 @@ const CLIENT_SCALE_OPTIONS: {
 const inputClass =
   "h-10 w-full rounded-eos-sm border border-eos-border bg-eos-surface-active px-3 text-[13px] text-eos-text outline-none placeholder:text-eos-text-tertiary focus:border-eos-primary/60 focus:bg-eos-surface-active transition-colors"
 
-export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }: Props) {
+export function PartnerWorkspaceStep({
+  initialOrgName = "",
+  onComplete,
+  onBack,
+  autoSubmit = false,
+}: Props) {
   const [orgName, setOrgName] = useState(initialOrgName)
   const [cui, setCui] = useState("")
-  const [clientScale, setClientScale] = useState<ClientScale | null>(null)
+  const [clientScale, setClientScale] = useState<ClientScale | null>(
+    // Faza 0.5: pentru cabinet-fiscal auto-submit, default "1-5" până la
+    // import primii clienți. Updated automat la primul CSV/ANAF import.
+    autoSubmit ? "1-5" : null,
+  )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit() {
-    const name = orgName.trim()
+  async function handleSubmit(overrideScale?: ClientScale, overrideName?: string) {
+    const name = (overrideName ?? orgName).trim()
     if (!name) {
       setError("Introdu numele firmei tale de consultanță.")
       return
     }
-    if (!clientScale) {
+    const effectiveScale = overrideScale ?? clientScale
+    if (!effectiveScale) {
       setError("Alege câți clienți gestionezi aproximativ.")
       return
     }
@@ -69,7 +87,7 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
 
     const body: PartnerWorkspaceData = {
       orgName: name,
-      clientScale,
+      clientScale: effectiveScale,
       ...(cui.trim() ? { cui: cui.trim() } : {}),
     }
 
@@ -90,6 +108,42 @@ export function PartnerWorkspaceStep({ initialOrgName = "", onComplete, onBack }
     } finally {
       setSaving(false)
     }
+  }
+
+  // Faza 0.5: auto-submit cu defaults pentru cabinet-fiscal venit din /fiscal
+  // landing. NU randăm formularul — doar loading state scurt în timpul submit-ului.
+  const autoSubmitTriggeredRef = useRef(false)
+  useEffect(() => {
+    if (!autoSubmit) return
+    if (autoSubmitTriggeredRef.current) return
+    if (!initialOrgName.trim()) return
+    autoSubmitTriggeredRef.current = true
+    void handleSubmit("1-5", initialOrgName)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSubmit, initialOrgName])
+
+  if (autoSubmit) {
+    return (
+      <section className="relative overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface">
+        <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-eos-primary/70" aria-hidden />
+        <div className="flex items-center gap-3 px-5 py-6">
+          <Loader2 className="size-4 animate-spin text-eos-primary" strokeWidth={2} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium text-eos-text">
+              Pregătim spațiul tău de lucru…
+            </p>
+            <p className="mt-0.5 text-[11.5px] text-eos-text-tertiary">
+              {initialOrgName || "Cabinet"} · setup automat pentru contabil CECCAR
+            </p>
+            {error && (
+              <p className="mt-2 rounded-eos-sm border border-eos-error/30 bg-eos-error-soft px-2 py-1.5 text-[11.5px] text-eos-error">
+                {error}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
