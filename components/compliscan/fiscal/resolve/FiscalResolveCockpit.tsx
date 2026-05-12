@@ -30,6 +30,8 @@ import { AIExplainBlock } from "@/components/compliscan/fiscal/resolve/AIExplain
 import { AuditLogInline } from "@/components/compliscan/fiscal/resolve/AuditLogInline"
 import { PatternAAutoApprove } from "@/components/compliscan/fiscal/resolve/patterns/PatternAAutoApprove"
 import { PatternBManualInput } from "@/components/compliscan/fiscal/resolve/patterns/PatternBManualInput"
+import { PatternECompareDecide } from "@/components/compliscan/fiscal/resolve/patterns/PatternECompareDecide"
+import { PatternFGenerateDoc } from "@/components/compliscan/fiscal/resolve/patterns/PatternFGenerateDoc"
 import { PatternGUpload } from "@/components/compliscan/fiscal/resolve/patterns/PatternGUpload"
 import { PatternIRetransmit } from "@/components/compliscan/fiscal/resolve/patterns/PatternIRetransmit"
 import { PatternFallback } from "@/components/compliscan/fiscal/resolve/patterns/PatternFallback"
@@ -160,9 +162,24 @@ function PatternDispatcher({
     return <PatternBManualInput finding={finding} onResolved={onResolved} />
   }
 
-  // Pattern E — compare (ETVA-GAP, ERP-SPV-MISMATCH, BANK-SPV-MISMATCH) — Faza 3.3
-  // Pattern F — generate-doc (ETVA-LATE, D300-MISSING, PFA-FORM082) — Faza 3.3
-  // Pattern D — search (EF-SEQUENCE, EMPUTERNICIRE-MISSING) — Faza 3.4
+  // Pattern E — compare-decide (ETVA-GAP, ERP-SPV-MISMATCH, BANK-SPV-MISMATCH,
+  // EF-DUPLICATE, FREQUENCY-MISMATCH)
+  if (
+    typeId === "ETVA-GAP" ||
+    typeId === "ERP-SPV-MISMATCH" ||
+    typeId === "BANK-SPV-MISMATCH" ||
+    typeId === "EF-DUPLICATE" ||
+    typeId === "FREQUENCY-MISMATCH"
+  ) {
+    return <PatternECompareDecide finding={finding} onResolved={onResolved} />
+  }
+
+  // Pattern F — generate-doc (ETVA-LATE, D300-MISSING, PFA-FORM082)
+  if (typeId === "ETVA-LATE" || typeId === "D300-MISSING" || typeId === "PFA-FORM082") {
+    return <PatternFGenerateDoc finding={finding} onResolved={onResolved} />
+  }
+
+  // Pattern D — search (EF-SEQUENCE, EF-CPV-MISSING) — Faza 3.4
   // Pattern C — skip-wait (EF-004 <72h alternativ) — Faza 3.4
   // Pattern H — external-contact (EMPUTERNICIRE-MISSING) — Faza 3.4
 
