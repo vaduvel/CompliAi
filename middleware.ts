@@ -252,6 +252,21 @@ export async function middleware(request: NextRequest) {
     )
   }
 
+  // ── Cabinet-fiscal: redirect /dashboard generic → /dashboard/fiscal cockpit ─
+  // Mircea (contabil CECCAR) NU trebuie să vadă vreodată dashboard-ul generic
+  // (GDPR · Pay Transparency · NIS2 · audit-readiness DPO-centric). Cockpitul
+  // fiscal-first cross-client este pagina lui principală.
+  //
+  // Aplicăm DOAR pe `/dashboard` exact (NU pe sub-rute precum /dashboard/fiscal
+  // /dashboard/dosar /dashboard/portfolio etc.).
+  if (
+    !isApiRoute &&
+    session.icpSegment === "cabinet-fiscal" &&
+    pathname === "/dashboard"
+  ) {
+    return NextResponse.redirect(new URL("/dashboard/fiscal", request.url))
+  }
+
   // ── Layer 4 ICP route guard (defensive) ──────────────────────────────────
   // Dacă URL-ul mapează la un modul restricted pentru icpSegment-ul user-ului,
   // redirect la /dashboard cu banner cross-sell.
@@ -263,7 +278,9 @@ export async function middleware(request: NextRequest) {
       navId &&
       !isModuleAllowed(navId, session.icpSegment, session.subFlag, session.accessMode)
     ) {
-      const redirectUrl = new URL("/dashboard", request.url)
+      // Pentru cabinet-fiscal, redirect la cockpit fiscal nu la /dashboard generic
+      const fallbackUrl = session.icpSegment === "cabinet-fiscal" ? "/dashboard/fiscal" : "/dashboard"
+      const redirectUrl = new URL(fallbackUrl, request.url)
       redirectUrl.searchParams.set("cross-sell", navId)
       return NextResponse.redirect(redirectUrl)
     }
