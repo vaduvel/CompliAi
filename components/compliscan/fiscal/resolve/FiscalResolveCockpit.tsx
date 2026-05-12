@@ -30,9 +30,12 @@ import { AIExplainBlock } from "@/components/compliscan/fiscal/resolve/AIExplain
 import { AuditLogInline } from "@/components/compliscan/fiscal/resolve/AuditLogInline"
 import { PatternAAutoApprove } from "@/components/compliscan/fiscal/resolve/patterns/PatternAAutoApprove"
 import { PatternBManualInput } from "@/components/compliscan/fiscal/resolve/patterns/PatternBManualInput"
+import { PatternCSkipWait } from "@/components/compliscan/fiscal/resolve/patterns/PatternCSkipWait"
+import { PatternDSearchLookup } from "@/components/compliscan/fiscal/resolve/patterns/PatternDSearchLookup"
 import { PatternECompareDecide } from "@/components/compliscan/fiscal/resolve/patterns/PatternECompareDecide"
 import { PatternFGenerateDoc } from "@/components/compliscan/fiscal/resolve/patterns/PatternFGenerateDoc"
 import { PatternGUpload } from "@/components/compliscan/fiscal/resolve/patterns/PatternGUpload"
+import { PatternHExternalContact } from "@/components/compliscan/fiscal/resolve/patterns/PatternHExternalContact"
 import { PatternIRetransmit } from "@/components/compliscan/fiscal/resolve/patterns/PatternIRetransmit"
 import { PatternFallback } from "@/components/compliscan/fiscal/resolve/patterns/PatternFallback"
 
@@ -143,8 +146,21 @@ function PatternDispatcher({
   }
 
   // Pattern I — retransmit (EF-005, EF-004 after 72h)
-  if (typeId === "EF-005" || typeId === "EF-004") {
+  if (typeId === "EF-005") {
     return <PatternIRetransmit finding={finding} onResolved={onResolved} />
+  }
+
+  // EF-004: dispatch dual based pe timeSinceSubmit. <72h = Pattern C (wait),
+  // ≥72h = Pattern I (retransmit oricum).
+  if (typeId === "EF-004") {
+    const ageHours = Math.floor(
+      (Date.now() - new Date(finding.createdAtISO).getTime()) / (1000 * 60 * 60),
+    )
+    return ageHours >= 72 ? (
+      <PatternIRetransmit finding={finding} onResolved={onResolved} />
+    ) : (
+      <PatternCSkipWait finding={finding} onResolved={onResolved} />
+    )
   }
 
   // Pattern G — upload-evidence (CERT-*, SAFT-DEADLINE)
@@ -179,10 +195,17 @@ function PatternDispatcher({
     return <PatternFGenerateDoc finding={finding} onResolved={onResolved} />
   }
 
-  // Pattern D — search (EF-SEQUENCE, EF-CPV-MISSING) — Faza 3.4
-  // Pattern C — skip-wait (EF-004 <72h alternativ) — Faza 3.4
-  // Pattern H — external-contact (EMPUTERNICIRE-MISSING) — Faza 3.4
+  // Pattern D — search-lookup (EF-SEQUENCE, EF-CPV-MISSING + EF-006 lookup-only)
+  if (typeId === "EF-SEQUENCE" || typeId === "EF-CPV-MISSING") {
+    return <PatternDSearchLookup finding={finding} onResolved={onResolved} />
+  }
 
+  // Pattern H — external-contact (EMPUTERNICIRE-MISSING)
+  if (typeId === "EMPUTERNICIRE-MISSING") {
+    return <PatternHExternalContact finding={finding} onResolved={onResolved} />
+  }
+
+  // Restul (EF-GENERIC, fără tip, etc.) → PatternFallback
   return <PatternFallback finding={finding} onResolved={onResolved} />
 }
 
