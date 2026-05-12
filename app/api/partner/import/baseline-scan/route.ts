@@ -22,7 +22,8 @@ import { buildRomanianPrivacyFindings } from "@/lib/compliance/romanian-privacy-
 import { buildImportBaselineAnswers } from "@/lib/compliance/import-baseline-profile"
 import { normalizeWebsiteUrl } from "@/lib/server/request-validation"
 import { jsonError } from "@/lib/server/api-response"
-import { AuthzError, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
+import { AuthzError, listUserMemberships, requireFreshRole, resolveUserMode } from "@/lib/server/auth"
+import { getWhiteLabelConfig } from "@/lib/server/white-label"
 import { readStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { getConfiguredDataBackend } from "@/lib/server/supabase-tenancy"
 import { hasSupabaseConfig } from "@/lib/server/supabase-rest"
@@ -72,11 +73,24 @@ export async function POST(request: Request) {
     // Pentru cabinet-fiscal, SKIP findings DPO/GDPR/NIS2 — Mircea nu vrea zgomot
     // non-fiscal pe clienții lui. Findings fiscal vin din Faza 2 scan orchestrator
     // care apelează ANAF SPV real per CUI.
-    const cabinetIcpSegment = request.headers.get("x-compliscan-icp-segment")
-    const isCabinetFiscal = cabinetIcpSegment === "cabinet-fiscal"
-    if (isCabinetFiscal) {
-      console.log("[baseline-scan] Cabinet-fiscal detected — skipping DPO/GDPR/NIS2 findings.")
+    //
+    // icpSegment NU e în session cookie (e calculat din white-label pe owner
+    // membership). Verificăm header propagat de middleware ca fast-path, apoi
+    // fallback la rezolvare directă din white-label config pe cabinet org.
+    let cabinetIcpSegment = request.headers.get("x-compliscan-icp-segment")
+    if (!cabinetIcpSegment) {
+      try {
+        const memberships = await listUserMemberships(session.userId)
+        const ownerMembership = memberships.find((m) => m.role === "owner")
+        const cabinetOrgId = ownerMembership?.orgId ?? session.orgId
+        const wl = await getWhiteLabelConfig(cabinetOrgId)
+        cabinetIcpSegment = wl.icpSegment ?? null
+      } catch (err) {
+        console.warn("[baseline-scan] white-label lookup failed:", (err as Error).message)
+      }
     }
+    const isCabinetFiscal = cabinetIcpSegment === "cabinet-fiscal"
+    console.log("[baseline-scan] Resolved icpSegment:", cabinetIcpSegment, "→ isCabinetFiscal:", isCabinetFiscal)
 
     let prefill = state.orgProfilePrefill ?? null
     let updatedProfile = state.orgProfile
@@ -204,6 +218,37 @@ export async function POST(request: Request) {
         const existingIds = new Set(state.findings.map((f) => f.id))
         const newFindings = findings.filter((f) => !existingIds.has(f.id))
         state.findings = [...state.findings, ...newFindings]
+      }
+
+      // Faza 3.5g cleanup: pentru cabinet-fiscal, șterge findings DPO/GDPR/NIS2
+      // legacy (generate la import înainte de fix). Idempotent — re-scan cleans
+      // up state-uri vechi automat. Păstrăm doar EF-*, SAFT-*, ETVA-*, D300-*,
+      // PFA-*, CERT-*, EMPUTERNICIRE-*, FREQUENCY-*, BANK-*, ERP-*.
+      if (isCabinetFiscal && state.findings.length > 0) {
+        const FISCAL_PREFIXES = [
+          "EF-",
+          "SAFT-",
+          "ETVA-",
+          "D300-",
+          "PFA-",
+          "CERT-",
+          "EMPUTERNICIRE-",
+          "FREQUENCY-",
+          "BANK-",
+          "ERP-",
+        ]
+        const before = state.findings.length
+        state.findings = state.findings.filter((f) => {
+          const typeId = f.findingTypeId ?? ""
+          return FISCAL_PREFIXES.some((p) => typeId.startsWith(p))
+        })
+        console.log(
+          "[baseline-scan] Cabinet-fiscal cleanup:",
+          before,
+          "→",
+          state.findings.length,
+          "(stripped non-fiscal findings)",
+        )
       }
 
       if (

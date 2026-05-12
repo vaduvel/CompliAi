@@ -8,7 +8,7 @@ import { NextResponse } from "next/server"
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
-const { AuthzErrorMock } = vi.hoisted(() => ({
+const { AuthzErrorMock, listMembershipsMock, whiteLabelMock } = vi.hoisted(() => ({
   AuthzErrorMock: class AuthzError extends Error {
     status: number
     code: string
@@ -18,6 +18,10 @@ const { AuthzErrorMock } = vi.hoisted(() => ({
       this.code = code
     }
   },
+  listMembershipsMock: vi.fn(async (_userId: string) => [
+    { orgId: "cabinet-org-1", role: "owner", status: "active", orgName: "Cabinet" },
+  ]),
+  whiteLabelMock: vi.fn(async (_orgId: string) => ({ icpSegment: "cabinet-fiscal" as string | null })),
 }))
 
 vi.mock("@/lib/server/auth", () => ({
@@ -29,9 +33,13 @@ vi.mock("@/lib/server/auth", () => ({
     email: "mircea@test.test",
     role: "owner",
     workspaceMode: "partner",
-    icpSegment: "cabinet-fiscal",
   })),
   resolveUserMode: vi.fn(async () => "partner"),
+  listUserMemberships: listMembershipsMock,
+}))
+
+vi.mock("@/lib/server/white-label", () => ({
+  getWhiteLabelConfig: whiteLabelMock,
 }))
 
 vi.mock("@/lib/server/api-response", () => ({
@@ -142,9 +150,10 @@ function makeRequest(body: unknown, icpSegment?: string): Request {
 describe("baseline-scan — cabinet-fiscal ICP scoping (Faza 3.5g fix)", () => {
   beforeEach(() => {
     for (const k of Object.keys(stateStore)) delete stateStore[k]
+    whiteLabelMock.mockResolvedValue({ icpSegment: "cabinet-fiscal" })
   })
 
-  it("SKIPS DPO/GDPR/NIS2 findings when x-compliscan-icp-segment=cabinet-fiscal", async () => {
+  it("SKIPS DPO/GDPR/NIS2 findings when x-compliscan-icp-segment=cabinet-fiscal (header fast-path)", async () => {
     const req = makeRequest({ orgId: "client-mgh" }, "cabinet-fiscal")
     const res = await POST(req)
     const body = await res.json()
@@ -157,29 +166,49 @@ describe("baseline-scan — cabinet-fiscal ICP scoping (Faza 3.5g fix)", () => {
     expect(saved.gdprTrainingRecords ?? []).toHaveLength(0)
   })
 
-  it("INCLUDES DPO/GDPR/NIS2 findings when icp-segment is missing (cabinet-dpo default)", async () => {
-    const req = makeRequest({ orgId: "client-dpo" })
+  it("FALLBACK — resolves icpSegment from white-label when header missing", async () => {
+    whiteLabelMock.mockResolvedValueOnce({ icpSegment: "cabinet-fiscal" })
+    const req = makeRequest({ orgId: "client-fallback" })
     const res = await POST(req)
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body.ok).toBe(true)
-    expect(body.findingsCount).toBeGreaterThan(0)
-    const saved = stateStore["client-dpo"] as { findings: Array<{ findingTypeId: string }>; gdprTrainingRecords?: unknown[] }
-    const ids = saved.findings.map((f) => f.findingTypeId)
-    expect(ids).toContain("DPO-1")
-    expect(ids).toContain("NIS2-TEST")
-    expect(ids).toContain("GDPR-TEST")
-    expect((saved.gdprTrainingRecords ?? []).length).toBeGreaterThan(0)
+    expect(body.findingsCount).toBe(0)
+    expect(whiteLabelMock).toHaveBeenCalled()
   })
 
-  it("INCLUDES findings when icp-segment is non-fiscal (cabinet-dpo)", async () => {
+  it("CLEANUP legacy non-fiscal findings on cabinet-fiscal re-scan (idempotent)", async () => {
+    stateStore["client-legacy"] = {
+      workspace: { id: "client-legacy", orgId: "client-legacy", name: "Client", orgName: "Client", workspaceLabel: "C", workspaceOwner: "owner" },
+      orgProfile: { orgName: "Client", sector: "services", employeeCount: 5, website: null, cui: null },
+      findings: [
+        { id: "old-gdpr-1", findingTypeId: "intake-gdpr-privacy-policy", title: "Old GDPR", detail: "x", severity: "high", status: "open" },
+        { id: "old-nis2-1", findingTypeId: "NIS2-TEST", title: "Old NIS2", detail: "x", severity: "medium", status: "open" },
+        { id: "keep-ef-1", findingTypeId: "EF-003", title: "Fiscal", detail: "x", severity: "high", status: "open" },
+      ],
+      events: [], scans: [], intakeAnswers: null, gdprTrainingRecords: [],
+    }
+    const req = makeRequest({ orgId: "client-legacy" }, "cabinet-fiscal")
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    const saved = stateStore["client-legacy"] as { findings: Array<{ findingTypeId: string }> }
+    const ids = saved.findings.map((f) => f.findingTypeId)
+    expect(ids).toContain("EF-003")
+    expect(ids).not.toContain("intake-gdpr-privacy-policy")
+    expect(ids).not.toContain("NIS2-TEST")
+  })
+
+  it("INCLUDES DPO/GDPR/NIS2 findings when icp-segment is cabinet-dpo", async () => {
+    whiteLabelMock.mockResolvedValueOnce({ icpSegment: "cabinet-dpo" })
     const req = makeRequest({ orgId: "client-dpo-explicit" }, "cabinet-dpo")
     const res = await POST(req)
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body.findingsCount).toBeGreaterThan(0)
+    const saved = stateStore["client-dpo-explicit"] as { findings: Array<{ findingTypeId: string }> }
+    const ids = saved.findings.map((f) => f.findingTypeId)
+    expect(ids).toContain("DPO-1")
   })
 
   it("returns 400 when orgId is missing", async () => {
