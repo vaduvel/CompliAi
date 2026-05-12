@@ -103,11 +103,18 @@ function LoginContent() {
         return
       }
 
+      // Faza 0.4 fix (2026-05-12): propagăm ?icp= la /onboarding pentru ca
+      // OnboardingForm să-l poată citi (urlParam → skip Pas 1 + auto-submit
+      // Pas 2 pentru cabinet-fiscal). Fără asta, /onboarding pierde contextul
+      // ICP din register și utilizatorul vede iar ecranul de selecție rol.
+      const onboardingDestination = icpSegment
+        ? `/onboarding?icp=${encodeURIComponent(icpSegment)}`
+        : "/onboarding"
       const destination =
         mode === "login"
           ? sanitizeInternalRoute(data.destination, nextPath)
           : mode === "register" && nextPath === "/dashboard"
-            ? "/onboarding"
+            ? onboardingDestination
             : nextPath
 
       toast.success(mode === "login" ? "Autentificat cu succes" : "Cont creat cu succes", {
