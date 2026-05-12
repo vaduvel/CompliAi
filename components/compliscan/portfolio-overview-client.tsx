@@ -25,6 +25,10 @@ import {
 
 import { ImportWizard } from "@/components/compliscan/import-wizard"
 import { PortfolioFiscalEmptyState } from "@/components/compliscan/portfolio/PortfolioFiscalEmptyState"
+import {
+  OnboardingWalkthrough,
+  hasSeenFiscalWalkthrough,
+} from "@/components/compliscan/onboarding-walkthrough"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
 import { V3FindingRow, V3FrameworkTag, V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3/finding-row"
@@ -464,6 +468,11 @@ export function PortfolioOverviewClient() {
   const [batchResults, setBatchResults] = useState<BatchResult[] | null>(null)
   const [batchAction, setBatchAction] = useState<BatchActionType | null>(null)
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all")
+  // Faza 1.3 (2026-05-12): walkthrough single-use pentru cabinet-fiscal —
+  // trigger la mount dacă (a) e cabinet-fiscal și (b) localStorage flag nu e set.
+  // Persistă prin `hasSeenFiscalWalkthrough()` helper care folosește
+  // `compliscan_walkthrough_fiscal_seen_v1` key.
+  const [showWalkthrough, setShowWalkthrough] = useState(false)
   const [alertFilter, setAlertFilter] = useState<AlertFilter>("all")
   const [sortKey, setSortKey] = useState<SortKey>("alerts")
   const [sortDir, setSortDir] = useState<SortDir>("desc")
@@ -498,6 +507,22 @@ export function PortfolioOverviewClient() {
     void fetchClients()
     void fetchPlanData()
   }, [])
+
+  // Faza 1.3 (2026-05-12): walkthrough trigger pentru cabinet-fiscal.
+  // Afișăm dialog-ul cu 3 slide-uri o singură dată — la prima vizită pe
+  // /portfolio gol după onboarding. Dependențe:
+  //   • icpSegment === "cabinet-fiscal" (else: nu-i pentru Mircea)
+  //   • !hasSeenFiscalWalkthrough() — localStorage flag nu e set
+  //   • !loading — nu trigger înainte de a ști câți clienți avem
+  //   • clients.length === 0 — portofoliu gol (sens onboarding)
+  // Verify-uim într-un useEffect separat ca să nu blocăm render-ul inițial.
+  useEffect(() => {
+    if (!isFiscalCabinet) return
+    if (loading) return
+    if (clients.length > 0) return
+    if (hasSeenFiscalWalkthrough()) return
+    setShowWalkthrough(true)
+  }, [isFiscalCabinet, loading, clients.length])
 
   // P2: drilldown navigates to client context page (stays in portfolio mode)
   function handleDrillDown(orgId: string) {
@@ -656,6 +681,14 @@ export function PortfolioOverviewClient() {
             void fetchClients()
             void fetchPlanData()
           }}
+        />
+      ) : null}
+
+      {/* Faza 1.3: walkthrough single-use pentru cabinet-fiscal cu portofoliu gol */}
+      {isFiscalCabinet ? (
+        <OnboardingWalkthrough
+          open={showWalkthrough}
+          onClose={() => setShowWalkthrough(false)}
         />
       ) : null}
 
