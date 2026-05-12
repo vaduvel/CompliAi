@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 
 import { ImportWizard } from "@/components/compliscan/import-wizard"
+import { PortfolioFiscalEmptyState } from "@/components/compliscan/portfolio/PortfolioFiscalEmptyState"
 import { V3PageHero } from "@/components/compliscan/v3/page-hero"
 import { V3KpiStrip, type V3KpiItem } from "@/components/compliscan/v3/kpi-strip"
 import { V3FindingRow, V3FrameworkTag, V3RiskPill, type V3SeverityTone } from "@/components/compliscan/v3/finding-row"
@@ -835,32 +836,44 @@ export function PortfolioOverviewClient() {
       {/* ── Client table ── */}
       <div className="overflow-hidden rounded-eos-lg border border-eos-border bg-eos-surface-variant">
         {activeClients.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 px-6 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-surface-active">
-              <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
+          isFiscalCabinet ? (
+            // Faza 1.2 (2026-05-12): cabinet-fiscal empty state cu 4 căi vizibile
+            // inline (ANAF SPV / ERP / Manual / CSV) + demo escape hatch.
+            <PortfolioFiscalEmptyState
+              onOpenCsvImport={() => setShowImport(true)}
+              onOpenManualAdd={() => setShowImport(true)}
+              importDisabled={planData ? !planData.canAddOrg : false}
+              importDisabledReason={
+                planData && !planData.canAddOrg
+                  ? "Limita planului curent atinsă. Upgrade din Setări → Plan."
+                  : undefined
+              }
+            />
+          ) : (
+            // Legacy empty state pentru DPO / IMM / Solo — păstrat neschimbat.
+            <div className="flex flex-col items-center gap-4 px-6 py-20 text-center">
+              <div className="flex size-14 items-center justify-center rounded-eos-lg border border-eos-border bg-eos-surface-active">
+                <Users className="size-7 text-eos-text-muted" strokeWidth={1.5} />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-base font-semibold text-eos-text">
+                  Niciun client încă în portofoliu
+                </p>
+                <p className="max-w-md text-sm leading-6 text-eos-text-tertiary">
+                  Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowImport(true)}
+                disabled={planData ? !planData.canAddOrg : false}
+                className="mt-2 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Upload className="size-4" strokeWidth={2} />
+                Adaugă primul client
+              </button>
             </div>
-            <div className="space-y-1.5">
-              <p className="text-base font-semibold text-eos-text">
-                {isFiscalCabinet
-                  ? "Niciun client fiscal în portofoliu încă"
-                  : "Niciun client încă în portofoliu"}
-              </p>
-              <p className="max-w-md text-sm leading-6 text-eos-text-tertiary">
-                {isFiscalCabinet
-                  ? "Adaugă primul client cabinet fiscal. Importă bulk dintr-un CSV cu coloanele CUI + Nume firmă — fiecare client va avea cockpit fiscal dedicat (e-Factura, SAF-T, RO e-TVA, cert SPV)."
-                  : "Adaugă prima firmă pe care o gestionezi. Poți importa din CSV, prin CUI ANAF sau introduce manual."}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowImport(true)}
-              disabled={planData ? !planData.canAddOrg : false}
-              className="mt-2 flex items-center gap-2 rounded-eos-lg bg-eos-primary px-5 py-2.5 text-sm font-semibold text-eos-text shadow-lg shadow-eos-primary/20 transition-all hover:bg-eos-primary disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Upload className="size-4" strokeWidth={2} />
-              {isFiscalCabinet ? "Importă primii clienți" : "Adaugă primul client"}
-            </button>
-          </div>
+          )
         ) : filteredClients.length === 0 ? (
           <div className="px-5 py-10 text-center text-sm text-eos-text-tertiary">
             Nicio firmă nu corespunde filtrelor aplicate.
