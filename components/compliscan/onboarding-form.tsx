@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
 import {
@@ -267,11 +267,42 @@ export function OnboardingForm({ initialUserMode, orgName }: OnboardingFormProps
   )
   // S1.6 — ICP segment selectat (5 carduri, mapează la 3 userMode-uri).
   const [selectedSegment, setSelectedSegment] = useState<IcpSegmentId | null>(initialIcpFromUrl)
+  // Mircea UX fix Faza 0.4 (2026-05-12): dacă URL register conține icp= valid
+  // (ex: /login?mode=register&icp=cabinet-fiscal venind din /fiscal landing),
+  // sărim ecranul "Pasul 1 — Cum vei folosi CompliScan?" cu cele 4 carduri de
+  // rol. ICP-ul e deja selectat din landing; ar fi redundant și enervant să
+  // întrebăm a doua oară.
+  const shouldSkipRoleSelection =
+    !initialUserMode && Boolean(initialIcpFromUrl && initialModeFromIcp)
   const [wizardStep, setWizardStep] = useState<ApplicabilityWizardStep | null>(
-    initialUserMode ? "cui" : null
+    initialUserMode || shouldSkipRoleSelection ? "cui" : null
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Mircea UX fix Faza 0.4: persistă auto userMode + icpSegment dacă am sărit
+  // ecranul de selecție rol (URL register cu icp= valid). Best-effort, nu blocăm
+  // flow-ul dacă API-urile sunt down — utilizatorul oricum poate continua.
+  useEffect(() => {
+    if (!shouldSkipRoleSelection || !selectedMode || !selectedSegment) return
+    void (async () => {
+      try {
+        await fetch("/api/auth/set-user-mode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: selectedMode }),
+        })
+        await fetch("/api/partner/white-label", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ icpSegment: selectedSegment }),
+        }).catch(() => {})
+      } catch {
+        // ignore — userMode persistare e best-effort în acest moment.
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const phaseIndex = getPhaseIndex(currentMode, wizardStep)
   const destination = resolveOnboardingDestination(currentMode)
