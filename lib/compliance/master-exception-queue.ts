@@ -288,22 +288,45 @@ function computeMissingDocs(f: CrossCorrelationFinding): string[] {
   return missing
 }
 
-function extractFromFilings(filings: FilingRecord[]): ExceptionItem[] {
+function extractFromFilings(
+  filings: FilingRecord[],
+  /**
+   * [FC-7 maturity fix 2026-05-14] Dedupe: nu re-emite items pentru filings
+   * care deja au produs un R6 cross-correlation finding (cu impact FC-5
+   * calibrat corect). Verificarea se face pe period — R6 finding-urile au
+   * period match cu FilingRecord.period.
+   */
+  alreadyCoveredPeriods: Set<string> = new Set(),
+): ExceptionItem[] {
   const items: ExceptionItem[] = []
-  const now = new Date().toISOString()
 
   for (const f of filings) {
     if (f.status === "on_time" || f.status === "rectified") continue
+    // Dedupe: dacă R6 finding pentru acest period deja există, skip.
+    // Tipul filing-ului trebuie inclus în chee pentru a permite multiple
+    // filings în același period (D300 + D390 ambele 2026-01).
+    const key = `${f.type}::${f.period}`
+    if (alreadyCoveredPeriods.has(key)) continue
 
     const daysUntilDeadline = daysFromNow(f.dueISO)
     const daysOverdue = daysUntilDeadline !== null && daysUntilDeadline < 0 ? -daysUntilDeadline : 0
     const severity = severityFromFilingStatus(f.status, daysOverdue)
     const category: ExceptionCategory = f.status === "missing" ? "filing-missing" : "filing-overdue"
 
-    // Estimare impact: penalitate fixă crescătoare cu zilele
-    let impactRON = 500
-    if (daysOverdue > 30) impactRON = 1500
-    else if (daysOverdue > 15) impactRON = 1000
+    // [FC-7 maturity fix] Reutilizăm calibrare FC-5: penalitate crescătoare
+    // cu severitate + diferențiere missing vs late. Aceeași logică ca în
+    // computeR6Impact pentru consistență cross-feature.
+    const isMissing = f.status === "missing"
+    let impactRON: number
+    if (isMissing) {
+      if (daysOverdue <= 30) impactRON = 3000 // 1000-3000 RON pentru ≤30z missing
+      else if (daysOverdue <= 90) impactRON = 4500
+      else impactRON = 7500
+    } else {
+      if (daysOverdue <= 15) impactRON = 1500
+      else if (daysOverdue <= 30) impactRON = 3000
+      else impactRON = 6000
+    }
 
     const priorityScore = computePriorityScore(severity, daysUntilDeadline, impactRON, 0)
 
@@ -334,7 +357,9 @@ function extractFromFilings(filings: FilingRecord[]): ExceptionItem[] {
           : "Documentează motivul întârzierii și păstrează în registru.",
       recurrenceCount: f.rectificationCount ?? 0,
       period: f.period,
-      legalReference: "Cod Fiscal Art. 219.",
+      legalReference: isMissing
+        ? "Cod Procedură Fiscală Art. 219 + Art. 107 (impunere oficiu peste 90 zile)."
+        : "Cod Procedură Fiscală Art. 219 (depunere tardivă).",
       priorityScore,
       sourceId: f.id,
     })
@@ -392,9 +417,35 @@ export function buildMasterExceptionQueue(
 ): ExceptionQueueReport {
   const recurrenceMap = input.recurrenceMap ?? new Map<string, number>()
 
+  // [FC-7 maturity fix 2026-05-14] Dedupe filings vs R6 findings:
+  // un D300 missing 2025-12 nu trebuie să apară de două ori în queue (o
+  // dată ca R6 cross-corr finding, încă o dată ca filing-missing).
+  // Construim setul de perioade deja acoperite de R6 (matching pe period +
+  // FilingType inferat din title — R6 finding-urile au period setat).
+  const xcorrFindings = input.crossCorrelationFindings ?? []
+  const alreadyCoveredPeriods = new Set<string>()
+  for (const f of xcorrFindings) {
+    if (f.rule !== "R6") continue
+    if (!f.period) continue
+    // Title-ul R6 conține tipul filing-ului între " — " și restul.
+    // ex: "R6 2025-12 — D300 (TVA) nedepusă (109 zile)"
+    // Extragem prefixul tipului (înainte de paranteză) ca lowercase + snake.
+    const titleAfterDash = f.title.split(" — ")[1] ?? ""
+    const typeRaw = titleAfterDash.split(/[ (]/)[0] ?? ""
+    const typeNorm = typeRaw.toLowerCase().replace(/[^a-z0-9]/g, "")
+    // Map back to FilingType naming (d300, saft, d390, d394)
+    const filingTypeKey =
+      typeNorm.startsWith("d300") ? "d300_tva"
+      : typeNorm.startsWith("saf") ? "saft"
+      : typeNorm.startsWith("d390") ? "d390_recap"
+      : typeNorm.startsWith("d394") ? "d394_local"
+      : typeNorm
+    alreadyCoveredPeriods.add(`${filingTypeKey}::${f.period}`)
+  }
+
   const items: ExceptionItem[] = [
-    ...extractFromCrossCorrelation(input.crossCorrelationFindings ?? [], recurrenceMap),
-    ...extractFromFilings(input.filings ?? []),
+    ...extractFromCrossCorrelation(xcorrFindings, recurrenceMap),
+    ...extractFromFilings(input.filings ?? [], alreadyCoveredPeriods),
     ...extractFromAuditRiskSignals(input.auditRiskSignals ?? []),
   ]
 
