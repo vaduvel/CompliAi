@@ -133,9 +133,11 @@ describe("computeClientBurden", () => {
         ],
       }),
     )
-    // 2 filed, 1 late (= closed but late), 1 missing
-    // closed=3, onTime=2 => 67%
-    expect(r.filingComplianceRate).toBeGreaterThanOrEqual(60)
+    // [FC-8 maturity 2026-05-14] late + missing reduc compliance:
+    // evaluated = 4 (toate, niciuna upcoming)
+    // onTime = 2 (doar status "on_time")
+    // rate = 2/4 = 50%
+    expect(r.filingComplianceRate).toBe(50)
     expect(r.problematicFilings).toBe(2)
   })
 

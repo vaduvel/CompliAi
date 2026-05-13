@@ -123,13 +123,21 @@ const TOXIC_MIN_BURDEN = 40
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Calculează rata de compliance filing (% on-time). */
+/** Calculează rata de compliance filing (% on-time din TOATE filing-urile cu
+ *  termen depășit). Upcoming nu intră în calcul.
+ *  [FC-8 maturity fix 2026-05-14] Înainte excludea late+missing din "closed"
+ *  → rate fals 100% chiar dacă majoritatea erau late. Acum: late și missing
+ *  reduc compliance corect, conform realității cabinetului. */
 function computeFilingComplianceRate(filings: FilingRecord[]): number {
   if (filings.length === 0) return 100
-  const closed = filings.filter((f) => f.status === "on_time" || f.status === "rectified")
-  if (closed.length === 0) return 0
-  const onTime = closed.filter((f) => f.status === "on_time").length
-  return Math.round((onTime / closed.length) * 100)
+  // Doar filing-urile cu termen depășit (nu upcoming).
+  const evaluated = filings.filter((f) => f.status !== "upcoming")
+  if (evaluated.length === 0) return 100
+  // On-time + rectified = aliniat la termen (rectificare e tot la timp post-depunere)
+  const onTime = evaluated.filter(
+    (f) => f.status === "on_time" || f.status === "rectified",
+  ).length
+  return Math.round((onTime / evaluated.length) * 100)
 }
 
 /** Estimează ore/lună consumate de cabinet pentru un client. */
