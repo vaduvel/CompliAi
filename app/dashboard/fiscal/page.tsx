@@ -21,6 +21,7 @@ import { toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
 import { CrossCorrelationCard } from "@/components/compliscan/fiscal/CrossCorrelationCard"
+import { PreANAFSimulationCard } from "@/components/compliscan/fiscal/PreANAFSimulationCard"
 import { PreventiveScanCard } from "@/components/compliscan/fiscal/PreventiveScanCard"
 import { RecurringPatternsCard } from "@/components/compliscan/fiscal/RecurringPatternsCard"
 import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
@@ -253,6 +254,15 @@ export default function FiscalPage() {
             <ArrowLeft className="size-3" strokeWidth={2} />
             Inapoi la finding
           </a>
+        </section>
+      )}
+
+      {/* [FC-6 2026-05-14] Pre-ANAF Simulation — butonul "wow" din Doc 09 cap 5.
+          "Dacă ANAF te-ar verifica azi, unde pici?" → top 5 riscuri cu sumă LEI
+          + acțiuni concrete. Plasat PRIMUL pentru a fi imediat vizibil. */}
+      {!tabParam && (
+        <section>
+          <PreANAFSimulationCard />
         </section>
       )}
 
