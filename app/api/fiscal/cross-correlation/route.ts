@@ -24,6 +24,7 @@ import type { StateWithParsedDeclarations } from "@/lib/compliance/parsed-declar
 import type { StateWithParsedAga } from "@/lib/compliance/parsed-aga"
 import type { StateWithParsedInvoices } from "@/lib/compliance/parsed-invoices"
 import type { StateWithOnrcSnapshots } from "@/lib/compliance/onrc-snapshot"
+import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 
 const READ_ROLES = [
   "owner",
@@ -46,6 +47,11 @@ type StateExt = ComplianceState &
   StateWithParsedInvoices &
   StateWithOnrcSnapshots & {
     crossCorrelationLastReport?: CrossCorrelationReport
+    filingRecords?: FilingRecord[]
+    orgProfile?: {
+      vatFrequency?: "monthly" | "quarterly"
+      [k: string]: unknown
+    }
   }
 
 export async function GET(request: Request) {
@@ -62,6 +68,8 @@ export async function GET(request: Request) {
         aga: (state.parsedAga ?? []).length,
         invoices: (state.parsedInvoices ?? []).length,
         onrc: (state.onrcSnapshots ?? []).length,
+        filings: (state.filingRecords ?? []).length,
+        vatFrequencyConfigured: Boolean(state.orgProfile?.vatFrequency),
       },
     })
   } catch (error) {
@@ -83,8 +91,19 @@ export async function POST(request: Request) {
     const aga = state.parsedAga ?? []
     const invoices = state.parsedInvoices ?? []
     const onrc = state.onrcSnapshots ?? []
+    const filings = state.filingRecords ?? []
+    const expectedVatFrequency = state.orgProfile?.vatFrequency
 
-    const report = runCrossCorrelation({ declarations, aga, invoices, onrc })
+    // [FC-4 maturity fix 2026-05-14] include filings + expectedVatFrequency
+    // pentru ca R6 (termen ↔ depunere) și R7 (frecvență D300) să poată rula.
+    const report = runCrossCorrelation({
+      declarations,
+      aga,
+      invoices,
+      onrc,
+      filings,
+      expectedVatFrequency,
+    })
 
     const actor = await resolveOptionalEventActor(request)
     const auditEvent = createComplianceEvent(

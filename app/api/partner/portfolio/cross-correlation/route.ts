@@ -33,6 +33,7 @@ import type { StateWithParsedDeclarations } from "@/lib/compliance/parsed-declar
 import type { StateWithParsedAga } from "@/lib/compliance/parsed-aga"
 import type { StateWithParsedInvoices } from "@/lib/compliance/parsed-invoices"
 import type { StateWithOnrcSnapshots } from "@/lib/compliance/onrc-snapshot"
+import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 
 type StateExt = ComplianceState &
   StateWithParsedDeclarations &
@@ -40,6 +41,11 @@ type StateExt = ComplianceState &
   StateWithParsedInvoices &
   StateWithOnrcSnapshots & {
     crossCorrelationLastReport?: CrossCorrelationReport
+    filingRecords?: FilingRecord[]
+    orgProfile?: {
+      vatFrequency?: "monthly" | "quarterly"
+      [k: string]: unknown
+    }
   }
 
 export type CrossClientRow = {
@@ -58,6 +64,8 @@ export type CrossClientRow = {
     R2: number
     R3: number
     R5: number
+    R6: number
+    R7: number
   }
   /** Risk level derivat: critic = orice error, warning = warnings>0, ok altfel. */
   riskLevel: "ok" | "warning" | "critical"
@@ -66,6 +74,8 @@ export type CrossClientRow = {
     aga: number
     invoices: number
     onrc: number
+    filings: number
+    vatFrequencyConfigured: boolean
   }
   /** Top 3 cele mai severe findings (pentru preview rapid). */
   topFindings: Array<{
@@ -90,14 +100,19 @@ function clientToReport(bundle: PortfolioOrgBundle): {
         aga: [],
         invoices: [],
         onrc: [],
+        filings: [],
       }),
     }
   }
+  // [FC-4 maturity fix 2026-05-14] include filings + expectedVatFrequency
+  // pentru ca R6 + R7 să ruleze și în cross-correlation cross-client.
   const report = runCrossCorrelation({
     declarations: state.parsedDeclarations ?? [],
     aga: state.parsedAga ?? [],
     invoices: state.parsedInvoices ?? [],
     onrc: state.onrcSnapshots ?? [],
+    filings: state.filingRecords ?? [],
+    expectedVatFrequency: state.orgProfile?.vatFrequency,
   })
   return { state, report }
 }
@@ -141,6 +156,8 @@ function bundleToRow(bundle: PortfolioOrgBundle): CrossClientRow {
       R2: report.summary.byRule.R2.error + report.summary.byRule.R2.warning,
       R3: report.summary.byRule.R3.error + report.summary.byRule.R3.warning,
       R5: report.summary.byRule.R5.error + report.summary.byRule.R5.warning,
+      R6: report.summary.byRule.R6.error + report.summary.byRule.R6.warning,
+      R7: report.summary.byRule.R7.error + report.summary.byRule.R7.warning,
     },
     riskLevel,
     inputs: report.inputs && {
@@ -151,6 +168,8 @@ function bundleToRow(bundle: PortfolioOrgBundle): CrossClientRow {
       aga: report.inputs.agaCount,
       invoices: report.inputs.invoicesCount,
       onrc: report.inputs.onrcCount,
+      filings: report.inputs.filingsCount ?? 0,
+      vatFrequencyConfigured: Boolean(state?.orgProfile?.vatFrequency),
     },
     topFindings,
   }
@@ -222,7 +241,8 @@ export async function GET(request: Request) {
           c.inputs.declarations > 0 ||
           c.inputs.aga > 0 ||
           c.inputs.invoices > 0 ||
-          c.inputs.onrc > 0,
+          c.inputs.onrc > 0 ||
+          c.inputs.filings > 0,
       ).length,
     }
 

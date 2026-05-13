@@ -35,9 +35,9 @@ type ClientRow = {
   warnings: number
   ok: number
   info: number
-  byRule: { R1: number; R2: number; R3: number; R5: number }
+  byRule: { R1: number; R2: number; R3: number; R5: number; R6: number; R7: number }
   riskLevel: RiskLevel
-  inputs: { declarations: number; aga: number; invoices: number; onrc: number }
+  inputs: { declarations: number; aga: number; invoices: number; onrc: number; filings: number; vatFrequencyConfigured: boolean }
   topFindings: Array<{
     id: string
     rule: string
@@ -58,7 +58,7 @@ type Summary = {
 }
 
 type SourceRef = {
-  type: "d300" | "d205" | "d100" | "aga" | "invoice" | "onrc"
+  type: "d300" | "d205" | "d100" | "aga" | "invoice" | "onrc" | "filing" | "calendar"
   id: string
   label: string
   period?: string | null
@@ -76,7 +76,7 @@ type DiffData = {
 
 type Finding = {
   id: string
-  rule: "R1" | "R2" | "R3" | "R5"
+  rule: "R1" | "R2" | "R3" | "R5" | "R6" | "R7"
   ruleName: string
   severity: Severity
   title: string
@@ -145,6 +145,8 @@ const SOURCE_LABELS: Record<SourceRef["type"], string> = {
   aga: "AGA",
   invoice: "Factură",
   onrc: "ONRC",
+  filing: "Filing",
+  calendar: "Calendar",
 }
 
 const SOURCE_TONES: Record<SourceRef["type"], string> = {
@@ -154,6 +156,8 @@ const SOURCE_TONES: Record<SourceRef["type"], string> = {
   aga: "border-eos-border bg-eos-surface-elevated text-eos-text",
   invoice: "border-eos-border bg-eos-surface-elevated text-eos-text-muted",
   onrc: "border-eos-border bg-eos-surface-elevated text-eos-text",
+  filing: "border-eos-warning/30 bg-eos-warning-soft text-eos-warning",
+  calendar: "border-eos-border bg-eos-surface-elevated text-eos-text-muted",
 }
 
 function fmtNumber(n: number | null | undefined): string {
@@ -249,7 +253,7 @@ export function PortfolioCrossCorrelationPanel() {
                 Cross-Correlation — vedere cross-client
               </h2>
               <span className="rounded-eos-sm border border-eos-primary/30 bg-eos-primary-soft px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
-                R1 · R2 · R3 · R5
+                R1 · R2 · R3 · R5 · R6 · R7
               </span>
             </div>
             <p className="mt-1 max-w-3xl text-[12.5px] text-eos-text-muted">
@@ -344,6 +348,12 @@ export function PortfolioCrossCorrelationPanel() {
                     R5
                   </th>
                   <th className="px-2 py-2.5 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.12em]">
+                    R6
+                  </th>
+                  <th className="px-2 py-2.5 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.12em]">
+                    R7
+                  </th>
+                  <th className="px-2 py-2.5 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.12em]">
                     Erori
                   </th>
                   <th className="px-2 py-2.5 text-right font-mono text-[10px] font-semibold uppercase tracking-[0.12em]">
@@ -368,7 +378,7 @@ export function PortfolioCrossCorrelationPanel() {
                     <td className="px-4 py-2.5">
                       <p className="font-semibold text-eos-text">{c.orgName}</p>
                       <p className="mt-0.5 font-mono text-[10px] text-eos-text-tertiary">
-                        {c.inputs.declarations} decl · {c.inputs.aga} AGA · {c.inputs.invoices} facturi · {c.inputs.onrc} ONRC
+                        {c.inputs.declarations} decl · {c.inputs.aga} AGA · {c.inputs.invoices} facturi · {c.inputs.onrc} ONRC · {c.inputs.filings} filings{c.inputs.vatFrequencyConfigured ? " · TVA freq ✓" : ""}
                       </p>
                     </td>
                     <td className="px-2 py-2.5 text-center">
@@ -389,6 +399,12 @@ export function PortfolioCrossCorrelationPanel() {
                     </td>
                     <td className="px-2 py-2.5 text-right font-mono">
                       <RuleBadge n={c.byRule.R5} />
+                    </td>
+                    <td className="px-2 py-2.5 text-right font-mono">
+                      <RuleBadge n={c.byRule.R6} />
+                    </td>
+                    <td className="px-2 py-2.5 text-right font-mono">
+                      <RuleBadge n={c.byRule.R7} />
                     </td>
                     <td className="px-2 py-2.5 text-right font-mono font-semibold">
                       <span className={c.errors > 0 ? "text-eos-error" : "text-eos-text-tertiary"}>
@@ -513,7 +529,7 @@ function ClientDetailDrawer({
           <div className="w-1/2 overflow-y-auto border-r border-eos-border">
             <div className="border-b border-eos-border bg-eos-surface-elevated px-3 py-2">
               <div className="flex flex-wrap gap-1">
-                {(["all", "R1", "R2", "R3", "R5"] as const).map((r) => (
+                {(["all", "R1", "R2", "R3", "R5", "R6", "R7"] as const).map((r) => (
                   <button
                     key={r}
                     type="button"
