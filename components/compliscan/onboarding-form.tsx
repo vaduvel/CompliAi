@@ -27,11 +27,14 @@ import { resolveOnboardingDestination } from "@/lib/compliscan/onboarding-destin
 type ModeId = "solo" | "partner" | "compliance"
 
 // S1.6 — ICP segment (Doc 06): 5 segmente Faza 1, mapate la 3 userMode-uri.
+// Faza 2 adaugă cabinet-hr + imm-hr (recunoscute în URL parser, dar fără mode mapping încă).
 type IcpSegmentId =
   | "solo"
   | "cabinet-dpo"
   | "cabinet-fiscal"
+  | "cabinet-hr"
   | "imm-internal"
+  | "imm-hr"
   | "enterprise"
 
 type ModeAccent = "primary" | "violet" | "success" | "amber" | "indigo"

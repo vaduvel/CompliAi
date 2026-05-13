@@ -26,6 +26,13 @@ import {
   buildPayTransparencyFinding,
   PAY_TRANSPARENCY_FINDING_ID,
 } from "@/lib/compliance/pay-transparency-rule"
+import {
+  generateFiscalCalendar,
+  inferFiscalProfile,
+  mergeAutoCalendarWithExisting,
+} from "@/lib/compliance/fiscal-calendar-generator"
+import type { FiscalOrgProfile } from "@/lib/compliance/fiscal-calendar-rules"
+import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 import { makeKnowledgeItem, mergeKnowledgeItems } from "@/lib/compliance/org-knowledge"
 import { trackEvent } from "@/lib/server/analytics"
 import { buildNis2Findings, readNis2State } from "@/lib/server/nis2-store"
@@ -154,6 +161,15 @@ export async function POST(request: Request) {
 
     const payTransparencyFinding = buildPayTransparencyFinding(orgProfile.employeeCount, new Date().toISOString())
 
+    // Auto-populare calendar fiscal: derivăm termenele aplicabile din
+    // profilul firmei folosind catalogul de 26 reguli ANAF. Nu inventăm —
+    // aplicăm regulile fiscale RO publice pe profilul concret.
+    const fiscalProfile = inferFiscalProfile(orgProfile as FiscalOrgProfile)
+    const calendarGeneration = generateFiscalCalendar(fiscalProfile, {
+      monthsAhead: 12,
+      nowISO: new Date().toISOString(),
+    })
+
     const stateAfterProfile = await mutateStateForOrg(session.orgId, (current) => {
       const previousFindings = (current.findings ?? [])
         .filter((finding) => !finding.id.startsWith("intake-") && finding.id !== PAY_TRANSPARENCY_FINDING_ID)
@@ -178,6 +194,17 @@ export async function POST(request: Request) {
       const returningFindings = allFindings.length
       console.error("[PROFILE DEBUG] intakeAns=", !!intakeAnswers, "currFindings=", current.findings?.length ?? 0, "returning=", returningFindings)
 
+      // Merge calendar auto-generat cu filing records existente (păstrează
+      // manual + filed, refresh auto, add noi).
+      const existingFilings =
+        ((current as typeof current & { filingRecords?: FilingRecord[] })
+          .filingRecords) ?? []
+      const calendarMerge = mergeAutoCalendarWithExisting(
+        existingFilings,
+        calendarGeneration.records,
+        new Date().toISOString(),
+      )
+
       return {
         ...current,
         orgProfile,
@@ -186,7 +213,8 @@ export async function POST(request: Request) {
         findings: allFindings,
         intakeAnswers,
         intakeCompletedAtISO,
-      }
+        filingRecords: calendarMerge.merged,
+      } as typeof current & { filingRecords: FilingRecord[] }
     }, session.orgName)
 
     // Auto A — write orgKnowledge from org profile (sector + tools)

@@ -26,6 +26,7 @@ import {
 import { validateSaftAccountStructure } from "@/lib/compliance/saft-account-validator"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
+import { applyFilingConfirmation } from "@/lib/compliance/erp-filing-confirmation"
 
 const READ_ROLES = ["owner", "partner_manager", "compliance", "reviewer"] as const
 const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
@@ -141,7 +142,26 @@ export async function POST(request: Request) {
     id: `saft-d406-${meta.period}-${nowISO.replace(/[^0-9]/g, "").slice(0, 14)}`,
   }
 
-  const allFilings: FilingRecord[] = [...(state.filingRecords ?? []), recordWithUniqueId]
+  // Auto-confirm: dacă există un filing D406 auto-generat în calendar pentru
+  // aceeași perioadă, îl flip-uim la on_time (sau late dacă e după termen).
+  // Asta închide bucla: upload SAF-T → status filing flip automat fără click.
+  const existingFilings = state.filingRecords ?? []
+  const confirmationResult = applyFilingConfirmation(
+    existingFilings,
+    {
+      filingType: "saft",
+      period: meta.period,
+      source: "saga", // sau "manual" — caller decide pe baza UI
+      filedAtISO: nowISO,
+      externalReference: recordWithUniqueId.id,
+      note: `Upload SAF-T XML (${(xml.length / 1024).toFixed(0)} KB)`,
+    },
+    nowISO,
+  )
+  const filingsAfterConfirmation = confirmationResult.applied
+    ? confirmationResult.updatedFilings
+    : existingFilings
+  const allFilings: FilingRecord[] = [...filingsAfterConfirmation, recordWithUniqueId]
 
   // Recompute hygiene + findings pe noul total
   const hygiene = computeSAFTHygiene(allFilings, nowISO)

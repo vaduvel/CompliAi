@@ -20,6 +20,8 @@ import { toast } from "sonner"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
+import { PreventiveScanCard } from "@/components/compliscan/fiscal/PreventiveScanCard"
+import { RecurringPatternsCard } from "@/components/compliscan/fiscal/RecurringPatternsCard"
 import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
 import { FiscalStatusInterpreterCard } from "@/components/compliscan/fiscal-status-interpreter-card"
 import { EFacturaValidatorCard } from "@/components/compliscan/efactura-validator-card"
@@ -262,6 +264,24 @@ export default function FiscalPage() {
         </section>
       )}
 
+      {/* Preventive Scan — rulează 4 detectoare preventive pe state-ul curent.
+          Funcționează în orice mediu ANAF (mock/test/prod). Vizibil doar pe
+          overview pentru a nu dubla contextul în deep-link-urile din cockpit. */}
+      {!tabParam && (
+        <section>
+          <PreventiveScanCard />
+        </section>
+      )}
+
+      {/* Smart Pattern Engine — pattern-uri recurrente detectate din fix-uri
+          aplicate anterior. Wedge differentiator: SmartBill/Saga nu au
+          memorie cross-finding. Vizibil pe overview. */}
+      {!tabParam && (
+        <section>
+          <RecurringPatternsCard />
+        </section>
+      )}
+
       {/* Cockpit Quick Actions — Sprint 0 IA restructure (2026-05-11).
           Vizibil DOAR în mod overview (fără tabParam din URL). Pe sub-rute
           (?tab=X) acest card ascuns ca să nu dubleze contextul. */}
@@ -286,6 +306,11 @@ export default function FiscalPage() {
             href="/dashboard/fiscal/integrari"
             title="Integrări ERP"
             description="SmartBill / Oblio / Saga + reconciliere SPV."
+          />
+          <CockpitQuickActionCard
+            href="/dashboard/fiscal/calendar"
+            title="Calendar fiscal"
+            description="Termene ANAF aplicabile firmei tale, generate automat din profil."
           />
           <CockpitQuickActionCard
             href="/dashboard/fiscal/deadline-urgent"

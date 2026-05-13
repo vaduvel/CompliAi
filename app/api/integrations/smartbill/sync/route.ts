@@ -24,7 +24,13 @@ import {
   EFACTURA_RISK_FINDING_PREFIX,
   type EFacturaInvoiceSignal,
 } from "@/lib/compliance/efactura-risk"
+import {
+  applyBatchConfirmations,
+  inferEFacturaMonthlyConfirmation,
+  type FilingConfirmation,
+} from "@/lib/compliance/erp-filing-confirmation"
 import type { ComplianceState } from "@/lib/compliance/types"
+import type { FilingRecord } from "@/lib/compliance/filing-discipline"
 
 const WRITE_ROLES = ["owner", "partner_manager", "compliance"] as const
 
@@ -118,6 +124,30 @@ export async function POST(request: Request) {
   )
   const mergedFindings = [...survivingFindings, ...newFindings]
 
+  // Auto-confirm raport lunar e-Factura B2C — pentru fiecare lună unde TOATE
+  // facturile sunt validate de ANAF, flip filing-ul `efactura_monthly` la
+  // on_time. Asta închide bucla: sync SmartBill → status filing flip automat.
+  const filingsBefore: FilingRecord[] = (state as ComplianceState & { filingRecords?: FilingRecord[] }).filingRecords ?? []
+  const invoicesByMonth = new Map<string, SmartBillInvoice[]>()
+  for (const inv of allInvoices) {
+    const month = inv.issueDate.slice(0, 7) // "2026-05"
+    const list = invoicesByMonth.get(month) ?? []
+    list.push(inv)
+    invoicesByMonth.set(month, list)
+  }
+  const monthlyConfirmations: FilingConfirmation[] = []
+  for (const [month, invoices] of invoicesByMonth.entries()) {
+    const inferred = inferEFacturaMonthlyConfirmation({
+      period: month,
+      invoices,
+      source: "smartbill",
+      filedAtISO: nowISO,
+    })
+    if (inferred) monthlyConfirmations.push(inferred)
+  }
+  const confirmBatch = applyBatchConfirmations(filingsBefore, monthlyConfirmations, nowISO)
+  const updatedFilings = confirmBatch.updatedFilings
+
   const actor = await resolveOptionalEventActor(request)
   const auditEvent = createComplianceEvent(
     {
@@ -137,9 +167,10 @@ export async function POST(request: Request) {
     actor,
   )
 
-  const updatedState: ComplianceState = {
+  const updatedState: ComplianceState & { filingRecords?: FilingRecord[] } = {
     ...state,
     findings: mergedFindings,
+    filingRecords: updatedFilings,
     integrations: {
       ...(state.integrations ?? {}),
       smartbill: {
@@ -163,6 +194,7 @@ export async function POST(request: Request) {
     invoicesProblematic: problematic.length,
     findingsGenerated: newFindings.length,
     findings: newFindings.map((f) => ({ id: f.id, title: f.title, severity: f.severity })),
+    filingsAutoConfirmed: confirmBatch.appliedCount,
     error: lastError,
   })
 }

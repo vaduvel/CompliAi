@@ -30,6 +30,12 @@ import { readFreshSessionFromRequest } from "@/lib/server/auth"
 import { readFreshStateForOrg, writeStateForOrg } from "@/lib/server/mvp-store"
 import { appendComplianceEvents, createComplianceEvent } from "@/lib/compliance/events"
 import { resolveOptionalEventActor } from "@/lib/server/event-actor"
+import {
+  appendFixPatternRecord,
+  buildFixPatternRecord,
+  pruneFixPatternMemory,
+  type FixPatternRecord,
+} from "@/lib/compliance/smart-pattern-engine"
 import type { ScanFinding } from "@/lib/compliance/types"
 
 type EvidenceType =
@@ -102,6 +108,40 @@ export async function POST(
     }
 
     state.findings[findingIdx] = updatedFinding
+
+    // Smart Pattern Engine — înregistrăm fix-ul în memorie pentru detector
+    // de recurență. State extension cu câmp opțional `fixPatternMemory`.
+    const stateExt = state as typeof state & {
+      fixPatternMemory?: FixPatternRecord[]
+    }
+    const clientCif =
+      (typeof finding.sourceDocument === "string" && finding.sourceDocument.startsWith("RO")
+        ? finding.sourceDocument.slice(0, 12)
+        : null) ??
+      state.orgProfile?.cui ??
+      "self"
+
+    const fixRecord = buildFixPatternRecord({
+      orgId: session.orgId,
+      finding: {
+        id: finding.id,
+        findingTypeId: finding.findingTypeId,
+        category: finding.category,
+      },
+      clientCif,
+      fixApplied: evidenceType,
+      fixLabel: evidenceLabel,
+      success: true, // ajungem aici doar la rezolvare cu succes
+      nowISO,
+      errorCode: (finding.findingTypeId ?? "").startsWith("EF-")
+        ? finding.findingTypeId
+        : undefined,
+    })
+
+    const existingMemory = stateExt.fixPatternMemory ?? []
+    const withRecord = appendFixPatternRecord(existingMemory, fixRecord)
+    const pruned = pruneFixPatternMemory(withRecord, nowISO, 90)
+    stateExt.fixPatternMemory = pruned
 
     // Audit event
     const actor = await resolveOptionalEventActor(request)

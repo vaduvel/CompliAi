@@ -1,4 +1,4 @@
-import { PortfolioFiscalPanel } from "@/components/compliscan/portfolio/PortfolioFiscalPanel"
+import { PortfolioFiscalTabs } from "@/components/compliscan/portfolio/PortfolioFiscalTabs"
 
 export default function PortfolioFiscalPage() {
   return (
@@ -11,15 +11,15 @@ export default function PortfolioFiscalPage() {
           data-display-text="true"
           className="mt-1 font-display text-[26px] font-semibold tracking-[-0.025em] text-eos-text md:text-[30px]"
         >
-          Sumar fiscal cross-client
+          Fiscal — vedere cross-client
         </h1>
         <p className="mt-1 max-w-2xl text-[13.5px] leading-[1.55] text-eos-text-muted">
-          Vezi scor SAF-T, disciplină depuneri și probleme e-Factura pentru fiecare client din portofoliu.
-          Sortat după nivelul de risc — clienții cu probleme apar primul.
+          Calendar agregat cu termene urgente pe toți clienții + sumar cu scoruri SAF-T,
+          disciplină depuneri, probleme e-Factura. Sortat după urgență — restantele apar primul.
         </p>
       </header>
 
-      <PortfolioFiscalPanel />
+      <PortfolioFiscalTabs />
     </div>
   )
 }

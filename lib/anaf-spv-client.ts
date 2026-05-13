@@ -258,7 +258,8 @@ export async function fetchSpvMessages(
     // ANAF SPV returns snake_case `data_creare`; our types use camelCase
     // `dataCreare`. Normalize so downstream consumers see a single shape.
     if (Array.isArray(json.mesaje)) {
-      json.mesaje = json.mesaje.map((m) => {
+      json.mesaje = json.mesaje.map((rawMsg) => {
+        const m = rawMsg as Record<string, unknown>
         const dataCreare =
           (m.dataCreare as string | undefined) ??
           (m.data_creare as string | undefined) ??

@@ -21,6 +21,12 @@ import {
 } from "@/lib/compliance/filing-discipline"
 import { computeSAFTHygiene } from "@/lib/compliance/saft-hygiene"
 import {
+  generateFiscalCalendar,
+  inferFiscalProfile,
+  mergeAutoCalendarWithExisting,
+} from "@/lib/compliance/fiscal-calendar-generator"
+import type { FiscalOrgProfile } from "@/lib/compliance/fiscal-calendar-rules"
+import {
   sendFiscalReminderEmail,
   type FiscalEmailResult,
 } from "@/lib/server/fiscal-reminder-email"
@@ -75,13 +81,37 @@ export async function GET(request: Request) {
       const state = (await readStateForOrg(orgId)) as StateWithFilings | null
       if (!state) continue
 
+      // Refresh calendar fiscal auto-generat înainte de a calcula reminders.
+      // Asta asigură că orgs care nu deschid aplicația primesc termenele
+      // luna viitoare la zi (rolling window 12 luni).
+      let workingFilings: FilingRecord[] = state.filingRecords ?? []
+      if (state.orgProfile) {
+        const fiscalProfile = inferFiscalProfile(state.orgProfile as FiscalOrgProfile)
+        const generation = generateFiscalCalendar(fiscalProfile, {
+          monthsAhead: 12,
+          nowISO,
+        })
+        const mergeResult = mergeAutoCalendarWithExisting(
+          workingFilings,
+          generation.records,
+          nowISO,
+        )
+        if (mergeResult.newCount > 0 || mergeResult.refreshedCount > 0) {
+          workingFilings = mergeResult.merged
+          await writeStateForOrg(orgId, {
+            ...state,
+            filingRecords: workingFilings,
+          } as StateWithFilings)
+        }
+      }
+
       // Skip dacă org nu are nicio activitate fiscal-relevantă
-      const hasFilings = (state.filingRecords ?? []).length > 0
+      const hasFilings = workingFilings.length > 0
       const hasIntegration = !!state.integrations?.smartbill || !!state.integrations?.oblio
       const hasFiscalFindings = (state.findings ?? []).some((f) => isFiscalCategory(f.category))
       if (!hasFilings && !hasIntegration && !hasFiscalFindings) continue
 
-      const reminders = generateFilingReminders(state.filingRecords ?? [], nowISO)
+      const reminders = generateFilingReminders(workingFilings, nowISO)
       const upcomingReminders = reminders.filter(
         (r) => r.escalationLevel === "escalation" || r.escalationLevel === "warning",
       )
@@ -94,7 +124,7 @@ export async function GET(request: Request) {
 
       // Calculăm SAF-T hygiene curent (snapshot)
       const saftHygiene = hasFilings
-        ? computeSAFTHygiene(state.filingRecords ?? [], nowISO)
+        ? computeSAFTHygiene(workingFilings, nowISO)
         : null
       const saftHygieneScore =
         saftHygiene && saftHygiene.totalFilings > 0 ? saftHygiene.hygieneScore : null

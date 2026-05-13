@@ -23,8 +23,11 @@ export function FinesCalculator() {
   const [category, setCategory] = useState<TaxpayerCategory>("mic")
   const [counts, setCounts] = useState<Record<ViolationType, number>>({
     efactura_nedepusa: 0,
+    efactura_b2c_nedepusa: 0,
+    efactura_b2b_15pct: 0,
     efactura_intarziere: 0,
     efactura_xml_eroare: 0,
+    pfa_cnp_neinregistrat: 0,
     saft_d406_nedepusa: 0,
     saft_d406_intarziere: 0,
     etva_neresponded: 0,
