@@ -99,6 +99,32 @@ describe("parseD100 — format block cu child elements", () => {
   })
 })
 
+describe("parseD100 — bug regression: opening tag with child elements (FC-3 fixture real)", () => {
+  // Bug găsit 2026-05-13 în timpul FC-3 testing: Pattern 1 (self-closing) acoperea
+  // și opening-tag-urile de blocuri și le adăuga în `seen` cu amount=0 înainte ca
+  // Pattern 2 să apuce să citească child elements. Fix: require explicit "/>".
+  const REAL_D100_DIVIDENDE = `<?xml version="1.0" encoding="UTF-8"?>
+<D100 xmlns="mfp:anaf:dgti:D100:declaratie:v1">
+  <cui_declarant>12345678</cui_declarant>
+  <an>2025</an>
+  <luna>5</luna>
+  <rectificativa>0</rectificativa>
+  <impozit cod="480">
+    <denumire>Impozit dividende persoane fizice</denumire>
+    <suma_datorata>4000.00</suma_datorata>
+    <suma_de_plata>4000.00</suma_de_plata>
+  </impozit>
+</D100>`
+
+  it("extrage suma 4000 din block format (NU 0)", () => {
+    const result = parseD100(REAL_D100_DIVIDENDE)
+    expect(result.lines).toHaveLength(1)
+    expect(result.lines[0]?.amountDue).toBe(4000)
+    expect(result.lines[0]?.amountToPay).toBe(4000)
+    expect(result.summaryByCategory.dividende.totalDue).toBe(4000)
+  })
+})
+
 describe("parseD100 — RO numeric format", () => {
   it("parsează '12.500,00' ca 12500", () => {
     const result = parseD100(SAMPLE_NUMERIC_RO)
