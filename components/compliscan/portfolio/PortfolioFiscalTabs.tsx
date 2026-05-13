@@ -4,12 +4,13 @@
 // summary cross-client (existent) și calendar cross-client (nou).
 
 import { useState } from "react"
-import { CalendarClock, ListChecks } from "lucide-react"
+import { CalendarClock, ListChecks, Sparkles } from "lucide-react"
 
 import { PortfolioCalendarPanel } from "@/components/compliscan/portfolio/PortfolioCalendarPanel"
+import { PortfolioCrossCorrelationPanel } from "@/components/compliscan/portfolio/PortfolioCrossCorrelationPanel"
 import { PortfolioFiscalPanel } from "@/components/compliscan/portfolio/PortfolioFiscalPanel"
 
-type Tab = "calendar" | "summary"
+type Tab = "calendar" | "summary" | "crosscorr"
 
 export function PortfolioFiscalTabs() {
   const [tab, setTab] = useState<Tab>("calendar")
@@ -29,9 +30,21 @@ export function PortfolioFiscalTabs() {
           icon={<ListChecks className="size-3.5" strokeWidth={2} />}
           label="Sumar per client"
         />
+        <TabButton
+          active={tab === "crosscorr"}
+          onClick={() => setTab("crosscorr")}
+          icon={<Sparkles className="size-3.5" strokeWidth={2} />}
+          label="Cross-correlation"
+        />
       </nav>
 
-      {tab === "calendar" ? <PortfolioCalendarPanel /> : <PortfolioFiscalPanel />}
+      {tab === "calendar" ? (
+        <PortfolioCalendarPanel />
+      ) : tab === "summary" ? (
+        <PortfolioFiscalPanel />
+      ) : (
+        <PortfolioCrossCorrelationPanel />
+      )}
     </div>
   )
 }
