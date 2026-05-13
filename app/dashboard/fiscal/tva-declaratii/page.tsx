@@ -4,9 +4,10 @@
 // Conține: Discrepanțe e-TVA + Depuneri fiscale + SAF-T Hygiene
 // Toate sub un layout cu secțiuni clare delimitate.
 
-import { Receipt, Calendar, FileText, Globe2 } from "lucide-react"
+import { Receipt, Calendar, FileText, Globe2, FileCode2 } from "lucide-react"
 
 import { CrossBorderAdvisorCard } from "@/components/compliscan/fiscal/CrossBorderAdvisorCard"
+import { D300UploadCard } from "@/components/compliscan/fiscal/D300UploadCard"
 import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTab"
 import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
@@ -47,6 +48,14 @@ export default function FiscalTvaPage() {
         subtitle="Scor 0-100 pentru fișierul D406 + draft D300/D394 generat din SAF-T XML."
       >
         <SaftHygieneTab />
+      </Section>
+
+      <Section
+        icon={<FileCode2 className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="D300 — parser conținut declarație TVA"
+        subtitle="Încarcă XML D300 descărcat din SPV ANAF sau exportat din Saga / SmartBill. Parser-ul extrage baze TVA per cotă, totale și TVA de plată — fundație pentru cross-correlation cu facturile."
+      >
+        <D300UploadCard />
       </Section>
 
       <Section
