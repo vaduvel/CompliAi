@@ -21,6 +21,7 @@ import { toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
 import { CrossCorrelationCard } from "@/components/compliscan/fiscal/CrossCorrelationCard"
+import { MasterExceptionQueueCard } from "@/components/compliscan/fiscal/MasterExceptionQueueCard"
 import { PreANAFSimulationCard } from "@/components/compliscan/fiscal/PreANAFSimulationCard"
 import { PreventiveScanCard } from "@/components/compliscan/fiscal/PreventiveScanCard"
 import { RecurringPatternsCard } from "@/components/compliscan/fiscal/RecurringPatternsCard"
@@ -263,6 +264,15 @@ export default function FiscalPage() {
       {!tabParam && (
         <section>
           <PreANAFSimulationCard />
+        </section>
+      )}
+
+      {/* [FC-7 2026-05-14] Master Exception Queue — Doc 09 cap 9.2.
+          Un singur loc cu TOATE excepțiile sortate după priorityScore.
+          Plasat după Pre-ANAF (simulare → acțiuni concrete). */}
+      {!tabParam && (
+        <section>
+          <MasterExceptionQueueCard />
         </section>
       )}
 
