@@ -4,7 +4,7 @@
 // Conține: Discrepanțe e-TVA + Depuneri fiscale + SAF-T Hygiene
 // Toate sub un layout cu secțiuni clare delimitate.
 
-import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign, Gavel, ScanLine } from "lucide-react"
+import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign, Gavel, ScanLine, Building2 } from "lucide-react"
 
 import { AgaUploadCard } from "@/components/compliscan/fiscal/AgaUploadCard"
 import { CrossBorderAdvisorCard } from "@/components/compliscan/fiscal/CrossBorderAdvisorCard"
@@ -12,6 +12,7 @@ import { D100UploadCard } from "@/components/compliscan/fiscal/D100UploadCard"
 import { D205UploadCard } from "@/components/compliscan/fiscal/D205UploadCard"
 import { D300UploadCard } from "@/components/compliscan/fiscal/D300UploadCard"
 import { InvoicePrimitaOcrCard } from "@/components/compliscan/fiscal/InvoicePrimitaOcrCard"
+import { OnrcSnapshotCard } from "@/components/compliscan/fiscal/OnrcSnapshotCard"
 import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTab"
 import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
@@ -92,6 +93,14 @@ export default function FiscalTvaPage() {
         subtitle="Fotografiază sau încarcă imaginea facturii primite de la furnizor. AI extrage CIF, sume, articole. Cross-correlation R1: Σ TVA facturi primite ↔ D300 TVA deductibil."
       >
         <InvoicePrimitaOcrCard />
+      </Section>
+
+      <Section
+        icon={<Building2 className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="ONRC — date firmă + asociați"
+        subtitle="Caută firma după CUI. ANAF aduce datele de bază (denumire, CAEN, TVA). Pentru asociați + cote deținere, conectează RECOM SOAP sau introduce manual din certificat. Cross-correlation R3: AGA procent ↔ ONRC procent."
+      >
+        <OnrcSnapshotCard />
       </Section>
 
       <Section
