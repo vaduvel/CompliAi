@@ -129,7 +129,12 @@ function extractLines(xml: string): D100Line[] {
   const seen = new Set<string>()
 
   // Pattern 1: <impozit cod="480" suma_datorata="..." suma_de_plata="..."/>
-  const impozitPattern = /<impozit\s+([^>]+?)\/?>/gi
+  // IMPORTANT: require explicit self-closing "/>" — altfel acest pattern
+  // mătură și opening-tag-urile de block-uri (<impozit cod="X">) și le
+  // adaugă în `seen` cu amount=0 înainte ca Pattern 2 să apuce să citească
+  // child elements (FC-3 testing 2026-05-13 a descoperit acest bug pe
+  // fixtures D100 reale cu format ANAF child-elements).
+  const impozitPattern = /<impozit\s+([^>]+?)\s*\/>/gi
   for (const match of xml.matchAll(impozitPattern)) {
     const attrs = match[1] ?? ""
     const code = attrs.match(/cod="([^"]+)"/i)?.[1]
