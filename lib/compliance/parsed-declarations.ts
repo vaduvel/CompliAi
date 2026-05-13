@@ -3,12 +3,13 @@
 
 import type { D300ParsedData } from "@/lib/compliance/parser-d300"
 import type { D205ParsedData } from "@/lib/compliance/parser-d205"
+import type { D100ParsedData } from "@/lib/compliance/parser-d100"
 
 export type ParsedDeclarationType = "d300" | "d205" | "d100"
 export type ParsedDeclarationSource = "upload-xml" | "upload-pdf" | "spv-fetch"
 
 /** Union al payload-urilor parsate per tip declarație. */
-export type ParsedDeclarationData = D300ParsedData | D205ParsedData
+export type ParsedDeclarationData = D300ParsedData | D205ParsedData | D100ParsedData
 
 export type ParsedDeclarationRecord = {
   id: string
