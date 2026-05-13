@@ -271,26 +271,69 @@ function computeR6Impact(finding: CrossCorrelationFinding): EconomicImpact {
     return zeroImpact(finding.severity)
   }
 
-  const daysLate = Math.abs(finding.diff?.actual ?? 0)
+  // [FC-5 maturity fix 2026-05-14] daysLate vine fie din diff.actual (late),
+  // fie din sources[0].value (missing — nu are diff). Înainte missing 109 zile
+  // era contat ca 0 zile → penalty bucket ≤15 (500-1500) — INCORECT pentru
+  // nedepuneri care sunt mult mai severe decât întârzieri.
+  const daysFromDiff = Math.abs(finding.diff?.actual ?? 0)
+  const daysFromSource = Math.abs(
+    typeof finding.sources?.[0]?.value === "number" ? finding.sources[0].value : 0,
+  )
+  const daysLate = Math.max(daysFromDiff, daysFromSource)
+
+  // Distincție: missing vs late?
+  // Missing = nu există filedAtISO → nu există diff → severitate intrinsec mai mare.
+  const isMissing = !finding.diff
   const affectedAmountRON = null
 
   let penaltyMinRON: number
   let penaltyMaxRON: number
 
-  if (daysLate <= 15) {
-    penaltyMinRON = FILING_LATE_PENALTY_BASE_RON
-    penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON
-  } else if (daysLate <= 30) {
-    penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 2
-    penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 2
+  // Cod Procedură Fiscală Art. 219:
+  //   - Persoane juridice mari: 1.000-5.000 RON
+  //   - Persoane juridice mici: 500-1.500 RON
+  //   - Agravare la nedepunere prelungită
+  if (isMissing) {
+    // Nedepunere = penalitate fixă mare INDIFERENT de zile (e mai grav decât late)
+    // 1000-3000 RON pentru ≤30 zile, agravare progresivă peste
+    if (daysLate <= 30) {
+      penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 2
+      penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 2
+    } else if (daysLate <= 90) {
+      penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 3
+      penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 3
+    } else {
+      // peste 90 zile: poate risca decizie de impunere din oficiu (Art. 107 CPF)
+      penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 5
+      penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 5
+    }
   } else {
-    // peste 30 zile: penalitate fixă + procent procesual pe sume raportate
-    penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 3
-    penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 4
+    // Late = depusă cu întârziere, deja există recipisă
+    if (daysLate <= 15) {
+      penaltyMinRON = FILING_LATE_PENALTY_BASE_RON
+      penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON
+    } else if (daysLate <= 30) {
+      penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 2
+      penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 2
+    } else {
+      penaltyMinRON = FILING_LATE_PENALTY_BASE_RON * 3
+      penaltyMaxRON = FILING_LATE_PENALTY_AGGRESSIVE_RON * 4
+    }
   }
 
-  const remediationHours = daysLate <= 5 ? 0.5 : daysLate <= 15 ? 1.0 : 2.0
-  const retransmissions = 0 // depunerea e deja făcută, doar plată penalitate
+  // Pentru nedepuneri: ore mai multe (trebuie depusă acum + notificare ANAF).
+  const remediationHours = isMissing
+    ? daysLate <= 30
+      ? 2.0
+      : daysLate <= 90
+        ? 3.0
+        : 4.0
+    : daysLate <= 5
+      ? 0.5
+      : daysLate <= 15
+        ? 1.0
+        : 2.0
+  const retransmissions = isMissing ? 1 : 0 // missing = trebuie depusă urgent
 
   return {
     affectedAmountRON,
@@ -300,11 +343,19 @@ function computeR6Impact(finding: CrossCorrelationFinding): EconomicImpact {
     retransmissions,
     totalCostMinRON: round2(penaltyMinRON + remediationHours * CABINET_HOURLY_RATE_RON),
     totalCostMaxRON: round2(penaltyMaxRON + remediationHours * CABINET_HOURLY_RATE_RON),
-    legalReferences: [
-      "Cod Fiscal Art. 219 alin (1) lit. d (depunere tardiv)",
-      "OG 92/2003 alin agravare",
-    ],
-    computationNote: `${daysLate} zile întârziere. Penalitate ${penaltyMinRON.toFixed(0)}-${penaltyMaxRON.toFixed(0)} lei (agravare progresivă) + ${remediationHours}h documentare cabinet.`,
+    legalReferences: isMissing
+      ? [
+          "Cod Procedură Fiscală Art. 219 alin (1) lit. d (nedepunere)",
+          "Cod Procedură Fiscală Art. 107 (impunere din oficiu peste 90 zile)",
+          "OG 92/2003 alin agravare progresivă",
+        ]
+      : [
+          "Cod Procedură Fiscală Art. 219 alin (1) lit. d (depunere tardiv)",
+          "OG 92/2003 alin agravare",
+        ],
+    computationNote: isMissing
+      ? `Nedepunere ${daysLate} zile (după termen). Penalitate ${penaltyMinRON.toFixed(0)}-${penaltyMaxRON.toFixed(0)} lei (agravare progresivă${daysLate > 90 ? " + RISC impunere oficiu" : ""}) + ${remediationHours}h cabinet + 1 retransmitere urgentă.`
+      : `${daysLate} zile întârziere. Penalitate ${penaltyMinRON.toFixed(0)}-${penaltyMaxRON.toFixed(0)} lei (agravare progresivă) + ${remediationHours}h documentare cabinet.`,
   }
 }
 

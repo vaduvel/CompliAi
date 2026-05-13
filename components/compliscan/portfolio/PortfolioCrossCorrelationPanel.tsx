@@ -74,6 +74,18 @@ type DiffData = {
   label?: string
 }
 
+type EconomicImpact = {
+  affectedAmountRON: number | null
+  penaltyMinRON: number
+  penaltyMaxRON: number
+  remediationHours: number
+  retransmissions: number
+  totalCostMinRON: number
+  totalCostMaxRON: number
+  legalReferences: string[]
+  computationNote: string
+}
+
 type Finding = {
   id: string
   rule: "R1" | "R2" | "R3" | "R5" | "R6" | "R7"
@@ -87,6 +99,7 @@ type Finding = {
   diff?: DiffData
   legalReference?: string
   suggestion?: string
+  economicImpact?: EconomicImpact
 }
 
 type ClientDetail = {
@@ -701,6 +714,58 @@ function FindingDetailContent({ finding }: { finding: Finding }) {
         <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary-soft px-3 py-2 text-eos-primary">
           <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em]">Recomandare</p>
           <p className="mt-0.5 text-[11px] leading-[1.5]">{finding.suggestion}</p>
+        </div>
+      )}
+
+      {/* [FC-5 maturity 2026-05-14] Economic Impact section pentru portfolio drawer.
+          Înainte lipsea — doar CrossCorrelationCard per-org afișa impact RON. */}
+      {finding.economicImpact && finding.economicImpact.totalCostMaxRON > 0 && (
+        <div className="rounded-eos-md border border-eos-error/40 bg-eos-error-soft p-3">
+          <p className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-error">
+            💰 Cât te poate costa
+          </p>
+          <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3">
+            {finding.economicImpact.affectedAmountRON !== null && (
+              <DiffTile
+                label="Sumă afectată"
+                value={`${fmtNumber(finding.economicImpact.affectedAmountRON)} RON`}
+                sub="TVA / impozit"
+              />
+            )}
+            <DiffTile
+              label="Penalitate"
+              value={`${fmtNumber(finding.economicImpact.penaltyMinRON)}-${fmtNumber(finding.economicImpact.penaltyMaxRON)} RON`}
+              sub="ANAF / CPF Art. 219"
+              highlight
+            />
+            <DiffTile
+              label="Cabinet"
+              value={`${finding.economicImpact.remediationHours}h`}
+              sub={`@200 RON/h`}
+            />
+            <DiffTile
+              label="COST TOTAL"
+              value={`${fmtNumber(finding.economicImpact.totalCostMinRON)}-${fmtNumber(finding.economicImpact.totalCostMaxRON)} RON`}
+              sub={
+                finding.economicImpact.retransmissions > 0
+                  ? `${finding.economicImpact.retransmissions}× retransmitere`
+                  : "MIN-MAX"
+              }
+              highlight
+            />
+          </div>
+          <p className="mt-2 text-[10.5px] leading-[1.45] text-eos-text-muted">
+            {finding.economicImpact.computationNote}
+          </p>
+          {finding.economicImpact.legalReferences.length > 0 && (
+            <ul className="mt-2 space-y-0.5">
+              {finding.economicImpact.legalReferences.map((ref, idx) => (
+                <li key={idx} className="text-[10px] text-eos-text-tertiary">
+                  · {ref}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
