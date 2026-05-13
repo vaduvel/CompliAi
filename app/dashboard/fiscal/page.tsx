@@ -20,6 +20,7 @@ import { toast } from "sonner"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
+import { CrossCorrelationCard } from "@/components/compliscan/fiscal/CrossCorrelationCard"
 import { PreventiveScanCard } from "@/components/compliscan/fiscal/PreventiveScanCard"
 import { RecurringPatternsCard } from "@/components/compliscan/fiscal/RecurringPatternsCard"
 import { FiscalExecutionLogCard } from "@/components/compliscan/fiscal-execution-log-card"
@@ -270,6 +271,15 @@ export default function FiscalPage() {
       {!tabParam && (
         <section>
           <PreventiveScanCard />
+        </section>
+      )}
+
+      {/* Cross-Correlation Engine (FC-3 Pas 8-9) — 4 reguli R1+R2+R3+R5 cu
+          drawer diff vizual. Vizibil doar pe overview ca să nu dubleze
+          contextul în deep-link-urile din findings. */}
+      {!tabParam && (
+        <section>
+          <CrossCorrelationCard />
         </section>
       )}
 
