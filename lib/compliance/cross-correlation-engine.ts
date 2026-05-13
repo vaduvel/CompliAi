@@ -1,6 +1,6 @@
-// FC-3 Pas 7 — Cross-Correlation Engine pentru declarații fiscale.
+// FC-3 + FC-4 — Cross-Correlation Engine pentru declarații fiscale.
 //
-// Inima FC-3: rulează 4 reguli care detectează neconcordanțe între sursele
+// Inima FC-3: rulează 6 reguli care detectează neconcordanțe între sursele
 // fiscale ale unei firme. Output-ul intră într-un raport cu findings (OK +
 // warning + error), fiecare cu surse referințe pentru drawer-ul diff.
 //
@@ -9,6 +9,8 @@
 //   R2: AGA dividende per asociat (CNP) ↔ D205 beneficiar dividende grossIncome.
 //   R3: AGA procent deținere per asociat (CNP) ↔ ONRC procent (per CUI).
 //   R5: D205 anual impozit dividende ↔ Σ D100 lunare cod 480 (impozit dividende).
+//   R6: termen calendar fiscal ↔ data depunere (FilingRecord.dueISO ↔ filedAtISO).  [FC-4]
+//   R7: frecvență reală depuneri ↔ frecvență așteptată (lunar/trimestrial).  [FC-4]
 //
 // Toate sumele în RON. Toleranță: 1 RON sau 1% per rule.
 
@@ -19,14 +21,15 @@ import type { ParsedDeclarationRecord } from "@/lib/compliance/parsed-declaratio
 import type { ParsedAgaRecord } from "@/lib/compliance/parsed-aga"
 import type { ParsedInvoiceRecord } from "@/lib/compliance/parsed-invoices"
 import type { OnrcSnapshotRecord } from "@/lib/compliance/onrc-snapshot"
+import type { FilingRecord, FilingType } from "@/lib/compliance/filing-discipline"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type CrossCorrelationRule = "R1" | "R2" | "R3" | "R5"
+export type CrossCorrelationRule = "R1" | "R2" | "R3" | "R5" | "R6" | "R7"
 
 export type CrossCorrelationSeverity = "ok" | "info" | "warning" | "error"
 
-export type SourceRefType = "d300" | "d205" | "d100" | "aga" | "invoice" | "onrc"
+export type SourceRefType = "d300" | "d205" | "d100" | "aga" | "invoice" | "onrc" | "filing" | "calendar"
 
 export type SourceRef = {
   type: SourceRefType
@@ -100,6 +103,10 @@ export type CrossCorrelationInput = {
   aga: ParsedAgaRecord[]
   invoices: ParsedInvoiceRecord[]
   onrc: OnrcSnapshotRecord[]
+  /** Filing records pentru R6 (termen ↔ depunere) și R7 (frecvență). */
+  filings?: FilingRecord[]
+  /** Frecvență TVA așteptată conform profilului fiscal: "monthly" sau "quarterly". */
+  expectedVatFrequency?: "monthly" | "quarterly" | null
 }
 
 // ── Tolerances ──────────────────────────────────────────────────────────────
@@ -110,6 +117,10 @@ const ABS_TOLERANCE_RON = 1.0
 const PCT_TOLERANCE = 0.01 // 1%
 /** Toleranță % pentru procente deținere (R3). */
 const OWNERSHIP_PCT_TOLERANCE = 0.5 // 0.5 puncte procentuale
+/** Zile întârziere maximă tolerată pentru R6 (depunere vs termen). */
+const FILING_DELAY_TOLERANCE_DAYS = 1 // max 1 zi grațiere
+/** Câte filing-uri minim pentru a deduce o frecvență (R7). */
+const MIN_FILINGS_FOR_FREQUENCY_INFERENCE = 3
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -770,6 +781,339 @@ function ruleR5(input: CrossCorrelationInput): CrossCorrelationFinding[] {
   return findings
 }
 
+// ── Rule R6: termen calendar fiscal ↔ data depunere efectivă ───────────────
+// FC-4 (2026-05-14): R6 detectează depuneri întârziate. Pentru fiecare
+// FilingRecord cu filedAtISO > dueISO + grace → finding warning/error.
+// "Bate la timp" e cheia compliance — penalități Cod Fiscal Art. 219 încep
+// imediat după termen, cu agravare după 15 / 30 / 60 zile.
+
+const MS_PER_DAY_CONST = 86_400_000
+
+function daysBetween(fromISO: string, toISO: string): number {
+  return Math.round(
+    (new Date(toISO).getTime() - new Date(fromISO).getTime()) / MS_PER_DAY_CONST,
+  )
+}
+
+const FILING_TYPE_LABELS_LOCAL: Record<FilingType, string> = {
+  d300_tva: "D300 (TVA)",
+  d390_recap: "D390 (Recapitulativă VIES)",
+  d394_local: "D394 (Achiziții/Livrări locale)",
+  saft: "SAF-T (D406)",
+  efactura_monthly: "e-Factura raport lunar",
+  etva_precompletata: "RO e-TVA precompletată",
+}
+
+function ruleR6(input: CrossCorrelationInput): CrossCorrelationFinding[] {
+  const findings: CrossCorrelationFinding[] = []
+  const filings = input.filings ?? []
+
+  if (filings.length === 0) {
+    return [
+      {
+        id: nextId("R6"),
+        rule: "R6",
+        ruleName: "Termen calendar fiscal ↔ data depunere efectivă",
+        severity: "info",
+        title: "R6 — Nu există filing records înregistrate",
+        summary:
+          "Adaugă FilingRecord-uri pentru a detecta depuneri întârziate și expunere la penalități.",
+        detail:
+          "Cross-correlation R6 compară termenul fiscal cu data efectivă de depunere. Pentru fiecare declarație depusă cu întârziere se calculează expunerea la penalități (Cod Fiscal Art. 219).",
+        period: null,
+        sources: [],
+      },
+    ]
+  }
+
+  for (const filing of filings) {
+    if (filing.status === "upcoming") continue
+    if (filing.status === "missing") {
+      // R6 raportează separat și depunerile lipsă (urgente)
+      const daysOverdue = daysBetween(filing.dueISO, new Date().toISOString())
+      findings.push({
+        id: nextId("R6"),
+        rule: "R6",
+        ruleName: "Termen calendar fiscal ↔ data depunere efectivă",
+        severity: daysOverdue > 30 ? "error" : "warning",
+        title: `R6 ${filing.period} — ${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} nedepusă (${daysOverdue} zile întârziere)`,
+        summary: `${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} pentru ${filing.period} are termenul ${filing.dueISO.slice(0, 10)} și NU a fost depusă. ${daysOverdue} zile întârziere.`,
+        detail: `Termenul fiscal de depunere a fost ${filing.dueISO.slice(0, 10)}. La data curentă, declarația este încă marcată ca nedepusă. Cu cât întârzierea e mai mare, cu atât penalitatea fixă crește (Cod Fiscal Art. 219, OG 92/2003).`,
+        period: filing.period,
+        sources: [
+          {
+            type: "filing",
+            id: filing.id,
+            label: `${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} ${filing.period}`,
+            period: filing.period,
+            value: daysOverdue,
+            valueLabel: "Zile întârziere (de la termen)",
+          },
+        ],
+        legalReference: "Cod Fiscal Art. 219 + OG 92/2003 (penalități tardiv).",
+        suggestion:
+          "Depune urgent declarația sau marchează în calendar ca executată. Termenele expirate generează penalități cumulative.",
+      })
+      continue
+    }
+
+    if (!filing.filedAtISO) continue
+    const daysLate = daysBetween(filing.dueISO, filing.filedAtISO)
+
+    if (daysLate <= FILING_DELAY_TOLERANCE_DAYS) {
+      findings.push({
+        id: nextId("R6"),
+        rule: "R6",
+        ruleName: "Termen calendar fiscal ↔ data depunere efectivă",
+        severity: "ok",
+        title: `R6 ${filing.period} — ${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} depusă la timp`,
+        summary: `${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} ${filing.period}: termen ${filing.dueISO.slice(0, 10)} → depusă ${filing.filedAtISO.slice(0, 10)}. La timp.`,
+        detail: `Termenul de depunere ${filing.dueISO.slice(0, 10)} a fost respectat (depunere ${filing.filedAtISO.slice(0, 10)}, ${daysLate} zile diferență — în limita toleranței).`,
+        period: filing.period,
+        sources: [
+          {
+            type: "calendar",
+            id: `calendar-${filing.id}`,
+            label: `Termen calendar fiscal`,
+            period: filing.period,
+            value: 0,
+            valueLabel: "Termen",
+          },
+          {
+            type: "filing",
+            id: filing.id,
+            label: `Depunere ${filing.filedAtISO.slice(0, 10)}`,
+            period: filing.period,
+            value: 0,
+            valueLabel: "Data efectivă",
+          },
+        ],
+        legalReference: "Cod Fiscal Art. 219.",
+      })
+      continue
+    }
+
+    // Întârziere reală
+    const severity: CrossCorrelationSeverity =
+      daysLate <= 5 ? "warning" : daysLate <= 15 ? "warning" : "error"
+
+    findings.push({
+      id: nextId("R6"),
+      rule: "R6",
+      ruleName: "Termen calendar fiscal ↔ data depunere efectivă",
+      severity,
+      title: `R6 ${filing.period} — ${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} depusă cu ${daysLate} zile întârziere`,
+      summary: `${FILING_TYPE_LABELS_LOCAL[filing.type] ?? filing.type} ${filing.period}: termen ${filing.dueISO.slice(0, 10)} → depusă ${filing.filedAtISO.slice(0, 10)} (${daysLate} zile întârziere).`,
+      detail: `Termenul fiscal era ${filing.dueISO.slice(0, 10)}. Depunerea efectivă a fost ${filing.filedAtISO.slice(0, 10)}, cu ${daysLate} zile întârziere. Penalitățile cresc progresiv: până la 30 zile = penalitate fixă mică; peste 30 zile = procent din valoarea raportată (Cod Fiscal Art. 219).`,
+      period: filing.period,
+      sources: [
+        {
+          type: "calendar",
+          id: `calendar-${filing.id}`,
+          label: `Termen calendar fiscal ${filing.dueISO.slice(0, 10)}`,
+          period: filing.period,
+          value: 0,
+          valueLabel: "Termen oficial",
+        },
+        {
+          type: "filing",
+          id: filing.id,
+          label: `Depunere efectivă ${filing.filedAtISO.slice(0, 10)}`,
+          period: filing.period,
+          value: daysLate,
+          valueLabel: "Zile întârziere",
+        },
+      ],
+      diff: {
+        expected: 0,
+        actual: daysLate,
+        diff: -daysLate,
+        diffPercent: 1,
+        label: "zile întârziere",
+      },
+      legalReference: "Cod Fiscal Art. 219, OG 92/2003 + OPANAF privind penalități.",
+      suggestion:
+        daysLate <= 15
+          ? "Verifică dacă există motiv obiectiv pentru întârziere (notificare ANAF, indisponibilitate SPV). Documentează cazul în notes."
+          : "Întârzierea peste 15 zile riscă penalitate procentuală. Verifică imediat dacă există decizie ANAF emisă pentru această perioadă.",
+    })
+  }
+
+  return findings
+}
+
+// ── Rule R7: frecvență reală depuneri ↔ frecvență așteptată ─────────────────
+// FC-4 (2026-05-14): R7 detectează mismatch între frecvența detectată (din
+// FilingRecord-urile efective) și frecvența așteptată conform profilului
+// (orgProfile.vatFrequency). Trecere de la lunar la trimestrial NEdeclarată
+// la ANAF e clasic — generează rectificative + amenzi.
+
+type DetectedFrequency = "monthly" | "quarterly" | "mixed" | "insufficient_data"
+
+function detectFilingFrequency(filings: FilingRecord[]): DetectedFrequency {
+  if (filings.length < MIN_FILINGS_FOR_FREQUENCY_INFERENCE) {
+    return "insufficient_data"
+  }
+  let monthly = 0
+  let quarterly = 0
+  for (const f of filings) {
+    if (f.period.match(/^\d{4}-Q\d$/)) quarterly++
+    else if (f.period.match(/^\d{4}-\d{2}$/)) monthly++
+  }
+  if (monthly > 0 && quarterly > 0) return "mixed"
+  if (monthly >= MIN_FILINGS_FOR_FREQUENCY_INFERENCE) return "monthly"
+  if (quarterly >= MIN_FILINGS_FOR_FREQUENCY_INFERENCE) return "quarterly"
+  return "insufficient_data"
+}
+
+function ruleR7(input: CrossCorrelationInput): CrossCorrelationFinding[] {
+  const findings: CrossCorrelationFinding[] = []
+  const filings = input.filings ?? []
+  const expectedFreq = input.expectedVatFrequency ?? null
+
+  // Concentrăm pe D300 (TVA) pentru frecvență, dar putem extinde la alte tipuri
+  const d300Filings = filings.filter((f) => f.type === "d300_tva")
+
+  if (d300Filings.length === 0) {
+    return [
+      {
+        id: nextId("R7"),
+        rule: "R7",
+        ruleName: "Frecvență reală depuneri ↔ frecvență așteptată",
+        severity: "info",
+        title: "R7 — Nu există D300 filing records pentru detecția frecvenței",
+        summary: "Adaugă cel puțin 3 D300-uri pentru a detecta frecvența reală.",
+        detail:
+          "R7 detectează schimbări de frecvență (lunar ↔ trimestrial) nedeclarate la ANAF. Pentru a rula regula, ai nevoie de cel puțin 3 filing records D300.",
+        period: null,
+        sources: [],
+      },
+    ]
+  }
+
+  const detected = detectFilingFrequency(d300Filings)
+
+  if (detected === "insufficient_data") {
+    findings.push({
+      id: nextId("R7"),
+      rule: "R7",
+      ruleName: "Frecvență reală depuneri ↔ frecvență așteptată",
+      severity: "info",
+      title: `R7 — Doar ${d300Filings.length} D300 filing (minim ${MIN_FILINGS_FOR_FREQUENCY_INFERENCE} pentru detecție)`,
+      summary: `Avem ${d300Filings.length} D300-uri înregistrate. Pentru detecție frecvență e nevoie de min ${MIN_FILINGS_FOR_FREQUENCY_INFERENCE}.`,
+      detail: "Așteptăm mai multe filing records pentru a deduce frecvența reală.",
+      period: null,
+      sources: d300Filings.slice(0, 5).map((f) => ({
+        type: "filing",
+        id: f.id,
+        label: `D300 ${f.period}`,
+        period: f.period,
+      })),
+    })
+    return findings
+  }
+
+  if (detected === "mixed") {
+    findings.push({
+      id: nextId("R7"),
+      rule: "R7",
+      ruleName: "Frecvență reală depuneri ↔ frecvență așteptată",
+      severity: "error",
+      title: "R7 — Frecvență MIXTĂ detectată (lunar + trimestrial în paralel)",
+      summary:
+        "Există atât D300 lunare cât și trimestriale înregistrate. Una dintre frecvențe e probabil greșită.",
+      detail:
+        "Un contribuabil are O SINGURĂ frecvență D300 (lunar SAU trimestrial, NU ambele simultan). Mixed = fie ai schimbat frecvența la mijlocul anului fără declarație 010, fie o rectificare a fost încărcată cu period eronat.",
+      period: null,
+      sources: d300Filings.slice(0, 10).map((f) => ({
+        type: "filing",
+        id: f.id,
+        label: `D300 ${f.period}`,
+        period: f.period,
+      })),
+      legalReference:
+        "Cod Fiscal Art. 322 (perioada fiscală TVA) + OPANAF declarații 010 (notificare schimbare).",
+      suggestion:
+        "Depune declarația 010 la ANAF pentru a oficializa frecvența curentă. Verifică D300-urile cu period inconsistent dacă au fost rectificative.",
+    })
+    return findings
+  }
+
+  // detected e "monthly" sau "quarterly"
+  if (!expectedFreq) {
+    findings.push({
+      id: nextId("R7"),
+      rule: "R7",
+      ruleName: "Frecvență reală depuneri ↔ frecvență așteptată",
+      severity: "info",
+      title: `R7 — Frecvență D300 detectată: ${detected === "monthly" ? "lunar" : "trimestrial"} (${d300Filings.length} declarații)`,
+      summary: `Frecvența reală este ${detected === "monthly" ? "lunară" : "trimestrială"}. Setează frecvența așteptată în profilul fiscal pentru cross-check complet.`,
+      detail:
+        "Pentru a verifica complet R7 e necesar să avem și expectedVatFrequency din profilul fiscal. Trimite profilul prin /api/org/profile cu câmpul vatFrequency setat.",
+      period: null,
+      sources: d300Filings.slice(0, 5).map((f) => ({
+        type: "filing",
+        id: f.id,
+        label: `D300 ${f.period}`,
+        period: f.period,
+      })),
+    })
+    return findings
+  }
+
+  if (detected === expectedFreq) {
+    findings.push({
+      id: nextId("R7"),
+      rule: "R7",
+      ruleName: "Frecvență reală depuneri ↔ frecvență așteptată",
+      severity: "ok",
+      title: `R7 — Frecvență D300 concordantă (${detected === "monthly" ? "lunar" : "trimestrial"})`,
+      summary: `Detectat: ${detected}, așteptat: ${expectedFreq}. Match.`,
+      detail: `${d300Filings.length} D300 înregistrate cu frecvența ${detected === "monthly" ? "lunară" : "trimestrială"} — concordant cu profilul fiscal.`,
+      period: null,
+      sources: d300Filings.slice(0, 5).map((f) => ({
+        type: "filing",
+        id: f.id,
+        label: `D300 ${f.period}`,
+        period: f.period,
+      })),
+      legalReference: "Cod Fiscal Art. 322.",
+    })
+    return findings
+  }
+
+  // Mismatch real: detected != expected
+  findings.push({
+    id: nextId("R7"),
+    rule: "R7",
+    ruleName: "Frecvență reală depuneri ↔ frecvență așteptată",
+    severity: "error",
+    title: `R7 — Mismatch frecvență: depui ${detected === "monthly" ? "LUNAR" : "TRIMESTRIAL"} dar profilul așteaptă ${expectedFreq === "monthly" ? "LUNAR" : "TRIMESTRIAL"}`,
+    summary: `Frecvența reală D300 (${detected}) diferă de cea așteptată (${expectedFreq}). Risc penalitate sau notificare ANAF.`,
+    detail: `Cifra de afaceri sau decizia A.G.A. determină frecvența TVA. Mismatch-ul indică fie: (a) trebuie depusă declarația 010 pentru a notifica schimbarea, fie (b) D300-urile au fost depuse cu frecvență greșită și necesită rectificative. Verifică art. 322 Cod Fiscal pentru pragul de schimbare (500.000 € cifră afaceri 12 luni).`,
+    period: null,
+    sources: d300Filings.slice(0, 10).map((f) => ({
+      type: "filing",
+      id: f.id,
+      label: `D300 ${f.period}`,
+      period: f.period,
+    })),
+    diff: {
+      expected: 0,
+      actual: 1,
+      diff: -1,
+      diffPercent: 1,
+      label: `${expectedFreq} → ${detected}`,
+    },
+    legalReference:
+      "Cod Fiscal Art. 322 (perioada fiscală TVA — modificare la pragul de 500.000 € cifră afaceri) + OPANAF declarații 010.",
+    suggestion:
+      "1. Depune declarația 010 pentru notificarea schimbării de frecvență. 2. Verifică dacă cifra de afaceri pe 12 luni anterioare a atins pragul de schimbare (500.000 €). 3. Dacă D300-urile sunt cu frecvență greșită, depune rectificative.",
+  })
+
+  return findings
+}
+
 // ── Orchestrator ────────────────────────────────────────────────────────────
 
 export function runCrossCorrelation(
@@ -783,6 +1127,8 @@ export function runCrossCorrelation(
     ...ruleR2(input),
     ...ruleR3(input),
     ...ruleR5(input),
+    ...ruleR6(input),
+    ...ruleR7(input),
   ]
 
   // Sortează: errors first, warnings, info, ok last
@@ -803,6 +1149,8 @@ export function runCrossCorrelation(
     R2: { ok: 0, warning: 0, error: 0, info: 0 },
     R3: { ok: 0, warning: 0, error: 0, info: 0 },
     R5: { ok: 0, warning: 0, error: 0, info: 0 },
+    R6: { ok: 0, warning: 0, error: 0, info: 0 },
+    R7: { ok: 0, warning: 0, error: 0, info: 0 },
   }
   let ok = 0
   let info = 0

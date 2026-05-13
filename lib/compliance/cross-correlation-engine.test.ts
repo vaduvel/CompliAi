@@ -1,4 +1,4 @@
-// Unit tests pentru Cross-Correlation Engine (Pas 7).
+// Unit tests pentru Cross-Correlation Engine (Pas 7 + FC-4 R6+R7).
 
 import { describe, expect, it } from "vitest"
 
@@ -17,6 +17,18 @@ import type { D300ParsedData } from "./parser-d300"
 import type { D205ParsedData } from "./parser-d205"
 import type { D100ParsedData } from "./parser-d100"
 import type { AgaExtractedData } from "./parser-aga"
+import type { FilingRecord } from "./filing-discipline"
+
+function mkFiling(
+  override: Partial<FilingRecord> & Pick<FilingRecord, "period" | "dueISO">,
+): FilingRecord {
+  return {
+    id: `filing-${override.period}-${Math.random().toString(36).slice(2, 6)}`,
+    type: "d300_tva",
+    status: "on_time",
+    ...override,
+  }
+}
 
 // ── Builders ────────────────────────────────────────────────────────────────
 
@@ -278,10 +290,10 @@ describe("helpers", () => {
 // ── Empty state ─────────────────────────────────────────────────────────────
 
 describe("runCrossCorrelation — empty inputs", () => {
-  it("rulează cu input gol și returnează info findings", () => {
+  it("rulează cu input gol și returnează info findings (6 reguli)", () => {
     const report = runCrossCorrelation(emptyInput())
-    expect(report.findings.length).toBe(4) // 1 per rule, all info
-    expect(report.summary.info).toBe(4)
+    expect(report.findings.length).toBe(6) // 1 per rule R1+R2+R3+R5+R6+R7, all info
+    expect(report.summary.info).toBe(6)
     expect(report.summary.errors).toBe(0)
     expect(report.summary.warnings).toBe(0)
     expect(report.inputs.d300Count).toBe(0)
@@ -527,6 +539,145 @@ describe("R5 — D205 anual ↔ Σ D100 lunare dividende", () => {
     const report = runCrossCorrelation(input)
     const r5 = report.findings.filter((f) => f.rule === "R5" && f.severity !== "info")
     expect(r5[0]?.severity).toBe("ok")
+  })
+})
+
+// ── R6: termen calendar ↔ data depunere [FC-4] ──────────────────────────────
+
+describe("R6 — termen calendar ↔ data depunere efectivă (FC-4)", () => {
+  it("info când nu există filings", () => {
+    const input = emptyInput()
+    const report = runCrossCorrelation(input)
+    const r6 = report.findings.filter((f) => f.rule === "R6")
+    expect(r6).toHaveLength(1)
+    expect(r6[0]?.severity).toBe("info")
+  })
+
+  it("OK pentru filing depus la timp (în limita 1 zi grațiere)", () => {
+    const input = emptyInput()
+    input.filings = [
+      mkFiling({
+        period: "2026-04",
+        dueISO: "2026-05-25T00:00:00Z",
+        filedAtISO: "2026-05-25T10:00:00Z", // chiar la termen
+        status: "on_time",
+      }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r6 = report.findings.filter((f) => f.rule === "R6")
+    expect(r6).toHaveLength(1)
+    expect(r6[0]?.severity).toBe("ok")
+  })
+
+  it("warning pentru întârziere ușoară (2-5 zile)", () => {
+    const input = emptyInput()
+    input.filings = [
+      mkFiling({
+        period: "2026-04",
+        dueISO: "2026-05-25T00:00:00Z",
+        filedAtISO: "2026-05-28T10:00:00Z", // 3 zile întârziere
+        status: "late",
+      }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r6 = report.findings.filter((f) => f.rule === "R6")
+    expect(r6[0]?.severity).toBe("warning")
+    expect(r6[0]?.title).toContain("3 zile")
+  })
+
+  it("error pentru întârziere mare (>15 zile)", () => {
+    const input = emptyInput()
+    input.filings = [
+      mkFiling({
+        period: "2026-04",
+        dueISO: "2026-05-25T00:00:00Z",
+        filedAtISO: "2026-06-20T10:00:00Z", // 26 zile întârziere
+        status: "late",
+      }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r6 = report.findings.filter((f) => f.rule === "R6")
+    expect(r6[0]?.severity).toBe("error")
+  })
+
+  it("flag pentru filing missing (nedepusă) cu zile de la termen", () => {
+    const input = emptyInput()
+    input.filings = [
+      mkFiling({
+        period: "2025-12",
+        dueISO: "2026-01-25T00:00:00Z",
+        status: "missing",
+        // No filedAtISO
+      }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r6 = report.findings.filter((f) => f.rule === "R6")
+    expect(r6[0]?.severity === "warning" || r6[0]?.severity === "error").toBe(true)
+    expect(r6[0]?.title).toContain("nedepusă")
+  })
+})
+
+// ── R7: frecvență reală ↔ frecvență așteptată [FC-4] ────────────────────────
+
+describe("R7 — frecvență reală D300 ↔ așteptată (FC-4)", () => {
+  it("info când nu există D300 filing records", () => {
+    const input = emptyInput()
+    const report = runCrossCorrelation(input)
+    const r7 = report.findings.filter((f) => f.rule === "R7")
+    expect(r7).toHaveLength(1)
+    expect(r7[0]?.severity).toBe("info")
+  })
+
+  it("info pentru date insuficiente (<3 D300)", () => {
+    const input = emptyInput()
+    input.filings = [
+      mkFiling({ period: "2026-01", dueISO: "2026-02-25Z", filedAtISO: "2026-02-20Z" }),
+      mkFiling({ period: "2026-02", dueISO: "2026-03-25Z", filedAtISO: "2026-03-20Z" }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r7 = report.findings.filter((f) => f.rule === "R7")
+    expect(r7[0]?.severity).toBe("info")
+    expect(r7[0]?.title).toContain("Doar 2")
+  })
+
+  it("OK când frecvența reală (monthly) coincide cu profilul", () => {
+    const input = emptyInput()
+    input.expectedVatFrequency = "monthly"
+    input.filings = [
+      mkFiling({ period: "2026-01", dueISO: "2026-02-25Z", filedAtISO: "2026-02-20Z" }),
+      mkFiling({ period: "2026-02", dueISO: "2026-03-25Z", filedAtISO: "2026-03-20Z" }),
+      mkFiling({ period: "2026-03", dueISO: "2026-04-25Z", filedAtISO: "2026-04-20Z" }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r7 = report.findings.filter((f) => f.rule === "R7")
+    expect(r7[0]?.severity).toBe("ok")
+  })
+
+  it("error la mismatch: depui MONTHLY dar profilul așteaptă QUARTERLY", () => {
+    const input = emptyInput()
+    input.expectedVatFrequency = "quarterly"
+    input.filings = [
+      mkFiling({ period: "2026-01", dueISO: "2026-02-25Z", filedAtISO: "2026-02-20Z" }),
+      mkFiling({ period: "2026-02", dueISO: "2026-03-25Z", filedAtISO: "2026-03-20Z" }),
+      mkFiling({ period: "2026-03", dueISO: "2026-04-25Z", filedAtISO: "2026-04-20Z" }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r7 = report.findings.filter((f) => f.rule === "R7")
+    expect(r7[0]?.severity).toBe("error")
+    expect(r7[0]?.title).toContain("Mismatch")
+  })
+
+  it("error la frecvență MIXTĂ (lunar + trimestrial paralel)", () => {
+    const input = emptyInput()
+    input.filings = [
+      mkFiling({ period: "2026-01", dueISO: "2026-02-25Z", filedAtISO: "2026-02-20Z" }),
+      mkFiling({ period: "2026-02", dueISO: "2026-03-25Z", filedAtISO: "2026-03-20Z" }),
+      mkFiling({ period: "2026-Q1", dueISO: "2026-04-25Z", filedAtISO: "2026-04-20Z" }),
+    ]
+    const report = runCrossCorrelation(input)
+    const r7 = report.findings.filter((f) => f.rule === "R7")
+    expect(r7[0]?.severity).toBe("error")
+    expect(r7[0]?.title).toContain("MIXTĂ")
   })
 })
 
