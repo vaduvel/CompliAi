@@ -4,8 +4,9 @@
 // Conține: Discrepanțe e-TVA + Depuneri fiscale + SAF-T Hygiene
 // Toate sub un layout cu secțiuni clare delimitate.
 
-import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign } from "lucide-react"
+import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign, Gavel } from "lucide-react"
 
+import { AgaUploadCard } from "@/components/compliscan/fiscal/AgaUploadCard"
 import { CrossBorderAdvisorCard } from "@/components/compliscan/fiscal/CrossBorderAdvisorCard"
 import { D100UploadCard } from "@/components/compliscan/fiscal/D100UploadCard"
 import { D205UploadCard } from "@/components/compliscan/fiscal/D205UploadCard"
@@ -74,6 +75,14 @@ export default function FiscalTvaPage() {
         subtitle="Încarcă XML-uri D100 lunare/trimestriale (impozit profit, micro, dividende, salarii). Parser-ul recunoaște codurile ANAF (480 dividende, 101 profit, 401 micro, 201 salarii) — fundație pentru R5: Σ D100 lunare ↔ D205 anual."
       >
         <D100UploadCard />
+      </Section>
+
+      <Section
+        icon={<Gavel className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Hotărâri AGA — extragere automată cu AI"
+        subtitle="Lipește textul hotărârii AGA sau încarcă .txt și AI-ul extrage asociați (CNP/CUI), procente deținere și dividende per asociat. Folosit pentru cross-correlation R2 (AGA ↔ stat plată ↔ D205) și R3 (AGA procent ↔ ONRC procent)."
+      >
+        <AgaUploadCard />
       </Section>
 
       <Section
