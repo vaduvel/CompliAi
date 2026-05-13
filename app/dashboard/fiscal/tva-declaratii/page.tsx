@@ -4,9 +4,10 @@
 // Conține: Discrepanțe e-TVA + Depuneri fiscale + SAF-T Hygiene
 // Toate sub un layout cu secțiuni clare delimitate.
 
-import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins } from "lucide-react"
+import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign } from "lucide-react"
 
 import { CrossBorderAdvisorCard } from "@/components/compliscan/fiscal/CrossBorderAdvisorCard"
+import { D100UploadCard } from "@/components/compliscan/fiscal/D100UploadCard"
 import { D205UploadCard } from "@/components/compliscan/fiscal/D205UploadCard"
 import { D300UploadCard } from "@/components/compliscan/fiscal/D300UploadCard"
 import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTab"
@@ -65,6 +66,14 @@ export default function FiscalTvaPage() {
         subtitle="Încarcă XML D205 anual descărcat din SPV ANAF. Parser-ul extrage beneficiarii (dividende, drepturi autor, dobânzi) cu sume și impozit reținut — fundație pentru cross-correlation cu hotărâri AGA și D100 lunar."
       >
         <D205UploadCard />
+      </Section>
+
+      <Section
+        icon={<CircleDollarSign className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="D100 — parser declarație obligații buget de stat"
+        subtitle="Încarcă XML-uri D100 lunare/trimestriale (impozit profit, micro, dividende, salarii). Parser-ul recunoaște codurile ANAF (480 dividende, 101 profit, 401 micro, 201 salarii) — fundație pentru R5: Σ D100 lunare ↔ D205 anual."
+      >
+        <D100UploadCard />
       </Section>
 
       <Section
