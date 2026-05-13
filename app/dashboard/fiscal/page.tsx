@@ -20,6 +20,7 @@ import { toast } from "sonner"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-os/Tabs"
 import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
+import { AuthorityGuardianCard } from "@/components/compliscan/fiscal/AuthorityGuardianCard"
 import { CrossCorrelationCard } from "@/components/compliscan/fiscal/CrossCorrelationCard"
 import { MasterExceptionQueueCard } from "@/components/compliscan/fiscal/MasterExceptionQueueCard"
 import { MissingEvidenceWorkflowCard } from "@/components/compliscan/fiscal/MissingEvidenceWorkflowCard"
@@ -282,6 +283,14 @@ export default function FiscalPage() {
       {!tabParam && (
         <section>
           <MissingEvidenceWorkflowCard />
+        </section>
+      )}
+
+      {/* [FC-10 2026-05-14] Authority & Mandate Guardian — Doc 09 cap 6.
+          Inventory certificate digitale + împuterniciri + alerte expirare. */}
+      {!tabParam && (
+        <section>
+          <AuthorityGuardianCard />
         </section>
       )}
 
