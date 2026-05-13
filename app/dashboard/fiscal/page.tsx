@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/evidence-
 import { AuditRiskPanel } from "@/components/compliscan/fiscal/AuditRiskPanel"
 import { CrossCorrelationCard } from "@/components/compliscan/fiscal/CrossCorrelationCard"
 import { MasterExceptionQueueCard } from "@/components/compliscan/fiscal/MasterExceptionQueueCard"
+import { MissingEvidenceWorkflowCard } from "@/components/compliscan/fiscal/MissingEvidenceWorkflowCard"
 import { PreANAFSimulationCard } from "@/components/compliscan/fiscal/PreANAFSimulationCard"
 import { PreventiveScanCard } from "@/components/compliscan/fiscal/PreventiveScanCard"
 import { RecurringPatternsCard } from "@/components/compliscan/fiscal/RecurringPatternsCard"
@@ -273,6 +274,14 @@ export default function FiscalPage() {
       {!tabParam && (
         <section>
           <MasterExceptionQueueCard />
+        </section>
+      )}
+
+      {/* [FC-9 2026-05-14] Missing Evidence Workflow — Doc 09 cap 7.
+          Cabinet poate cere documente lipsă cu tracking + email template. */}
+      {!tabParam && (
+        <section>
+          <MissingEvidenceWorkflowCard />
         </section>
       )}
 
