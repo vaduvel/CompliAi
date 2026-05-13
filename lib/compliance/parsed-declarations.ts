@@ -2,9 +2,13 @@
 // Stocăm rezultatul fiecărui upload pentru cross-correlation cu facturi/AGA/ONRC.
 
 import type { D300ParsedData } from "@/lib/compliance/parser-d300"
+import type { D205ParsedData } from "@/lib/compliance/parser-d205"
 
 export type ParsedDeclarationType = "d300" | "d205" | "d100"
 export type ParsedDeclarationSource = "upload-xml" | "upload-pdf" | "spv-fetch"
+
+/** Union al payload-urilor parsate per tip declarație. */
+export type ParsedDeclarationData = D300ParsedData | D205ParsedData
 
 export type ParsedDeclarationRecord = {
   id: string
@@ -16,8 +20,8 @@ export type ParsedDeclarationRecord = {
   parsedAtISO: string
   source: ParsedDeclarationSource
   fileName?: string
-  /** Date parsate ca JSON serializat (D300ParsedData / D205ParsedData / D100ParsedData). */
-  data: D300ParsedData // pentru moment doar D300, extindem cu union la D205/D100
+  /** Date parsate (union pe tipuri pentru D300 / D205 / D100). */
+  data: ParsedDeclarationData
   /** Erori parser (informative, înregistrarea se salvează chiar și cu erori). */
   errors: string[]
   /** Warnings parser. */
