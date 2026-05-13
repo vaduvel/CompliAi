@@ -4,13 +4,14 @@
 // Conține: Discrepanțe e-TVA + Depuneri fiscale + SAF-T Hygiene
 // Toate sub un layout cu secțiuni clare delimitate.
 
-import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign, Gavel } from "lucide-react"
+import { Receipt, Calendar, FileText, Globe2, FileCode2, Coins, CircleDollarSign, Gavel, ScanLine } from "lucide-react"
 
 import { AgaUploadCard } from "@/components/compliscan/fiscal/AgaUploadCard"
 import { CrossBorderAdvisorCard } from "@/components/compliscan/fiscal/CrossBorderAdvisorCard"
 import { D100UploadCard } from "@/components/compliscan/fiscal/D100UploadCard"
 import { D205UploadCard } from "@/components/compliscan/fiscal/D205UploadCard"
 import { D300UploadCard } from "@/components/compliscan/fiscal/D300UploadCard"
+import { InvoicePrimitaOcrCard } from "@/components/compliscan/fiscal/InvoicePrimitaOcrCard"
 import { DiscrepanciesTab } from "@/components/compliscan/fiscal/DiscrepanciesTab"
 import { CrossFilingCheckCard } from "@/components/compliscan/fiscal/CrossFilingCheckCard"
 import { FilingRecordsTab } from "@/components/compliscan/fiscal/FilingRecordsTab"
@@ -83,6 +84,14 @@ export default function FiscalTvaPage() {
         subtitle="Lipește textul hotărârii AGA sau încarcă .txt și AI-ul extrage asociați (CNP/CUI), procente deținere și dividende per asociat. Folosit pentru cross-correlation R2 (AGA ↔ stat plată ↔ D205) și R3 (AGA procent ↔ ONRC procent)."
       >
         <AgaUploadCard />
+      </Section>
+
+      <Section
+        icon={<ScanLine className="size-4 text-eos-primary" strokeWidth={2} />}
+        title="Facturi primite — OCR Gemini Vision"
+        subtitle="Fotografiază sau încarcă imaginea facturii primite de la furnizor. AI extrage CIF, sume, articole. Cross-correlation R1: Σ TVA facturi primite ↔ D300 TVA deductibil."
+      >
+        <InvoicePrimitaOcrCard />
       </Section>
 
       <Section
