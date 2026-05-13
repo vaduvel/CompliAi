@@ -20,7 +20,7 @@ import { toast } from "sonner"
 
 // ── Types (mirror engine output) ────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R5"
+type Rule = "R1" | "R2" | "R3" | "R5" | "R6" | "R7"
 type Severity = "ok" | "info" | "warning" | "error"
 
 type SourceRef = {
@@ -53,6 +53,19 @@ type Finding = {
   diff?: DiffData
   legalReference?: string
   suggestion?: string
+  economicImpact?: EconomicImpactData
+}
+
+type EconomicImpactData = {
+  affectedAmountRON: number | null
+  penaltyMinRON: number
+  penaltyMaxRON: number
+  remediationHours: number
+  retransmissions: number
+  totalCostMinRON: number
+  totalCostMaxRON: number
+  legalReferences: string[]
+  computationNote: string
 }
 
 type Report = {
@@ -64,6 +77,16 @@ type Report = {
     info: number
     warnings: number
     errors: number
+    economic?: {
+      totalAffectedRON: number
+      totalPenaltyMinRON: number
+      totalPenaltyMaxRON: number
+      totalRemediationHours: number
+      totalRetransmissions: number
+      totalCostMinRON: number
+      totalCostMaxRON: number
+      impactfulFindingsCount: number
+    }
     byRule: Record<
       Rule,
       { ok: number; warning: number; error: number; info: number }
@@ -87,6 +110,8 @@ type HasInputs = {
 }
 
 const RULE_LABELS: Record<Rule, string> = {
+  R6: "R6 · Termen ↔ Depunere",
+  R7: "R7 · Frecvență TVA",
   R1: "R1 · Facturi ↔ D300",
   R2: "R2 · AGA ↔ D205",
   R3: "R3 · AGA ↔ ONRC",
@@ -319,6 +344,35 @@ export function CrossCorrelationCard() {
               {report.inputs.invoicesCount} facturi · {report.inputs.onrcCount} ONRC.
             </p>
 
+            {/* [FC-5] Economic Impact Summary — cost estimat în LEI */}
+            {report.summary.economic &&
+              report.summary.economic.impactfulFindingsCount > 0 && (
+                <div className="mt-4 rounded-eos-md border border-eos-warning/30 bg-eos-warning-soft/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
+                        💰 Impact economic estimat
+                      </p>
+                      <p
+                        data-display-text="true"
+                        className="mt-1 font-display text-[20px] font-bold text-eos-warning"
+                      >
+                        {fmtRON(report.summary.economic.totalCostMinRON)} –{" "}
+                        {fmtRON(report.summary.economic.totalCostMaxRON)} RON
+                      </p>
+                      <p className="mt-1 text-[11.5px] text-eos-text-muted">
+                        Cost total expunere: penalități{" "}
+                        {fmtRON(report.summary.economic.totalPenaltyMinRON)}–
+                        {fmtRON(report.summary.economic.totalPenaltyMaxRON)} RON +{" "}
+                        {report.summary.economic.totalRemediationHours.toFixed(1)}h cabinet ·{" "}
+                        {report.summary.economic.totalRetransmissions} retransmiteri ·{" "}
+                        {report.summary.economic.impactfulFindingsCount} findings cu impact
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             {/* Rule filters */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-eos-text-tertiary">
@@ -335,7 +389,7 @@ export function CrossCorrelationCard() {
               >
                 Toate ({report.findings.length})
               </button>
-              {(["R1", "R2", "R3", "R5"] as Rule[]).map((rule) => {
+              {(["R1", "R2", "R3", "R5", "R6", "R7"] as Rule[]).map((rule) => {
                 const stats = report.summary.byRule[rule]
                 const total = stats.ok + stats.warning + stats.error + stats.info
                 if (total === 0) return null
@@ -542,6 +596,55 @@ function FindingDrawer({
               </div>
             )}
 
+            {/* [FC-5] Economic Impact pe finding */}
+            {finding.economicImpact &&
+              finding.economicImpact.totalCostMaxRON > 0 && (
+                <div className="rounded-eos-md border border-eos-warning/30 bg-eos-warning-soft px-4 py-3">
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
+                    💰 Cât te poate costa
+                  </p>
+                  <p
+                    data-display-text="true"
+                    className="mt-1 font-display text-[16px] font-bold text-eos-warning"
+                  >
+                    {fmtRON(finding.economicImpact.totalCostMinRON)} –{" "}
+                    {fmtRON(finding.economicImpact.totalCostMaxRON)} RON
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-eos-warning">
+                    <div>
+                      <span className="opacity-70">Penalitate:</span>{" "}
+                      <strong>
+                        {fmtRON(finding.economicImpact.penaltyMinRON)}–
+                        {fmtRON(finding.economicImpact.penaltyMaxRON)} RON
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="opacity-70">Manoperă cabinet:</span>{" "}
+                      <strong>
+                        {finding.economicImpact.remediationHours.toFixed(1)}h
+                      </strong>
+                    </div>
+                    {finding.economicImpact.affectedAmountRON !== null && (
+                      <div>
+                        <span className="opacity-70">Sumă fiscală afectată:</span>{" "}
+                        <strong>
+                          {fmtRON(finding.economicImpact.affectedAmountRON)} RON
+                        </strong>
+                      </div>
+                    )}
+                    {finding.economicImpact.retransmissions > 0 && (
+                      <div>
+                        <span className="opacity-70">Retransmiteri:</span>{" "}
+                        <strong>{finding.economicImpact.retransmissions}</strong>
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-2 text-[10.5px] text-eos-warning/80 italic">
+                    {finding.economicImpact.computationNote}
+                  </p>
+                </div>
+              )}
+
             {/* Suggestion */}
             {finding.suggestion && (
               <div className="rounded-eos-md border border-eos-primary/30 bg-eos-primary-soft px-4 py-3 text-eos-primary">
@@ -561,6 +664,21 @@ function FindingDrawer({
                 <p className="mt-0.5">{finding.legalReference}</p>
               </div>
             )}
+
+            {/* [FC-5] Referințe legale economic — list */}
+            {finding.economicImpact &&
+              finding.economicImpact.legalReferences.length > 0 && (
+                <div className="rounded-eos-sm border border-eos-border bg-eos-surface-elevated px-3 py-2 text-[10.5px] text-eos-text-muted">
+                  <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-eos-text-tertiary">
+                    Bază legală penalitate
+                  </span>
+                  <ul className="mt-0.5 ml-3 list-disc">
+                    {finding.economicImpact.legalReferences.map((ref, i) => (
+                      <li key={i}>{ref}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
           </div>
         </div>
 

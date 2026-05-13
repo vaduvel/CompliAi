@@ -22,6 +22,10 @@ import type { ParsedAgaRecord } from "@/lib/compliance/parsed-aga"
 import type { ParsedInvoiceRecord } from "@/lib/compliance/parsed-invoices"
 import type { OnrcSnapshotRecord } from "@/lib/compliance/onrc-snapshot"
 import type { FilingRecord, FilingType } from "@/lib/compliance/filing-discipline"
+import {
+  aggregateEconomicImpact,
+  annotateWithImpact,
+} from "@/lib/compliance/economic-impact"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +74,18 @@ export type CrossCorrelationFinding = {
   diff?: DiffData
   legalReference?: string
   suggestion?: string
+  /** [FC-5] Impact economic estimat — populat de annotateWithImpact din engine. */
+  economicImpact?: {
+    affectedAmountRON: number | null
+    penaltyMinRON: number
+    penaltyMaxRON: number
+    remediationHours: number
+    retransmissions: number
+    totalCostMinRON: number
+    totalCostMaxRON: number
+    legalReferences: string[]
+    computationNote: string
+  }
 }
 
 export type CrossCorrelationSummaryByRule = Record<
@@ -87,6 +103,17 @@ export type CrossCorrelationReport = {
     warnings: number
     errors: number
     byRule: CrossCorrelationSummaryByRule
+    /** [FC-5] Sumar economic agregat — total cost estimat în RON. */
+    economic?: {
+      totalAffectedRON: number
+      totalPenaltyMinRON: number
+      totalPenaltyMaxRON: number
+      totalRemediationHours: number
+      totalRetransmissions: number
+      totalCostMinRON: number
+      totalCostMaxRON: number
+      impactfulFindingsCount: number
+    }
   }
   inputs: {
     d300Count: number
@@ -95,6 +122,7 @@ export type CrossCorrelationReport = {
     agaCount: number
     invoicesCount: number
     onrcCount: number
+    filingsCount?: number
   }
 }
 
@@ -1164,9 +1192,13 @@ export function runCrossCorrelation(
     else if (f.severity === "error") errors++
   }
 
+  // [FC-5] Anotăm cu economic impact și agregăm sumar
+  const findingsWithImpact = annotateWithImpact(findings)
+  const economic = aggregateEconomicImpact(findingsWithImpact)
+
   return {
     generatedAtISO: new Date().toISOString(),
-    findings,
+    findings: findingsWithImpact,
     summary: {
       totalChecks: findings.length,
       ok,
@@ -1174,6 +1206,7 @@ export function runCrossCorrelation(
       warnings,
       errors,
       byRule,
+      economic,
     },
     inputs: {
       d300Count: input.declarations.filter((r) => r.type === "d300").length,
@@ -1182,6 +1215,7 @@ export function runCrossCorrelation(
       agaCount: input.aga.length,
       invoicesCount: input.invoices.length,
       onrcCount: input.onrc.length,
+      filingsCount: (input.filings ?? []).length,
     },
   }
 }
