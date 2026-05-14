@@ -47,6 +47,7 @@ import {
   markOverdueRequests,
   type EvidenceRequest,
 } from "@/lib/compliance/missing-evidence-workflow"
+import type { ReconciliationResult } from "@/lib/compliance/bank-spv-matcher"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { StateWithParsedDeclarations } from "@/lib/compliance/parsed-declarations"
 import type { StateWithParsedAga } from "@/lib/compliance/parsed-aga"
@@ -63,6 +64,12 @@ type StateExt = ComplianceState &
     digitalCertificates?: DigitalCertificate[]
     representationMandates?: RepresentationMandate[]
     evidenceRequests?: EvidenceRequest[]
+    /** [FC-11.5 2026-05-14] Ultima reconciliere bank-SPV cached. */
+    bankReconciliationLast?: ReconciliationResult & {
+      uploadedAtISO?: string
+      statementPeriodFromISO?: string
+      statementPeriodToISO?: string
+    }
     orgProfile?: {
       vatFrequency?: "monthly" | "quarterly"
       [k: string]: unknown
@@ -133,6 +140,22 @@ type ExceptionCardItem = {
   focusId: string
 }
 
+type BankItem = {
+  clientOrgId: string
+  clientOrgName: string
+  title: string
+  kind:
+    | "unmatched-debit" // plată fără factură — CRITIC
+    | "unmatched-credit" // încasare fără factură — CRITIC
+    | "invoice-unpaid" // factură primită neplătită
+    | "invoice-uncollected" // factură emisă neîncasată
+  amountRON: number
+  severity: "critic" | "important"
+  dateISO: string
+  narrative: string
+  focusId: string
+}
+
 type SnapshotData = {
   totalClients: number
   greenCount: number // 0 errors, 0 warnings
@@ -183,6 +206,16 @@ type TodayResponse = {
       criticCount: number
       totalImpactRON: number
       items: ExceptionCardItem[]
+    }
+    bank: {
+      totalFirms: number
+      unmatchedDebitsCount: number // plăți fără factură
+      unmatchedCreditsCount: number // încasări fără factură
+      unpaidInvoicesCount: number
+      uncollectedInvoicesCount: number
+      totalSuspiciousAmountRON: number // |unmatched debits| + |unmatched credits|
+      firmsWithoutData: number // câte clienti N-au încărcat extras
+      items: BankItem[]
     }
   }
 }
@@ -310,6 +343,65 @@ function extractPreAnafTop(
   }))
 }
 
+function extractBank(bundle: PortfolioOrgBundle): BankItem[] {
+  const state = bundle.state as StateExt | null
+  if (!state) return []
+  const recon = state.bankReconciliationLast
+  if (!recon) return []
+
+  const items: BankItem[] = []
+
+  // Plăți fără factură (debit) — CEL MAI GRAV (posibilă plată în negru)
+  for (const txn of recon.unmatched_transactions ?? []) {
+    if (txn.type === "debit") {
+      items.push({
+        clientOrgId: bundle.membership.orgId,
+        clientOrgName: bundle.membership.orgName,
+        title: `Plată ${Math.abs(txn.amountRON).toLocaleString("ro-RO")} RON FĂRĂ factură`,
+        kind: "unmatched-debit",
+        amountRON: Math.abs(txn.amountRON),
+        severity: "critic",
+        dateISO: txn.dateISO,
+        narrative: txn.narrative.slice(0, 80),
+        focusId: `bank-txn-${txn.id}`,
+      })
+    } else {
+      // Credit fără factură = încasare nedeclarată → CEL MAI GRAV
+      items.push({
+        clientOrgId: bundle.membership.orgId,
+        clientOrgName: bundle.membership.orgName,
+        title: `Încasare ${txn.amountRON.toLocaleString("ro-RO")} RON FĂRĂ factură`,
+        kind: "unmatched-credit",
+        amountRON: txn.amountRON,
+        severity: "critic",
+        dateISO: txn.dateISO,
+        narrative: txn.narrative.slice(0, 80),
+        focusId: `bank-txn-${txn.id}`,
+      })
+    }
+  }
+
+  // Facturi neîncasate / neplătite — important dar mai puțin grav decât suspicious
+  for (const inv of recon.unmatched_invoices ?? []) {
+    items.push({
+      clientOrgId: bundle.membership.orgId,
+      clientOrgName: bundle.membership.orgName,
+      title:
+        inv.direction === "issued"
+          ? `${inv.invoiceNumber} către ${inv.partyName ?? inv.partyCif} — NEÎNCASATĂ`
+          : `${inv.invoiceNumber} de la ${inv.partyName ?? inv.partyCif} — NEPLĂTITĂ`,
+      kind: inv.direction === "issued" ? "invoice-uncollected" : "invoice-unpaid",
+      amountRON: inv.totalRON,
+      severity: "important",
+      dateISO: inv.issueDateISO,
+      narrative: `Emisă ${new Date(inv.issueDateISO).toLocaleDateString("ro-RO")}`,
+      focusId: `bank-inv-${inv.id}`,
+    })
+  }
+
+  return items
+}
+
 function extractExceptions(
   bundle: PortfolioOrgBundle,
   items: ExceptionItem[],
@@ -364,6 +456,8 @@ export async function GET(request: Request) {
     const allEvidence: EvidenceItem[] = []
     const allPreAnaf: PreAnafItem[] = []
     const allExceptions: ExceptionCardItem[] = []
+    const allBank: BankItem[] = []
+    let firmsWithoutBankData = 0
 
     let totalRiskRON = 0
     let totalCabinetHours = 0
@@ -422,6 +516,12 @@ export async function GET(request: Request) {
       allPreAnaf.push(...extractPreAnafTop(bundle, preAnafReport.topRisks))
       allExceptions.push(...extractExceptions(bundle, queueReport.items))
 
+      const bankItems = extractBank(bundle)
+      allBank.push(...bankItems)
+      if (!state.bankReconciliationLast) {
+        firmsWithoutBankData++
+      }
+
       // Snapshot
       const errCount = xcorrReport.summary.errors
       const warnCount = xcorrReport.summary.warnings
@@ -470,6 +570,14 @@ export async function GET(request: Request) {
       if (sevOrder[a.severity] !== sevOrder[b.severity])
         return sevOrder[a.severity] - sevOrder[b.severity]
       return b.impactRON - a.impactRON
+    })
+
+    allBank.sort((a, b) => {
+      // Critic primul (unmatched debits/credits = suspicious)
+      const sevOrder = { critic: 0, important: 1 }
+      if (sevOrder[a.severity] !== sevOrder[b.severity])
+        return sevOrder[a.severity] - sevOrder[b.severity]
+      return b.amountRON - a.amountRON
     })
 
     const snapshot: SnapshotData = {
@@ -524,6 +632,20 @@ export async function GET(request: Request) {
           criticCount: allExceptions.filter((i) => i.severity === "critic").length,
           totalImpactRON: Math.round(allExceptions.reduce((s, i) => s + i.impactRON, 0)),
           items: allExceptions.slice(0, MAX_ITEMS_PER_CARD),
+        },
+        bank: {
+          totalFirms: new Set(allBank.map((i) => i.clientOrgId)).size,
+          unmatchedDebitsCount: allBank.filter((i) => i.kind === "unmatched-debit").length,
+          unmatchedCreditsCount: allBank.filter((i) => i.kind === "unmatched-credit").length,
+          unpaidInvoicesCount: allBank.filter((i) => i.kind === "invoice-unpaid").length,
+          uncollectedInvoicesCount: allBank.filter((i) => i.kind === "invoice-uncollected").length,
+          totalSuspiciousAmountRON: Math.round(
+            allBank
+              .filter((i) => i.kind === "unmatched-debit" || i.kind === "unmatched-credit")
+              .reduce((s, i) => s + i.amountRON, 0),
+          ),
+          firmsWithoutData: firmsWithoutBankData,
+          items: allBank.slice(0, MAX_ITEMS_PER_CARD),
         },
       },
     }

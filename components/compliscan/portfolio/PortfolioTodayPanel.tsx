@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Calendar as CalIcon,
   CheckCircle2,
+  CreditCard,
   FileWarning,
   Loader2,
   Mail,
@@ -90,6 +91,18 @@ type ExceptionItem = {
   focusId: string
 }
 
+type BankItem = {
+  clientOrgId: string
+  clientOrgName: string
+  title: string
+  kind: "unmatched-debit" | "unmatched-credit" | "invoice-unpaid" | "invoice-uncollected"
+  amountRON: number
+  severity: "critic" | "important"
+  dateISO: string
+  narrative: string
+  focusId: string
+}
+
 type Snapshot = {
   totalClients: number
   greenCount: number
@@ -132,6 +145,16 @@ type TodayResponse = {
       criticCount: number
       totalImpactRON: number
       items: ExceptionItem[]
+    }
+    bank: {
+      totalFirms: number
+      unmatchedDebitsCount: number
+      unmatchedCreditsCount: number
+      unpaidInvoicesCount: number
+      uncollectedInvoicesCount: number
+      totalSuspiciousAmountRON: number
+      firmsWithoutData: number
+      items: BankItem[]
     }
   }
 }
@@ -377,6 +400,44 @@ export function PortfolioTodayPanel() {
               badge={item.severity}
             />
           ))}
+        </Card>
+
+        {/* CARD 7: BANK RECONCILIATION (FC-11.5) */}
+        <Card
+          icon={<CreditCard className="size-4 text-emerald-700" strokeWidth={2} />}
+          title="Reconciliere plăți (Bank ↔ SPV)"
+          summary={
+            cards.bank.totalFirms === 0 && cards.bank.firmsWithoutData > 0
+              ? `0 firme cu extras încărcat · ${cards.bank.firmsWithoutData} clienți fără date bancare`
+              : `${cards.bank.totalFirms} firme · ${cards.bank.unmatchedDebitsCount + cards.bank.unmatchedCreditsCount} suspecte · Σ ${cards.bank.totalSuspiciousAmountRON.toLocaleString("ro-RO")} RON neacoperite`
+          }
+          empty={cards.bank.items.length === 0}
+          emptyText={
+            cards.bank.firmsWithoutData > 0
+              ? "📂 Cere clienților extras MT940/CSV din IB → încarcă pe per-client pentru reconciliere automată."
+              : "✓ Toate plățile și încasările au factură corespondentă."
+          }
+        >
+          {cards.bank.items.map((item) => {
+            const kindLabel =
+              item.kind === "unmatched-debit"
+                ? "PLATĂ FĂRĂ FACTURĂ"
+                : item.kind === "unmatched-credit"
+                  ? "ÎNCASARE FĂRĂ FACTURĂ"
+                  : item.kind === "invoice-unpaid"
+                    ? "Factură neplătită"
+                    : "Factură neîncasată"
+            return (
+              <ItemRow
+                key={item.focusId}
+                onClick={() => openClient(item.clientOrgId, item.focusId)}
+                clientName={item.clientOrgName}
+                title={item.title}
+                meta={`${kindLabel} · ${new Date(item.dateISO).toLocaleDateString("ro-RO")} · ${item.narrative}`}
+                badge={item.severity}
+              />
+            )
+          })}
         </Card>
       </div>
 
