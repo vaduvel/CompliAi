@@ -188,7 +188,7 @@ import { join } from "path"
 
 const localSubmissions = new Map<string, SPVSubmissionRow[]>()
 const SUBMISSIONS_DIR = join(process.cwd(), ".data")
-let submissionsLoaded = false
+const submissionsLoaded = false
 
 function submissionsFilePath(orgId: string): string {
   return join(SUBMISSIONS_DIR, `spv-submissions-${orgId}.json`)
