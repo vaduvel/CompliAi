@@ -121,28 +121,34 @@ export function generateDemoEvents(today: Date = new Date()): FiscalEvent[] {
     amountRON: 45_000,
     refDoc: "AGA-2025-11-20",
   });
-  // Simulează revenue cumulat în anul curent ~2.1M RON (peste 80% din prag)
+  // Simulează revenue cumulat în anul curent ~2.1M RON (peste 80% din prag micro 2.5M)
+  // Cristina factura 480K RON/lună × 5 luni = ~2.4M RON (96% din pragul micro)
   for (let m = 0; m < today.getMonth(); m++) {
-    events.push({
-      id: `evt-cristina-rev-${m}`,
-      clientId: "client-cristina-micro",
-      type: "invoice_emitted",
-      date: new Date(today.getFullYear(), m, 15).toISOString(),
-      amountRON: 175_000,
-      refDoc: `INV-${today.getFullYear()}-${m + 1}`,
-    });
+    for (let week = 0; week < 4; week++) {
+      events.push({
+        id: `evt-cristina-rev-${m}-${week}`,
+        clientId: "client-cristina-micro",
+        type: "invoice_emitted",
+        date: new Date(today.getFullYear(), m, 5 + week * 6).toISOString(),
+        amountRON: 120_000, // 4×120K = 480K/lună
+        refDoc: `INV-${today.getFullYear()}-${m + 1}-${week}`,
+      });
+    }
   }
 
   // Florin II — vânzări numerar acumulate aproape de pragul casa marcat
+  // 5 evenimente pe lună (3 înregistrări numerar/lună × prag spre 500K)
   for (let m = 0; m < today.getMonth() + 1; m++) {
-    events.push({
-      id: `evt-florin-rev-${m}`,
-      clientId: "client-florin-ii",
-      type: "bank_receipt",
-      date: new Date(today.getFullYear(), m, 10).toISOString(),
-      amountRON: 38_000,
-      refDoc: `BR-${m}`,
-    });
+    for (let week = 0; week < 4; week++) {
+      events.push({
+        id: `evt-florin-rev-${m}-${week}`,
+        clientId: "client-florin-ii",
+        type: "bank_receipt",
+        date: new Date(today.getFullYear(), m, 5 + week * 6).toISOString(),
+        amountRON: 22_500, // 4×22.5K = 90K/lună × 5 luni = 450K (90% din 500K)
+        refDoc: `BR-${m}-${week}`,
+      });
+    }
   }
 
   // Mihai Logistics — large SRL, multiple events
