@@ -428,6 +428,6 @@ export const config = {
     "/cabinet/:path*",
     "/genereaza-dpa/:path*",
     "/genereaza-politica-gdpr/:path*",
-    "/api/((?!auth|demo|stripe/webhook|whistleblowing/submit|free-tools/|client-portal/).*)",
+    "/api/((?!auth|demo|fiscal-copilot|stripe/webhook|whistleblowing/submit|free-tools/|client-portal/).*)",
   ],
 }
