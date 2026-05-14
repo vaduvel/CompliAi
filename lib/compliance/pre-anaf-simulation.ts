@@ -147,15 +147,15 @@ function extractCrossCorrelationRisks(
 
     const sourceDocs = f.sources.map((s) => s.label)
     const missingDocs: string[] = []
-    // Inferăm docs lipsă din severitate + rule
-    if (f.rule === "R1" && f.severity !== "ok") {
+    // Inferăm docs lipsă din rule (severitate deja filtrată la warning/error mai sus).
+    if (f.rule === "R1") {
       missingDocs.push("Facturi primite scanate complet (OCR)")
     }
     if (f.rule === "R2" && f.severity === "error") {
       missingDocs.push("Hotărâre AGA completă cu toți asociații")
       missingDocs.push("D205 rectificativă cu beneficiarii corecți")
     }
-    if (f.rule === "R3" && f.severity !== "ok") {
+    if (f.rule === "R3") {
       missingDocs.push("Snapshot ONRC actualizat cu cesiunile părților sociale")
     }
     if (f.rule === "R5" && f.severity === "error") {

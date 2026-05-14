@@ -11,6 +11,7 @@ import { requireRole } from "@/lib/server/auth"
 import { readStateForOrg } from "@/lib/server/mvp-store"
 import { runCrossCorrelation } from "@/lib/compliance/cross-correlation-engine"
 import { buildMasterExceptionQueue } from "@/lib/compliance/master-exception-queue"
+import type { FindingWithImpact } from "@/lib/compliance/economic-impact"
 import type { ComplianceState } from "@/lib/compliance/types"
 import type { StateWithParsedDeclarations } from "@/lib/compliance/parsed-declarations"
 import type { StateWithParsedAga } from "@/lib/compliance/parsed-aga"
@@ -60,8 +61,11 @@ export async function GET(request: Request) {
     })
 
     // Construim queue
+    // runCrossCorrelation populează economicImpact via annotateWithImpact,
+    // așa că findings sunt în realitate FindingWithImpact — facem cast explicit
+    // pentru contractul cu buildMasterExceptionQueue.
     const queue = buildMasterExceptionQueue({
-      crossCorrelationFindings: crossCorrReport.findings.filter(
+      crossCorrelationFindings: (crossCorrReport.findings as FindingWithImpact[]).filter(
         (f) =>
           f.severity === "warning" ||
           f.severity === "error",
