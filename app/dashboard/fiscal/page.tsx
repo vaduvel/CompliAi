@@ -60,6 +60,10 @@ export default function FiscalPage() {
   const findingIdParam = searchParams.get("findingId")
   const anafStatusParam = searchParams.get("anaf")
   const anafModeParam = searchParams.get("mode")
+  // [FC-11 2026-05-14] focus param din portofoliu AZI tab.
+  // Când utilizatorul face click pe un item din carduri, navigăm aici cu
+  // ?focus=<itemId> și scrolează la elementul corespunzător + îl evidențiază.
+  const focusParam = searchParams.get("focus")
   const [validatorBusy, setValidatorBusy] = useState(false)
   const [repairBusy, setRepairBusy] = useState(false)
   const [validations, setValidations] = useState<EFacturaValidationRecord[]>([])
@@ -106,6 +110,43 @@ export default function FiscalPage() {
       description: descriptions[anafStatusParam] ?? "Autorizarea ANAF nu a putut fi finalizată.",
     })
   }, [anafModeParam, anafStatusParam])
+
+  // [FC-11 2026-05-14] Focus on item when ?focus= param present.
+  // Așteptăm 1.5s pentru ca toate API-urile cardurilor să răspundă, apoi
+  // căutăm elementul DOM după data-focus-id sau text și scroll + flash.
+  useEffect(() => {
+    if (!focusParam) return
+    let attempts = 0
+    const maxAttempts = 20
+    const interval = setInterval(() => {
+      attempts++
+      const candidates = [
+        document.querySelector(`[data-focus-id="${focusParam}"]`),
+        // Fallback: search by text content (finding id appears in DOM via title)
+        ...Array.from(document.querySelectorAll('[class*="rounded"]')).filter((el) => {
+          const t = el.textContent ?? ""
+          return t.length < 500 && t.length > 30 && (
+            t.includes(focusParam) ||
+            // Match prin partea unică a focusId (după ultimul "-")
+            (focusParam.split("-").pop() && t.includes(focusParam.split("-").pop()!))
+          )
+        }),
+      ].filter(Boolean) as Element[]
+      if (candidates.length > 0 || attempts >= maxAttempts) {
+        clearInterval(interval)
+        const target = candidates[0]
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" })
+          target.classList.add("ring-2", "ring-eos-warning", "ring-offset-2")
+          setTimeout(() => {
+            target.classList.remove("ring-2", "ring-eos-warning", "ring-offset-2")
+          }, 3500)
+          toast.success(`Element evidențiat: ${focusParam.slice(0, 30)}...`, { duration: 2500 })
+        }
+      }
+    }, 400)
+    return () => clearInterval(interval)
+  }, [focusParam])
 
   useEffect(() => {
     if (tabParam !== "status" || !findingIdParam) {

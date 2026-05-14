@@ -1,24 +1,32 @@
 "use client"
 
-// Wrapper cu tab-uri pentru pagina /portfolio/fiscal — combinare între
-// summary cross-client (existent) și calendar cross-client (nou).
+// Wrapper cu tab-uri pentru pagina /portfolio/fiscal.
+// Tab default: "AZI" (FC-11) — homepage cabinet cu 6 carduri pe tip de necesitate.
+// Restul: drill-down detail (Calendar / Sumar / Cross-correlation / Burden).
 
 import { useState } from "react"
-import { CalendarClock, ListChecks, Sparkles, Users } from "lucide-react"
+import { CalendarClock, Home, ListChecks, Sparkles, Users } from "lucide-react"
 
 import { ClientBurdenIndexCard } from "@/components/compliscan/portfolio/ClientBurdenIndexCard"
 import { PortfolioCalendarPanel } from "@/components/compliscan/portfolio/PortfolioCalendarPanel"
 import { PortfolioCrossCorrelationPanel } from "@/components/compliscan/portfolio/PortfolioCrossCorrelationPanel"
 import { PortfolioFiscalPanel } from "@/components/compliscan/portfolio/PortfolioFiscalPanel"
+import { PortfolioTodayPanel } from "@/components/compliscan/portfolio/PortfolioTodayPanel"
 
-type Tab = "calendar" | "summary" | "crosscorr" | "burden"
+type Tab = "today" | "calendar" | "summary" | "crosscorr" | "burden"
 
 export function PortfolioFiscalTabs() {
-  const [tab, setTab] = useState<Tab>("calendar")
+  const [tab, setTab] = useState<Tab>("today")
 
   return (
     <div className="space-y-4">
       <nav className="flex items-center gap-1 border-b border-eos-border">
+        <TabButton
+          active={tab === "today"}
+          onClick={() => setTab("today")}
+          icon={<Home className="size-3.5" strokeWidth={2} />}
+          label="🏠 AZI"
+        />
         <TabButton
           active={tab === "calendar"}
           onClick={() => setTab("calendar")}
@@ -45,7 +53,9 @@ export function PortfolioFiscalTabs() {
         />
       </nav>
 
-      {tab === "calendar" ? (
+      {tab === "today" ? (
+        <PortfolioTodayPanel />
+      ) : tab === "calendar" ? (
         <PortfolioCalendarPanel />
       ) : tab === "summary" ? (
         <PortfolioFiscalPanel />
