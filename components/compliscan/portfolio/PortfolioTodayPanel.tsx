@@ -517,10 +517,14 @@ function ItemRow({
       >
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] uppercase tracking-wide text-eos-text-tertiary">
+            {/* [FC-11 fix vizibilitate 2026-05-14] Firma mai evidentă:
+                pastilă cu border + bold + mărimea mai mare ca să sară în ochi
+                la triage cross-client. Înainte era 10px text-tertiary subtil. */}
+            <span className="inline-flex items-center gap-1 rounded-md border border-eos-primary/30 bg-eos-primary-soft px-1.5 py-0.5 font-mono text-[10.5px] font-bold uppercase tracking-[0.08em] text-eos-primary">
+              <span className="size-1.5 rounded-full bg-eos-primary" />
               {clientName}
-            </p>
-            <p className="mt-0.5 text-[12.5px] font-semibold leading-[1.35] text-eos-text">
+            </span>
+            <p className="mt-1.5 text-[12.5px] font-semibold leading-[1.35] text-eos-text">
               {title}
             </p>
             <p className="mt-0.5 text-[11px] text-eos-text-muted">{meta}</p>
