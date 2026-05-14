@@ -151,23 +151,20 @@ export function PreANAFSimulationCard() {
               data-display-text="true"
               className="font-display text-[17px] font-bold tracking-[-0.015em] text-eos-text"
             >
-              Pre-ANAF Simulation
+              Simulare control ANAF
             </h2>
-            <span className="rounded-eos-sm border border-eos-warning/40 bg-eos-warning-soft px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-warning">
-              KILLER FEATURE
-            </span>
           </div>
           <p
             data-display-text="true"
             className="mt-2 font-display text-[20px] font-semibold leading-[1.25] tracking-[-0.015em] text-eos-text md:text-[24px]"
           >
-            "Dacă ANAF te-ar verifica azi,
+            „Dacă ANAF te-ar verifica azi,
             <br />
             <span className="text-eos-warning">unde pici prima dată?"</span>
           </p>
           <p className="mt-2 max-w-2xl text-[12.5px] text-eos-text-muted">
-            Click pe buton: agregăm toate sursele (cross-correlation R1-R7 +
-            economic impact) și-ți arătăm <strong>Top 5 riscuri active</strong>{" "}
+            Apasă butonul: agregăm diferențele între declarații, întârzierile și
+            impactul economic și-ți arătăm <strong>Top 5 riscuri active</strong>{" "}
             ordonate după magnitudine. Pentru fiecare: sumă în lei, probabilitate
             escalare, acțiunea concretă de remediere.
           </p>

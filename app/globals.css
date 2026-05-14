@@ -419,4 +419,19 @@
   .shadow-panel {
     box-shadow: var(--card-shadow);
   }
+
+  /* [FC-12 fix 2026-05-14] Maria persona test: sumele RON nu se aliniază în
+     tabele/cards (Inter sans-serif default). Pentru accounting tool e amateurish.
+     `.ron` aplică tabular-nums + ușor font-mono pe orice afișaj currency. */
+  .ron {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Alias mai explicit pentru sume bani */
+  .currency,
+  .currency-ron {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
 }

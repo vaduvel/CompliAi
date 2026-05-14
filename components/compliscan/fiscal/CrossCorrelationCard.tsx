@@ -254,16 +254,13 @@ export function CrossCorrelationCard() {
                 data-display-text="true"
                 className="font-display text-[15.5px] font-semibold tracking-[-0.015em] text-eos-text"
               >
-                Cross-Correlation — 4 reguli FC-3
+                Diferențe între declarații
               </h2>
-              <span className="rounded-eos-sm border border-eos-primary/30 bg-eos-primary-soft px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
-                R1 · R2 · R3 · R5
-              </span>
             </div>
             <p className="mt-1 max-w-3xl text-[12.5px] text-eos-text-muted">
-              Motor automat care detectează neconcordanțe între declarații fiscale (D300/D205/D100),
-              hotărâri AGA, facturi OCR-ate și date ONRC. Click pe orice finding pentru detalii cu
-              surse alăturate.
+              Verificări automate care detectează neconcordanțe între declarații fiscale (D300/D205/D100),
+              hotărâri AGA, facturi scanate și date ONRC. Apasă pe orice diferență pentru detalii cu
+              sursele puse alături.
             </p>
           </div>
           <button

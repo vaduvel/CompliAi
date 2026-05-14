@@ -39,12 +39,12 @@ export const metadata: Metadata = isFiscalMode
         template: "%s | CompliScan Fiscal",
       },
       description:
-        "Cockpit pentru cabinet contabil RO. ANAF SPV + cross-client analytics + reconciliere ERP-SPV + Pre-ANAF Simulation + Economic Impact LEI. Vezi ce arde la toate firmele tale într-un singur ecran dimineața la 9.",
+        "Cockpit pentru cabinet contabil RO. ANAF SPV + vedere cross-client + reconciliere ERP-SPV + simulare control ANAF + impact economic LEI. Vezi ce arde la toate firmele tale într-un singur ecran dimineața la 9.",
       icons: { icon: "/favicon.ico", shortcut: "/favicon.ico", apple: "/favicon.ico" },
       openGraph: {
         title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
         description:
-          "ANAF SPV + cross-client analytics. 38 capabilities funcționale. Pre-ANAF Simulation, Master Exception Queue, Client Burden Index, Authority Guardian, Bank ↔ SPV reconciliere.",
+          "ANAF SPV + vedere cross-client. Simulare control ANAF, probleme prioritare, profitabilitate per client, certificate & împuterniciri, reconciliere Bank ↔ SPV.",
         url: "/",
         siteName: "CompliScan Fiscal",
         locale: "ro_RO",

@@ -406,10 +406,37 @@ export function isRouteActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function isNavItemActive(pathname: string, item: DashboardNavItem) {
-  if (item.matchers?.length) {
-    return item.matchers.some((matcher) => isRouteActive(pathname, matcher))
+/** Returns the longest matching matcher for an item (or null if no match). */
+function bestMatcherFor(pathname: string, item: DashboardNavItem): string | null {
+  const matchers = item.matchers?.length ? item.matchers : [item.href]
+  let best: string | null = null
+  for (const m of matchers) {
+    if (isRouteActive(pathname, m)) {
+      if (!best || m.length > best.length) best = m
+    }
+  }
+  return best
+}
+
+/**
+ * [FC-12 fix 2026-05-14] Active = longest matching matcher across ALL items.
+ * Without this, /dashboard/fiscal was highlighting both "De rezolvat" (via group matcher)
+ * and "Cockpit fiscal" (via direct href). Maria persona test flagged as multi-active bug.
+ * When `allItems` is provided, an item wins only if no OTHER item has a more specific match.
+ */
+export function isNavItemActive(pathname: string, item: DashboardNavItem, allItems?: DashboardNavItem[]) {
+  const myBest = bestMatcherFor(pathname, item)
+  if (!myBest) return false
+
+  if (allItems?.length) {
+    for (const other of allItems) {
+      if (other.id === item.id) continue
+      const otherBest = bestMatcherFor(pathname, other)
+      if (otherBest && otherBest.length > myBest.length) {
+        return false
+      }
+    }
   }
 
-  return isRouteActive(pathname, item.href)
+  return true
 }

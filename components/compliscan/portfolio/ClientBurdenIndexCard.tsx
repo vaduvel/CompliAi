@@ -101,7 +101,7 @@ export function ClientBurdenIndexCard() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
-            FC-8 · Client Burden Index
+            Profitabilitate client
           </p>
           <h3
             data-display-text="true"
@@ -110,7 +110,7 @@ export function ClientBurdenIndexCard() {
             Cine îți consumă cabinetul
           </h3>
           <p className="mt-1 max-w-3xl text-[12.5px] leading-[1.5] text-eos-text-muted">
-            Per client: excepții/lună, ore consumate, fiscal risk activ, clasificare. Vezi care e profitabil, care e toxic, care e candidat pentru up-sell.
+            Per client: excepții/lună, ore consumate, risc fiscal activ, clasificare. Vezi care e profitabil, care e neprofitabil, care e candidat pentru renegociere fee.
           </p>
         </div>
         <button
@@ -125,7 +125,7 @@ export function ClientBurdenIndexCard() {
       </header>
 
       {error && (
-        <div className="rounded-md border border-red-300/50 bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12.5px] text-red-200">
           {error}
         </div>
       )}
@@ -133,10 +133,10 @@ export function ClientBurdenIndexCard() {
       {report && (
         <>
           {/* Strategic banner */}
-          <div className="rounded-lg border border-amber-300/50 bg-gradient-to-r from-amber-50 to-yellow-50 p-3">
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 size-4 text-amber-700" strokeWidth={2} />
-              <p className="text-[12.5px] font-medium leading-[1.5] text-amber-900">
+              <AlertTriangle className="mt-0.5 size-4 text-amber-300" strokeWidth={2} />
+              <p className="text-[12.5px] font-medium leading-[1.5] text-eos-text">
                 {report.topRecommendation}
               </p>
             </div>
@@ -222,11 +222,11 @@ function Tile({
 }) {
   const toneCls =
     tone === "danger"
-      ? "border-red-300/50 bg-red-50"
+      ? "border-red-500/30 bg-red-500/10"
       : tone === "warning"
-        ? "border-amber-300/50 bg-amber-50"
+        ? "border-amber-500/30 bg-amber-500/10"
         : tone === "ok"
-          ? "border-emerald-300/50 bg-emerald-50"
+          ? "border-emerald-500/30 bg-emerald-500/10"
           : "border-eos-border bg-eos-surface-subtle"
   return (
     <div className={`rounded-lg border ${toneCls} p-2`}>
@@ -268,30 +268,30 @@ function TabButton({
 function ClientRow({ rank, client }: { rank: number; client: ClientMetrics }) {
   const classBadge =
     client.classification === "toxic"
-      ? { cls: "bg-red-100 text-red-700 border-red-300/50", label: "TOXIC" }
+      ? { cls: "bg-red-500/15 text-red-300 border-red-500/30", label: "NEPROFITABIL" }
       : client.classification === "high-touch"
-        ? { cls: "bg-amber-100 text-amber-700 border-amber-300/50", label: "HIGH-TOUCH" }
+        ? { cls: "bg-amber-500/15 text-amber-300 border-amber-500/30", label: "EFORT MARE" }
         : client.classification === "profitable"
-          ? { cls: "bg-emerald-100 text-emerald-700 border-emerald-300/50", label: "PROFITABIL" }
+          ? { cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30", label: "PROFITABIL" }
           : client.classification === "dormant"
-            ? { cls: "bg-slate-100 text-slate-600 border-slate-300/50", label: "DORMANT" }
-            : { cls: "bg-blue-100 text-blue-700 border-blue-300/50", label: "NORMAL" }
+            ? { cls: "bg-eos-surface-elevated text-eos-text-muted border-eos-border", label: "INACTIV" }
+            : { cls: "bg-blue-500/15 text-blue-300 border-blue-500/30", label: "NORMAL" }
 
   const responseBadge =
     client.responseBehavior === "non-responsive"
-      ? { cls: "text-red-700", label: "Nu răspunde" }
+      ? { cls: "text-red-300", label: "Nu răspunde" }
       : client.responseBehavior === "slow"
-        ? { cls: "text-amber-700", label: "Lent" }
+        ? { cls: "text-amber-300", label: "Lent" }
         : client.responseBehavior === "fast"
-          ? { cls: "text-emerald-700", label: "Rapid" }
+          ? { cls: "text-emerald-300", label: "Rapid" }
           : { cls: "text-eos-text-muted", label: "Normal" }
 
   const burdenTone =
     client.burdenScore >= 60
-      ? "text-red-700"
+      ? "text-red-300"
       : client.burdenScore >= 40
-        ? "text-amber-700"
-        : "text-emerald-700"
+        ? "text-amber-300"
+        : "text-emerald-300"
 
   return (
     <li className="rounded-lg border border-eos-border bg-eos-surface-subtle p-3">
@@ -321,7 +321,7 @@ function ClientRow({ rank, client }: { rank: number; client: ClientMetrics }) {
             <Stat
               label="Risc activ"
               value={`${Math.round(client.activeFiscalRiskRON / 100) / 10}k RON`}
-              valueClass={client.activeFiscalRiskRON > 5000 ? "text-red-700" : ""}
+              valueClass={client.activeFiscalRiskRON > 5000 ? "text-red-300" : ""}
             />
             <Stat
               label={client.monthlyFeeRON ? "Cost/Fee" : "Fee"}
@@ -333,13 +333,13 @@ function ClientRow({ rank, client }: { rank: number; client: ClientMetrics }) {
                     : "—"
               }
               valueClass={
-                client.costToFeeRatio !== null && client.costToFeeRatio > 0.5 ? "text-red-700" : ""
+                client.costToFeeRatio !== null && client.costToFeeRatio > 0.5 ? "text-red-300" : ""
               }
             />
           </div>
 
           {client.recurrentExceptions > 0 && (
-            <p className="mt-2 inline-flex items-center gap-1 text-[10.5px] font-medium text-amber-700">
+            <p className="mt-2 inline-flex items-center gap-1 text-[10.5px] font-medium text-amber-300">
               <TrendingDown className="size-3" strokeWidth={2} />
               {client.recurrentExceptions} excepții recurente
             </p>

@@ -176,16 +176,12 @@ export function MasterExceptionQueueCard() {
               data-display-text="true"
               className="font-display text-[15.5px] font-semibold tracking-[-0.015em] text-eos-text"
             >
-              Master Exception Queue
+              Probleme prioritare
             </h2>
-            <span className="rounded-eos-sm border border-eos-primary/30 bg-eos-primary-soft px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-eos-primary">
-              FC-7
-            </span>
           </div>
           <p className="mt-1 max-w-3xl text-[12.5px] text-eos-text-muted">
-            Un singur loc cu TOATE excepțiile (cross-correlation + filings +
-            audit risk) ordonate după priority score (severitate × deadline ×
-            impact lei × repetitivitate).
+            Toate excepțiile (diferențe declarații, depuneri întârziate, risc audit)
+            ordonate după prioritate: severitate × termen × impact lei × repetitivitate.
           </p>
         </div>
         <button

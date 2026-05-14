@@ -121,11 +121,11 @@ const MANDATE_TYPE_LABEL: Record<MandateType, string> = {
 }
 
 const STATUS_CLS: Record<CertStatus | MandateStatus, string> = {
-  active: "bg-emerald-100 text-emerald-700 border-emerald-300/50",
-  "expiring-soon": "bg-amber-100 text-amber-700 border-amber-300/50",
-  expired: "bg-red-100 text-red-700 border-red-300/50",
-  revoked: "bg-gray-200 text-gray-600 border-gray-300/50",
-  draft: "bg-slate-100 text-slate-600 border-slate-300/50",
+  active: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  "expiring-soon": "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  expired: "bg-red-500/15 text-red-300 border-red-500/30",
+  revoked: "bg-eos-surface-elevated text-eos-text-muted border-eos-border",
+  draft: "bg-eos-surface-elevated text-eos-text-muted border-eos-border-subtle",
 }
 
 const STATUS_LABEL: Record<CertStatus | MandateStatus, string> = {
@@ -188,7 +188,7 @@ export function AuthorityGuardianCard() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
-            FC-10 · Authority & Mandate Guardian
+            Certificate & împuterniciri
           </p>
           <h3
             data-display-text="true"
@@ -197,7 +197,7 @@ export function AuthorityGuardianCard() {
             Certificate digitale + împuterniciri
           </h3>
           <p className="mt-1 max-w-3xl text-[12.5px] leading-[1.5] text-eos-text-muted">
-            Inventory cert calificate (eIDAS), token SPV ANAF, împuterniciri form 270, procuri notariale. Alerte automate cu 30/7 zile înainte de expirare.
+            Inventar certificate calificate (eIDAS), token SPV ANAF, împuterniciri form 270, procuri notariale. Alerte automate cu 30/7 zile înainte de expirare.
           </p>
         </div>
         <div className="flex gap-1.5">
@@ -219,7 +219,7 @@ export function AuthorityGuardianCard() {
       </header>
 
       {error && (
-        <div className="rounded-md border border-red-300/50 bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12.5px] text-red-200">
           {error}
         </div>
       )}
@@ -230,20 +230,20 @@ export function AuthorityGuardianCard() {
           <div
             className={`rounded-lg border p-3 ${
               summary.expiredCertsCount > 0 || summary.expiredMandatesCount > 0
-                ? "border-red-300/50 bg-red-50"
+                ? "border-red-500/30 bg-red-500/10"
                 : summary.criticalAlerts > 0
-                  ? "border-amber-300/50 bg-amber-50"
-                  : "border-emerald-300/50 bg-emerald-50"
+                  ? "border-amber-500/30 bg-amber-500/10"
+                  : "border-emerald-500/30 bg-emerald-500/10"
             }`}
           >
             <div className="flex items-start gap-2">
               <ShieldAlert
                 className={`mt-0.5 size-4 ${
                   summary.expiredCertsCount > 0 || summary.expiredMandatesCount > 0
-                    ? "text-red-700"
+                    ? "text-red-300"
                     : summary.criticalAlerts > 0
-                      ? "text-amber-700"
-                      : "text-emerald-700"
+                      ? "text-amber-300"
+                      : "text-emerald-300"
                 }`}
                 strokeWidth={2}
               />
@@ -294,7 +294,7 @@ export function AuthorityGuardianCard() {
       {tab === "alerts" && (
         <ul className="space-y-2">
           {alerts.length === 0 ? (
-            <li className="rounded-lg border border-eos-border bg-eos-surface-subtle px-3 py-4 text-center text-[12.5px] text-emerald-700">
+            <li className="rounded-lg border border-eos-border bg-eos-surface-subtle px-3 py-4 text-center text-[12.5px] text-emerald-300">
               ✓ Nicio alertă activă. Toate elementele sunt valide.
             </li>
           ) : (
@@ -358,11 +358,11 @@ function Tile({
 }) {
   const toneCls =
     tone === "danger"
-      ? "border-red-300/50 bg-red-50"
+      ? "border-red-500/30 bg-red-500/10"
       : tone === "warning"
-        ? "border-amber-300/50 bg-amber-50"
+        ? "border-amber-500/30 bg-amber-500/10"
         : tone === "ok"
-          ? "border-emerald-300/50 bg-emerald-50"
+          ? "border-emerald-500/30 bg-emerald-500/10"
           : "border-eos-border bg-eos-surface-subtle"
   return (
     <div className={`rounded-lg border ${toneCls} p-2`}>
@@ -404,15 +404,15 @@ function TabBtn({
 function AlertRow({ alert }: { alert: Alert }) {
   const sevCls =
     alert.severity === "critical"
-      ? "border-red-300/60 bg-red-50"
+      ? "border-red-500/40 bg-red-500/10"
       : alert.severity === "warning"
-        ? "border-amber-300/60 bg-amber-50"
+        ? "border-amber-500/40 bg-amber-500/10"
         : "border-eos-border bg-eos-surface-subtle"
   return (
     <li className={`rounded-lg border ${sevCls} p-3`}>
       <div className="flex items-start gap-2">
         <AlertTriangle
-          className={`mt-0.5 size-4 ${alert.severity === "critical" ? "text-red-700" : "text-amber-700"}`}
+          className={`mt-0.5 size-4 ${alert.severity === "critical" ? "text-red-300" : "text-amber-300"}`}
           strokeWidth={2}
         />
         <div className="flex-1 min-w-0">
@@ -774,7 +774,7 @@ function CreateModal({
             </>
           )}
 
-          {err && <p className="text-[11.5px] text-red-700">{err}</p>}
+          {err && <p className="text-[11.5px] text-red-300">{err}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <button

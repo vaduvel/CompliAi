@@ -25,7 +25,7 @@ export function PortfolioFiscalTabs() {
           active={tab === "today"}
           onClick={() => setTab("today")}
           icon={<Home className="size-3.5" strokeWidth={2} />}
-          label="🏠 AZI"
+          label="AZI"
         />
         <TabButton
           active={tab === "calendar"}
@@ -43,13 +43,13 @@ export function PortfolioFiscalTabs() {
           active={tab === "crosscorr"}
           onClick={() => setTab("crosscorr")}
           icon={<Sparkles className="size-3.5" strokeWidth={2} />}
-          label="Cross-correlation"
+          label="Diferențe declarații"
         />
         <TabButton
           active={tab === "burden"}
           onClick={() => setTab("burden")}
           icon={<Users className="size-3.5" strokeWidth={2} />}
-          label="Client Burden"
+          label="Profitabilitate client"
         />
       </nav>
 

@@ -13,7 +13,14 @@ export function TrialBanner() {
   const [info, setInfo] = useState<AccountStateInfo | null>(null)
   const [dismissed, setDismissed] = useState(false)
 
+  // [FC-12 fix 2026-05-14] Maria persona test: trial banner apărea simultan cu DEV banner
+  // și o panica ("sunt logată ca Ana Maria și apare expirat?"). Pe deploy fiscal pilot,
+  // toți userii sunt în program pilot 3 luni gratuit — nu există trial expirat.
+  // Ascundem complet banner-ul în fiscal mode pentru a evita confuzia.
+  const isFiscalMode = process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal"
+
   useEffect(() => {
+    if (isFiscalMode) return
     fetch("/api/plan")
       .then((r) => r.json())
       .then((data: { plan: OrgPlan; trialEndsAtISO: string | null }) => {
@@ -21,9 +28,9 @@ export function TrialBanner() {
         if (derived.showBanner) setInfo(derived)
       })
       .catch(() => {})
-  }, [])
+  }, [isFiscalMode])
 
-  if (!info || !info.showBanner || dismissed) return null
+  if (isFiscalMode || !info || !info.showBanner || dismissed) return null
 
   const isExpired = info.state === "trial_expired"
   const bgColor = isExpired

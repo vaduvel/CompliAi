@@ -25,26 +25,26 @@ import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
 const HERO_BADGES = ["ANAF SPV", "e-Factura", "SAF-T D406", "CECCAR", "OPANAF"] as const
 
 const SEVEN_CARDS = [
-  { icon: FileWarning, color: "text-amber-600", title: "Declarații", desc: "R6+R7 + filing discipline cross-client. Vezi ce-i lipsă pe TOȚI clienții într-un singur loc." },
-  { icon: Calendar, color: "text-blue-600", title: "Termene 7 zile", desc: "Calendar agregat cu deadline-uri ANAF din SPV. Sortat după urgență." },
-  { icon: ShieldAlert, color: "text-red-600", title: "Certificate & împuterniciri", desc: "Cert ANAF expiră? Împuternicire form 270 expiră? Alertă cu 30/7 zile înainte." },
-  { icon: Mail, color: "text-violet-600", title: "Cereri documente", desc: "Cabinet cere bonuri Z, contracte, AGA, extras bancar — workflow tracking complet." },
-  { icon: Target, color: "text-orange-600", title: "Pre-ANAF Simulation", desc: "Dacă ANAF te-ar verifica AZI, unde pici prima dată? Top 5 risks ranked." },
-  { icon: AlertTriangle, color: "text-red-700", title: "Excepții CRITICE", desc: "Master queue cross-client. Σ impact RON. Owner + deadline + recurrence priority." },
-  { icon: CreditCard, color: "text-emerald-700", title: "Bank ↔ SPV reconciliere", desc: "Plăți fără factură (suspect!) + facturi neîncasate + reconciliere fuzzy CUI/sumă/dată." },
+  { icon: FileWarning, color: "text-amber-300", title: "Declarații", desc: "Depuneri întârziate și rectificări cross-client. Vezi ce lipsește la TOȚI clienții într-un singur loc." },
+  { icon: Calendar, color: "text-blue-300", title: "Termene 7 zile", desc: "Calendar agregat cu termene ANAF din SPV. Sortat după urgență." },
+  { icon: ShieldAlert, color: "text-red-300", title: "Certificate & împuterniciri", desc: "Cert ANAF expiră? Împuternicire form 270 expiră? Alertă cu 30/7 zile înainte." },
+  { icon: Mail, color: "text-violet-300", title: "Cereri documente", desc: "Cabinet cere bonuri Z, contracte, AGA, extras bancar — istoric complet pentru audit ANAF." },
+  { icon: Target, color: "text-orange-300", title: "Simulare control ANAF", desc: "Dacă ANAF te-ar verifica AZI, unde pici prima dată? Top 5 riscuri ordonate după magnitudine." },
+  { icon: AlertTriangle, color: "text-red-300", title: "Probleme prioritare", desc: "Toate excepțiile cross-client într-un singur loc. Total impact RON. Responsabil + termen + recurență." },
+  { icon: CreditCard, color: "text-emerald-300", title: "Bank ↔ SPV reconciliere", desc: "Plăți fără factură (suspect!) + facturi neîncasate + reconciliere automată CUI/sumă/dată." },
 ]
 
 const MOAT_FEATURES = [
-  { title: "Cross-correlation R1-R7", desc: "8 reguli care detectează inconsistențe între D300 ↔ facturi, AGA ↔ D205, AGA ↔ ONRC, D205 ↔ D100, termen ↔ depunere, frecvență TVA." },
-  { title: "Economic Impact LEI", desc: "Pentru fiecare finding: 'te costă 3.300-8.300 RON' (CPF Art. 219). Nu doar warning, ci sumă reală cu range MIN-MAX." },
-  { title: "Burden Index per client", desc: "Care client îți consumă cabinetul. Toxic / profitabil / dormant. Recomandare automată: renegociere fee sau evacuare." },
-  { title: "ERP ↔ SPV Reconciler", desc: "Folosești SAGA / SmartBill / Oblio? Vezi gap-uri între ERP-ul clientului și SPV ANAF — moat real față de SPVGo, SAGA nativ, Nexus." },
+  { title: "Diferențe între declarații", desc: "8 verificări care detectează neconcordanțe între D300 ↔ facturi, AGA ↔ D205, AGA ↔ ONRC, D205 ↔ D100, termen ↔ depunere, frecvență TVA." },
+  { title: "Impact economic LEI", desc: "Pentru fiecare problemă: „te costă 3.300-8.300 RON” (CPF Art. 219). Nu doar avertizare, ci sumă reală cu interval MIN-MAX." },
+  { title: "Profitabilitate per client", desc: "Care client îți consumă cabinetul. Profitabil / efort mare / neprofitabil / inactiv. Recomandare automată: renegociere fee." },
+  { title: "ERP ↔ SPV Reconciler", desc: "Folosești SAGA / SmartBill / Oblio? Vezi gap-uri între ERP-ul clientului și SPV ANAF — diferența reală față de SPVGo, SAGA nativ, Nexus." },
 ]
 
 const COMPETITION = [
-  { name: "SAGA", does: "ERP cabinet — book-keeping + generare D300", lacks: "Cross-correlation, Economic Impact, Pre-ANAF, Master Queue, Burden Index" },
-  { name: "SmartBill Conta", does: "ERP + integrare SmartBill invoicing", lacks: "Cross-client analytics, risc simulation" },
-  { name: "SPVGo", does: "Import e-Factura SPV centralizat", lacks: "Analytics layer peste date" },
+  { name: "SAGA", does: "ERP cabinet — book-keeping + generare D300", lacks: "Diferențe între declarații, impact economic, simulare ANAF, probleme prioritare, profitabilitate client" },
+  { name: "SmartBill Conta", does: "ERP + integrare SmartBill invoicing", lacks: "Vedere cross-client, simulare risc" },
+  { name: "SPVGo", does: "Import e-Factura SPV centralizat", lacks: "Strat analitic peste date" },
   { name: "Nexus ERP", does: "ERP enterprise cu import SPV", lacks: "Workflow non-digital (bonuri, AGA)" },
 ]
 

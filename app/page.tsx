@@ -20,19 +20,19 @@ export const metadata: Metadata = isFiscalMode
   ? {
       title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
       description:
-        "ANAF SPV + cross-client analytics + reconciliere ERP-SPV. Pre-ANAF Simulation, Master Exception Queue, Client Burden Index, Bank ↔ SPV reconciliere. Vezi ce arde la TOATE firmele tale într-un singur ecran.",
+        "ANAF SPV + vedere cross-client + reconciliere ERP-SPV. Simulare control ANAF, probleme prioritare, profitabilitate per client, reconciliere Bank ↔ SPV. Vezi ce arde la TOATE firmele tale într-un singur ecran.",
       alternates: { canonical: "/" },
       openGraph: {
         title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
         description:
-          "ANAF SPV + cross-client analytics. 38 capabilities funcționale. Pentru cabinetul tău contabil.",
+          "ANAF SPV + vedere cross-client cabinet contabil. Triage cross-client, diferențe declarații, reconciliere bancă-SPV. Pentru cabinetul tău contabil.",
         url: "/",
         type: "website",
       },
       twitter: {
         card: "summary",
         title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
-        description: "ANAF SPV + cross-client. Reconciliere ERP. Pentru cabinetul tău.",
+        description: "ANAF SPV + vedere cross-client. Reconciliere ERP. Pentru cabinetul tău.",
       },
     }
   : {

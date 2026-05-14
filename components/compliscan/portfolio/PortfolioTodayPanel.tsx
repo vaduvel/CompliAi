@@ -15,6 +15,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import {
   AlertTriangle,
   Calendar as CalIcon,
@@ -188,29 +189,38 @@ export function PortfolioTodayPanel() {
   }, [])
 
   /** Click pe item: switch-org + redirect cu ?focus= */
+  // [FC-12 fix 2026-05-14] Maria: "Click → nu se întâmplă nimic". Cauza era alert()
+  // silențios în Chrome Preview MCP + fail silențios când partner/clients return
+  // empty. Fix: toast pentru feedback vizibil + fallback la navigare directă chiar
+  // dacă membership lookup eșuează (router.push merge la /dashboard/fiscal — user
+  // poate folosi sidebar pentru switch dacă context-ul nu se schimbă automat).
   const openClient = async (orgId: string, focusId: string) => {
+    const focusUrl = `/dashboard/fiscal?focus=${encodeURIComponent(focusId)}`
     try {
-      // Find membership for orgId via memberships API
+      // Try to switch-org via membership lookup. Best-effort.
       const m = await fetch("/api/partner/clients", { cache: "no-store" }).then((r) => r.json())
       const client = m.clients?.find((c: { orgId: string }) => c.orgId === orgId)
-      if (!client?.membershipId) {
-        alert("Nu am găsit membership-ul.")
-        return
+      if (client?.membershipId) {
+        const swRes = await fetch("/api/auth/switch-org", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ membershipId: client.membershipId }),
+        })
+        if (!swRes.ok) {
+          toast.warning("Nu am putut comuta automat firma. Te ducem pe pagină — alege firma din sidebar.")
+        } else {
+          toast.success("Am intrat în firmă. Te ducem la item-ul respectiv...")
+        }
+      } else {
+        // Fallback: navigăm oricum (user în mod solo sau cabinet fără membership înregistrat)
+        toast.message("Te ducem pe pagina fiscală. Folosește sidebar dacă vrei altă firmă.")
       }
-      const swRes = await fetch("/api/auth/switch-org", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ membershipId: client.membershipId }),
-      })
-      if (!swRes.ok) {
-        alert("Switch org eșuat.")
-        return
-      }
-      // Navigate to per-client fiscal dashboard with focus param
-      router.push(`/dashboard/fiscal?focus=${encodeURIComponent(focusId)}`)
+      router.push(focusUrl)
     } catch (err) {
       console.error("openClient error:", err)
-      alert("Eroare la navigare.")
+      // Fallback: încearcă oricum router.push — userul nu rămâne blocat
+      toast.error("Eroare la comutare firmă. Te ducem oricum pe pagina fiscală.")
+      router.push(focusUrl)
     }
   }
 
@@ -225,7 +235,7 @@ export function PortfolioTodayPanel() {
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-300/50 bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+      <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12.5px] text-red-200">
         {error}
       </div>
     )
@@ -242,18 +252,24 @@ export function PortfolioTodayPanel() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
-              📊 Portofoliu cabinet · azi
+              Portofoliu cabinet · azi
             </p>
             <h2
               data-display-text="true"
               className="mt-1 font-display text-[24px] font-semibold tracking-[-0.025em] text-eos-text md:text-[28px]"
             >
-              {snapshot.totalClients} firme · {snapshot.greenCount} verzi · {snapshot.yellowCount} galbene · {snapshot.redCount} roșii
+              {snapshot.totalClients} {pluralRO(snapshot.totalClients, "firmă", "firme")}
+              {" · "}
+              <span className="text-emerald-300">{snapshot.greenCount} {pluralRO(snapshot.greenCount, "verde", "verzi")}</span>
+              {" · "}
+              <span className="text-amber-300">{snapshot.yellowCount} {pluralRO(snapshot.yellowCount, "galbenă", "galbene")}</span>
+              {" · "}
+              <span className="text-red-300">{snapshot.redCount} {pluralRO(snapshot.redCount, "roșie", "roșii")}</span>
             </h2>
             <p className="mt-1 text-[12.5px] leading-[1.55] text-eos-text-muted">
-              Σ risc fiscal expus: <strong className="text-eos-text">{snapshot.totalRiskRON.toLocaleString("ro-RO")} RON</strong>{" "}
-              · Σ ore cabinet/lună estimate: <strong className="text-eos-text">{snapshot.totalCabinetHoursPerMonth}h</strong>{" "}
-              · {snapshot.totalSpvSyncedCount} clienți cu SPV activ
+              Total risc fiscal estimat: <strong className="font-mono tabular-nums text-eos-text">{snapshot.totalRiskRON.toLocaleString("ro-RO")} RON</strong>{" "}
+              · Total ore cabinet/lună estimate: <strong className="font-mono tabular-nums text-eos-text">{snapshot.totalCabinetHoursPerMonth}h</strong>{" "}
+              · {snapshot.totalSpvSyncedCount} {pluralRO(snapshot.totalSpvSyncedCount, "client", "clienți")} cu SPV activ
             </p>
           </div>
           <button
@@ -263,7 +279,7 @@ export function PortfolioTodayPanel() {
             className="inline-flex items-center gap-1 rounded-md border border-eos-border bg-eos-surface px-2.5 py-1.5 text-[11.5px] font-medium text-eos-text-muted hover:bg-eos-surface-hover disabled:opacity-50"
           >
             <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} strokeWidth={2} />
-            Refresh
+            Actualizează
           </button>
         </div>
       </header>
@@ -272,9 +288,9 @@ export function PortfolioTodayPanel() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {/* CARD 1: DECLARAȚII */}
         <Card
-          icon={<FileWarning className="size-4 text-amber-600" strokeWidth={2} />}
+          icon={<FileWarning className="size-4 text-amber-300" strokeWidth={2} />}
           title="Declarații de depus / rectificat"
-          summary={`${cards.declarations.totalFirms} firme · ${cards.declarations.totalImpactRON.toLocaleString("ro-RO")} RON impact`}
+          summary={`${cards.declarations.totalFirms} ${pluralRO(cards.declarations.totalFirms, "firmă", "firme")} · ${cards.declarations.totalImpactRON.toLocaleString("ro-RO")} RON impact`}
           empty={cards.declarations.items.length === 0}
           emptyText="✓ Niciun client cu declarații întârziate."
         >
@@ -292,11 +308,12 @@ export function PortfolioTodayPanel() {
 
         {/* CARD 2: CALENDAR */}
         <Card
-          icon={<CalIcon className="size-4 text-blue-600" strokeWidth={2} />}
+          icon={<CalIcon className="size-4 text-blue-300" strokeWidth={2} />}
           title="Termene urgente (7 zile)"
-          summary={`${cards.calendar.totalFirms} firme · ${cards.calendar.totalDeadlines} termene`}
+          summary={`${cards.calendar.totalFirms} ${pluralRO(cards.calendar.totalFirms, "firmă", "firme")} · ${cards.calendar.totalDeadlines} ${pluralRO(cards.calendar.totalDeadlines, "termen", "termene")}`}
           empty={cards.calendar.items.length === 0}
-          emptyText="✓ Niciun termen în următoarele 7 zile."
+          emptyText="✓ Liber săptămâna asta. Vezi calendarul lunii viitoare →"
+          emptyHref="/dashboard/fiscal/calendar"
         >
           {cards.calendar.items.map((item) => (
             <ItemRow
@@ -312,9 +329,9 @@ export function PortfolioTodayPanel() {
 
         {/* CARD 3: CERTIFICATE */}
         <Card
-          icon={<ShieldAlert className="size-4 text-red-600" strokeWidth={2} />}
+          icon={<ShieldAlert className="size-4 text-red-300" strokeWidth={2} />}
           title="Certificate & împuterniciri"
-          summary={`${cards.certificates.totalFirms} firme · ${cards.certificates.expiredCount} expirate · ${cards.certificates.expiringSoonCount} expiră`}
+          summary={`${cards.certificates.totalFirms} ${pluralRO(cards.certificates.totalFirms, "firmă", "firme")} · ${cards.certificates.expiredCount} ${pluralRO(cards.certificates.expiredCount, "expirat", "expirate")} · ${cards.certificates.expiringSoonCount} expiră`}
           empty={cards.certificates.items.length === 0}
           emptyText="✓ Toate certificatele și împuternicirile sunt valide."
         >
@@ -336,9 +353,9 @@ export function PortfolioTodayPanel() {
 
         {/* CARD 4: EVIDENCE */}
         <Card
-          icon={<Mail className="size-4 text-violet-600" strokeWidth={2} />}
+          icon={<Mail className="size-4 text-violet-300" strokeWidth={2} />}
           title="Cereri documente lipsă"
-          summary={`${cards.evidence.totalFirms} firme · ${cards.evidence.overdueCount} overdue · ${cards.evidence.pendingClientCount} pendente client`}
+          summary={`${cards.evidence.totalFirms} ${pluralRO(cards.evidence.totalFirms, "firmă", "firme")} · ${cards.evidence.overdueCount} întârziate · ${cards.evidence.pendingClientCount} pendente client`}
           empty={cards.evidence.items.length === 0}
           emptyText="✓ Nicio cerere documente în așteptare."
         >
@@ -364,9 +381,9 @@ export function PortfolioTodayPanel() {
 
         {/* CARD 5: PRE-ANAF */}
         <Card
-          icon={<Target className="size-4 text-orange-600" strokeWidth={2} />}
+          icon={<Target className="size-4 text-orange-300" strokeWidth={2} />}
           title="Risc Pre-ANAF iminent"
-          summary={`${cards.preAnaf.totalFirms} firme · ${cards.preAnaf.imminentCount} IMINENT · ${cards.preAnaf.highCount} HIGH · ${cards.preAnaf.totalExposureMaxRON.toLocaleString("ro-RO")} RON expunere`}
+          summary={`${cards.preAnaf.totalFirms} ${pluralRO(cards.preAnaf.totalFirms, "firmă", "firme")} · ${cards.preAnaf.imminentCount} IMINENT · ${cards.preAnaf.highCount} RIDICAT · ${cards.preAnaf.totalExposureMaxRON.toLocaleString("ro-RO")} RON expunere`}
           empty={cards.preAnaf.items.length === 0}
           emptyText="✓ Niciun risc iminent în portofoliu."
         >
@@ -384,9 +401,9 @@ export function PortfolioTodayPanel() {
 
         {/* CARD 6: EXCEPȚII */}
         <Card
-          icon={<AlertTriangle className="size-4 text-red-700" strokeWidth={2} />}
-          title="Excepții CRITIC Master Queue"
-          summary={`${cards.exceptions.totalFirms} firme · ${cards.exceptions.criticCount} CRITICE · Σ ${cards.exceptions.totalImpactRON.toLocaleString("ro-RO")} RON`}
+          icon={<AlertTriangle className="size-4 text-red-300" strokeWidth={2} />}
+          title="Probleme prioritare"
+          summary={`${cards.exceptions.totalFirms} ${pluralRO(cards.exceptions.totalFirms, "firmă", "firme")} · ${cards.exceptions.criticCount} ${pluralRO(cards.exceptions.criticCount, "CRITICĂ", "CRITICE")} · Total ${cards.exceptions.totalImpactRON.toLocaleString("ro-RO")} RON`}
           empty={cards.exceptions.items.length === 0}
           emptyText="✓ Nicio excepție critică."
         >
@@ -402,14 +419,14 @@ export function PortfolioTodayPanel() {
           ))}
         </Card>
 
-        {/* CARD 7: BANK RECONCILIATION (FC-11.5) */}
+        {/* CARD 7: BANK RECONCILIATION */}
         <Card
-          icon={<CreditCard className="size-4 text-emerald-700" strokeWidth={2} />}
+          icon={<CreditCard className="size-4 text-emerald-300" strokeWidth={2} />}
           title="Reconciliere plăți (Bank ↔ SPV)"
           summary={
             cards.bank.totalFirms === 0 && cards.bank.firmsWithoutData > 0
-              ? `0 firme cu extras încărcat · ${cards.bank.firmsWithoutData} clienți fără date bancare`
-              : `${cards.bank.totalFirms} firme · ${cards.bank.unmatchedDebitsCount + cards.bank.unmatchedCreditsCount} suspecte · Σ ${cards.bank.totalSuspiciousAmountRON.toLocaleString("ro-RO")} RON neacoperite`
+              ? `0 firme cu extras încărcat · ${cards.bank.firmsWithoutData} ${pluralRO(cards.bank.firmsWithoutData, "client", "clienți")} fără date bancare`
+              : `${cards.bank.totalFirms} ${pluralRO(cards.bank.totalFirms, "firmă", "firme")} · ${cards.bank.unmatchedDebitsCount + cards.bank.unmatchedCreditsCount} suspecte · Total ${cards.bank.totalSuspiciousAmountRON.toLocaleString("ro-RO")} RON neacoperite`
           }
           empty={cards.bank.items.length === 0}
           emptyText={
@@ -457,6 +474,7 @@ function Card({
   children,
   empty,
   emptyText,
+  emptyHref,
 }: {
   icon: React.ReactNode
   title: string
@@ -464,6 +482,7 @@ function Card({
   children: React.ReactNode
   empty: boolean
   emptyText: string
+  emptyHref?: string
 }) {
   return (
     <section className="rounded-2xl border border-eos-border bg-eos-surface p-4 shadow-sm">
@@ -480,12 +499,27 @@ function Card({
         </div>
       </header>
       {empty ? (
-        <p className="mt-3 rounded-md bg-emerald-50 px-3 py-2 text-[11.5px] text-emerald-700">{emptyText}</p>
+        emptyHref ? (
+          <a
+            href={emptyHref}
+            className="mt-3 block rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11.5px] text-emerald-200 transition hover:border-emerald-500/50 hover:bg-emerald-500/15"
+          >
+            {emptyText}
+          </a>
+        ) : (
+          <p className="mt-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11.5px] text-emerald-200">{emptyText}</p>
+        )
       ) : (
         <ul className="mt-3 space-y-1.5">{children}</ul>
       )}
     </section>
   )
+}
+
+// Helper plural RO: 1 → singular, 0/2+ → plural.
+// [FC-12 fix 2026-05-14] Maria: "1 firme" e gramatical greșit. Folosim pluralizare RO.
+function pluralRO(n: number, singular: string, plural: string): string {
+  return n === 1 ? singular : plural
 }
 
 function ItemRow({
@@ -503,10 +537,10 @@ function ItemRow({
 }) {
   const badgeCls =
     badge === "critic"
-      ? "bg-red-100 text-red-700 border-red-300/50"
+      ? "bg-red-500/15 text-red-300 border-red-500/30"
       : badge === "important"
-        ? "bg-amber-100 text-amber-700 border-amber-300/50"
-        : "bg-blue-100 text-blue-700 border-blue-300/50"
+        ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+        : "bg-blue-500/15 text-blue-300 border-blue-500/30"
   const badgeLabel = badge === "critic" ? "CRITIC" : badge === "important" ? "IMPORTANT" : "ATENȚIE"
   return (
     <li>

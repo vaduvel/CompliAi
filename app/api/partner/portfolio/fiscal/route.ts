@@ -52,16 +52,18 @@ type FiscalClientRow = {
 type StateWithFilings = ComplianceState & { filingRecords?: FilingRecord[] }
 
 function deriveRiskLevel(row: Omit<FiscalClientRow, "riskLevel">): "ok" | "warning" | "critical" {
-  // Critical dacă: SAF-T <50 sau filing discipline <50 sau >5 issue e-Factura
+  // [FC-12 fix 2026-05-14] Maria persona test: AZI tab arăta "2 CRITICE"
+  // dar Sumar per client arăta "RISC CRITIC 0" — threshold prea înalt
+  // (filingMissing >= 2). Acum: orice declarație lipsă = critic (1 R6 D300
+  // nedepusă = ANAF penalitate iminentă), aliniat cu AZI tab criticCount.
   if (
     (row.saftHygieneScore !== null && row.saftHygieneScore < 50) ||
     (row.filingDisciplineScore !== null && row.filingDisciplineScore < 50) ||
     row.efacturaIssueCount >= 5 ||
-    row.filingMissing >= 2
+    row.filingMissing >= 1
   ) {
     return "critical"
   }
-  // Warning dacă scor 50-70 sau 1-4 issue
   if (
     (row.saftHygieneScore !== null && row.saftHygieneScore < 70) ||
     (row.filingDisciplineScore !== null && row.filingDisciplineScore < 70) ||

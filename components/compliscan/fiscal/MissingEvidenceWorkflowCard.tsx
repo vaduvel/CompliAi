@@ -117,14 +117,14 @@ const STATUS_LABELS: Record<EvidenceStatus, string> = {
 }
 
 const STATUS_CLS: Record<EvidenceStatus, string> = {
-  requested: "bg-slate-100 text-slate-700 border-slate-300/50",
-  sent: "bg-blue-100 text-blue-700 border-blue-300/50",
-  "client-acknowledged": "bg-cyan-100 text-cyan-700 border-cyan-300/50",
-  received: "bg-violet-100 text-violet-700 border-violet-300/50",
-  verified: "bg-emerald-100 text-emerald-700 border-emerald-300/50",
-  overdue: "bg-red-100 text-red-700 border-red-300/50",
-  rejected: "bg-orange-100 text-orange-700 border-orange-300/50",
-  cancelled: "bg-gray-100 text-gray-600 border-gray-300/50",
+  requested: "bg-eos-surface-elevated text-eos-text-muted border-eos-border",
+  sent: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+  "client-acknowledged": "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+  received: "bg-violet-500/15 text-violet-300 border-violet-500/30",
+  verified: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+  overdue: "bg-red-500/15 text-red-300 border-red-500/30",
+  rejected: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+  cancelled: "bg-eos-surface-elevated text-eos-text-muted border-eos-border-subtle",
 }
 
 export function MissingEvidenceWorkflowCard() {
@@ -192,7 +192,7 @@ export function MissingEvidenceWorkflowCard() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-eos-text-tertiary">
-            FC-9 · Missing Evidence Workflow
+            Cereri documente lipsă
           </p>
           <h3
             data-display-text="true"
@@ -215,7 +215,7 @@ export function MissingEvidenceWorkflowCard() {
       </header>
 
       {error && (
-        <div className="rounded-md border border-red-300/50 bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+        <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12.5px] text-red-200">
           {error}
         </div>
       )}
@@ -285,11 +285,11 @@ function Tile({
 }) {
   const toneCls =
     tone === "danger"
-      ? "border-red-300/50 bg-red-50"
+      ? "border-red-500/30 bg-red-500/10"
       : tone === "warning"
-        ? "border-amber-300/50 bg-amber-50"
+        ? "border-amber-500/30 bg-amber-500/10"
         : tone === "ok"
-          ? "border-emerald-300/50 bg-emerald-50"
+          ? "border-emerald-500/30 bg-emerald-500/10"
           : "border-eos-border bg-eos-surface-subtle"
   return (
     <div className={`rounded-lg border ${toneCls} p-2`}>
@@ -327,9 +327,9 @@ function EvidenceRow({
 
   const dueCls =
     daysDiff < 0
-      ? "text-red-700"
+      ? "text-red-300"
       : daysDiff <= 3
-        ? "text-amber-700"
+        ? "text-amber-300"
         : "text-eos-text-muted"
 
   return (
@@ -343,7 +343,7 @@ function EvidenceRow({
               {STATUS_LABELS[req.status]}
             </span>
             {req.urgency === "critical" && (
-              <span className="inline-flex shrink-0 rounded border border-red-300/50 bg-red-100 px-1.5 py-px font-mono text-[9.5px] font-semibold uppercase text-red-700">
+              <span className="inline-flex shrink-0 rounded border border-red-500/40 bg-red-500/15 px-1.5 py-px font-mono text-[9.5px] font-semibold uppercase text-red-200">
                 URGENT
               </span>
             )}
@@ -380,7 +380,7 @@ function EvidenceRow({
               <button
                 type="button"
                 onClick={() => onPatch(req.id, "sent", "Email trimis")}
-                className="inline-flex items-center gap-1 rounded-md border border-blue-300/60 bg-blue-50 px-2 py-1 text-[10.5px] font-medium text-blue-700 hover:bg-blue-100"
+                className="inline-flex items-center gap-1 rounded-md border border-blue-500/40 bg-blue-500/15 px-2 py-1 text-[10.5px] font-medium text-blue-200 hover:bg-blue-500/25"
               >
                 <Send className="size-3" strokeWidth={2} /> Marchează trimis
               </button>
@@ -389,7 +389,7 @@ function EvidenceRow({
               <button
                 type="button"
                 onClick={() => onPatch(req.id, "received", "Document primit")}
-                className="inline-flex items-center gap-1 rounded-md border border-violet-300/60 bg-violet-50 px-2 py-1 text-[10.5px] font-medium text-violet-700 hover:bg-violet-100"
+                className="inline-flex items-center gap-1 rounded-md border border-violet-500/40 bg-violet-500/15 px-2 py-1 text-[10.5px] font-medium text-violet-200 hover:bg-violet-500/25"
               >
                 Primit
               </button>
@@ -398,7 +398,7 @@ function EvidenceRow({
               <button
                 type="button"
                 onClick={() => onPatch(req.id, "verified", "Verificat și aprobat")}
-                className="inline-flex items-center gap-1 rounded-md border border-emerald-300/60 bg-emerald-50 px-2 py-1 text-[10.5px] font-medium text-emerald-700 hover:bg-emerald-100"
+                className="inline-flex items-center gap-1 rounded-md border border-emerald-500/40 bg-emerald-500/15 px-2 py-1 text-[10.5px] font-medium text-emerald-200 hover:bg-emerald-500/25"
               >
                 <CheckCircle2 className="size-3" strokeWidth={2} /> Verifică
               </button>
@@ -598,7 +598,7 @@ function CreateRequestModal({
             </Field>
           </div>
 
-          {err && <p className="text-[11.5px] text-red-700">{err}</p>}
+          {err && <p className="text-[11.5px] text-red-300">{err}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <button

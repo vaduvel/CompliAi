@@ -90,6 +90,10 @@ export function dashboardFindingRoute(
 export const dashboardRouteGroups = {
   home: [dashboardRoutes.home],
   scan: [dashboardRoutes.scan, dashboardRoutes.documents],
+  // [FC-12 fix 2026-05-14] Removed dashboardRoutes.fiscal from resolve group.
+  // Fiscal is its own top-level nav item ("Cockpit fiscal") and including it
+  // here made the sidebar highlight TWO items simultaneously on /dashboard/fiscal:
+  // "De rezolvat" + "Cockpit fiscal" (multi-active bug flagged by Maria persona test).
   resolve: [
     dashboardRoutes.resolve,
     dashboardRoutes.approvals,
@@ -105,7 +109,6 @@ export const dashboardRouteGroups = {
     dashboardRoutes.training,
     dashboardRoutes.dpoMigration,
     dashboardRoutes.agents,
-    dashboardRoutes.fiscal,
     dashboardRoutes.vendorReview,
     dashboardRoutes.payTransparency,
     dashboardRoutes.whistleblowing,

@@ -205,52 +205,58 @@ export function DashboardShell({
             )}
 
             {/* Nav sections */}
-            {navSections.map((section, sectionIdx) => (
-              <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
-                {navSections.length > 1 || section.label !== "Flux principal" ? (
-                  <p className="mb-1.5 px-2.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-eos-text-tertiary">
-                    {section.label}
-                  </p>
-                ) : null}
-                <nav className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const active = isNavItemActive(pathname, item)
-                    const badge =
-                      item.id === "resolve" && resolveBadgeCount > 0 && !active ? (
-                        <span className="rounded-full bg-eos-error-soft px-1.5 py-0.5 text-[10px] font-bold text-eos-error">
-                          {resolveBadgeCount}
-                        </span>
-                      ) : null
+            {/* [FC-12 fix 2026-05-14] Flatten all items across sections so isNavItemActive
+                can do longest-match across the full sidebar (prevents multi-active highlight). */}
+            {(() => {
+              const allItemsFlat = navSections.flatMap((s) => s.items)
+              return navSections.map((section, sectionIdx) => (
+                <div key={section.id} className={sectionIdx > 0 ? "mt-6" : ""}>
+                  {navSections.length > 1 || section.label !== "Flux principal" ? (
+                    <p className="mb-1.5 px-2.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-eos-text-tertiary">
+                      {section.label}
+                    </p>
+                  ) : null}
+                  <nav className="space-y-0.5">
+                    {section.items.map((item) => {
+                      const active = isNavItemActive(pathname, item, allItemsFlat)
+                      const badge =
+                        item.id === "resolve" && resolveBadgeCount > 0 && !active ? (
+                          <span className="rounded-full bg-eos-error-soft px-1.5 py-0.5 text-[10px] font-bold text-eos-error">
+                            {resolveBadgeCount}
+                          </span>
+                        ) : null
 
-                    return (
-                      <Link
-                        key={`${section.id}-${item.id}`}
-                        href={item.href}
-                        onClick={(e) => {
-                          if (handleNavItemSelection(item)) e.preventDefault()
-                        }}
-                        className={[
-                          "group flex w-full items-center gap-2.5 rounded-eos-sm px-2.5 py-1.5 text-[12.5px] transition-all duration-100",
-                          active
-                            ? "bg-white/[0.035] font-semibold text-eos-text"
-                            : "font-medium text-eos-text-tertiary hover:bg-white/[0.025] hover:text-eos-text-muted",
-                        ].join(" ")}
-                      >
-                        <item.icon
+                      return (
+                        <Link
+                          key={`${section.id}-${item.id}`}
+                          href={item.href}
+                          aria-current={active ? "page" : undefined}
+                          onClick={(e) => {
+                            if (handleNavItemSelection(item)) e.preventDefault()
+                          }}
                           className={[
-                            "h-4 w-4 shrink-0 transition-colors duration-150",
-                            active ? "text-eos-primary" : "text-eos-text-tertiary group-hover:text-eos-text-muted",
+                            "group flex w-full items-center gap-2.5 rounded-eos-sm px-2.5 py-1.5 text-[12.5px] transition-all duration-100",
+                            active
+                              ? "bg-white/[0.035] font-semibold text-eos-text"
+                              : "font-medium text-eos-text-tertiary hover:bg-white/[0.025] hover:text-eos-text-muted",
                           ].join(" ")}
-                          strokeWidth={2}
-                        />
-                        <span className="flex-1 truncate">{item.label}</span>
-                        {badge}
-                      </Link>
-                    )
-                  })}
-                </nav>
-              </div>
-            ))}
+                        >
+                          <item.icon
+                            className={[
+                              "h-4 w-4 shrink-0 transition-colors duration-150",
+                              active ? "text-eos-primary" : "text-eos-text-tertiary group-hover:text-eos-text-muted",
+                            ].join(" ")}
+                            strokeWidth={2}
+                          />
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {badge}
+                        </Link>
+                      )
+                    })}
+                  </nav>
+                </div>
+              ))
+            })()}
           </div>
 
           {/* User card */}
