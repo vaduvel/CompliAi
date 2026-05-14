@@ -157,7 +157,14 @@ export function CompliScanLogoLockup({
       />
       <div className="min-w-0 leading-none">
         <div className={cn("break-words font-semibold tracking-tight", sizeClass.title, titleClassName)}>
-          CompliScan
+          {/* [FC-12 2026-05-14] Branding env-aware: CompliScan Fiscal pentru cabinet contabil deploy. */}
+          {process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal" ? (
+            <>
+              CompliScan <span className="text-eos-primary">Fiscal</span>
+            </>
+          ) : (
+            "CompliScan"
+          )}
         </div>
         {subtitle ? (
           <div

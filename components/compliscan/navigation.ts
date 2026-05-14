@@ -318,10 +318,46 @@ import {
 } from "@/lib/compliscan/icp-modules"
 import type { IcpSegment } from "@/lib/server/white-label"
 
+// [FC-12 2026-05-14] env-mode pentru deploy fiscal-only (cabinet contabil).
+// Când NEXT_PUBLIC_PRODUCT_MODE=fiscal, păstrăm doar items fiscal-relevante
+// din TOATE nav-urile (primary, secondary, portfolio, mobile).
+const FISCAL_ONLY_NAV_IDS = new Set<DashboardNavId>([
+  // Foundations always-on
+  "home",
+  "scan",
+  "scanare",
+  "scanari",
+  "resolve",
+  "settings",
+  "approvals",
+  "calendar",
+  "reports",
+  "trust",
+  "agenti",
+  // Fiscal core
+  "fiscal",
+  "fiscal-validation",
+  "fiscal-transmission",
+  "fiscal-tva",
+  "fiscal-integrations",
+  "fiscal-deadlines",
+  // Partner / portfolio (cabinet)
+  "partner",
+  "portfolio-overview",
+  // Cabinet templates (relevant pentru cabinet contabil)
+  "cabinet-templates",
+])
+
+function isFiscalProductMode(): boolean {
+  return process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal"
+}
+
 /**
  * Filtrează un array de DashboardNavItem după contextul user-ului.
  * Folosit pentru sidebars: dashboardPrimaryNavItems, soloNavItems,
  * portfolioNavItems, mobileNavItems.
+ *
+ * [FC-12] Aplică pre-filter pentru fiscal-only mode (intersecție cu ICP).
  */
 export function filterNavItemsByIcp(
   items: ReadonlyArray<DashboardNavItem>,
@@ -330,13 +366,20 @@ export function filterNavItemsByIcp(
   accessMode: AccessMode = "owner",
 ): DashboardNavItem[] {
   const allowed = resolveAllowedModules(icpSegment, subFlag, accessMode)
-  return items.filter((item) => allowed.has(item.id))
+  const fiscalGate = isFiscalProductMode()
+  return items.filter((item) => {
+    if (!allowed.has(item.id)) return false
+    if (fiscalGate && !FISCAL_ONLY_NAV_IDS.has(item.id)) return false
+    return true
+  })
 }
 
 /**
  * Filtrează un array de DashboardNavSection după contextul user-ului.
  * Folosit pentru: dashboardSecondaryNavSections.
  * Sections fără items după filter sunt eliminate (no empty groups).
+ *
+ * [FC-12] Aplică pre-filter pentru fiscal-only mode (intersecție cu ICP).
  */
 export function filterNavSectionsByIcp(
   sections: ReadonlyArray<DashboardNavSection>,
@@ -345,10 +388,15 @@ export function filterNavSectionsByIcp(
   accessMode: AccessMode = "owner",
 ): DashboardNavSection[] {
   const allowed = resolveAllowedModules(icpSegment, subFlag, accessMode)
+  const fiscalGate = isFiscalProductMode()
   return sections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => allowed.has(item.id)),
+      items: section.items.filter((item) => {
+        if (!allowed.has(item.id)) return false
+        if (fiscalGate && !FISCAL_ONLY_NAV_IDS.has(item.id)) return false
+        return true
+      }),
     }))
     .filter((section) => section.items.length > 0)
 }

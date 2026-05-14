@@ -27,37 +27,60 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.compliscan.ro";
+const isFiscalMode = process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(appUrl),
-  applicationName: "CompliScan",
-  title: {
-    default: "CompliScan – Tablou de bord",
-    template: "%s | CompliScan",
-  },
-  description:
-    "Asistent AI care îți scanează documentele și îți arată riscurile (EU AI Act + GDPR + e-Factura).",
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
-  openGraph: {
-    title: "CompliScan – Tablou de bord",
-    description:
-      "Asistent AI pentru conformitate GDPR, NIS2, EU AI Act și e-Factura, cu finding-uri, dovadă și dosar operațional.",
-    url: "/",
-    siteName: "CompliScan",
-    locale: "ro_RO",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "CompliScan – Tablou de bord",
-    description:
-      "Asistent AI pentru conformitate GDPR, NIS2, EU AI Act și e-Factura.",
-  },
-};
+// [FC-12 2026-05-14] Metadata env-aware pentru deploy fiscal-only cabinet contabil.
+export const metadata: Metadata = isFiscalMode
+  ? {
+      metadataBase: new URL(appUrl),
+      applicationName: "CompliScan Fiscal",
+      title: {
+        default: "CompliScan Fiscal — Cockpit cabinet contabil RO",
+        template: "%s | CompliScan Fiscal",
+      },
+      description:
+        "Cockpit pentru cabinet contabil RO. ANAF SPV + cross-client analytics + reconciliere ERP-SPV + Pre-ANAF Simulation + Economic Impact LEI. Vezi ce arde la toate firmele tale într-un singur ecran dimineața la 9.",
+      icons: { icon: "/favicon.ico", shortcut: "/favicon.ico", apple: "/favicon.ico" },
+      openGraph: {
+        title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
+        description:
+          "ANAF SPV + cross-client analytics. 38 capabilities funcționale. Pre-ANAF Simulation, Master Exception Queue, Client Burden Index, Authority Guardian, Bank ↔ SPV reconciliere.",
+        url: "/",
+        siteName: "CompliScan Fiscal",
+        locale: "ro_RO",
+        type: "website",
+      },
+      twitter: {
+        card: "summary",
+        title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
+        description: "ANAF SPV + cross-client. Reconciliere ERP. Pentru cabinetul tău.",
+      },
+    }
+  : {
+      metadataBase: new URL(appUrl),
+      applicationName: "CompliScan",
+      title: {
+        default: "CompliScan – Tablou de bord",
+        template: "%s | CompliScan",
+      },
+      description:
+        "Asistent AI care îți scanează documentele și îți arată riscurile (EU AI Act + GDPR + e-Factura).",
+      icons: { icon: "/favicon.ico", shortcut: "/favicon.ico", apple: "/favicon.ico" },
+      openGraph: {
+        title: "CompliScan – Tablou de bord",
+        description:
+          "Asistent AI pentru conformitate GDPR, NIS2, EU AI Act și e-Factura, cu finding-uri, dovadă și dosar operațional.",
+        url: "/",
+        siteName: "CompliScan",
+        locale: "ro_RO",
+        type: "website",
+      },
+      twitter: {
+        card: "summary",
+        title: "CompliScan – Tablou de bord",
+        description: "Asistent AI pentru conformitate GDPR, NIS2, EU AI Act și e-Factura.",
+      },
+    };
 
 export const viewport: Viewport = {
   themeColor: "#090b10",

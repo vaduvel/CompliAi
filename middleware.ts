@@ -204,6 +204,73 @@ function buildLoginRedirectUrl(request: NextRequest) {
   return loginUrl
 }
 
+// [FC-12 2026-05-14] env-mode pentru deploy fiscal-only (cabinet contabil).
+// Când NEXT_PUBLIC_PRODUCT_MODE=fiscal, redirectăm toate route-urile non-fiscal
+// (DPO/GDPR/NIS2/AI-Act etc.) la /dashboard/fiscal pentru a simplifica UX-ul.
+// Lista cu prefixe non-fiscale care sunt blocate.
+const PRODUCT_MODE = process.env.NEXT_PUBLIC_PRODUCT_MODE
+const FISCAL_ONLY_BLOCKED_PREFIXES = [
+  "/dpo",
+  "/nis2",
+  "/imm",
+  "/dpa",
+  "/cabinet",
+  "/genereaza-dpa",
+  "/genereaza-politica-gdpr",
+  "/dashboard/dpia",
+  "/dashboard/dsar",
+  "/dashboard/ropa",
+  "/dashboard/breach",
+  "/dashboard/incidente",
+  "/dashboard/sisteme",
+  "/dashboard/vendor-review",
+  "/dashboard/whistleblowing",
+  "/dashboard/nis2",
+  "/dashboard/dora",
+  "/dashboard/training",
+  "/dashboard/pay-transparency",
+  "/dashboard/conformitate",
+  "/dashboard/politici",
+  "/dashboard/documente",
+  "/dashboard/notificari",
+  "/dashboard/checklists",
+  "/dashboard/cabinet",
+  "/dashboard/agents",
+  "/dashboard/audit-log",
+  "/dashboard/dosar",
+  "/dashboard/magic-links",
+  "/dashboard/migration",
+  "/dashboard/review",
+  "/dashboard/generator",
+  "/portfolio/vendors",
+  "/portfolio/alerts",
+  "/portfolio/tasks",
+  "/portfolio/reports",
+  "/portfolio/trust-pack",
+  "/api/dpo",
+  "/api/gdpr",
+  "/api/nis2",
+  "/api/ai-systems",
+  "/api/ai-act",
+  "/api/ai-conformity",
+  "/api/dsar",
+  "/api/vendor-review",
+  "/api/breach-notification",
+  "/api/cookie-banner",
+  "/api/whistleblowing",
+  "/api/pay-transparency",
+  "/api/dora",
+  "/api/hr",
+  "/api/contracts",
+  "/api/shadow-ai",
+  "/api/policies",
+]
+
+function isFiscalOnlyBlocked(pathname: string): boolean {
+  if (PRODUCT_MODE !== "fiscal") return false
+  return FISCAL_ONLY_BLOCKED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isApiRoute = pathname.startsWith("/api/")
@@ -213,6 +280,23 @@ export async function middleware(request: NextRequest) {
   const isPublicSharedApprovalRoute = /^\/api\/shared\/[^/]+\/(?:approve|reject|comment)$/.test(
     pathname
   )
+
+  // [FC-12] Fiscal-only mode: block non-fiscal routes
+  if (isFiscalOnlyBlocked(pathname)) {
+    if (isApiRoute) {
+      return NextResponse.json(
+        {
+          error: "Acest endpoint nu este disponibil în CompliScan Fiscal (modul cabinet contabil).",
+          code: "FISCAL_MODE_ROUTE_BLOCKED",
+          fiscalMode: true,
+        },
+        { status: 404 },
+      )
+    }
+    // Redirect non-fiscal pages la landing fiscal (/) — de acolo user navighează.
+    // Nu trimitem direct la /portfolio/fiscal pentru că poate fi nelogat.
+    return NextResponse.redirect(new URL("/", request.url))
+  }
 
   if (
     isDemoBootRoute ||
@@ -336,6 +420,14 @@ export const config = {
     "/dashboard/:path*",
     "/portfolio/:path*",
     "/onboarding",
+    // [FC-12] Adăugat route-uri non-fiscal pentru a permite fiscal-mode redirect:
+    "/dpo/:path*",
+    "/nis2/:path*",
+    "/imm/:path*",
+    "/dpa/:path*",
+    "/cabinet/:path*",
+    "/genereaza-dpa/:path*",
+    "/genereaza-politica-gdpr/:path*",
     "/api/((?!auth|demo|stripe/webhook|whistleblowing/submit|free-tools/|client-portal/).*)",
   ],
 }

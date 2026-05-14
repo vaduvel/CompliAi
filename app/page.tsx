@@ -11,28 +11,49 @@ import {
 
 import { CompliScanLogoLockup } from "@/components/compliscan/logo"
 import { LegalDisclaimer } from "@/components/compliscan/legal-disclaimer"
+import { FiscalLanding } from "@/components/compliscan/marketing/FiscalLanding"
 
-export const metadata: Metadata = {
-  title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
-  description:
-    "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada într-un dosar operațional pentru GDPR, NIS2, EU AI Act și e-Factura.",
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
-    description:
-      "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada într-un dosar operațional.",
-    url: "/",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
-    description:
-      "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada.",
-  },
-}
+const isFiscalMode = process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal"
+
+// [FC-12 2026-05-14] Metadata env-aware: fiscal-only branding pentru cabinet contabil deploy.
+export const metadata: Metadata = isFiscalMode
+  ? {
+      title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
+      description:
+        "ANAF SPV + cross-client analytics + reconciliere ERP-SPV. Pre-ANAF Simulation, Master Exception Queue, Client Burden Index, Bank ↔ SPV reconciliere. Vezi ce arde la TOATE firmele tale într-un singur ecran.",
+      alternates: { canonical: "/" },
+      openGraph: {
+        title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
+        description:
+          "ANAF SPV + cross-client analytics. 38 capabilities funcționale. Pentru cabinetul tău contabil.",
+        url: "/",
+        type: "website",
+      },
+      twitter: {
+        card: "summary",
+        title: "CompliScan Fiscal — Cockpit cabinet contabil RO",
+        description: "ANAF SPV + cross-client. Reconciliere ERP. Pentru cabinetul tău.",
+      },
+    }
+  : {
+      title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
+      description:
+        "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada într-un dosar operațional pentru GDPR, NIS2, EU AI Act și e-Factura.",
+      alternates: { canonical: "/" },
+      openGraph: {
+        title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
+        description:
+          "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada într-un dosar operațional.",
+        url: "/",
+        type: "website",
+      },
+      twitter: {
+        card: "summary",
+        title: "CompliScan — conformitate GDPR, NIS2 și EU AI Act pentru IMM",
+        description:
+          "Vezi ce se aplică firmei tale, rezolvi finding-urile clare și păstrezi dovada.",
+      },
+    }
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -365,6 +386,11 @@ function ProductMock() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  // [FC-12 2026-05-14] Fiscal-only landing pentru deploy cabinet contabil.
+  if (isFiscalMode) {
+    return <FiscalLanding />
+  }
+
   return (
     <div className="min-h-screen bg-eos-bg text-eos-text">
       {/* ── Top nav ── */}
