@@ -164,8 +164,9 @@ function LoginContent() {
               <CompliScanLogoLockup variant="flat" size="sm" />
             </Link>
             <span className="ml-auto font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-eos-text-tertiary">
-              {icpSegment === "cabinet-fiscal"
-                ? "e-Factura · SAF-T · RO e-TVA · CECCAR"
+              {/* [FC-12 2026-05-14] Pentru deploy fiscal-only forțăm tagchain fiscal. */}
+              {process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal" || icpSegment === "cabinet-fiscal"
+                ? "ANAF SPV · e-Factura · SAF-T · CECCAR"
                 : icpSegment === "cabinet-dpo"
                   ? "GDPR · DPO · DSAR · Audit"
                   : "Conformitate · GDPR · NIS2 · AI Act"}

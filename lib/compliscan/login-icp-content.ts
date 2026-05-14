@@ -81,16 +81,16 @@ const ICP_CONTENT_MAP: Record<IcpSegment, LoginPaneContent> = {
     accent: "violet",
   },
   "cabinet-fiscal": {
-    eyebrow: "— Cabinete contabile CECCAR",
-    title: "Layer compliance peste SmartBill / Saga / Oblio. NU-ți schimbă stack-ul.",
+    eyebrow: "— Sincronizare ANAF SPV live",
+    title: "Cockpit cross-client. Vezi ce arde la TOATE firmele tale într-un singur ecran.",
     kpis: [
-      { framework: "e-Factura", value: "47/47", tone: "ok", label: "validate UBL CIUS-RO" },
-      { framework: "e-TVA", value: "3", tone: "warning", label: "discrepanțe detectate" },
-      { framework: "GDPR lite", value: "22/22", tone: "ok", label: "clienți acoperiți" },
-      { framework: "ANAF SPV", value: "live", tone: "ok", label: "sincronizat" },
+      { framework: "ANAF SPV", value: "47/47", tone: "ok", label: "clienți sincronizați" },
+      { framework: "Cross-corr", value: "12", tone: "warning", label: "discrepanțe R1-R7" },
+      { framework: "Pre-ANAF", value: "3", tone: "warning", label: "risc iminent detectat" },
+      { framework: "Bank ↔ SPV", value: "2", tone: "warning", label: "plăți fără factură" },
     ],
     testimonial: {
-      quote: "Îmi recuperez o zi pe săptămână. CompliScan face scanarea, eu fac deciziile.",
+      quote: "Îmi recuperez o zi pe săptămână. CompliScan face triage-ul, eu fac deciziile.",
       author: "Ramona Ilie",
       role: "expert contabil · 22 clienți",
     },
@@ -178,6 +178,12 @@ export function parseLoginIcp(value: string | null | undefined): IcpSegment | nu
 }
 
 export function getLoginPaneContent(icp: IcpSegment | null): LoginPaneContent {
+  // [FC-12 2026-05-14] Pentru deploy fiscal-only forțăm pane cabinet-fiscal
+  // chiar dacă URL-ul nu are ?icp=cabinet-fiscal. Default DEFAULT_CONTENT
+  // are referințe GDPR/NIS2/AI Act nepotrivite pentru CompliScan Fiscal.
+  if (process.env.NEXT_PUBLIC_PRODUCT_MODE === "fiscal") {
+    return ICP_CONTENT_MAP["cabinet-fiscal"]
+  }
   if (!icp) return DEFAULT_CONTENT
   return ICP_CONTENT_MAP[icp]
 }
