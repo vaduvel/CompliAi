@@ -86,20 +86,45 @@ export function effectiveConfidence(fact: FactRecord, now: number = Date.now() /
 // PROCEDURAL — action sequences with success stats
 // ============================================================================
 
+export interface ProcedureStep {
+  action: string;
+  description?: string;
+  /** Ce input cere pasul (e.g., "aga_aprobată", "stat_dividende_completat") */
+  requires?: string[];
+  /** Ce produce pasul (e.g., "OP_virat", "recipisă_D205") */
+  produces?: string[];
+  /** Validare preventivă: dacă această condiție e adevărată, STOP înainte de pas */
+  blocker?: { check: string; reason: string };
+  /** Estimare timp în minute pentru execuție manuală */
+  estimatedMinutes?: number;
+}
+
 export interface ProcedureRecord {
   id: string;
   orgId: string;
   /** Numele procedurii (e.g., "distribuire_dividende", "depunere_D205") */
   name: string;
-  /** Lista de pași (acțiuni) */
-  steps: Array<{
-    action: string;
-    description?: string;
-    /** Ce input cere pasul (e.g., "aga_aprobată", "stat_dividende_completat") */
-    requires?: string[];
-    /** Ce produce pasul (e.g., "OP_virat", "recipisă_D205") */
-    produces?: string[];
-  }>;
+  /** Titlu prietenos pentru UI (e.g., "Distribuie dividende către asociați") */
+  title?: string;
+  /** Descriere scurtă a intenției (ce vrea utilizatorul) */
+  intent?: string;
+  /** Documente necesare ÎNAINTE de start (preconditions) */
+  documentsRequired?: string[];
+  /** Întrebări de adresat clientului ca să obții datele */
+  questionsToAskClient?: string[];
+  /** Lista de pași în ordine */
+  steps: ProcedureStep[];
+  /** Validări preventive care se rulează ÎNAINTE de orice pas (smart guards) */
+  preventiveChecks?: Array<{ check: string; ifTrueAdvise: string }>;
+  /** Ce produce procedura la final (output-uri concrete) */
+  outputs?: string[];
+  /** Referințe legale pentru curiozi (citate pe care AI le folosește dacă întreabă "de ce?") */
+  legalReferences?: Array<{ article: string; law: string; url?: string }>;
+  /** Estimare timp manual vs cu copilot */
+  estimatedTimeManualMin?: number;
+  estimatedTimeWithCopilotMin?: number;
+  /** Match Path-ul care declanșează automat această procedură */
+  triggeredByPathId?: string;
   /** Cât de des s-a executat această procedură */
   invocations: number;
   /** Câte au fost cu succes (s-a depus, fără erori) */

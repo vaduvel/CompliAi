@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { MatchPathAlert } from "@/lib/fiscal-copilot/match-paths/types";
+import { ProcedureModal } from "./procedure-modal";
 
 const SEV_ORDER = ["urgent", "high", "medium", "low", "info"] as const;
 const SEV_COLORS: Record<string, string> = {
@@ -32,7 +33,6 @@ export function AlertsList({ alerts }: { alerts: MatchPathAlert[] }) {
     );
   }
 
-  // Group by severity
   const grouped = SEV_ORDER.map((sev) => ({
     sev,
     items: alerts.filter((a) => a.severity === sev),
@@ -59,6 +59,7 @@ export function AlertsList({ alerts }: { alerts: MatchPathAlert[] }) {
 
 function AlertItem({ alert }: { alert: MatchPathAlert }) {
   const [expanded, setExpanded] = useState(false);
+  const [procOpen, setProcOpen] = useState(false);
   return (
     <li className={`rounded-lg border-2 p-4 ${SEV_COLORS[alert.severity]}`}>
       <div className="flex items-start justify-between gap-3">
@@ -84,7 +85,7 @@ function AlertItem({ alert }: { alert: MatchPathAlert }) {
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -92,13 +93,21 @@ function AlertItem({ alert }: { alert: MatchPathAlert }) {
         >
           {expanded ? "Ascunde pașii" : `Vezi ${alert.actionSteps.length} pași`}
         </Button>
+        <Button
+          size="sm"
+          variant="default"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+          onClick={() => setProcOpen(true)}
+        >
+          Procedura completă
+        </Button>
       </div>
 
       {expanded && (
         <div className="mt-3 space-y-2 border-t border-current/10 pt-3">
           <div>
             <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide opacity-80">
-              Pași de urmat
+              Pași de urmat (sumar)
             </h4>
             <ol className="list-decimal space-y-1 pl-5 text-sm">
               {alert.actionSteps.map((s, i) => (
@@ -121,6 +130,12 @@ function AlertItem({ alert }: { alert: MatchPathAlert }) {
           </div>
         </div>
       )}
+
+      <ProcedureModal
+        pathId={alert.pathId}
+        open={procOpen}
+        onClose={() => setProcOpen(false)}
+      />
     </li>
   );
 }
