@@ -31262,5 +31262,931 @@
       "caen": "8623"
     },
     "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221650",
+    "url": "https://www.portalcontabilitate.ro/venituri-din-chirii-221650.htm",
+    "title": "Venituri din chirii - Chirii",
+    "question": "Va rugam sa ne comunicati un punct de vedere cu privire la tratamentul fiscal aplicabil in cazul unei persoane fizice care a incheiat un contract de inchiriere pentru un imobil cu o persoana juridica, in conditiile in care chiriasul persoana juridica ar fi avut obligatia retinerii si platii impozitului aferent veniturilor din chirii, insa, din informatiile disponibile, acest impozit nu a fost achitat. Mentionam ca persoana fizica a incasat efectiv suma prevazuta in contractul de inchiriere, fara diferente fata de valoarea contractuala. In acest context, va rugam sa ne precizati care este conduita fiscala corecta pentru persoana fizica: daca aceasta are obligatia de a declara si achita impozitul pe venit prin Declaratia unica, in situatia in care persoana juridica nu si-a indeplinit obligatia de retinere/plata, sau daca venitul din chirii trebuie avut in vedere doar la determinarea plafonului pentru contributia de asigurari sociale de sanatate, cu indicarea articolelor relevante din Codul fiscal si/sau din normele metodologice aplicabile, pentru analiza individuala.",
+    "tags": [
+      "venituri din chirii",
+      "impozit pe venit",
+      "declaratia unica"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "4673"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221397",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221397.htm",
+    "title": "DU 2025 - Declaratia unica",
+    "question": "In anul 2024, o PFA a avut pierdere. In Declaratia unica 20242025, pentru anul 2025 s-a bifat la CASS categoria persoanelor care au realizat pierdere, dar doresc sa plateasca CASS. S-a achitat suma aferenta la nivelul a 6 salarii minime, respectiv 2.430 ron. In anul 2025 are tot pierdere. La completarea Declaratiei unice pe 2025 nu imi calculeaza CASS. Daca se bifeaza la fel, la categoria persoanelor care au realizat pierdere, imi calculeaza tot suma de 2.430 ron. Nu vreau sa dublez suma si sa platesc de doua ori. Cum se completeaza Declaratia unica pentru 2025 in ceea ce priveste CASS? In acelasi timp doresc ca persoana sa fie asigurata la sanatate in continuare.",
+    "tags": [
+      "declaratia unica",
+      "pfa",
+      "cass"
+    ],
+    "date_validity": "11 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221638",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221638.htm",
+    "title": "DU 2025 - Salarii",
+    "question": "Sunt pensionara la limita de varsta tot anul 2025. Am o PFA pe care am un venit in 2025 de 10.000 lei si cheltuieli deductibile de 2.000 lei. In acest caz: platesc impozit pe venit: in cazul meu (10.000 2.000) 10% = 800 lei CASS: nu datorez din cauza faptului ca sunt pensionara si venitul este sub plafonul de 6 salarii minime (6 4.050 = 24.300 lei) CAS: nu datorez, fiind pensionara La Declaratia unica: aleg statutul de pensionar completez datele referitoare la venituri si cheltuieli din start imi calculeaza CASS de 2.430 lei nu stiu unde si ce ar trebui sa bifez ca sa imi calculeze 0 lei Este adevarat ca, in cazul prezentat, nu platesc CASS? Daca da, cum ar trebui sa o declar? Daca bifez ca ma incadrez in exceptii, imi calculeaza CASS de 800 lei, iar impozitul devine 720 lei ((10.000 2.000 800) 10% = 720).",
+    "tags": [
+      "cass",
+      "declaratia unica",
+      "cheltuieli deductibile",
+      "pfa"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "3213"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221630",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221630.htm",
+    "title": "DU 2025 - Declaratia unica",
+    "question": "Daca obtin venituri nete in anul 2025 in suma de 21.000 lei din activitati independente si nu am o alta calitate si nici alte venituri platesc sanatate in anul 2025?",
+    "tags": [
+      "activitati independente",
+      "venituri",
+      "cass"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "8621"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221628",
+    "url": "https://www.portalcontabilitate.ro/deductibilitate-penalitati-contractuale-221628.htm",
+    "title": "Deductibilitate penalitati contractuale - Impozit pe profit",
+    "question": "Daca o societate care efectueaza servicii de curierat in parteneriat cu Fan Courier nu ii ramburseaza banii catre Fan Courier, iar acesta emite facturi cu penalitati pentru aceste sume nerambursate, aceste penalitati sunt deductibile fiscal?",
+    "tags": [
+      "penalitati contractuale",
+      "servicii de curierat",
+      "deductibilitate"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221617",
+    "url": "https://www.portalcontabilitate.ro/majorare-capital-social-din-imprumuturi-legea-2392025-221617.htm",
+    "title": "Majorare capital social din imprumuturi. Legea 239/2025 - Datorii",
+    "question": "O societate are activ net negativ de circa 300.000 lei si, bineinteles, sub jumatate din capitalul social. Societatea inregistreaza o datorie fata de fostul asociat unic al societatii, care a cesionat toate partile sociale catre actualul asociat. Acest fost asociat este de acord sa faca orice demers in sprijinul societatii pentru renuntarea la aceasta creanta si pentru a ajuta societatea, neavand nicio pretentie financiara. Care este modalitatea cea mai avantajoasa pentru societate pentru reintregirea activului net cu aceasta suma? Nu intra in discutie transformarea in venit impozabil a acestei sume. Societatea este platitoare de impozit pe profit. Suma este in prezent in contul 462, fiind vorba de 300.000 lei (proveniti din creditari ale societatii din anii in care acesta era asociat unic). Vechiul asociat unic a cesionat integral partile sociale catre actualul asociat unic pana in anul 2016.",
+    "tags": [
+      "majorare capital social",
+      "imprumut",
+      "asociat unic",
+      "monografie contabila"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221614",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221614.htm",
+    "title": "DU 2025 - Declaratia unica",
+    "question": "Jurist, asigurat in sistem propriu, isi suspenda activitatea pe cabinet incepand cu data de 01.05.2025, iar situatia finala se prezinta astfel: venituri = 150.000 lei, taxe barou = 6.580 lei, pierdere din anii trecuti = 16.603 lei, mai obtine venituri din dividende de la o persoana juridica din Romania in suma de 838.507 lei. Care sunt contributiile datorate dupa completarea Declaratiei unice pentru anul 2025?",
+    "tags": [
+      "declaratia unica",
+      "contributii",
+      "venituri din activitate independenta"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6910"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221608",
+    "url": "https://www.portalcontabilitate.ro/du-221608.htm",
+    "title": "DU - Declaratia unica",
+    "question": "In cazul in care un pensionar incaseaza din strainatate venituri din drepturi de autor are dreptul sa deduca cota forfetara de 40%, datoreaza in Romania CAS si CASS?",
+    "tags": [
+      "venituri din drepturi de autor",
+      "cota forfetara",
+      "cas",
+      "cass"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2042"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221607",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221607.htm",
+    "title": "DU 2025 - Declaratia unica",
+    "question": "Am o PFA care obtine venituri din SUA, Canada, Cipru, Olanda si Romania, din servicii online. PFA este in sistem real, iar serviciile se presteaza din Romania. Va rog sa ma ajutati cu modul de completare a Declaratiei unice. Aceste venituri trebuie trecute la venituri obtinute din strainatate? Daca da, in cazul acestor venituri din strainatate, CASS si CAS nu se mai scad din venit atunci cand se calculeaza impozitul pe venit de 10%? Exemplu: venit din Canada 5.000 lei, Olanda 57.000 lei, SUA 1.000 lei, Romania 500 lei. Daca pana acum PFA le-a declarat ca venituri din Romania, ce se poate intampla?",
+    "tags": [
+      "pfa",
+      "cas",
+      "cass",
+      "venituri obtinute din strainatate"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6311"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221606",
+    "url": "https://www.portalcontabilitate.ro/d060-221606.htm",
+    "title": "D060 - Salarii",
+    "question": "Societatea are sediul social declarat la domiciliul asociatilor si mai are un sediu secundar deschis de peste zece ani, fara CIF, in acelasi municipiu, care a fost declarat la administratia financiara a orasului la momentul respectiv. Are un singur salariat cu timp partial, director economic, iar in contractul individual de munca locul muncii este la sediul firmei. Trebuie sa depuna declaratia privind sediile secundare pana la 30 iunie 2026? Adica sa declare inca o data acest sediu secundar fara CIF?",
+    "tags": [
+      "declaratia 060",
+      "cif",
+      "sediu secundar",
+      "sediu social"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221602",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221602.htm",
+    "title": "DU 2025 - Drepturi de proprietate intelectuala",
+    "question": "Care sunt obligatiile de plata (impozit, CAS, CASS) pentru drepturile de autor la o persoana care este salariata cu contract de munca?",
+    "tags": [
+      "cas",
+      "cass",
+      "declaratia unica"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "O.N.G.",
+      "employees": "11-50 angajati",
+      "vat_payer": false,
+      "caen": "8799"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221600",
+    "url": "https://www.portalcontabilitate.ro/venituri-din-activitati-agricole-si-al-sumelor-apia-tratament-fiscal-221600.htm",
+    "title": "Venituri din activitati agricole si al sumelor APIA. Tratament fiscal - Activitati agricole",
+    "question": "Cum trebuie completata Declaratia unica pentru o persoana fizica ce detine un PFA cu obiect de activitate 0113 cultivarea legumelor si a pepenilor, a radacinoaselor si tuberculiferelor si care a obtinut venituri pe acesta in anul 2025, dar are si o decizie, pe CNP, de la APIA, cu suprafetele cultivate in 2025?",
+    "tags": [
+      "venituri din activitati agricole",
+      "declaratia unica",
+      "apia"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "P.F.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "0113"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221596",
+    "url": "https://www.portalcontabilitate.ro/completare-d060-pentru-sedii-secundare-cu-cif-atribuit-sedii-secundare-aflate-in-aceeasi-localitate-sau-in-localitati-diferite-fata-de-sediul-social-221596.htm",
+    "title": "Completare D060 pentru sedii secundare cu CIF atribuit. Sedii secundare aflate in aceeasi localitate sau in localitati diferite fata de sediul social - Salarii",
+    "question": "Societate cu sediul social in sector 2 are deschise urmatoarele sedii secundare pentru care a obtinut deja CIF pentru fiecare in parte: * sediu secundar 1 declarat in Sector 2 * sediu secundar 2 declarat in Comuna Stefanesti * sediu secundar 3 declarat in Sector 1 In contextul formularului 060, va rugam sa ne ajutati cu urmatoarele clarificari: * pentru sediul secundar 1 se completeaza la A? * pentru sediile secundare 2 si 3 mai este necesar sa completam la B I, avand in vedere ca sunt unicele sedii secundare in acele localitati?",
+    "tags": [
+      "sediu secundar",
+      "formularul 060",
+      "cif"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4711"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221586",
+    "url": "https://www.portalcontabilitate.ro/tratament-contabil-venituri-realizate-in-avans-si-provizioane-pentru-cheltuieli-estimate-221586.htm",
+    "title": "Tratament contabil venituri realizate in avans si provizioane pentru cheltuieli estimate - Facturare",
+    "question": "O firma X incheie un contract cu o alta firma Z pentru furnizarea unui program informatic pentru evidenta stocurilor, plus aparatura necesara, respectiv server si alte componente. Valoarea contractului este de 900.000 lei, fara TVA. Prin contract, firma X se obliga sa asigure suport tehnic, respectiv mentenanta produselor pentru o perioada de 3 ani. Costul pentru mentenanta este de 125.000 lei, fara TVA, inclus in valoarea totala a contractului de 900.000 lei. In luna noiembrie 2025, X emite factura catre Z cu valoarea totala de 900.000 lei, fara TVA, pe care o incaseaza in februarie 2026. Cum vom trata suma de 125.000 lei, care reprezinta mentenanta pentru urmatorii 3 ani si al carei cost a fost incasat deja? La emiterea facturii in noiembrie, firma a inregistrat valoarea acestei mentenante pe venit (contul 704), insa, avand in vedere ca este pentru urmatorii 3 ani, este corect sa fie tratata ca venit in perioada curenta? Ar fi trebuit inregistrata in contul 472 sau ar fi trebuit constituit un provizion pentru cheltuieli legate de service in perioada de garantie?",
+    "tags": [
+      "provizioane",
+      "factura",
+      "program informatic"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4941"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221574",
+    "url": "https://www.portalcontabilitate.ro/eroare-tehnica-la-validarea-s1002-221574.htm",
+    "title": "Eroare tehnica la validarea S1002 - Bilant",
+    "question": "Pentru societatea X din categoria entitati mijlocii si mari, s-a intocmit bilantul pentru anul 2025, fara erori la validare. Bilantul poate fi semnat cu semnatura electronica in interiorul declaratiei (PDF inteligent) propriu-zise. La validarea prin DUK Integrator, insa, apare eroarea si nu se poate genera PDF-ul semnat S1002 care ar trebui transmis ulterior prin link-ul e-guvernare. In cazul in care bifam optiunea pentru entitati mici, PDF-ul semnat poate fi generat. Mentionez ca versiunea DUK Integrator este ultima disponibila pe site-ul ANAF (1.4.18.3.3). De asemenea, toate campurile obligatorii sunt completate. Va rugam sa ne furnizati o solutie pentru remedierea acestei erori.",
+    "tags": [
+      "eroare tehnica validare S1002",
+      "bilant",
+      "semnatura electronica"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "6210"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221546",
+    "url": "https://www.portalcontabilitate.ro/achizitii-intracomunitare-221546.htm",
+    "title": "Achizitii intracomunitare - Intracomunitare",
+    "question": "Intreprindere individuala detine cod special de TVA pentru achizitii intracomunitare din luna noiembrie 2025. In 2026 a efectuat achizitii intracomunitare din Polonia de la mici fermieri care nu au cod valid TVA in sistemul VIES. In 30.04.2026 s-a depasit plafonul de 10.000 Euro (34.000 lei). Cum se procedeaza cu aceste achizitii de la persoane neplatitoare de TVA? Ce declaratii trebuie sa depuna I.I.?",
+    "tags": [
+      "achizitii intracomunitare",
+      "tva",
+      "cod special de TVA",
+      "declaratia 390"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Gabi Popescu",
+    "expert_role": "Auditor financiar",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "4781"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221494",
+    "url": "https://www.portalcontabilitate.ro/accize-tratament-fiscal-in-productia-de-biogaz-221494.htm",
+    "title": "Accize. Tratament fiscal in productia de biogaz - Accize",
+    "question": "O societate producatoare de bere care, in urma procesului tehnologic, obtine o cantitate de biogaz pe care o amesteca cu gazul achizitionat de la terti si o utilizeaza pentru producerea aburului. Se datoreaza acciza pentru biogazul produs si utilizat intern? In caz afirmativ, va rugam sa ne precizati in ce categorie ar trebui incadrat si accizat, precum si care sunt obligatiile declarative si de raportare din perspectiva accizelor.",
+    "tags": [
+      "accize",
+      "productie de biogaz",
+      "cod nc"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Munteanu Corneliu Stefan",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "1105"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221493",
+    "url": "https://www.portalcontabilitate.ro/imprumut-asociat-221493.htm",
+    "title": "Imprumut asociat - Contabilitate si monografii",
+    "question": "Va rugam sa ne transmiteti un punct de vedere contabil si fiscal cu privire la imprumuturile acordate unei societati cu raspundere limitata de catre asociatul persoana fizica, evidentiate in contabilitate in contul 4551. Dorim sa clarificam urmatoarele aspecte: * Este obligatorie incheierea unui contract de imprumut in forma scrisa pentru sumele creditate de asociat catre societate? * Este obligatoriu ca acest contract sa prevada dobanda sau imprumutul poate fi acordat si fara dobanda? * In cazul in care se stabileste dobanda, care este baza legala pentru stabilirea acesteia si ce nivel al dobanzii se poate aplica in mod legal: * se poate aplica dobanda legala? * daca da, care este procentul aplicabil in prezent pentru lei si/sau valuta? * partile pot conveni si o alta dobanda decat dobanda legala? Daca exista contract de imprumut cu dobanda, iar dobanda aferenta anului nu a fost platita efectiv pana la 31.12, cum se calculeaza si cum se inregistreaza corect in contabilitate: * se evidentiaza pe cheltuieli financiare si datorii fata de asociat? * care sunt monografiile contabile corecte pentru inregistrarea dobanzii calculate, dar neplatite? * se utilizeaza contul 4558 pentru dobanzile aferente conturilor curente ale asociatilor? In situatia in care dobanda nu este platita efectiv pana la sfarsitul exercitiului, exista obligatia retinerii la sursa a impozitului in momentul inregistrarii acesteia sau numai la momentul platii efective? La data platii dobanzii catre asociatul persoana fizica rezidenta: * ce impozit se retine la sursa? * care este baza de calcul? * impozitul este final? * exista obligatia privind contributia de asigurari sociale de sanatate, dupa caz? Care sunt obligatiile declarative ale societatii la plata dobanzii catre asociatul persoana fizica: * in ce declaratii se raporteaza impozitul retinut? * exista obligatia depunerii Declaratiei 100? * exista obligatia depunerii Declaratiei 205? * care sunt termenele de declarare si plata? Din punct de vedere al deductibilitatii la calculul impozitului pe profit, cheltuiala cu dobanda aferenta imprumutului primit de la asociat este deductibila integral sau exista limitari speciale? Exista diferente de tratament daca imprumutul este in lei fata de situatia in care este in valuta? Va rugam, daca este posibil, sa indicati si monografia contabila completa pentru urmatoarele doua situatii: * dobanda calculata la 31.12, dar neplatita; * dobanda platita ulterior, cu retinerea impozitului aferent. In contextul de mai sus, va rugam sa ne indicati punctual baza legala aplicabila din Codul fiscal, Codul civil si reglementarile contabile, precum si tratamentul contabil si fiscal corect.",
+    "tags": [
+      "imprumut",
+      "contract de imprumut",
+      "dobanda",
+      "declaratia 100"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Gabi Popescu",
+    "expert_role": "Auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4683"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221487",
+    "url": "https://www.portalcontabilitate.ro/deductibilitate-ajutor-social-221487.htm",
+    "title": "Deductibilitate ajutor social - Impozit pe profit",
+    "question": "Societatea doreste sa acorde unui angajat un ajutor pentru boala incurabila in luna mai 2026. Valoarea ajutorului este de 18.000 lei. Sa presupunem ca la 30.06.2026 fondul de salarii total ianuarieiunie (total rulaje cont 641) este de 86.000 lei. Suma considerata deductibila, respectiv 5% din fond, este de 4.300 lei. Restul de 18.000 4.300 = 13.700 lei il vom considera nedeductibil la calculul impozitului pe profit. Vom reface acest calcul la finele trimestrului 3 si 4, fiind posibil ca la sfarsitul anului suma de 18.000 lei sa fie integral deductibila. Este corect astfel? In toate articolele se vorbeste de fondul de salarii. Este vorba de fondul de salarii al personalului cumulat de la inceputul anului pana la perioada de calcul si nu de cel lunar. Este corect?",
+    "tags": [
+      "ajutor social",
+      "deductibilitate",
+      "fondul de salarii",
+      "calcul impozit pe profit"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Mihaela Corneanu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "7022"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221445",
+    "url": "https://www.portalcontabilitate.ro/corectarea-situatiilor-financiare-anuale-221445.htm",
+    "title": "Corectarea situatiilor financiare anuale - Bilant",
+    "question": "O firma si-a actualizat codul CAEN si a primit un nou certificat de inmatriculare, cu noua forma de J: din J../.../.... s-a transformat in J................... Daca s-a depus bilantul cu forma veche a numarului de inregistrare J, este nevoie sa il redepunem?",
+    "tags": [
+      "situatii financiare anuale",
+      "bilant",
+      "certificat de inmatriculare"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Mihaela Corneanu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "0"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221275",
+    "url": "https://www.portalcontabilitate.ro/cheltuieli-de-cazare-deductibilitate-fiscala-221275.htm",
+    "title": "Cheltuieli de cazare. Deductibilitate fiscala - Alte obligatii",
+    "question": "Daca de pe Booking.com, se poate obtine doar confirmarea rezervarii pentru o cazare, aceasta poate fi considerata document justificativ pentru deductibilitatea cheltuielii de cazare in contabilitate? De asemenea, o chitanta emisa in Italia pentru cazare poate fi considerata cheltuiala deductibila?",
+    "tags": [
+      "cheltuieli de cazare",
+      "cheltuieli deductibile",
+      "calcul rezultat fiscal"
+    ],
+    "date_validity": "14 Mai 2026",
+    "expert": "Ionut Jinga",
+    "expert_role": "consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4299"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221522",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221522.htm",
+    "title": "DU 2025 - Declaratia unica",
+    "question": "O persoana fizica autorizata a obtinut in anul 2025 venituri nete in valoare de 314.359 lei. Care este valoarea taxelor pe care le are de platit prin declaratia unica pana la data de 25.05.2026 si cum se calculeaza acestea? Mentionam faptul ca persoana fizica nu este nici pensionar si nici nu are contract de munca in alta parte.",
+    "tags": [
+      "venituri",
+      "declaratia unica",
+      "cas",
+      "cass"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": true,
+      "caen": "9002"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221521",
+    "url": "https://www.portalcontabilitate.ro/conditii-incadrare-microintreprindere-contract-de-mandat-221521.htm",
+    "title": "Conditii incadrare microintreprindere. Contract de mandat - Conditii incadrare",
+    "question": "Contractul de mandat se poate intocmi oricand in cele 90 de zile, pentru a indeplini conditia micro, sau data infiintarii societatii.",
+    "tags": [
+      "microintreprindere",
+      "contract de mandat"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "6202"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221514",
+    "url": "https://www.portalcontabilitate.ro/inregistrare-penalitati-contractuale-221514.htm",
+    "title": "Inregistrare penalitati contractuale - Creante",
+    "question": "O SRL, platitoare de TVA, desfasoara activitate de administrare imobile si emite facturi catre proprietarii din imobilul luat in administrare. Facturile cuprind: * refacturare utilitati (clasificare in contul 461) consum apa (refacturare consum din factura Apa Nova), consum energie electrica (refacturare PPC etc.); * taxa servicii management (clasificare cont 704); * penalitati procentuale (aplicate pentru plata cu intarziere a facturilor). Conform Legii nr. 196/2018 privind asociatiile de proprietari, sumele rezultate din aplicarea penalitatilor de intarziere, prevazute la alin. (1), se includ in fondul de penalitati al asociatiei de proprietari si se utilizeaza cu prioritate pentru plata penalitatilor impuse asociatiei de proprietari de catre terti, precum si pentru cheltuieli cu reparatiile asupra proprietatii comune, reabilitarea termica sau consolidarea condominiului. Sumele rezultate din aplicarea penalitatilor de intarziere nu pot fi utilizate in alte scopuri. In evidentele contabile ale SRL-ului, aceste penalitati din facturile emise, respectiv penalitatile percepute de furnizorii de utilitati pentru intarzierea la plata, pot fi tratate ca fiind creante imobilizate si inregistrate in contul 2678?",
+    "tags": [
+      "penalitati contractuale",
+      "evidenta contabila",
+      "inregistrari contabile"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6832"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221506",
+    "url": "https://www.portalcontabilitate.ro/facturarea-corectia-facturilor-emise-si-comunicate-beneficiarului-221506.htm",
+    "title": "Facturarea. Corectia facturilor emise si comunicate beneficiarului. - Comert",
+    "question": "Va solicitam sprijinul in clarificarea procedurii legale si fiscale corecte aplicabile intr-o situatie in care un furnizor a emis si transmis prin RO e-Factura/SPV o factura pentru o cantitate de marfa mai mare decat cea livrata efectiv beneficiarului. In fapt, factura emisa de furnizor cuprinde o cantitate si o valoare mai mari decat cele aferente marfii efectiv receptionate. La receptie, beneficiarul a constatat ca a primit o cantitate mai mica decat cea inscrisa in factura, motiv pentru care a achitat doar contravaloarea cantitatii efectiv livrate si receptionate. Ulterior, furnizorul a solicitat beneficiarului sa emita o factura catre furnizor pentru diferenta de marfa facturata initial, dar nelivrata si neplatita, in vederea reglarii situatiei. Avand in vedere ca beneficiarul nu a livrat bunuri catre furnizor, nu a prestat servicii si nu a returnat efectiv marfa primita, va rugam sa ne comunicati care este modalitatea legala corecta de reglare a acestei situatii, respectiv daca diferenta dintre cantitatea facturata initial si cantitatea efectiv livrata/receptionata trebuie corectata de furnizor, in calitate de emitent al facturii initiale, prin emiterea unei facturi de corectie/storno/credit note cu referire la factura initiala, sau daca este permisa emiterea unei facturi de catre beneficiar catre furnizor pentru diferenta aferenta marfii neprimite, precum si care sunt implicatiile fiscale ale unei astfel de modalitati de reglare. Mentionam ca dorim ca reglarea sa fie efectuata in mod corect atat din perspectiva evidentei contabile, cat si din perspectiva TVA si a documentelor justificative aferente, avand in vedere ca diferenta nu provine dintr-o livrare ulterioara efectuata de beneficiar catre furnizor, ci din faptul ca factura initiala a fost emisa pentru o cantitate mai mare decat cea livrata efectiv. Va rugam sa ne comunicati punctul dumneavoastra de vedere cu privire la procedura legala care trebuie urmata in aceasta situatie.",
+    "tags": [
+      "e-Factura",
+      "spv",
+      "factura",
+      "tva"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Munteanu Corneliu Stefan",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4673"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221502",
+    "url": "https://www.portalcontabilitate.ro/transfer-imobil-in-contul-imprumutului-221502.htm",
+    "title": "Transfer imobil in contul imprumutului - Imobilizari corporale",
+    "question": "Societatea are achizitionata pe firma o casa, incadrata la imobilizari. Administratorul vrea sa o transfere in proprietatea sa, persoana fizica, iar valoarea casei sa fie stinsa cu imprumutul asociatului in firma. Societatea are raport de evaloare pentru acest bun. Care este monografie contabila si care sunt implicatiilor fiscale.",
+    "tags": [
+      "raport de evaloare",
+      "monografie contabila",
+      "imprumut",
+      "inregistrari contabile"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4511"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221495",
+    "url": "https://www.portalcontabilitate.ro/intreprindere-familiala-venituri-agricole-impuse-la-norma-de-venit-cas-optional-de-plata-221495.htm",
+    "title": "Intreprindere familiala. Venituri agricole impuse la norma de venit. CAS optional de plata - Declaratia unica",
+    "question": "O intreprindere familiala, cu domeniul de activitate agricultura, are doi membri: sotul, pensionar, iar sotia doreste sa plateasca CAS la nivelul salariului minim. La depunerea Declaratiei unice pentru anul 2025, se constata ca venitul obtinut corespunzator normei de venit pentru activitati agricole din judetul respectiv este de 29.630 lei pentru fiecare dintre membrii familiei. In formularul 212 actualizat nu mai exista posibilitatea de a opta pentru plata CAS ca in anul precedent. Care este solutia pentru achitarea si asigurarea la pensie a membrului intreprinderii familiale pentru anul 2025 si pe viitor, avand in vedere acest specific de activitate si faptul ca norma de venit in agricultura este sub 12 salarii minime in anii 2025 si 2026?",
+    "tags": [
+      "intreprindere familiala",
+      "venituri agricole",
+      "cas",
+      "norma de venit"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "1-10 angajati",
+      "caen": "4711"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221484",
+    "url": "https://www.portalcontabilitate.ro/corectarea-unei-erori-contabile-221484.htm",
+    "title": "Corectarea unei erori contabile - Corectarea erorilor",
+    "question": "Am descoperit ca, in urma unei actualizari de soft a programului de contabilitate, s-a modificat suma din contul 121 cu 1,75 lei la data de 31.12.2024. Bilantul este deja depus si nu stiu cum sa corectez aceasta diferenta. As putea sa o corectez acum, la bilantul din decembrie 2025?",
+    "tags": [
+      "erori contabile",
+      "bilant",
+      "inregistrari contabile"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Anca Ivanov",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4531"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221470",
+    "url": "https://www.portalcontabilitate.ro/contracte-de-inchiriere-coproprietari-obligatii-cass-221470.htm",
+    "title": "Contracte de inchiriere coproprietari. Obligatii CASS - Chirii",
+    "question": "Persoane fizice, sot 50% si sotie 50%, coproprietari mentionati pe doua contracte de inchiriere. Contract 1: chirie lunara 2.000 lei, 12 luni, venit brut anual 24.000 lei. Contract 2: chirie lunara 2.000 lei, 12 luni, venit brut anual 24.000 lei. Este corect daca in Declaratia unica fiecare proprietar declara cate jumatate din venit, respectiv: * venit brut anual: 24.000 lei; * venit impozabil: 19.200 lei; * impozit: 1.920 lei. Proprietar 1: persoana cu venituri din salarii > 6 salarii minime. Proprietar 1: salariat, salariu brut lunar 10.125 lei. Proprietar 2: persoana care nu este salariata. Cei doi proprietari trebuie sa plateasca CASS, daca fiecare realizeaza un venit brut anual din chirii de 24.000 lei, mai mic decat plafonul de 6 salarii minime?",
+    "tags": [
+      "contract de inchiriere",
+      "cass",
+      "declaratia unica"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Olguta Crevelescu",
+    "expert_role": "Expert Contabil",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6810"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221466",
+    "url": "https://www.portalcontabilitate.ro/tratamentul-fiscal-al-divizarii-cand-societatile-au-vector-fiscal-diferit-221466.htm",
+    "title": "Tratamentul fiscal al divizarii cand societatile au vector fiscal diferit - Imobilizari corporale",
+    "question": "Exista in Legea societatilor nr. 31/1990, in Codul fiscal sau in alt act normativ vreo prevedere care sa conditioneze efectuarea unei divizari de faptul ca societatea beneficiara sa aiba acelasi vector fiscal cu societatea cedenta / societatea care se divide? Mai exact, exista vreo restrictie legala in situatia in care una dintre societati este microintreprindere, iar cealalta platitoare de impozit pe profit; una este platitoare de TVA, iar cealalta neplatitoare de TVA? De asemenea, as dori clarificari si asupra urmatoarelor aspecte fiscale rezultate in urma divizarii: 1. Daca societatea care se divide factureaza in prezent chirii cu TVA (avand optiune de taxare), societatea beneficiara poate ulterior sa factureze aceleasi chirii fara TVA, in conditiile in care aceasta nu aplica taxarea operatiunii? 2. In situatia in care societatea care se divide este in prezent platitoare de impozit pe profit, societatea beneficiara poate, dupa divizare, sa aplice regimul de impozitare pe veniturile microintreprinderilor, daca indeplineste conditiile prevazute de Codul fiscal? Din analiza Legii societatilor nr. 31/1990 nu am identificat o conditionare privind identitatea vectorului fiscal, insa as dori confirmarea daca exista prevederi fiscale speciale, interpretari ANAF sau practica ONRC relevante in acest sens. Va rog, daca este cazul, sa indicati si baza legala aplicabila.",
+    "tags": [
+      "vector fiscal diferit",
+      "tva",
+      "chirie",
+      "divizare"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4719"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221453",
+    "url": "https://www.portalcontabilitate.ro/recuperare-pierdere-contabila-221453.htm",
+    "title": "Recuperare pierdere contabila - Rezultat fiscal",
+    "question": "Pierderea fiscala din 2020 poate fi acoperita inclusiv in anul 2027? Pierderea fiscala din 2021 poate fi acoperita inclusiv in anul 2028? In trimestrul I si II din 2022, societatea a fost platitoare de impozit pe veniturile microintreprinderilor, iar in trimestrul III si IV din 2022 a devenit platitoare de impozit pe profit, rezultand la decembrie 2022 profit aferent ultimelor doua trimestre, de cand a redevenit platitoare de impozit pe profit. Pana in prezent nu au fost acoperite integral niciuna dintre pierderile inregistrate in anii 2020 si 2021. Incepand cu anul 2024 s-a calculat impozit doar pentru 30% din profitul fiscal realizat.",
+    "tags": [
+      "pierdere contabila",
+      "pierdere fiscala",
+      "calcul impozit"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Gabi Popescu",
+    "expert_role": "Auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "1419"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221442",
+    "url": "https://www.portalcontabilitate.ro/sponsorizare-primita-de-ong-de-la-societate-legaturi-de-rudenie-sau-raporturi-de-munca-intre-fondatori-si-sponsor-221442.htm",
+    "title": "Sponsorizare primita de ONG de la societate. Legaturi de rudenie sau raporturi de munca intre fondatori si sponsor - ONG",
+    "question": "1. Este vreo problema daca membrul fondator al unei asociatii este ruda (frate, fiu sau sot) cu asociatul sau administratorul firmei care este principalul sponsor? 2. Dar daca membrul fondator al asociatiei este salariat al sponsorului principal? 3. Chiar daca banii se cheltuiesc in mod legal? 4. Exista riscul anularii sponsorizarii? 5. In cazul in care sponsorizarea s-a primit prin redirectionarea impozitului pe profit al sponsorului, ce se poate intampla? 6. In cazul in care la o asociatie nonprofit se strang bani pentru o investitie mai mare (o scoala), iar banii raman in contul acesteia pentru o perioada de 2-3 ani, iar intre timp are loc un control ANAF, exista riscul ca asociatia sa fie obligata sa restituie sponsorizarea?",
+    "tags": [
+      "sponsorizare",
+      "ong",
+      "asociatie"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "O.N.G.",
+      "employees": "1-10 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221430",
+    "url": "https://www.portalcontabilitate.ro/tratamentul-contabil-si-fiscal-al-investitiilor-in-fonduri-private-externe-capital-calls-distribuiri-wht-221430.htm",
+    "title": "Tratamentul contabil si fiscal al investitiilor in fonduri private externe: capital calls, distribuiri, WHT - Imobilizari financiare",
+    "question": "Societatea din Romania investeste incepand cu iulie 2025 in fonduri private din SUA si Israel in baza unor LPA cu commitment in x USD. Retragerile din fonduri se pot face dupa minim 3 ani. Avem urmatoarele operatiuni: 1. Capital call-uri care contin informatii despre: investments, formation costs (pentru primul call), equalization distribution, carried interest, withholding tax, subsequent close interest rate. Pentru aceste sume am inteles ca trebuie sa facem analitice la 265. 2. Se transmit trimestrial Capital Account Statement. Se fac regularizari trimestriale ale capitalului investit sau doar la sfarsit de an daca valoarea lor scade? 3. Tot trimestrial se fac distribuiri de venituri care contin informatiile: income distribution, din care se scad management fee, carried interest si withheld tax. Suma neta o primim in cont. Noi inregistram pe venit suma incasata sau diferenta dintre suma bruta pe venit si cheltuieli? Notificarea pentru distribuirea venitului pentru trimestrul 4 a fost emisa in ianuarie 2026. Aceste distribuiri de venit sunt similare cu distribuirile de dividend de la noi, in sensul ca le inregistram la data notificarii sau la data trimestrului incheiat? In luna aprilie am primit formularul 1042 din SUA prin care au declarat in numele firmei noastre venit din dobanzi realizat (cu WHT 0) si dividende (WHT 10%). Sumele din acest formular nu coincid cu sumele distribuite si incasate pentru anul 2025. Facem o regularizare a acestor venituri cu sumele din aceasta declaratie? Desi la fiecare distribuire apare withholding tax, am solicitat certificat fiscal dar au raspuns ca nu vor trimite pentru ca se regularizeaza la fiecare distribuire. Deci acel WHT nu se inregistreaza si nu este credit fiscal? 4. In anul 2025 dupa 2 call-uri am avut o Distribution notice cu un Return of contribution due to Equalization. Adica ne-au restituit o suma din capital recalculata de ei la care au adaugat change in distribution si scazut management fee, carried interest, WHT. Suma incasata a fost inregistrata in contul 265. Este corect?",
+    "tags": [
+      "investitii",
+      "fonduri private externe",
+      "inregistrari contabile",
+      "plata impozit"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6820"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221391",
+    "url": "https://www.portalcontabilitate.ro/modificare-destinatie-utilizare-autoturism-achizitionat-in-leasing-221391.htm",
+    "title": "Modificare destinatie utilizare autoturism achizitionat in leasing - Drept de deducere",
+    "question": "O societate a achizitionat un autoturism in leasing pentru un agent de vanzari. Pe perioada leasingului a fost dedus 100% TVA la achizitie, consumabile, reparatii, s-au intocmit foi de parcurs, cheltuielile au fost integral deductibile. Dupa incheierea leasingului, agentul de vanzari a trecut la un contract part-time si nu se mai doreste intocmirea foilor de parcurs. In acest caz se poate trece la deductibilitate limitata de 50%?",
+    "tags": [
+      "achizitie autoturism",
+      "leasing",
+      "deductibilitate limitata",
+      "deducere tva"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Olguta Crevelescu",
+    "expert_role": "Expert Contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4690"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221383",
+    "url": "https://www.portalcontabilitate.ro/ong-vanzare-opera-de-arta-catre-un-client-persoana-fizica-221383.htm",
+    "title": "ONG vanzare opera de arta catre un client persoana fizica - ONG",
+    "question": "O ONG al carui obiectiv este \"Promovarea artei generative si stabilirea unui centru pentru acest scop, organizarea de expozitii, ateliere de creatie, seminarii, conferinte etc.\" doreste sa vada o opera de arta catre un client PF, pretul de vanzare 10.000 euro. Este impozabila aceasta vanzare? Ce alte aspecte fiscale si contabile trebuie avute in vedere la aceasta vanzare?",
+    "tags": [
+      "vanzare opera de arta",
+      "ong",
+      "inregistrari contabile"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Bajan Camelia",
+    "expert_role": "Expert contabil, expert judiciar, practician in insolventa",
+    "society": {
+      "type": "O.N.G.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221361",
+    "url": "https://www.portalcontabilitate.ro/inchiriere-apartament-pe-termen-scurt-casa-de-marcat-evidenta-turisti-221361.htm",
+    "title": "Inchiriere apartament pe termen scurt. Casa de marcat. Evidenta turisti - Case marcat",
+    "question": "SRL, neplatitor de TVA si platitor de impozit pe profit, a inchiriat un apartament pe care il subinchiriaza prin Booking si Airbnb in Bucuresti. Se datoreaza o taxa de promovare de 10 lei de persoana pe noapte: Daca se doreste ca taxa de promovare sa fie colectata de la client direct, nu prin platforma, este obligatoriu sa existe casa de marcat? Daca incasarea se face prin POS si este evidentiata pe factura de cazare, mai este necesara casa de marcat? Ce obligatii are firma legat de evidenta clientilor? Trebuie sa completeze si firma fisa de ocupare a capacitatii de cazare prevazuta la art. 85 alin. (8)?",
+    "tags": [
+      "inchiriere apartament",
+      "casa de amanet",
+      "casa de marcat",
+      "taxa de promovare"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Constanta Popa",
+    "expert_role": "Expert contabil, auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221323",
+    "url": "https://www.portalcontabilitate.ro/investitii-imobiliare-terenuri-de-minifotbal-si-alte-constructii-aferente-unei-baze-sportive-221323.htm",
+    "title": "Investitii imobiliare. Terenuri de minifotbal si alte constructii aferente unei baze sportive - Imobilizari corporale",
+    "question": "O societate a construit pe un teren doua terenuri de minifotbal pentru a desfasura activitate de inchiriere a acestora. Terenul pe care au fost construite cele doua terenuri are suprafata de 7.822 mp si este inscris intr-un CF cu numar principal (ex. 1111111). Cele doua terenuri sunt deja intabulate, apar in CF ca si constructii administrative si social-culturale si au numar cadastral secundar (ex. 1111111-C2). Pe acest teren urmeaza sa mai fie finalizate si intabulate, tot cu numar secundar atribuit, inca un teren de minifotbal, un vestiar si o terasa care va face parte din constructia vestiarului, toate urmand sa fie intabulate ulterior. Practic, este o baza sportiva formata din mai multe constructii (unele deja finalizate si intabulate, altele in curs de finalizare), care vor deservi activitatea societatii, iar aceasta are CF principal. Societatea doreste sa declare punct de lucru la adresa unde sunt construite si finalizate deja aceste terenuri pentru a putea incepe desfasurarea activitatii. Va rog sa imi spuneti cum se inregistreaza in contabilitate aceasta baza sportiva si cand. In prezent, toata investitia este inregistrata in contul 231 si ar trebui transferata partial in contul 215 si, totodata, inregistrata si amortizarea? Care este procedura si care sunt operatiunile contabile ce trebuie efectuate?",
+    "tags": [
+      "investitii imobiliare",
+      "amortizare",
+      "inregistrari contabile"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Carmen Adomnoaei",
+    "expert_role": "Consultant fiscal, Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "9311"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221107",
+    "url": "https://www.portalcontabilitate.ro/regimul-de-perfectionare-activa-tratament-fiscal-originea-bunurilor-221107.htm",
+    "title": "Regimul de perfectionare activa. Tratament fiscal. Originea bunurilor. - Alte obligatii",
+    "question": "O societate comerciala avand codul CAEN 2420 Productia de tuburi, tevi, profile tubulare si accesorii pentru acestea, din otel doreste sa importe materii prime din Turcia, ulterior produsele finite rezultate din prelucrarea acestora fiind exportate in Bosnia si Hertegovina. Societatea va avea obligatia platii unor taxe precum drepturi antidumping, contingente (cote) sau CBAM? Avand in vedere ca Bosnia si Hertegovina nu este stat membru UE, ar putea aceste importuri fi scutite in cadrul regimului de perfectionare activa? Daca da, de la ce taxe si obligatii am fi scutiti mai exact? De asemenea, pentru produsele fabricate in Romania folosind materii prime dintr-o tara non-UE (Turcia) in cadrul regimului de perfectionare activa, putem emite certificate EUR, cum ar fi certificatul EUR.1? Ar putea acestea fi supuse ulterior unor taxe compensatorii?",
+    "tags": [
+      "codul CAEN 2420",
+      "import de bunuri",
+      "export",
+      "tva"
+    ],
+    "date_validity": "13 Mai 2026",
+    "expert": "Munteanu Corneliu Stefan",
+    "expert_role": "Consultant fiscal",
+    "society": {},
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221515",
+    "url": "https://www.portalcontabilitate.ro/pfi-221515.htm",
+    "title": "PFI - PFA/II/CMI",
+    "question": "O PFI cu activitate medicala poate deduce in contabilitate cheltuielile aferente unei operatii oftalmologice (de exemplu: cataracta), efectuate pentru titularul PFI? Operatia este necesara pentru a asigura buna desfasurare a activitatii medicale prestate ca PFI. Va rog sa specificati si baza legala.",
+    "tags": [
+      "PFI",
+      "activitate medicala",
+      "cheltuieli"
+    ],
+    "date_validity": "12 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "8622"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221511",
+    "url": "https://www.portalcontabilitate.ro/du-221511.htm",
+    "title": "DU - Dividende",
+    "question": "Persoana fizica romana (cu rezidenta fiscala in Romania), in anul 2026, primeste dividende de la o societate din Albania. Cum declara in DU 2026 (depusa in 2027) si ce taxe mai are de achitat in Romania, in conditiile in care in Albania a fost retinut un impozit de 8%?",
+    "tags": [
+      "dividende",
+      "declaratia unica",
+      "plata impozit"
+    ],
+    "date_validity": "12 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4120"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221509",
+    "url": "https://www.portalcontabilitate.ro/registrul-de-casa-in-format-exclusiv-electronic-221509.htm",
+    "title": "Registrul de casa in format exclusiv electronic - Bilant",
+    "question": "Avem o intrebare referitoare la Registrul de casa. Este legal sa avem registrul de casa doar in format electronic? Va rugam sa ne ajutati si cu baza legala in acest sens.",
+    "tags": [
+      "registru de casa",
+      "operatiuni de numerar",
+      "documente justificative"
+    ],
+    "date_validity": "12 Mai 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221507",
+    "url": "https://www.portalcontabilitate.ro/du-2025-221507.htm",
+    "title": "DU 2025 - Declaratia unica",
+    "question": "O persoana fizica ce nu este salariata, dar obtine in anul 2025 venituri din dividende peste echivalentul a 12 salarii minime, este asigurata in sistemul public de sanatate dupa depunerea Declaratiei unice privind CASS sau trebuie sa se asigure optional la sanatate? Daca trebuie sa isi exprime optiunea de asigurare la sanatate, va trebui sa completeze in Declaratia unica si Capitolul I, sectiunea 2 CASS datorata pentru dividendele obtinute in 2025, precum si Capitolul II, sectiunea 1 CASS optional? Cu ce suma si pana la ce data va fi asigurata la sanatate?",
+    "tags": [
+      "cass",
+      "dividende",
+      "declaratia unica"
+    ],
+    "date_validity": "12 Mai 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "0"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221504",
+    "url": "https://www.portalcontabilitate.ro/radiere-pfa-la-norma-de-venit-221504.htm",
+    "title": "Radiere PFA la norma de venit - Declaratia unica",
+    "question": "PFA cu obiect de activitate agricultura, cultura cerealelor, impusa la norma de venit, isi inceteaza activitatea in anul 2025. Inainte de radierea PFA-ului la ONRC, factureaza utilajele agricole din patrimoniul afacerii, la pret de piata, pe baza unui raport de evaluare, catre o societate comerciala parte afiliata. Contravaloarea facturii nu a fost achitata in anul 2025, urmand a fi achitata pe parcursul a 3 ani. Cum se trateaza aceasta vanzare din punct de vedere al impozitului pe venit? Cand si cum se declara in declaratia unica? Ce fel de contributii sociale se datoreaza?",
+    "tags": [
+      "norma de venit",
+      "radiere pfa",
+      "impozit pe venit",
+      "declaratia unica"
+    ],
+    "date_validity": "12 Mai 2026",
+    "expert": "Vera Constantin",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "5330"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-221503",
+    "url": "https://www.portalcontabilitate.ro/calcul-pofit-de-repartizat-in-cazul-companiilor-de-stat-221503.htm",
+    "title": "Calcul pofit de repartizat in cazul companiilor de stat - Bilant",
+    "question": "Ne confruntam cu urmatoarea problema: Conform OG 64/2001, profitul net (repartizabil) se repartizeaza pe urmatoarele destinatii: a) rezerve legale; b) alte rezerve reprezentand facilitati fiscale prevazute de lege; c) acoperirea pierderilor contabile din anii precedenti; c1) constituirea surselor proprii de finantare pentru proiectele finantate din imprumuturi externe, precum si pentru constituirea surselor necesare rambursarii ratelor de capital, platii dobanzilor, comisioanelor si a altor costuri aferente acestor imprumuturi externe; d) alte repartizari prevazute de lege; e) participarea salariatilor la profit; societatile nationale, companiile nationale si societatile comerciale cu capital integral sau majoritar de stat, precum si regiile autonome care s-au angajat si au stabilit prin bugetele de venituri si cheltuieli obligatia de participare la profit, ca urmare a serviciilor angajatilor lor in relatie cu acestea, pot acorda aceste drepturi in limita a 10% din profitul net, dar nu mai mult de nivelul unui salariu de baza mediu lunar realizat la nivelul agentului economic, in exercitiul financiar de referinta; f) minimum 50% varsaminte la bugetul de stat sau local, in cazul regiilor autonome, ori dividende, in cazul societatilor nationale, companiilor nationale si societatilor comerciale cu capital integral sau majoritar de stat; g) profitul nerepartizat pe destinatiile prevazute la lit. a)-f) se repartizeaza la alte rezerve si constituie sursa proprie de finantare, putand fi redistribuit ulterior sub forma de dividende sau varsaminte la bugetul de stat sau local, in cazul regiilor autonome. Conform precizarilor de pe AMEPIP si HG 639/2023: In prezent, in Romania, companiile detinute in totalitate sau in majoritate de stat sunt obligate sa vireze la bugetul de stat cel putin 50% din profitul net. Pentru a mentine si a evalua politica de dividende, este important sa se includa rata de plata a dividendelor ca indicator. Formula de calcul: Rata de plata a dividendelor = Dividende platite (aferente anului x) / Profit net (aferent anului x) Acesta este un indicator obligatoriu care face parte din anexa la contractul de mandat al administratorilor neexecutivi. In acest context: * cum se determina profitul net (soldul contului 121 sau profitul net ramas de repartizat dupa constituirea rezervelor legale etc.)? * cum se stabilesc dividendele platite (includ sau nu impozitul aferent de 16%)?",
+    "tags": [
+      "bugetul de stat",
+      "dividende",
+      "repartizare profit"
+    ],
+    "date_validity": "12 Mai 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "3600"
+    },
+    "scraped_at": "2026-05-15"
   }
 ]

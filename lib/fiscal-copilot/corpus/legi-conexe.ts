@@ -5344,4 +5344,583 @@ RECOMANDARE:
     ],
     last_verified: "2026-05-15",
   },
+  {
+    id: "micro-2026-conditii-aplicare-intreprinderi-legate",
+    tags: ["micro 2026", "microîntreprindere", "art. 47", "art. 48", "art. 51", "OUG 8/2026", "întreprinderi legate", "contract mandat", "100000 EUR"],
+    title: "Microîntreprindere 2026 — condiții aplicare + plafon 100K EUR + întreprinderi legate",
+    body: `Cod Fiscal Titlul III art. 47-57 + OUG 8/2026 (modificări 2026) + Legea 296/2023 (întreprinderi legate).
+
+CONDIȚII APLICARE MICRO 2026 (Cod Fiscal art. 47):
+La data de 31 decembrie a anului fiscal precedent (pentru micro 2026 → la 31.12.2025):
+
+a) Venituri realizate ≤ PRAGUL ACTUALIZAT (OUG 8/2026):
+   - 2024-2025: plafon 500.000 EUR
+   - 2026+: plafon REDUS la **100.000 EUR** (echivalent ~496.500 RON la curs BNR 31.12)
+
+b) Venituri ≤ 20% din venituri din consultanță/management (excepție: IT, contabilitate, expertize tehnice, juridice — pentru anumite categorii)
+
+c) Activitate principală NU este interzisă (asigurări, bancare, jocuri noroc, energie electrică, produse petroliere — vezi art. 47 alin. 3)
+
+d) Capitalul social NU deținut de stat/UAT
+
+e) NU în lichidare/dizolvare/insolvență
+
+f) Are CEL PUȚIN UN SALARIAT (art. 47 alin. 1 lit. g) — vezi mai jos pentru opțiuni
+
+g) Asociații dețin (direct/indirect) peste 25% într-O SINGURĂ persoană juridică care aplică micro
+
+CONDIȚIA SALARIAT (Cod Fiscal art. 51 alin. 4):
+"Salariat" = persoană angajată cu CIM cu normă întreagă (Legea 53/2003 — Codul Muncii).
+
+CONDIȚIA SE CONSIDERĂ ÎNDEPLINITĂ și în următoarele variante:
+a) Mai mulți salariați cu CIM cu TIMP PARȚIAL → fracțiunile cumulate echivalează o normă întreagă (ex: 2 × 4h/zi = 1 × 8h/zi)
+b) CONTRACT MANDAT sau ADMINISTRARE cu remunerație ≥ salariul minim brut pe țară garantat în plată (2025: 4.050 RON; 2026: presumabil actualizat)
+
+ATENȚIE: contractul de mandat trebuie încheiat și remunerat efectiv lunar. Simpla existență a documentului fără plată = neîndeplinire condiție.
+
+FIRMĂ NOU-ÎNFIINȚATĂ (Cod Fiscal art. 48 alin. 3):
+- Poate opta pentru micro din PRIMUL AN dacă condițiile art. 47(1) lit. d (capital) și h (>25% într-o singură PJ) sunt îndeplinite la data înregistrării ONRC
+- Condiția salariat (lit. g) → 90 ZILE de la înregistrare ONRC pentru îndeplinire
+- Dacă în 90 zile NU se îndeplinește → trecere la impozit profit începând cu trimestrul URMĂTOR celui în care expiră perioada
+
+ÎNTREPRINDERI LEGATE (Legea 296/2023):
+Pentru calculul plafonului 100.000 EUR în 2026, se cumulează cifra de afaceri a TOATE întreprinderile LEGATE.
+
+DEFINIȚIE legate (UE — Recomandare 2003/361/CE transpusă RO):
+- Aceeași persoană fizică / aceeași familie deține >25% din 2+ firme
+- Aceleași firme au administrator/asociat comun cu putere de decizie
+- Persoane fizice cu legături de rudenie până în gradul 4 (soți, copii, părinți, frați)
+
+EXEMPLU CONCRET:
+Asociat unic A deține:
+- Firma X — CA 2025: 80.000 EUR
+- Firma Y (nou-înființată 2026) — CA estimat 50.000 EUR
+- Total cumulat: 130.000 EUR > 100.000 EUR prag micro
+→ Firma Y NU poate fi micro în 2026 (cumulează depășirea cu firma X care e ÎNTREPRINDERE LEGATĂ)
+
+EXCEPȚIE persoană fizică cu firme deja existente cu impozit profit:
+- Firma X existentă cu impozit profit (CA 700K lei depășit pragul în 2025)
+- Asociatul A vrea să înființeze firma Y micro 2026
+- Întrucât A este legat cu X (>25%), iar X depășește pragul → Y NU poate fi micro
+- Soluție: A trebuie să cedeze poziția majoritară (< 25%) într-una dintre firme
+
+PRAG REDUS DE LA 500K LA 100K EUR (OUG 8/2026):
+Schimbarea pragului de la 01.01.2026:
+- Firme cu CA în 2025 între 100K-500K EUR → trec OBLIGATORIU la impozit profit din 01.01.2026
+- Bilanțul 2025 → depus până la 31 MARTIE 2026 (regula nouă pentru a beneficia de micro 2026 — vezi entrie "termen depunere bilanț")
+- Firme care depun bilant DUPĂ 31 martie 2026 → automat impozit profit (NU mai pot reveni la micro)
+
+REVENIREA LA MICRO:
+Cazul: firmă care a fost micro, a depășit pragul în trim. III 2025 → trecere la impozit profit pentru trim. III + IV
+- Pentru 2026: poate reveni la micro DACĂ:
+  - CA 2025 (total an, micro + profit) ≤ 100K EUR
+  - Are salariat la 31.12.2025
+  - Îndeplinește toate celelalte condiții
+- D700 cu solicitare reactivare micro din 01.01.2026
+
+COTE IMPOZIT MICRO 2026:
+- 1% pentru firme CU SALARIAT
+- 3% pentru firme FĂRĂ SALARIAT (excepție: art. 48 alin. 3 — primii 90 zile pentru nou-înființate)
+
+ATENȚIE 2026: cu pragul redus la 100K EUR, multe firme care erau micro vor trece la profit. Verificare obligatorie a CA 2025 pentru decizia statutului 2026.
+
+CALCUL CIFRA DE AFACERI pentru pragul micro:
+- Veniturile din producție + comerț + servicii (cont 70x)
+- - Reducerile comerciale acordate (cont 709)
+- + Venituri din subvenții pentru exploatare aferente cifrei (cont 7411 — DOAR dacă sunt operate)
+- Conversie în EUR: la cursul BNR din 31.12 anul respectiv
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Bilanț 2025 + cont profit/pierdere
+2. Contract muncă/mandat cu remunerație
+3. Listă asociați + cote (pentru verificare întreprinderi legate)
+4. Calcul CA în EUR la 31.12.2025
+5. Hotărâre AGA pentru opțiune micro (dacă era pe profit)
+
+SANCȚIUNI APLICARE INCORECTĂ:
+- Firma a aplicat micro fără să îndeplinească condițiile → recalcul retroactiv ca impozit profit + accesorii
+- Diferență impozit + dobânzi 0.02%/zi + penalități 0.01%/zi (de la termenele plății micro inițiale)`,
+    sources: [
+      { label: "Cod Fiscal art. 47-57 (Titlul III — Microîntreprinderi)", ref: "https://legislatie.just.ro" },
+      { label: "OUG 8/2026 (modificări regim micro 2026)", ref: "https://legislatie.just.ro" },
+      { label: "Legea 296/2023 (întreprinderi legate)", ref: "https://legislatie.just.ro" },
+      { label: "Recomandarea (UE) 2003/361/CE (definiție IMM + întreprinderi legate)", ref: "https://eur-lex.europa.eu" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "tva-incasare-plafon-oug-8-2026",
+    tags: ["TVA la încasare", "art. 282", "plafon 5M", "plafon 5.5M", "OUG 8/2026", "intrare ieșire", "exigibilitate"],
+    title: "TVA la încasare — plafon nou OUG 8/2026 (5M/5.5M) + intrare/ieșire",
+    body: `Cod Fiscal art. 282 alin. (3)-(8) + OUG 8/2026 (modificare plafon).
+
+REGIM TVA LA ÎNCASARE — DEFINIȚIE:
+Sistem opțional de exigibilitate amânată: TVA colectat devine exigibil la DATA ÎNCASĂRII de la client (NU la data facturii). Similar pentru TVA dedus din achiziții — exigibilă la data plății furnizorului.
+
+PLAFON NOU (OUG 8/2026):
+Plafonul cifrei de afaceri pentru aplicare TVA la încasare:
+- Până la 28.02.2026: 4.500.000 LEI (vechi)
+- **01.03.2026 - 31.12.2026: 5.000.000 LEI** (NOU)
+- **2027+: 5.500.000 LEI** (NOU)
+
+CONDIȚII INTRARE în sistem TVA la încasare (art. 282 alin. 3¹ — introdus OUG 8/2026):
+
+a) În ANUL CALENDARISTIC PRECEDENT NU a depășit plafonul valabil pentru ACEL AN
+   - Pentru intrare 2026: CA 2025 < 4.500.000 lei (pragul 2025)
+   - Pentru intrare 2027: CA 2026 < 5.000.000 lei (pragul 2026)
+
+b) La DATA EXERCITĂRII OPȚIUNII să NU fi depășit plafonul pentru anul în curs
+
+c) Cerere D097 la ANAF (Notificare aplicare TVA la încasare) cu min. 25 zile înainte de începerea perioadei fiscale dorite
+
+INTRARE PRACTICĂ:
+- Firme noi (înregistrate TVA în cursul anului): pot opta din momentul înregistrării (cu D097 atașat la D700)
+- Firme existente: opțiune cu D097 până la 25 a lunii anterioare perioadei fiscale dorite
+
+EXEMPLU SCENARIU REAL 2026 (din Q&A Portal):
+Firmă cu CA 2025 = 5.200.000 lei (depășit plafonul 4.5M 2025).
+ÎNTREBARE: Poate aplica TVA la încasare în 2026 (plafonul 5M)?
+RĂSPUNS NU. Conform art. 282 alin. (4) lit. c, dacă a depășit plafonul în anul precedent (valabil pentru anul respectiv = 4.5M pentru 2025), firma NU este eligibilă pentru anul curent. Plafonul nou (5M) NU se aplică retroactiv.
+Reactivare posibilă: 2027 (dacă CA 2026 < 5M).
+
+IEȘIRE OBLIGATORIE din sistem (art. 282 alin. 4):
+a) Depășire plafon în cursul anului → ieșire începând cu prima zi a perioadei fiscale URMĂTOARE celei în care s-a depășit
+b) Anularea codului TVA → ieșire automată la data anulării
+c) Schimbare regim (ex: trecere la TVA art. 317 — special) → ieșire
+
+IEȘIRE OPȚIONALĂ:
+Firma poate renunța oricând la sistem cu D097 (cerere ieșire). Termen: 25 zile înainte de începerea perioadei fiscale dorite.
+ATENȚIE: după renunțare voluntară, REINTRARE permisă DOAR după minim 1 AN CALENDARISTIC complet.
+
+EXIGIBILITATE PRACTICĂ:
+
+A) PENTRU FURNIZOR (în sistem TVA la încasare):
+- Factură emisă 100.000 + TVA 21% în ianuarie 2026
+- TVA colectat (4427) — ÎNREGISTRAT dar NEEXIGIBIL
+- Cont contabil: 4111 = 707 (venit) + 4111 = 4428 (TVA neexigibil)
+- Plata clientului în martie 2026: 4428 → 4427 (TVA devine exigibil → decont D300 martie)
+
+B) PENTRU CUMPĂRĂTOR (cumpără DE LA furnizor cu TVA la încasare):
+- Factură primită ianuarie 2026: cheltuială + TVA dedus
+- Dar TVA deducibil DOAR DUPĂ PLATA furnizorului (art. 297 alin. 2)
+- Cont contabil: 601 = 401 + 4428 = 401 (TVA neexigibil)
+- Plata furnizorului în aprilie 2026: 4428 → 4426 (TVA devine deductibil → decont D300 aprilie)
+
+REGULA 90 ZILE (art. 282 alin. 3):
+TVA colectat devine exigibil OBLIGATORIU la 90 ZILE de la data facturii, chiar dacă nu s-a încasat încă.
+Aceasta este o LIMITĂ MAXIMĂ de amânare a exigibilității.
+
+IEȘIRE DIN TVA cu STOC DE MARFĂ — CAZ SPECIAL:
+La data ieșirii din evidența TVA (cerere scoatere voluntară):
+- Stoc marfă (cont 371) — ajustare prin transferul TVA neexigibil:
+  371 = 4428 (anulare TVA neexigibil aferent stocului)
+- TVA neexigibil din facturi furnizori: anulare cu același tip (firma NU mai are drept de deducere)
+
+MONOGRAFIE COMPLETĂ ieșire TVA cu sold neexigibil:
+- 371 = 4428 (cu sumă pozitivă pentru TVA intrări aferentă stocului)
+- 371 = 4428 (cu sumă negativă pentru TVA neexigibil deja existent)
+- 371 = 378 (ajustare adaos comercial cu diferența) — pentru păstrare preț de vânzare neschimbat
+
+FACTURI EMISE de FURNIZOR ÎN TVA la ÎNCASARE — pentru CUMPĂRĂTOR:
+Mențiune obligatorie pe factură: "TVA la încasare" (sau "TVA aplicat conform art. 282 alin. 3-8 Cod Fiscal")
+Cumpărător: drept de deducere AMÂNAT până la plata efectivă.
+
+ATENȚIE FURNIZORI MIXTI:
+Furnizor cu TVA la încasare emite factură care e POATE NU MARCATĂ ca "TVA la încasare":
+- Pentru clarificare: verificare DOCUMENT JUSTIFICATIV (factură + mențiunea pe factură)
+- Dacă mențiunea lipsește: clientul tratează ca TVA normal (deductibil imediat)
+- Riscul rămâne la furnizor (poate fi sancționat de ANAF pentru lipsa mențiunii)
+
+SANCȚIUNI nedeclarare TVA la încasare:
+- Aplicare regim fără îndeplinire condiții: ajustare retroactivă + accesorii
+- Lipsa mențiunii pe factură: amendă 500-1.000 RON per factură
+- Cumpărător care deduce TVA înainte de plată (când furnizorul are TVA la încasare): ajustare deducere + accesorii`,
+    sources: [
+      { label: "Cod Fiscal art. 282 alin. (3)-(8) (TVA la încasare)", ref: "https://legislatie.just.ro" },
+      { label: "OUG 8/2026 (modificare plafon 5M/5.5M)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 297 alin. 2 (drept deducere amânat)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 409/2021 (D097 — notificare TVA la încasare)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "tva-imobiliar-cladire-veche-noua-scutire",
+    tags: ["TVA imobiliar", "art. 292", "scutire TVA", "clădire veche", "clădire nouă", "teren construibil", "teren neconstruibil", "ajustare"],
+    title: "TVA imobiliar — clădire veche/nouă, teren construibil/neconstruibil + scutire art. 292",
+    body: `Cod Fiscal art. 292 alin. (2) lit. f) + art. 268-270 + art. 286 + Norme metodologice pct. 55-56.
+
+REGULA FUNDAMENTALĂ:
+Livrarea de bunuri imobile este IMPOZABILĂ cu TVA, EXCEPȚIE: cazurile prevăzute la art. 292 alin. (2) lit. f), care sunt SCUTITE DE TVA fără drept de deducere.
+
+CAZURI SCUTITE (art. 292 alin. 2 lit. f):
+1. Livrarea de CONSTRUCȚII / PĂRȚI DE CONSTRUCȚII și a TERENULUI pe care sunt construite (CLĂDIRE VECHE)
+2. Livrarea oricărui alt TEREN (TEREN NECONSTRUIBIL — agricol, fără PUZ pentru construcție)
+
+EXCEPȚII DE LA SCUTIRE (rămân impozabile cu TVA — chiar dacă încadrate inițial):
+1. Livrarea de TERENURI CONSTRUIBILE (cu PUZ/PUG pentru construcție)
+2. Livrarea de CONSTRUCȚII NOI (sau părți de construcții noi) — vândute ÎNAINTE de prima ocupare
+
+DEFINIȚII CHEIE (norme metodologice pct. 55):
+
+A) CONSTRUCȚIE NOUĂ:
+- Construcție livrată ÎNAINTE de "prima ocupare" sau folosință (chiar și de către constructor)
+- "Prima ocupare" = utilizarea efectivă (ex: locuit, închiriat, comercial)
+- DACĂ construcția nu a fost ocupată/utilizată de nimeni → încă "nouă"
+
+B) CONSTRUCȚIE VECHE:
+- Construcție livrată DUPĂ prima ocupare/folosință
+- "Veche" indiferent de vârsta efectivă (poate fi construită acum 2 ani, dar dacă a fost locuită/închiriată → veche)
+
+C) TEREN CONSTRUIBIL:
+- Teren cu PUZ/PUG aprobat care permite construire
+- Atestat prin Certificat de Urbanism sau extras CF cu mențiune
+- TVA aplicabilă obligatoriu (NU se aplică scutire)
+
+D) TEREN NECONSTRUIBIL:
+- Teren agricol, fâneață, pădure
+- Fără posibilitate de construire conform PUG
+- SCUTIT de TVA conform art. 292
+
+OPȚIUNE TAXARE (art. 292 alin. 3):
+Furnizorul POATE OPTA pentru aplicarea TVA chiar pe operațiuni scutite (teren agricol, clădire veche) prin NOTIFICARE la ANAF înainte de operațiune.
+Avantaj: păstrare drept de deducere pe achiziții/costuri aferente.
+
+CAZURI PRACTICE 2026:
+
+A) Vânzare APARTAMENT NOU în 2026 către persoană fizică:
+- Construcție livrată după 01.07.2025 → TVA 11% (cota redusă pentru locuințe)
+- Dacă persoana fizică e prima locuință + maxim 1 apartament la o cotă redusă/an
+- TVA 11% pe valoarea totală (teren + apartament)
+
+B) Vânzare APARTAMENT VECHI (locuit anterior) către PJ:
+- Scutire art. 292 alin. (2) lit. f) → fără TVA
+- Opțiune taxare: pentru a beneficia de deducere TVA pe costuri (renovări etc.) — taxare cu cota 21%
+- Notificare ANAF înainte de operațiune
+
+C) Vânzare CLĂDIRE COMERCIALĂ VECHE între PJ:
+- Scutire fără drept deducere (pentru vânzător)
+- OPȚIUNE taxare frecventă: ambele părți preferă cu TVA (cumpărător deduce, vânzător își păstrează drept deducere)
+- Cu opțiune: TVA 21%
+- Taxare inversă posibilă dacă ambele PJ sunt plătitoare de TVA (art. 331)
+
+D) Vânzare TEREN AGRICOL între PJ:
+- Scutire fără drept deducere (necontruibil)
+- Opțiune taxare posibilă
+
+E) Vânzare TEREN INTRAVILAN cu CERTIFICAT URBANISM pentru construire:
+- TEREN CONSTRUIBIL — TVA OBLIGATORIE (cotă 21%)
+- NU se poate aplica scutire
+
+AJUSTARE TVA la VÂNZARE SCUTITĂ (art. 305 — bunuri de capital):
+
+Pentru clădiri vândute în regim de scutire:
+- Perioada de ajustare: 20 ANI (de la achiziție/recepție)
+- Ajustare: (TVA inițial dedus) × (Ani rămași până la final perioadă 20) / 20
+
+EXEMPLU:
+Clădire achiziționată cu TVA dedus 100.000 lei în 2020 (20 ani perioadă = până 2040).
+Vânzare scutită în 2026.
+Ani folosiți în scop deductibil: 2020-2025 = 6 ani.
+Ani rămași: 2026-2040 = 14 ani.
+TVA de ajustat (returnat la stat): 100.000 × 14/20 = 70.000 lei.
+
+ECHIVALENT pentru ECHIPAMENTE (perioadă 5 ani):
+TVA de ajustat = TVA inițial × ani rămași / 5
+
+TRANSFER DE ACTIVITATE art. 270(7) — SCUTIT DE AJUSTARE:
+Dacă bunul imobil face parte din transferul unei activități/ramuri întregi (succesor în drepturi):
+- NU se consideră livrare (art. 270 alin. 7)
+- NU se aplică ajustare TVA
+- CONDIȚIE: primitorul declară pe propria răspundere INTENȚIA DE CONTINUARE a activității economice
+- Documentul obligatoriu: declarație primitor + factură art. 320 alin. 12 cu valoare 0
+
+FACTURĂ EMISĂ ÎN TRANSFER ACTIVITATE:
+- NU se emite factură normală
+- Document specific art. 320 alin. 12 — proces verbal/document de predare-primire activ
+- Valoare 0 (NU livrare impozabilă)
+- ABSENȚA art. 270(7): operațiunea e LIVRARE → trebuie aplicat TVA sau ajustare
+
+CAZUL: CESIUNE CONTRACT vs VÂNZARE FINALĂ:
+- Persoană fizică achiziționează apartament în 2021 cu antecontract (plată integrală)
+- 2026: cesionează antecontract către altă persoană fizică
+- Tratament: NU este vânzare apartament (clădire) — este vânzare DREPT contractual
+- Vânzător PF: venit din alte surse (impozit 10%)
+- TVA: nu se aplică pe cesiune
+- Dezvoltatorul vinde apartamentul către CESIONAR cu factură pe noul nume + TVA cota redusă (dacă îndeplinește condițiile cota redusă)
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Contract VÂNZARE-CUMPĂRARE notarial cu detalii imobil + valoare
+2. Extras CF cu mențiune scop construire (pentru teren)
+3. Certificat urbanism (dacă teren cu construcție posibilă)
+4. Notificare opțiune taxare (dacă aplicată) — depusă la ANAF
+5. Calcul ajustare TVA (dacă aplicabilă)
+6. Pentru transfer activitate: declarație primitor + document predare-primire`,
+    sources: [
+      { label: "Cod Fiscal art. 292 alin. (2) lit. f) (scutire imobile)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 268-270 (livrare bunuri), 286 (baza impozabilă)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 305 (ajustare bunuri capital)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 270 alin. (7) (transfer activitate)", ref: "https://legislatie.just.ro" },
+      { label: "Norme metodologice Cod Fiscal pct. 55-56 (construcție nouă/veche)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "diurna-plafon-33-procente-detasare-ue",
+    tags: ["diurnă", "plafon 33%", "art. 76", "delegație", "detașare", "HG 714/2018", "A1", "sofer transport", "indemnizație"],
+    title: "Diurnă internă/externă — plafon 33% salarii brute + A1 detașare UE",
+    body: `Cod Fiscal art. 76 alin. (4) lit. h) + alin. (4¹) + HG 714/2018 + Regulament (CE) 883/2004.
+
+DEFINIȚII:
+
+DIURNĂ = indemnizație acordată salariaților pentru deplasări temporare (delegație) sau permanente (mobilitate).
+
+DELEGAȚIE (Cod Muncii art. 43):
+- Trimitere TEMPORARĂ a salariatului la alt loc decât locul obișnuit (în interesul angajatorului)
+- Caracteristici: ocazional, max 60 zile/an consecutiv, cu ordin deplasare per eveniment
+
+DETAȘARE (Cod Muncii art. 45-47):
+- Modificare temporară a locului muncii (transferare la altă firmă/locație)
+- Caracteristici: poate fi mai îndelungată (max 1 an + prelungire), schimbă subordonarea
+
+PLAFON NEIMPOZABIL DIURNĂ (Cod Fiscal art. 76 alin. 4 lit. h):
+Diurna NEIMPOZABILĂ în limita:
+- 2.5 × nivelul legal stabilit pentru personalul instituțiilor publice (HG 714/2018)
+- Calculat per zi de deplasare
+
+PLAFON LEGAL HG 714/2018 (2025+):
+- Diurnă RO (delegații interne): 23 RON/zi sector buget → 57.5 RON/zi maxim neimpozabil pentru privat (2.5x)
+- Diurnă externă (delegații externe): variabil pe țară (HG 518/1995 actualizat anual)
+  - UE: aproximativ 35 EUR/zi sector buget → ~87.5 EUR/zi pentru privat (~430 RON/zi cu curs 4.95)
+  - Țări non-UE: variabil (ex: Turcia 35 EUR, China 40 EUR, etc.)
+
+PLAFONUL ADIȚIONAL DE 33% (Cod Fiscal art. 76 alin. 4¹ — introdus 2023):
+Indiferent de plafonul 2.5x HG 714/2018, **suma totală a INDEMNIZAȚIILOR NEIMPOZABILE acordate unui salariat pe lună NU poate depăși 33% din SALARIUL BRUT LUNAR de bază**.
+
+CALCUL DUBLU PLAFON (regula CEA MAI MICĂ):
+Plafon = MIN(2.5 × HG 714 × zile deplasare, 33% × salariu brut lunar)
+
+EXEMPLU TRANSPORT INTERNATIONAL SOFER:
+Salariu brut lunar: 5.000 RON
+33% plafon: 1.650 RON/lună maxim neimpozabil
+Sofer cu 20 zile delegații externe în lună:
+- Plafon clasic 2.5×: 20 × 87.5 EUR × 4.95 = ~8.662 RON
+- Plafon 33%: 1.650 RON
+- MAI MIC: 1.650 RON → maxim neimpozabil per lună
+- Sumă peste plafon (8.662 - 1.650 = 7.012 RON): IMPOZABIL ca salariu (impozit 16% + CAS 25% + CASS 10%)
+
+EXEMPLU PERSONAL ADMINISTRATIV (puține deplasări):
+Salariu brut lunar: 5.000 RON
+3 zile delegație internă în lună × 57.5 RON = 172.5 RON
+33% plafon: 1.650 RON
+- Plafon 2.5×: 172.5 RON (sub limita 33%)
+- Aplicabil: 172.5 RON neimpozabil
+
+IMPACT REGULA 33%:
+Pentru salariile MICI cu DELEGAȚII LUNGI/FRECVENTE → plafon 33% activează LIMITAREA.
+Pentru salariile MARI cu delegații punctuale → rar activează (rămâne sub 33%).
+
+CINE BENEFICIAZĂ DE DIURNĂ:
+- Salariați cu CIM normă întreagă
+- Salariați cu CIM normă parțială (proporțional cu timpul)
+- Administratori cu CONTRACT MANDAT (vezi entrie diurnă-administrator)
+- Directori cu contract management
+
+CINE NU BENEFICIAZĂ:
+- Asociați FĂRĂ CIM și FĂRĂ contract mandat (Cod Fiscal art. 25 alin. 4 lit. d — sumele acordate sunt CHELTUIELI NEDEDUCTIBILE; nu este indemnizație de delegare)
+- Colaboratori externi (PFA, contracte civile) — au propriile reguli de impozitare
+
+DETAȘARE TRANSNAȚIONALĂ UE — FORMULAR A1 (Reg. CE 883/2004):
+Pentru salariați detașați în UE cu durată > 24 luni:
+- A1 OBLIGATORIU emis de Casa Națională Pensii (CNPP)
+- Permite menținere CAS în RO (NU CAS în țara de detașare)
+- Termen valabilitate: 24 luni (cu posibilitate prelungire la Comisia UE)
+- Documente solicitare: contract muncă + contract servicii cu beneficiarul + dovada activității
+
+DETAȘARE NON-UE (Turcia, Elveția, SUA):
+- A1 NU se aplică (este UE-only)
+- Reguli CDI între RO și țara de detașare
+- Posibil dublă contribuție (RO + țară detașare) sau scutire prin CDI
+- Diurnă acordată: aplicabil plafon RO (2.5× sau 33%)
+
+CAZUL CIRCULAȚIE LA BAZĂ:
+Pentru șoferi internaționali cu BAZĂ FIXĂ în RO + curse externe:
+- Tratament CA DELEGAȚIE (NU mobilitate) dacă revin regulat la bază
+- Diurnă externă pentru zilele OAFRA țării RO
+- Diurnă internă pentru zilele în RO
+
+REGISTRU OBLIGATORIU pentru DELEGAȚIE:
+1. Ordin de deplasare (Cod Muncii) — semnat înainte de plecare
+2. Itinerar precis: destinație, durată, scop
+3. Documente justificative (bilete, cazare, alimentație)
+4. Decont final (la întoarcere)
+5. Pentru externe: vouchere/extrase plată valută
+
+REGULA pentru DIURNĂ "CASH" CASA:
+- Diurna primită în numerar din casierie
+- Cuantum maxim: respectă plafonul Legea 70/2015 (5.000 RON/zi pentru persoană fizică)
+- Pentru sume mai mari: plată prin bancă
+
+MONOGRAFIE CONTABILĂ:
+A) Plată diurnă (în limita neimpozabilă):
+   625 = 421 (cheltuială cu deplasări — DEDUCTIBILĂ)
+   421 = 5311/5121 (plată)
+
+B) Diurnă peste plafon (impozabilă):
+   421 = 4431/4432/4441 (contribuții + impozit pe suma peste plafon)
+   421 = 5311/5121 (plata netă)
+   641 = 421 (parte salarială transferată — pentru claritate contabilă)
+
+D112 RAPORTARE:
+- Secțiunea F1: diurnă neimpozabilă (sub plafon)
+- Secțiunea G: parte impozabilă (peste plafon)
+- Atenție: NEDECLARARE peste plafon → control fiscal cu impunere retroactivă + accesorii
+
+SANCȚIUNI:
+- Diurnă acordată fără justificare/ordin deplasare: ANAF reclasifică ca salariu → impozit + contribuții suplim.
+- Plafonul 33% nedeclarat: ajustare în D112 + accesorii`,
+    sources: [
+      { label: "Cod Fiscal art. 76 alin. (4) lit. h), alin. (4¹) (plafoane diurnă)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Muncii art. 43-47 (delegație, detașare)", ref: "https://legislatie.just.ro" },
+      { label: "HG 714/2018 (diurnă sector public)", ref: "https://legislatie.just.ro" },
+      { label: "Regulament (CE) 883/2004 (A1 detașare UE)", ref: "https://eur-lex.europa.eu" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "cod-tva-anulat-reactivare-d311",
+    tags: ["cod TVA anulat", "art. 316 alin. 11", "art. 11", "reînregistrare TVA", "D311", "drept deducere", "proc. 2393"],
+    title: "Cod TVA anulat — anulare oficiu, reactivare, D311, impact parteneri",
+    body: `Cod Fiscal art. 316 alin. (11) + art. 11 alin. (6)-(9) + OPANAF 2393/2017 (procedură reînregistrare).
+
+MOTIVE ANULARE COD TVA DIN OFICIU (Cod Fiscal art. 316 alin. 11):
+
+a) NU au depus deconturi TVA pentru 1 SEMESTRU (trimestrial) sau 2 SEMESTRE (lunar) consecutive
+b) Au depus deconturi cu sume ZERO 6 LUNI consecutive (sub 6 trimestre consecutive pentru trimestrial)
+c) Sunt declarați INACTIVI fiscal (art. 92 Cod Procedură Fiscală)
+d) Au asociați/administratori cu cazier fiscal / fapte penale fiscale
+e) Modificare structură asociați cu risc fiscal
+f) Risc fiscal mare (criterii ANAF — note de risc)
+g) Schimbare adresă fără notificare 30 zile
+h) Activitate suspendată la ONRC fără declarare ANAF
+
+CONSECINȚE ANULARE:
+1. Firma RĂMÂNE PERSOANĂ IMPOZABILĂ (poate vinde/cumpăra) DAR:
+2. NU MAI POATE COLECTA TVA pe vânzări (factură fără TVA)
+3. NU MAI POATE DEDUCE TVA pe achiziții
+4. NU MAI ARE acces la rambursări TVA
+5. Continuă obligația D311 pentru anumite operațiuni (achiziții IC, taxare inversă internă)
+
+LIMITARE DEDUCERE pentru PARTENERII (art. 11 alin. 6-9):
+Firmele care cumpără DE LA o firmă cu COD TVA ANULAT au limitări:
+
+a) **Cumpărător PĂSTREAZĂ dreptul deducere** dacă:
+   - Furnizorul are codul TVA ANULAT din motivele de la lit. a-c (inactivitate declarații)
+   - Furnizorul ulterior se REACTIVEAZĂ (recâștigă cod TVA)
+   - În acest caz, cumpărătorul DEDUCE TVA pe facturile primite în perioada cu cod anulat, după reactivarea furnizorului
+
+b) **Cumpărător PIERDE dreptul deducere** dacă:
+   - Furnizorul are codul ANULAT din lit. d-h (risc fiscal, cazier, etc.)
+   - Dedu cerea NU se recuperează niciodată
+
+VERIFICARE STATUS COD TVA:
+- Registru public ANAF: https://www.anaf.ro/PublicWebApp (verifică valabilitate cod TVA)
+- Verificare ÎNAINTE de fiecare factură (mai ales pentru cumpărări mari)
+- Documentul de verificare se păstrează ca anexă (poate fi solicitat la control)
+
+D311 — Decont special pentru firme cu cod anulat (OPANAF 188/2018):
+Vezi entrie dedicate "D311 — TVA cod anulat". Cuprinde:
+- Achiziții IC bunuri (cu TVA datorat RO)
+- Servicii IC primite (reverse charge)
+- Taxare inversă internă (deșeuri, scrap)
+- Importuri
+
+PROCEDURA REACTIVARE COD TVA (OPANAF 2393/2017):
+
+PASUL 1 — VERIFICARE EligIBILITATE:
+- Firma NU mai e inactivă fiscal (art. 92 CPF)
+- Toate declarațiile la zi (D300, D394, D112, D101, bilanț)
+- Toate plățile la zi (sau eșalonare aprobată)
+- Conformare contabilă (audit dacă necesar)
+
+PASUL 2 — DEPUNERE D700:
+- D700 cu secțiunea reactivare TVA bifată
+- Atașamente:
+  - Bilanț + declarații depuse
+  - Documente eliminare cauze anulare
+  - Pentru risc fiscal: documente justificative + declarații cazier curat
+  - Pentru sediu schimbat: extras ONRC actualizat
+
+PASUL 3 — EVALUARE ANAF:
+- ANAF evaluează în 30-60 zile
+- Inspecție fiscală scurtă (la sediu)
+- Verificare contabilitate (random 3-6 luni)
+
+PASUL 4 — DECIZIE ANAF:
+- APROBARE: cod TVA reactivat (sau cod NOU dacă inactivitate >12 luni)
+- RESPINGERE: motivare + cale contestație (Cod Procedură Fiscală art. 268-270)
+
+DURATA REACTIVARE FĂRĂ COD NOU:
+- Dacă reactivare ÎN 6 LUNI de la anulare: același cod TVA
+- Peste 6 luni: cod NOU (cu RO + cifre noi)
+
+CAZ FRECVENT: REÎNREGISTRARE ÎNTÂRZIATĂ după anulare:
+
+SCENARIU:
+Firma și-a pierdut codul TVA din inactivitate (motive a-c). Continuă activitatea fără să observe.
+Trece 1 an cu vânzări fără TVA + cumpărări fără deducere.
+Realizează problema → demarează reactivare.
+
+CONSECINȚE FISCALE:
+- Pentru vânzările făcute în perioada cu cod anulat: TVA datorat retroactiv (de la ANAF) pe baza tranzacțiilor
+- Pentru achizițiile făcute: TVA NU se poate deduce retroactiv (excepție: dacă furnizorul are cod activ)
+- Accesorii: 0.02%/zi dobândă + 0.01%/zi penalitate (de la termene plată inițiale)
+- D311 retroactiv pentru achiziții IC care nu au fost declarate
+
+AJUSTARE NEGATIVĂ TVA BUNURI CAPITAL la ANULAREA CODULUI (art. 305):
+La data anulării codului → ajustare obligatorie TVA dedus inițial pe bunuri de capital:
+- Clădiri: perioada 20 ani → recuperare proporțională
+- Echipamente: perioada 5 ani → recuperare proporțională
+
+EXEMPLU:
+Mijloc fix (laptop/server) achiziționat 2024 cu TVA dedus 5.000 lei (perioada amortizare 3 ani / perioadă ajustare 5 ani).
+Anulare cod TVA: 06.04.2026 (după 2 ani de utilizare).
+Ani rămași în perioada ajustare: 5 - 2 = 3.
+TVA de ajustat (returnat la stat): 5.000 × 3/5 = 3.000 lei.
+
+ALTERNATIVE LEGALE pentru AJUSTARE:
+- Dacă mijlocul fix se vinde (deși firma nu mai are TVA): tratament special art. 304-305
+- Cu cod anulat, nu se mai colectează TVA la vânzare (factură fără TVA)
+
+PLATĂ TVA AJUSTAT:
+- La data anulării: TVA ajustat în D311 (sau decont special)
+- Plata: 25 luna următoare anulării
+
+CAZ SPECIAL: SUSPENDARE ACTIVITATE 3 ANI + COD ANULAT:
+Firmă cu mijloace fixe + suspendare ONRC 3 ani:
+- Anulare cod TVA automată
+- Ajustare TVA toate bunurile de capital (la data suspendării)
+- Mijloace fixe ramân în patrimoniu DAR fără TVA dedus
+- La reactivare: cod TVA nou, fără posibilitate de recuperare TVA ajustat
+
+DREPT DEDUCERE TVA NEEXIGIBILĂ la IEȘIRE DIN TVA:
+Pentru firme care ies VOLUNTAR din TVA (cerere proprie):
+- Stocuri marfă: ajustare conform 371 = 4428 (vezi monografie din Portal)
+- TVA neexigibilă din facturi (TVA la încasare): NU se mai poate deduce niciodată (renunțare drept)
+- Cont 4428 sold creditor: anulat la data ieșirii
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Decizia ANAF anulare cod
+2. D700 cu cerere reactivare
+3. Calcul ajustare TVA bunuri capital
+4. D311 pentru tranzacțiile care necesită declarare
+5. Pentru parteneri: notificare anulare cod (păstrare drept deducere)`,
+    sources: [
+      { label: "Cod Fiscal art. 316 alin. (11) (anulare cod TVA)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 11 alin. (6)-(9) (limitare deducere parteneri)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 305 (ajustare bunuri capital la anulare)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 2393/2017 (procedură reactivare cod TVA)", ref: "https://anaf.ro" },
+      { label: "OPANAF 188/2018 (D311)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
 ];
