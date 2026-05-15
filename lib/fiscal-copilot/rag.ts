@@ -12,10 +12,12 @@
  */
 
 import { FISCAL_CORPUS, type KnowledgeEntry } from "./corpus/seed-fiscal-ro";
+import { loadSagaManualCorpus } from "./corpus/saga-manual";
 
 export interface RetrievalResult {
   entry: KnowledgeEntry;
   score: number;
+  source: "seed" | "saga-manual";
 }
 
 const STOP_WORDS = new Set([
@@ -85,7 +87,9 @@ function scoreEntry(entry: KnowledgeEntry, queryTokens: string[]): number {
 }
 
 /**
- * Caută top N entries relevante pentru query.
+ * Caută top N entries relevante pentru query — SEED corpus ONLY (fast, sync).
+ *
+ * Pentru retrieval extins cu SAGA Manual corpus, folosește retrieveRelevantAsync().
  */
 export function retrieveRelevant(query: string, topN = 3): RetrievalResult[] {
   const tokens = tokenize(query);
@@ -94,6 +98,7 @@ export function retrieveRelevant(query: string, topN = 3): RetrievalResult[] {
   const scored = FISCAL_CORPUS.map((entry) => ({
     entry,
     score: scoreEntry(entry, tokens),
+    source: "seed" as const,
   }))
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -103,7 +108,56 @@ export function retrieveRelevant(query: string, topN = 3): RetrievalResult[] {
 }
 
 /**
+ * Caută top N entries în AMBELE corpus-uri: seed (15 entries) + SAGA Manual (97 topics).
+ *
+ * Seed prioritizat (curated): +20% boost la scor.
+ * SAGA Manual = expansiune masivă pentru întrebări pe operații specifice (jurnal TVA,
+ * intrari valută, închidere lună, etc.).
+ */
+export async function retrieveRelevantAsync(
+  query: string,
+  topN = 5
+): Promise<RetrievalResult[]> {
+  const tokens = tokenize(query);
+  if (tokens.length === 0) return [];
+
+  const seedResults: RetrievalResult[] = FISCAL_CORPUS.map((entry) => ({
+    entry,
+    score: scoreEntry(entry, tokens) * 1.2, // 20% boost for curated seed
+    source: "seed" as const,
+  })).filter((r) => r.score > 0);
+
+  const saga = await loadSagaManualCorpus();
+  const sagaResults: RetrievalResult[] = saga
+    .map((entry) => ({
+      entry,
+      score: scoreEntry(entry, tokens),
+      source: "saga-manual" as const,
+    }))
+    .filter((r) => r.score > 0);
+
+  return [...seedResults, ...sagaResults]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topN);
+}
+
+/**
+ * Maximum caractere pentru body în prompt context (per entry).
+ * SAGA Manual entries pot fi 20-35KB; trunchiem ca să nu saturăm Gemma's context window.
+ */
+const MAX_BODY_CHARS_PER_ENTRY = 2_500;
+
+function truncateBody(body: string, max = MAX_BODY_CHARS_PER_ENTRY): string {
+  if (body.length <= max) return body;
+  // Truncă la cea mai apropiată propoziție pentru naturalețe
+  const truncated = body.slice(0, max);
+  const lastPeriod = truncated.lastIndexOf(". ");
+  return (lastPeriod > max * 0.7 ? truncated.slice(0, lastPeriod + 1) : truncated) + "\n[...truncat pentru concizie prompt...]";
+}
+
+/**
  * Formatează rezultatele RAG ca context pentru LLM prompt.
+ * Trunchează automat entries lungi (SAGA Manual) pentru a respecta context budget.
  */
 export function formatContextForPrompt(results: RetrievalResult[]): string {
   if (results.length === 0) {
@@ -114,7 +168,7 @@ export function formatContextForPrompt(results: RetrievalResult[]): string {
     .map(
       (r, i) => `### Articol ${i + 1}: ${r.entry.title}
 
-${r.entry.body}
+${truncateBody(r.entry.body)}
 
 **Surse:** ${r.entry.sources.map((s) => `${s.label} (${s.ref})`).join("; ")}
 **Verificat:** ${r.entry.last_verified}`

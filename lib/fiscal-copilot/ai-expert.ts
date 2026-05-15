@@ -8,7 +8,12 @@
  */
 
 import { askGemma, checkGemmaAvailable, type GemmaResponse } from "./gemma-client";
-import { retrieveRelevant, formatContextForPrompt, type RetrievalResult } from "./rag";
+import {
+  retrieveRelevant,
+  retrieveRelevantAsync,
+  formatContextForPrompt,
+  type RetrievalResult,
+} from "./rag";
 import { logEpisode } from "./memory/episodic";
 import { clientFacts, factsAsContext } from "./memory/semantic";
 
@@ -56,8 +61,9 @@ export async function askExpert(
   const start = Date.now();
   const topN = opts.topN ?? 3;
 
-  // 1. RAG retrieval (knowledge base)
-  const retrieved = retrieveRelevant(question, topN);
+  // 1. RAG retrieval — seed (curated 15) + SAGA Manual (97 topics)
+  void retrieveRelevant; // sync fallback kept for callers care doresc fast path
+  const retrieved = await retrieveRelevantAsync(question, topN);
   const context = formatContextForPrompt(retrieved);
 
   // 1b. Semantic memory facts (if client context is provided)
