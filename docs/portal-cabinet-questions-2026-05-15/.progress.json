@@ -1,8 +1,6 @@
 {
-  "i": 1374,
+  "done": true,
   "total": 1502,
-  "processed": 1375,
-  "corpus": 1350,
-  "lastUrl": "https://www.portalcontabilitate.ro/incasare-factura-prin-pos-casa-de-marcat-mijloace-moderne-de-plata-216606.htm",
-  "elapsed_s": 3045
+  "corpus": 1474,
+  "elapsed_s": 3326
 }

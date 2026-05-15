@@ -717,7 +717,97 @@ export async function seedDefaultProcedures(orgId: string): Promise<void> {
   });
 
   // ==========================================================================
-  // 8. Casa de marcat (înregistrare AMEF) — pentru cei la prag rulaj
+  // 8. Redirectionare 20% / 0.75% impozit profit către ONG (D177)
+  // Sursa pain: FB "Contabili pe Facebook" Dana Popescu 14 mai 2026
+  // 4 răspunsuri contradictorii în comunitate — exact unde AI Expert dă valoare
+  // ==========================================================================
+  await upsertProcedure({
+    orgId,
+    name: "redirectionare_d177_ong",
+    title: "Redirectionează imp. profit către ONG (D177)",
+    intent: "Adm. vrea să redirecționeze 20% din impozit pe profit (sau 0.75% CA, cea mai mică) către un ONG ales",
+    tags: ["D177", "ONG", "redirectionare", "sponsorizare", "impozit-profit"],
+    estimatedTimeManualMin: 60,
+    estimatedTimeWithCopilotMin: 8,
+    documentsRequired: [
+      "Bilanț depus și aprobat",
+      "D101 (impozit pe profit anual) calculat",
+      "Datele ONG-ului beneficiar: denumire, CIF, cont IBAN",
+      "Sumele anuale: impozit profit declarat + cifra de afaceri",
+    ],
+    questionsToAskClient: [
+      "Ce ONG vrei să beneficieze? (denumire + CIF + IBAN)",
+      "Ai depus deja bilanțul? D101 e calculat?",
+      "Ai plătit deja impozit profit (sau urmează)?",
+    ],
+    preventiveChecks: [
+      {
+        check: "D101_nu_e_depus",
+        ifTrueAdvise: "STOP — depune D101 ÎNTÂI. ANAF compară automat suma redirectionată cu impozitul declarat. Fără D101, D177 e respinsă.",
+      },
+      {
+        check: "suma_redirectionare > min(20%_impozit, 0.75%_CA)",
+        ifTrueAdvise: "ATENȚIE — limita e MIN dintre: 20% × impozit profit ȘI 0.75% × cifra de afaceri. Se alege varianta MAI MICĂ. Calculează ambele.",
+      },
+      {
+        check: "termen_25_iunie_aproape",
+        ifTrueAdvise: "Termen: 25 iunie anul curent pentru anul fiscal precedent. După 25 iunie nu se mai poate.",
+      },
+      {
+        check: "ong_neeligibil",
+        ifTrueAdvise: "Verifică ONG-ul e în Registrul entităților ANAF (eligibile pentru redirectionare). Doar ONG-uri certificate.",
+      },
+    ],
+    outputs: [
+      "Calculul exact: min(20% × imp_profit, 0.75% × CA) = SUMA redirectionată",
+      "D177 completat cu datele ONG + suma",
+      "Recipisă SPV ANAF (acceptare/respingere)",
+      "(Notă: NU se fac înregistrări contabile pentru D177 — confirmat Amalia FB)",
+    ],
+    legalReferences: [
+      { article: "art. 25 alin. (4) lit. i)", law: "Cod Fiscal (sponsorizare)", url: "https://legislatie.just.ro" },
+      { article: "OPANAF cu modificările ulterioare", law: "Formular D177", url: "https://anaf.ro" },
+      { article: "Legea 32/1994", law: "Sponsorizare", url: "https://legislatie.just.ro" },
+    ],
+    steps: [
+      {
+        action: "verifica_d101_depus_si_platit",
+        description: "D101 trebuie depus PRIMUL (ANAF folosește suma de acolo pentru cross-check). Plata impozitului recomandată.",
+        produces: ["d101_status"],
+        estimatedMinutes: 2,
+      },
+      {
+        action: "calculeaza_dubla_limita",
+        description: "Calculează AMBELE: A = 20% × impozit profit declarat. B = 0.75% × cifra afaceri anuală. SUMA = MIN(A, B).",
+        requires: ["d101_status"],
+        produces: ["suma_max_redirectionare"],
+        estimatedMinutes: 2,
+      },
+      {
+        action: "verifica_ong_eligibil",
+        description: "Caută ONG-ul în Registrul entităților ANAF pentru sponsorizare. Doar ONG-uri certificate primesc redirectionare.",
+        produces: ["ong_eligibilitate"],
+        estimatedMinutes: 1,
+      },
+      {
+        action: "completeaza_d177",
+        description: "Completează D177 cu: CIF ONG + denumire + IBAN + suma (max calculată). Verifică datele.",
+        requires: ["suma_max_redirectionare", "ong_eligibilitate"],
+        produces: ["d177_xml"],
+        estimatedMinutes: 2,
+      },
+      {
+        action: "depune_in_spv",
+        description: "Depune D177 prin SPV. Termen ABSOLUT: 25 iunie an curent pentru anul fiscal precedent.",
+        requires: ["d177_xml"],
+        produces: ["recipisa_d177"],
+        estimatedMinutes: 1,
+      },
+    ],
+  });
+
+  // ==========================================================================
+  // 9. Casa de marcat (înregistrare AMEF) — pentru cei la prag rulaj
   // ==========================================================================
   await upsertProcedure({
     orgId,

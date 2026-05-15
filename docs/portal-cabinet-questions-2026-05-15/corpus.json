@@ -28643,5 +28643,2624 @@
       "caen": "8710"
     },
     "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216605",
+    "url": "https://www.portalcontabilitate.ro/schimbarea-metodei-de-evaluare-a-stocurilor-de-la-cmp-la-lifo-216605.htm",
+    "title": "Schimbarea metodei de evaluare a stocurilor: de la CMP la LIFO - Contabilitate si monografii",
+    "question": "Se poate schimba metoda evaluarii stocurilor de produse finite de la CMP la LIFO? In ce conditii?",
+    "tags": [
+      "produse finite",
+      "evaluare stocuri"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "0811"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216604",
+    "url": "https://www.portalcontabilitate.ro/regimul-contributiilor-sociale-si-al-impozitarii-salariului-in-cazul-telemuncii-din-spania-216604.htm",
+    "title": "Regimul contributiilor sociale si al impozitarii salariului in cazul telemuncii din Spania - Salarii",
+    "question": "Se doreste pastrarea unui salariat care urmeaza sa plece in Spania, posibil definitiv. Ne-am gandit sa-i transformam contractul individual de munca in contract cu clauza de telemunca. Salariatul este cetatean roman si lucreaza ca programator. Unde se vor plati contributiile salariale daca salariatul o sa depaseasca cele 183 zile de sedere in Spania? Ce obligatii ii revin angajatorului in aceasta situatie?",
+    "tags": [
+      "contributii sociale",
+      "impozit pe venit",
+      "conventia de evitare a dublei impuneri"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6220"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216600",
+    "url": "https://www.portalcontabilitate.ro/raportare-factura-furnizor-intracomunitar-in-intrastat-vs-d390-216600.htm",
+    "title": "Raportare factura furnizor intracomunitar in Intrastat vs D390 - Intrastat",
+    "question": "Am primit de la un furnizor intracomunitar o factura in luna decembrie cu produse care se vor livra ulterior. Am intregistrat ca si note contabile: 327=401; 4426=4427. Am declarat factura in declaratia 390 ca si achizitie intracomunitara, dar nu am declarat in intrastat deoarece marfa nu a sosit. Este corect asa?",
+    "tags": [
+      "inregistrari contabile",
+      "declaratia 390",
+      "achizitie intracomunitara"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Georgiana Mierloiu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4639"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216598",
+    "url": "https://www.portalcontabilitate.ro/completare-d700-inregistrare-in-scopuri-de-tva-216598.htm",
+    "title": "Completare D700. Inregistrare in scopuri de TVA - Intracomunitare",
+    "question": "O societate neplatitoare de TVA doreste sa cumpere doua utilaje din Polonia, in valoare de 31.786 EUR fiecare. Va rog sa ma indrumati cu privire la completarea declaratiei D700, in vederea inregistrarii in scopuri de TVA, inclusiv cu documentele care trebuie sa fie atasate declaratiei. Mentionez ca societatea va vinde ulterior aceste utilaje si, deci, va depasi cifra de afaceri reprezentand plafonul de scutire.",
+    "tags": [
+      "declaratia 700",
+      "tva",
+      "plafon de scutire",
+      "cifra de afaceri"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Denisa Alexe",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4619"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216597",
+    "url": "https://www.portalcontabilitate.ro/inregistrare-in-scopuri-de-tva-prin-optiune-216597.htm",
+    "title": "Inregistrare in scopuri de TVA prin optiune - Intracomunitare",
+    "question": "O societate neplatitoare de TVA, doreste sa cumpere doua utilaje din Polonia in valoare de 31786 euro fiecare. Va rog sa ma indrumati in legatura cu completarea declaratiei d700 in vederea inregistrarii in scopuri de TVA, inclusiv cu documentele care trebuie sa fie atasate declaratiei. Mentinez ca societatea va vinde ulterior utilajele respective si deci automat va depasi si cifra de afaceri reprezentand plafonul de scutire.",
+    "tags": [
+      "tva",
+      "declaratia 700",
+      "documente",
+      "cifra de afaceri"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4619"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216595",
+    "url": "https://www.portalcontabilitate.ro/dare-in-plata-imobil-implicatii-tva-216595.htm",
+    "title": "Dare in plata imobil. Implicatii TVA - TVA e-TVA",
+    "question": "O societate comerciala, platitoare de TVA si impozit pe profit, are inregistrat in patrimoniu un teren intravilan achizitionat in anul 2012, pe care a edificat in perioada 20122016 un imobil compus din 3 corpuri, cu destinatia de sediu social.La aceasta data s-a intocmit un raport de evaluare in vederea vanzarii atat a terenului, cat si a celor trei constructii. * Valoarea neta contabila a terenului este 50.000 lei, valoarea evaluata 285.000 lei. * La imobile, valoarea contabila neta este 12.000 lei, iar valoarea evaluata este 900.000 lei. Se doreste vanzarea catre administratorul societatii, care are de recuperat din firma suma de 625.000 lei. Vanzarea se face prin act notarial. 1. Se percepe TVA la vanzarea terenului si a imobilelor? 2. Precizez ca pentru ajustarea TVA se impune un volum foarte mare de munca, lucrarile fiind edificate pe parcursul a aproape 4 ani, iar ulterior au mai fost aduse modernizari care au marit valoarea contabila a imobilului. 3. Diferenta intre valoarea contabila si valoarea de vanzare este considerata cheltuiala nedeductibila, avand in vedere ca exista raport de evaluare?",
+    "tags": [
+      "TVA",
+      "cheltuiala nedeductibila",
+      "raport de evaluare",
+      "monografie contabila"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Mariana Prejbeanu",
+    "expert_role": "Expert contabil, Consultant fiscal, Auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true,
+      "caen": "7022"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216586",
+    "url": "https://www.portalcontabilitate.ro/aplicarea-reducerii-de-50procente-a-normei-de-venit-pentru-pfa-care-dobandeste-calitatea-de-salariat-in-cursul-anului-2025-216586.htm",
+    "title": "Aplicarea reducerii de 50% a normei de venit pentru PFA care dobandeste calitatea de salariat in cursul anului 2025 - Declaratia unica",
+    "question": "La o PFA inregistrat fiscal la norma de venit in 2025, reprezentantul legal este angajat cu contract de munca, cu norma intreaga, incepand cu 1 septembrie 2025. Ajustarea normei de venit se face pentru intreaga suma de 48.600 lei cu 50%, sau proportional, pentru cele 4 luni de la inceputul contractului de munca?",
+    "tags": [
+      "PFA",
+      "ajusare norma de venit",
+      "reprezentant legal"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "4221"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216572",
+    "url": "https://www.portalcontabilitate.ro/achizitie-matrita-in-slovenia-trimitere-componente-spre-prelucrare-in-italia-tratament-tva-216572.htm",
+    "title": "Achizitie matrita in Slovenia. Trimitere componente spre prelucrare in Italia. Tratament TVA - TVA e-TVA",
+    "question": "Am achizitionat o matrita de la o firma din Italia, cu care am incheiat un proces-verbal de custodie a matritei. Firma din Italia nu este si producatorul matritei. Matrita ne-a fost facturata fara TVA, desi nu a ajuns pe teritoriul Romaniei. In fapt, matrita se afla in Slovenia, la producator (a fost produsa in Slovenia si nu a parasit teritoriul Sloveniei), si este utilizata de firma din Slovenia pentru producerea de componente. Ulterior, componentele produse cu matrita noastra sunt livrate firmei din Italia, unde sunt supuse prelucrarii mecanice, in conformitate cu documentatia tehnica aprobata de comun acord de catre partile implicate. Dupa finalizarea operatiunilor de prelucrare mecanica, produsele rezultate sunt livrate catre societatea noastra. Matrita este proprietatea societatii noastre. Va rugam sa ne comunicati care este tratamentul fiscal din punctul de vedere al TVA. Factura emisa din Italia este corect intocmita fara TVA, avand in vedere ca matrita se afla pe teritoriul Sloveniei si nu a parasit acest teritoriu? De asemenea, va rugam sa ne precizati ce documente justificative este necesar sa detinem pentru tranzactia prezentata.",
+    "tags": [
+      "tva",
+      "documente justificative",
+      "achizitie matrita"
+    ],
+    "date_validity": "25 Feb 2026",
+    "expert": "Constanta Popa",
+    "expert_role": "Expert contabil, auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2824"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216571",
+    "url": "https://www.portalcontabilitate.ro/d300-export-de-bunuri-reduceri-comerciale-19procente-216571.htm",
+    "title": "D300. Export de bunuri. Reduceri comerciale 19% - Declaratii TVA",
+    "question": "1. La ce rand din decontul de TVA se declara livrarile de bunuri catre persoane juridice care au sediul activitatii in afara spatiului European, bunuri care parasesc tara in baza Declaratie vamale de export, clauza de transport. 2. S-au emis facturi de reduceri comerciale de volum aferente livrarilor a caror fapt generator au fost cu 19%, aceste valori se inscriu la rd. 16 din noul decont TVA?",
+    "tags": [
+      "export de bunuri",
+      "reduceri comerciale",
+      "declaratia 300",
+      "decontul de TVA"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "1712"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216565",
+    "url": "https://www.portalcontabilitate.ro/cass-datorata-de-pensionar-cu-venituri-din-pfa-sub-si-peste-plafonul-de-6-salarii-minime-216565.htm",
+    "title": "CASS datorata de pensionar cu venituri din PFA sub si peste plafonul de 6 salarii minime - Declaratia unica",
+    "question": "Va rog sa-mi comunicati care este obligatia de plata a contributiei la asigurarile sociale de sanatate (CASS) pentru o persoana fizica ce are calitatea de pensionar si obtine venituri nete din activitate independenta (PFA coafor): - in situatia in care veniturile nete sunt sub pragul de 6 salarii minime brute pe economie; - respectiv, in cazul in care veniturile nete depasesc acest plafon.",
+    "tags": [
+      "CASS",
+      "venituri",
+      "pfa",
+      "plafon"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216563",
+    "url": "https://www.portalcontabilitate.ro/anulare-din-oficiu-si-reactivare-cod-de-tva-in-aceeasi-perioada-fiscala-de-raportare-216563.htm",
+    "title": "Anulare din oficiu si reactivare cod de TVA in aceeasi perioada fiscala de raportare - Declaratii",
+    "question": "Societate platioare de TVA pana la data de 12.01.2026 este declarata inactiva de ANAF deoarece i-a expirat durata spatiului pentru sediul social. La data de 16.02.2026 am depus in SPV solicitarea de reactivare a societatii insotita de documentele de la registrul comertului cu dovada spatiului pentru sediul social. In perioada in care societatea a fost inactiva am primit 2 facturi cu tva de la furnizori. Ce declaratii trebuie sa fac pe perioada inactivitatii societatii avand in vedere aceste doua facturi de la furnizori si fapul ca societatea a fost platitoare de tva la trimestru? Trebuie sa depun si declaratia 700 pentru a o reinregistra in scopuri de tva?",
+    "tags": [
+      "cod de TVA",
+      "declaratia 700",
+      "factura",
+      "spv"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true,
+      "caen": "3512"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216562",
+    "url": "https://www.portalcontabilitate.ro/ajustare-tva-minus-de-inventar-216562.htm",
+    "title": "Ajustare TVA minus de inventar - Ajustare TVA",
+    "question": "In urma inventarierii patrimoniului la 31.12.2025 a rezultat minus inventar si avem nota contabila 635=4426 . Rezultatul inventarierii nu era finalizat la 25 ianuarie cand s-a depus D300 aferent lunii dec.2025. Cand inregistrez nota contabila, la decembrie 2025 (caz in care se face redepune , corecteaza D300) sau ianuarie 2026? Decontul lunii ianuarie inca nu este depus?",
+    "tags": [
+      "ajustare TVA",
+      "minus de inventar",
+      "inregistrari contabile",
+      "declaratia 300"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4321"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216561",
+    "url": "https://www.portalcontabilitate.ro/neplatitor-de-tva-prestari-servicii-online-de-coaching-beneficiar-persoana-juridica-nerezidenta-216561.htm",
+    "title": "Neplatitor de TVA. Prestari servicii online de coaching. Beneficiar persoana juridica nerezidenta - Servicii",
+    "question": "O SRL neplatitor de TVA, platitor de impozit pe venit presteaza servicii de coach-ing pentru o firma din Statele unite ale Americii. Mentionez ca activitatea se desfasoara online. Va rog sa imi spuneti ce obligatii are din punct de vedere declarativ si fiscal.",
+    "tags": [
+      "tva",
+      "servicii online",
+      "nerezident"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216559",
+    "url": "https://www.portalcontabilitate.ro/achizitie-loc-de-parcare-inregistare-regim-tva-la-achizitie-216559.htm",
+    "title": "Achizitie loc de parcare. Inregistare. Regim TVA la achizitie - Contabilitate si monografii",
+    "question": "O societate platitoare de TVA doreste ca achizitioneze un loc de parcare, dar care nu are legatura cu sediul societatii. Se poate achizitiona pe societate? Care sunt notele contabile de introducere a locului de parcare in societate si cum se factureaza achizitia( cu taxare inversa sau cota standard)?",
+    "tags": [
+      "achizitie loc de parcare",
+      "tva",
+      "inregistrari contabile"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4619"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216557",
+    "url": "https://www.portalcontabilitate.ro/facilitati-cheltuieli-de-cercetare-dezvoltare-la-calculul-impozitului-pe-profit-216557.htm",
+    "title": "Facilitati cheltuieli de cercetare dezvoltare la calculul impozitului pe profit - Imobilizari necorporale",
+    "question": "Societatea comerciala dezvolta un produs informatic propriu, sub forma unei platforme modulare. In acest sens, cheltuielile sunt capitalizate in contul 203 Cheltuieli de dezvoltare, prin nota contabila 203 = 721, iar la finalul anului se face receptia si se inregistreaza 208 = 203. Incepand cu luna urmatoare receptiei, activul este amortizat contabil, prin metoda liniara, pe o perioada de 10 ani. Pentru cheltuielile de cercetare-dezvoltare, in baza unui raport de expertiza, am obtinut eligibilitatea acestora pentru aplicarea deducerii suplimentare de 50% la calculul rezultatului fiscal, conform art. 20 din Codul fiscal. Va rugam sa ne precizati care este abordarea dumneavoastra din punctul de vedere al amortizarii contabile si al celei fiscale, precum si care ar fi impactul in cazul unui control fiscal, avand in vedere decizia noastra de a aplica amortizarea liniara pe o perioada de 10 ani.",
+    "tags": [
+      "cheltuieli de cercetare dezvoltare",
+      "calcul impozit pe profit",
+      "amortizare"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4649"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216555",
+    "url": "https://www.portalcontabilitate.ro/completare-d205-venituri-din-inchiriere-216555.htm",
+    "title": "Completare D205 venituri din inchiriere - Chirii",
+    "question": "Ce trebuie sa completam la punctul 7. Castig / Dividende distribuite (a) / VB platit exclusiv in natura (k) si la punctul 8. Pierdere / Dividende platite (a) / Suma garantie pentru plata chiriei stabilita prin contract (k) din declaratia D205 pentru declararea chiriilor retinute la sursa pentru PF? Aceste campuri au devenit obligatorii si declaratia nu se valideaza pana nu le completam. La punctul 7: trecem castigul brut pe care il includem si la punctul 9, Baza de calcul, sau o alta valoare? La punctul 8: daca nu am platit in anul 2025 nicio garantie, trecem valoarea 0? Care este castigul brut declarabil in cazul unei persoane fizice care realizeaza venituri din inchirierea unui imobil catre PJ? a. Valoarea trecuta in contractul de inchiriere b. Valoarea rezultata dupa retinerea la sursa a impozitului c. Valoarea incasata efectiv de PF, conform extrasului de cont",
+    "tags": [
+      "venituri din inchiriere",
+      "declaratia 205",
+      "contract de inchiriere"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216554",
+    "url": "https://www.portalcontabilitate.ro/beneficiu-extrasalarial-acordat-in-ccc-d112-216554.htm",
+    "title": "Beneficiu extrasalarial acordat in CCC. D112 - Salarii",
+    "question": "O salariata aflata in concediu de ingrijire copil beneficiaza de o dobanda mai mica decat dobanda practicata pe piata, pe perioada suspendarii contractului. Cum recunoastem acest avantaj si cum il declaram in D112? Ca avantaj neimpozabil, fiind in limita de 33% din salariul de baza al contractului de munca suspendat, sau ca avantaj impozabil, iar firma sa suporte contributiile si impozitul? Are dreptul sa primeasca acest avantaj fara sa ii afecteze dreptul de a primi indemnizatia de la stat, daca acest drept este stabilit prin politica interna?",
+    "tags": [
+      "beneficiu extrasalarial",
+      "declaratia 112",
+      "avantaj impozabil",
+      "contributii"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Adela Oncescu",
+    "expert_role": "Economist, jurist",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216552",
+    "url": "https://www.portalcontabilitate.ro/regimul-fiscal-al-punctelor-de-lucru-cif-sediu-desemnat-si-declararea-d112-legea-2732006-og-62026-216552.htm",
+    "title": "Regimul fiscal al punctelor de lucru: CIF, sediu desemnat si declararea D112 (Legea 273/2006 + OG 6/2026) - Impozit pe venit",
+    "question": "Am depus formularul 060 pentru puncte de lucru situate in aceeasi localitate, fiecare avand 12 salariati. Cum pot afla ce s-a intamplat cu emiterea Codului de Identificare Fiscala (CIF), daca s-a emis sau nu CIF in urma depunerii formularului 060? Cum determin care este punctul de lucru care preia responsabilitatea declararii in D112? Daca avem 10 puncte de lucru si pentru 3 dintre ele s-a emis CIF, iar pentru restul nu, ce facem in aceasta situatie cu completarea D112?",
+    "tags": [
+      "punct de lucru",
+      "cif",
+      "sediu secundar",
+      "formularul 060"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "9329"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216550",
+    "url": "https://www.portalcontabilitate.ro/corectare-impozit-pe-profit-aferent-anilor-2020-si-2024-216550.htm",
+    "title": "Corectare impozit pe profit aferent anilor 2020 si 2024 - Scutiri impozit",
+    "question": "Va rog sa ma ajutati cu o monografie contabila si sa-mi confirmati daca este corect ca, in anul 2025, sa corectez D101 pentru impozitul pe profit aferent anilor 2020 si 2024, avand in vedere profitul reinvestit pentru utilaje agricole noi achizitionate de firma in anii 2020 si 2024.",
+    "tags": [
+      "impozit pe profit",
+      "monografie contabila",
+      "declaratia 101",
+      "profit reinvestit"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Olguta Crevelescu",
+    "expert_role": "Expert Contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "0111"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216542",
+    "url": "https://www.portalcontabilitate.ro/regim-si-cota-de-tva-pentru-cesiune-apartament-216542.htm",
+    "title": "Regim si cota de TVA pentru cesiune apartament - Inregistrare (sau obligatiile persoanelor impozabile)",
+    "question": "Societatea A (platitoare de TVA si aplicand sistemul TVA la incasare) factureaza catre societatea B (platitoare de TVA, fara aplicarea sistemului TVA la incasare) prestatii in constructii in valoare de 1.000.000 lei, TVA inclus. Societatea B factureaza catre dezvoltatorul imobiliar, societatea C (platitoare de TVA, fara aplicarea sistemului TVA la incasare), prestatii in constructii in valoare de 10.000.000 lei, TVA inclus. Societatea C este dispusa sa cedeze dreptul de proprietate asupra unui apartament din blocul construit catre societatea B (acceptat la valoarea de 1.000.000 lei, conform unei promisiuni bilaterale de vanzare-cumparare a unui apartament viitor), pentru a stinge o parte din obligatii. Ulterior, acest apartament urmeaza sa fie cesionat catre societatea A, pentru a stinge obligatia societatii B fata de societatea A. Conventia de cesiune este incheiata la notar intre cele trei societati. Pe langa conventia de cesiune incheiata intre parti, din punctul de vedere al TVA, societatea C, in momentul in care cedeaza apartamentul finalizat, trebuie sa emita factura? Daca da, ce regim de TVA aplica? Contractul de cesiune a fost incheiat in martie 2025, cu promisiune de finalizare in cursul anului 2025, iar finalizarea apartamentului are loc in februarie 2026.",
+    "tags": [
+      "cesiune apartament",
+      "cota de TVA",
+      "tva",
+      "factura"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216539",
+    "url": "https://www.portalcontabilitate.ro/stabilirea-anului-fiscal-pentru-d205-si-declaratia-unica-in-cazul-dividendelor-reincadrate-la-control-216539.htm",
+    "title": "Stabilirea anului fiscal pentru D205 si declaratia unica in cazul dividendelor reincadrate la control - Dividende",
+    "question": "In urma unui control fiscal in anul 2025 a fost considerata ca fiind asimilata veniturilor din dividende suma de 307884,60 lei pentru care s-a stabilit impozit pe dividende de 8% in valoare de 26.773 lei. Aceasta suma a fost considerata din profitul anilor trecuti existent in contul 117 la sfarsitul anului 2024. Va rugam sa ne precizati daca trebuie depusa declaratia 205 si declaratie unica. Declaratia 205 se depune pentru anul 2024 avand in vedere ca impozitul s-a calculat cu 8%. Dar declaratia unica pentru ce an se depune pentru a plati CASS?",
+    "tags": [
+      "declaratia unica",
+      "dividende",
+      "declaratia 205",
+      "calcul impozit"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "0220"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216535",
+    "url": "https://www.portalcontabilitate.ro/tratament-contabil-si-tva-vehicul-rulat-achizitionat-din-germania-216535.htm",
+    "title": "Tratament contabil si TVA. Vehicul rulat achizitionat din Germania - Intracomunitare",
+    "question": "Societatea cumpara un vehicul rulat din Germania. Factura este facuta pe suma de 46.050 euro iar plata este facuta pe suma +TVA (54.800 euro), adica am achitat si TVA. Cum inregistrez aceasta factura?",
+    "tags": [
+      "achizitie autoturism",
+      "factura",
+      "tva"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4100"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216532",
+    "url": "https://www.portalcontabilitate.ro/cota-de-tva-livrare-meniuri-fast-food-216532.htm",
+    "title": "Cota de TVA livrare meniuri fast-food - Cotele de TVA",
+    "question": "Suntem o societate de tip fast-food. Livram aceste bunuri la sediul fast-food-ului si prin sistem catering. Nu toate meniurile livrate contin si bauturi nonalcoolice. Care este cota de TVA cu care se livreaza meniurile atat cele care contin bauturi nonalcoolice cat si cele fara?",
+    "tags": [
+      "cota de tva",
+      "livrare meniuri fast-food"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216531",
+    "url": "https://www.portalcontabilitate.ro/bonificatie-3procente-la-impozit-pe-profit-216531.htm",
+    "title": "Bonificatie 3% la impozit pe profit - Impozit pe profit",
+    "question": "Care este tratamentul contabil si fiscal al bonificatiei de 3% acordate conform OUG 107/2024, in cazul unei societati platitoare de impozit pe profit? Am intalnit opinii diferite: inregistrarea in contul 117 Rezultat reportat, inregistrarea in contul 7588 Alte venituri din exploatare sau diminuarea cheltuielii cu impozitul pe profit. Va rugam sa precizati: 1. Care este tratamentul contabil corect? 2. In cazul in care se inregistreaza in contul 7588, acesta este un venit impozabil? Cum se reflecta in D101 pentru anul 2025? 3. Daca se inregistreaza in contul 117, este necesara depunerea unei declaratii rectificative D101 pentru anul 2024?",
+    "tags": [
+      "impozit pe profit",
+      "bonificatie",
+      "declaratia 101"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Mariana Prejbeanu",
+    "expert_role": "Expert contabil, Consultant fiscal, Auditor financiar",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216525",
+    "url": "https://www.portalcontabilitate.ro/raspuns-notificare-ro-e-tva-216525.htm",
+    "title": "Raspuns notificare RO e-TVA - Declaratii TVA",
+    "question": "Am primit o notificare de conformare RO e-TVA. Diferenta o reprezinta RD 9.1 Livrari cu 19%, unde apare o suma negativa la TVA. Am verificat si suma trecuta la RD 9.1 provine de la doua facturi emise pentru: * storno-ul unui avans facturat in 2024, cu TVA 19%; * returnarea unui tambur de cablu livrat inainte de iulie 2025. Facturile respective au fost transmise prin RO e-Factura, detinem ID-urile de transmitere, insa in Decontul precompletat nu au fost cuprinse, nici la RD 9.1, nici la regularizari. Cum ar trebui sa formulam raspunsul la notificare?",
+    "tags": [
+      "e-TVA",
+      "avans",
+      "e-factura"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "7112"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216522",
+    "url": "https://www.portalcontabilitate.ro/regim-tva-servicii-prestate-de-comisionar-vamal-216522.htm",
+    "title": "Regim TVA servicii prestate de comisionar vamal - Cotele de TVA",
+    "question": "Societate cu obiect de activitate: comisionar in vama. Avem clienti din afara UE, exemplu: 1. Daca emitem factura catre o firma din afara UE, operatiunea este neimpozabila in Romania, factura se emite fara TVA. Locul prestarii este in Romania, la sediul comisionarului vamal, in incinta biroului vamal de frontiera sau de interior, iar factura se emite la sediul clientului beneficiar (Turcia, Serbia, Republica Moldova, Muntenegru, Ucraina etc.). Se aplica regula generala B2B (art. 278 alin. 2 Codul fiscal). Mentiune pe factura: Neimpozabil in Romania conform art. 278 alin. (2) Codul fiscal. 2. In cazul operatiunilor precum: declaratie vamala de export, T1/T2, depozitare temporara logistica, manipulare, TSDPN, acestea se factureaza fara TVA. Factura trebuie emisa obligatoriu catre firma, nu catre persoana fizica non-UE.",
+    "tags": [
+      "comisionar vamal",
+      "tva",
+      "declaratie vamala de export"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Monica Cernea",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "5229"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216518",
+    "url": "https://www.portalcontabilitate.ro/obligatie-factura-216518.htm",
+    "title": "Obligatie factura - Servicii",
+    "question": "O microintreprindere, neplatitoare de TVA, presteaza servicii de mentenanta unui client, persoana juridica platitoare de TVA, conform contractului incheiat intre cele doua parti. Plata se efectueaza in termenul stabilit in contract. Este suficient contractul sau microintreprinderea are si obligatia emiterii facturii?",
+    "tags": [
+      "factura",
+      "microintreprindere",
+      "servicii de mentenanta"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4637"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216516",
+    "url": "https://www.portalcontabilitate.ro/dedctibilitate-cheltuieli-casare-stocuri-aflate-in-depozit-la-amazon-216516.htm",
+    "title": "Dedctibilitate cheltuieli casare stocuri aflate in depozit la Amazon - Stocuri",
+    "question": "O societate din Romania, avand ca obiect principal de activitate comertul online cu produse (cod CAEN 4791), achizitioneaza bunuri din China, care sunt livrate direct in SUA pentru a fi comercializate prin platforma Amazon. Se prezinta urmatoarele situatii: 1. Distrugerea stocului de catre firma de depozitare Societatea colaboreaza cu o firma din SUA pentru depozitarea produselor. Firma americana emite facturi pentru serviciile de depozitare. Intrucat societatea din Romania nu achita facturile aferente serviciilor, firma din SUA transmite o notificare prin care informeaza ca, in lipsa platii, va proceda la distrugerea intregului stoc. In final, stocul este distrus. Se solicita clarificari privind: a) Care este tratamentul contabil al situatiei? b) In cazul in care se inregistreaza casarea stocului (ex. prin bon de consum / proces-verbal de scoatere din gestiune), cheltuiala este deductibila sau nedeductibila fiscal? c) Care este tratamentul datoriei fata de furnizorul de servicii de depozitare? 2. Distrugerea voluntara a stocului Societatea din Romania utilizeaza o firma din SUA pentru depozitarea produselor. Din cauza lipsei vanzarilor, societatea decide distrugerea integrala a stocului, deoarece produsele nu mai sunt vandabile, pentru a evita costuri suplimentare de logistica si depozitare. Se solicita clarificarea daca cheltuiala aferenta distrugerii stocului este considerata deductibila sau nedeductibila din punct de vedere fiscal. 3. Donarea unei parti din stoc Societatea decide sa doneze o parte din produsele aflate in depozitul din SUA, intocmind documentele justificative necesare (proces-verbal de donatie etc.). Se solicita clarificarea daca cheltuiala aferenta bunurilor donate este deductibila sau nedeductibila fiscal.",
+    "tags": [
+      "cheltuiala deductibila",
+      "achizitie bunuri",
+      "comert online",
+      "cheltuiala nedeductibila"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true,
+      "caen": "4791"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216515",
+    "url": "https://www.portalcontabilitate.ro/facturi-primite-tarziu-in-e-factura-216515.htm",
+    "title": "Facturi primite tarziu in e-Factura - Cotele de TVA",
+    "question": "Acum, 16.02.2026, am primit in SPV facturi emise in mai, iunie si septembrie 2025. Cum inregistrez aceste facturi, avand in vedere cota de TVA de 19% aplicabila in perioada maiiunie 2025?",
+    "tags": [
+      "e-Factura",
+      "spv",
+      "cota de TVA",
+      "inregistrari contabile"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "1721"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216512",
+    "url": "https://www.portalcontabilitate.ro/furnizor-cu-cod-de-tva-anulat-din-oficiu-vanzare-imobil-catre-persoana-juridica-platitoare-de-tva-216512.htm",
+    "title": "Furnizor cu cod de TVA anulat din Oficiu. Vanzare imobil catre persoana juridica platitoare de TVA - Cod TVA anulat",
+    "question": "Societate platitoare de impozit de profit, cu cod TVA suspendat in luna iulie 2025, vinde un imobil (hala si teren) catre o societate platitoare de TVA. Cum ar trebui intocmita factura de vanzare avand in vedere ca operatiunea este supusa masurilor simplificate (taxare inversa) si care implicatiile fiscale la ambii parteneri?",
+    "tags": [
+      "cod de tva anulat",
+      "vanzare imobil",
+      "tva",
+      "factura de vanzare"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "0113"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216507",
+    "url": "https://www.portalcontabilitate.ro/tratamentul-tva-aplicabil-la-vanzarea-unei-locuinte-dupa-cesiunea-antecontractului-216507.htm",
+    "title": "Tratamentul TVA aplicabil la vanzarea unei locuinte dupa cesiunea antecontractului - Cotele de TVA",
+    "question": "Un client persoana fizica (X) a achitat un avans de 20% inainte de data de 31.07.2025 pentru achizitionarea unui apartament nou, aplicandu-se cota redusa de TVA de 9%, fiind indeplinite toate celelalte conditii legale. In luna ianuarie 2026, clientul X decide sa cesioneze drepturile si obligatiile rezultate din antecontract catre o alta persoana fizica (Y), printr-un act notarial de cesiune. Notariatul sustine ca noul client (Y) nu poate beneficia de cota redusa de 9%, intrucat: - nu a existat un act juridic incheiat de acesta anterior datei de 01.08.2025; si - nu a fost achitat de catre acesta un avans de minimum 20% inainte de aceasta data. Pe de alta parte, opinia noastra este ca clientul Y preia integral drepturile si obligatiile clientului X, inclusiv dreptul de a beneficia de tratamentul fiscal aplicabil la momentul incheierii antecontractului initial. Va rugam sa ne comunicati cum considerati ca trebuie tratata aceasta situatie din perspectiva TVA si, concret, cu ce cota de TVA ar trebui incheiat contractul de vanzare-cumparare, ulterior cesiunii.",
+    "tags": [
+      "cesiune antecontract",
+      "avans",
+      "tva",
+      "contract de vanzare-cumparare"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4120"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216506",
+    "url": "https://www.portalcontabilitate.ro/casa-de-amanet-plafon-de-scutire-tva-la-vanzare-bunuri-216506.htm",
+    "title": "Casa de amanet. Plafon de scutire tva la vanzare bunuri - Inregistrare (sau obligatiile persoanelor impozabile)",
+    "question": "In situatia unei firme cu activitate de amanet, platitoare de TVA, intrebarea este: plafonul de scutire pentru intreprinderi mici se refera la valoarea totala a vanzarii bunurilor in regim second-hand (adica inclusiv pretul de vanzare integral) sau doar la valoarea adaosului, respectiv sumele care constituie baza de calcul a TVA?",
+    "tags": [
+      "plafon de scutire tva",
+      "vanzare bunuri",
+      "casa de amanet"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Mariana Prejbeanu",
+    "expert_role": "Expert contabil, Consultant fiscal, Auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216505",
+    "url": "https://www.portalcontabilitate.ro/tva-achizitie-servicii-facturate-de-prestator-din-stat-tert-216505.htm",
+    "title": "TVA. Achizitie servicii facturate de prestator din stat tert - TVA e-TVA",
+    "question": "O firma din Romania, platitoare de TVA, primeste o factura din Israel pentru servicii de management de la administratorul societatii, emisa de o firma mica neplatitoare de TVA din Israel (echivalentul in Romania al unei microintreprinderi neinregistrate in scopuri de TVA). Pe factura nu este indicat niciun echivalent al CIF-ului, ci doar TVA 0. 1. Cum se reglementeaza acest aspect din punctul de vedere al TVA pentru clientul roman platitor de TVA? Se inregistreaza cu: * scutit cu drept de deducere, * scutit fara drept de deducere, * sau conform art. 278 si 306 se aplica taxarea inversa? 2. Daca pe factura se trece corporate number (echivalentul CIF), se aplica taxarea inversa si se acorda drept de deducere (4426 = 4427) chiar daca se comunica doar corporate number? 3. Daca prestatorul din Israel se inregistreaza in scopuri de TVA si trece pe factura corporate number si VAT number, atunci se aplica clar taxarea inversa, corect?",
+    "tags": [
+      "inregistrari contabile",
+      "tva",
+      "achizitie servicii",
+      "servicii de management"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "7022"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216503",
+    "url": "https://www.portalcontabilitate.ro/reevaluare-cladire-monografie-contabila-216503.htm",
+    "title": "Reevaluare cladire. Monografie contabila - Imobilizari corporale",
+    "question": "La 31.12.2025 s-a realizat evaluarea claridii din patrimoniu prin metoda capitalizarii directe. Valoarea de intrare 1.501.835 lei, amortizare cumulata la 905.215,53 lei, durata de amortizare 219 luni, durata de amortizare ramasa 87 luni, valoare reevaluata 1.664.500 lei. Va rog sa ma ajutati cu monografia contabila.",
+    "tags": [
+      "monografie contabila",
+      "reevaluare cladire",
+      "patrimoniu"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Vera Constantin",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4683"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216497",
+    "url": "https://www.portalcontabilitate.ro/achizitii-servicii-de-consultanta-de-la-pfa-neinregistrata-in-scop-de-tva-din-franta-216497.htm",
+    "title": "Achizitii servicii de consultanta de la PFA neinregistrata in scop de TVA din Franta - Servicii",
+    "question": "Daca societatea din Romania, platitoare de TVA, achizitioneaza servicii de consultanta financiara de la o persoana fizica autorizata (Status: Self-employed (microaentreprise), registered in France) neinregistrata in scop de tva in Franta, care sunt ogligatiile pe care trebuie sa le respecte entitatea din Romania din perspective TVA?",
+    "tags": [
+      "servicii de consultanta",
+      "pfa",
+      "tva",
+      "inregistrari contabile"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Bajan Camelia",
+    "expert_role": "Expert contabil, expert judiciar, practician in insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "6220"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216495",
+    "url": "https://www.portalcontabilitate.ro/vanzare-teren-plafon-tva-216495.htm",
+    "title": "Vanzare teren. Plafon TVA - Cotele de TVA",
+    "question": "O societate neplatitoare de TVA vinde un teren si depaseste plafonul pentru tva cu pretul tranzactiei. Tranzactia va fi cu tva sau nu, in conditiile in care terenul se afla in intravilanul comunei si este construibil sau devine ulterior societatea platitoare de tva?",
+    "tags": [
+      "vanzare teren",
+      "plafon",
+      "tva"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Denisa Alexe",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6820"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216488",
+    "url": "https://www.portalcontabilitate.ro/documentele-de-atestare-a-dividendelor-platite-nerezidentilor-persoane-juridice-si-persoane-fizice-216488.htm",
+    "title": "Documentele de atestare a dividendelor platite nerezidentilor persoane juridice si persoane fizice - Dividende",
+    "question": "Societatea noastra a acordat dividende pe parcursul anului 2025 catre actionarii societatii persoane juridice nerezidente din Spania si o persoana fizica nerezidenta din Spania. Persoanele juridice nerezidente detin peste 10% din capitalul social al companiei. Persoana fizica nerezidenta detine 4% din capitalul social al companiei. De la persoana fizica nerezidenta, la plata dividendelor s-a retinut impozitul la sursa si s-a virat la bugetul de stat. Actionarii persoane fizice si juridice nerezidente solicita pentru anul 2025 un certificat de dividende care sa ateste plata dividendelor si retinerea impozitului la sursa. Va rugam sa ne ajutati cu documentele care trebuie sa le furnizam actionarilor.",
+    "tags": [
+      "dividende",
+      "documente",
+      "nerezident"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "2229"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216484",
+    "url": "https://www.portalcontabilitate.ro/provizionul-pentru-participarea-salariatilor-la-profit-216484.htm",
+    "title": "Provizionul pentru participarea salariatilor la profit - Provizioane/ajustari",
+    "question": "Care este modul de calcul al provizionului pentru participarea salariatilor la profitul anului 2025 (in conditiile Ordonantei 64/2001)? Presupunem ca nu avem de constituit rezerve, dar avem de acoperit pierderi contabile anterioare de 1 milion lei. Nu se pune problema ca suma repartizata sa depaseasca nivelul unui salariu de baza mediu lunar. Rezultat net (inainte de inregistrarea provizionului): 15 milioane lei. Care este valoarea provizionului pentru participarea salariatilor la profitul anului 2025, respectiv valoarea fondului de participare a salariatilor la profit?",
+    "tags": [
+      "provizion",
+      "inregistrari contabile"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Vera Constantin",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "873"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216483",
+    "url": "https://www.portalcontabilitate.ro/impactul-incoterms-ddp-asupra-tratamentului-tva-in-romania-si-uk-216483.htm",
+    "title": "Analiza regimului TVA si a fluxurilor financiare in cazul livrarilor de bunuri din Romania catre Marea Britanie prin reprezentant fiscal - Intracomunitare",
+    "question": "O societate producatoare de mobila din Romania (X-RO), inregistrata in scopuri de TVA, isi desemneaza un reprezentant fiscal in Marea Britanie (X-UK), obtinand astfel un cod de inregistrare fiscala in UK. X-RO primeste comenzi de la un client din Marea Britanie (Y-UK). Dupa productie, X-RO emite o factura de vanzare fara TVA catre X-UK (reprezentantul fiscal), iar marfa este expediata direct din Romania catre clientul final Y-UK. Ulterior, Y-UK emite o autofactura cu TVA din Marea Britanie catre X-UK. In acest context, se solicita clarificarea urmatoarelor aspecte: 1. Este permis ca Y-UK sa efectueze plata direct catre X-RO, desi factura este emisa catre X-UK? Daca da, ce mentiuni ar trebui incluse la detaliile platii pentru a justifica corect tranzactia? 2. Este obligatoriu ca pe factura emisa de X-RO catre X-UK sa fie mentionat in mod expres faptul ca X-UK actioneaza ca reprezentant fiscal al X-RO in Marea Britanie? 3. Poate fi considerata factura emisa de X-RO catre X-UK un document comercial justificativ pentru export, in conditiile in care beneficiarul final si destinatarul efectiv al marfii este Y-UK? 4. Avand in vedere ca X-RO incaseaza plata direct de la clientul Y-UK, iar X-UK nu are cont bancar in Marea Britanie, va fi X-RO obligata sa achite TVA in UK? Ce mentiuni ar trebui incluse in detaliile platii pentru a justifica corect aceasta plata? Cum este tratata fiscal in Romania plata efectuata de X-RO catre statul britanic?",
+    "tags": [
+      "reprezentant fiscal",
+      "cod de inregistrare fiscala",
+      "factura de vanzare",
+      "autofactura"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "3109"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216479",
+    "url": "https://www.portalcontabilitate.ro/sponsorizare-acordata-in-ani-cu-pierdere-efecte-fiscale-pentru-impozitul-pe-profit-216479.htm",
+    "title": "Sponsorizare acordata in ani cu pierdere. Efecte fiscale pentru impozitul pe profit - Documente",
+    "question": "In anul 2023, 2024, 2025, am inregistrat pierdere considerabila. In acest caz, putem acorda sponsorizare in valoare de 1.500 lei? Daca da, care sunt conditiile?",
+    "tags": [
+      "aponsorizare",
+      "impozit pe profit"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216477",
+    "url": "https://www.portalcontabilitate.ro/tva-la-inchiderea-datoriei-fata-de-furnizor-extern-401-7588-216477.htm",
+    "title": "Inchiderea soldului fata de un furnizor din China - Datorii",
+    "question": "Acum 3 ani am achizitionat marfa de la un furnizor din China valoarea care a mai ramas de achitat este 24 000 lei. Deoarece nu a fost conforma, administratorul nu a vrut sa mai achite dar pana in acest moment nici chinezii nu au cerut banii. In aceasta situatie se doreste inchiderea soldului. Cum procedez, care sunt notele contabile, cum se comporta din punct de vedere al tva si impozit pe profit. Ce documente trebuie intocmite. Nota contabila pot sa o inregistrez cu 31.12.2025?",
+    "tags": [
+      "inchidere sold",
+      "documente",
+      "inregistrari contabile"
+    ],
+    "date_validity": "12 Ian 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216472",
+    "url": "https://www.portalcontabilitate.ro/optiune-acordare-al-13-lea-salariu-numerar-sau-platforma-benefit-216472.htm",
+    "title": "Optiune acordare al 13-lea salariu. Numerar sau platforma Benefit - Salarii",
+    "question": "Avand in vedere ca in Contractul Colectiv de Munca este prevazut faptul ca putem acorda al 13-lea salariu fie in numerar, fie prin intermediul platformei Benefit (unde se pot comanda tichete de masa, tichete de vacanta sau vouchere culturale), iar fiecare salariat are posibilitatea de a alege modalitatea de acordare la inceputul fiecarui an, dorim sa stim daca aceasta optiune ar putea genera eventuale probleme din punct de vedere fiscal. Mentionez ca, in compania noastra, tichetele de masa nu sunt oferite ca beneficiu standard, insa acestea pot fi comandate individual de angajati din sumele incarcate pe platforma. Ne puteti oferi, va rugam, o opinie fiscala cu privire la aceasta situatie?",
+    "tags": [
+      "venituri din salarii",
+      "tichete de masa",
+      "vouchere de vacanta",
+      "tichete culturale"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "8710"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216468",
+    "url": "https://www.portalcontabilitate.ro/d205-si-d212-cass-dividende-distribuite-vs-efectiv-platiteincasate-216468.htm",
+    "title": "D205 si D212 (CASS). Dividende distribuite vs. efectiv platite/incasate - Dividende",
+    "question": "Am distribuit dividende in suma de 500000 lei in cursul anului 2025. Am platit si declarat impozit 50.000 lei. Din dividendele nete de 450.000 lei s au ridicat numai 22.000 lei. In declaratia 205 la dividende platite se trec 450.000 lei sau 22.000 lei? De asemenea ce dividende se trec in 212 pentru plafon CASS? 22.000 lei sau 450.000 lei?",
+    "tags": [
+      "declaratia 205",
+      "declaratia 212",
+      "dividende",
+      "plafon"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4690"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216466",
+    "url": "https://www.portalcontabilitate.ro/scoatere-din-evidenta-client-radiat-ajustare-tva-216466.htm",
+    "title": "Scoatere din evidenta client radiat. Ajustare TVA - Ajustare TVA",
+    "question": "La data de 31.12.2025 am inregistrat un client incert in suma de 28.374,08 lei. In urma verificarilor efectuate acum, in februarie 2026, in vederea inchiderii anului fiscal 2025, am constatat ca clientul este radiat de la ONRC, existand decizie definitiva si irevocabila emisa de Tribunal. Decizia Tribunalului are data de 09.09.2025. Noi am primit aceasta decizie astazi, 17.02.2026, iar decontul de TVA aferent lunii decembrie 2025 este depus. La ce data inregistrez scoaterea clientului incert din contabilitate si ajustarea TVA, avand in vedere ca decontul lunii decembrie 2025 este depus? As putea sa inregistrez scoaterea in decembrie 2025: 654 = 4118, 26.031,27 lei, dar ajustarea, daca o fac la decembrie, va genera diferente intre contabilitate si decontul depus.",
+    "tags": [
+      "client radiat",
+      "ajustare TVA",
+      "inregistrari contabile",
+      "decontul de TVA"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Diana Ioana Tabara",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "6812"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216463",
+    "url": "https://www.portalcontabilitate.ro/cheltuieli-deductibile-amortizare-autoturism-termen-majorare-capital-social-216463.htm",
+    "title": "Cheltuieli deductibile amortizare autoturism. Termen majorare capital social - Impozit pe profit",
+    "question": "1. Mai este in vigoare plafonul maxim (in valoare de 1.500 lei) privind deductibilitatea amortizarii fiscale pentru mijloacele fixe, pentru calculul impozitului pe profit? Puteti sa ne dati si baza legala, va rog? 2. Pentru o companie care, la finele anului 2025, a depasit cifra de afaceri de 400.000 lei si are obligatia majorarii capitalului social, care este termenul in care trebuie sa se incadreze pentru aceasta operatiune?",
+    "tags": [
+      "cheltuieli deductibile",
+      "amortizare autoturism",
+      "majorare capital social"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216456",
+    "url": "https://www.portalcontabilitate.ro/inregistrare-in-scopuri-de-tva-pentru-persoana-fizica-cu-cnp-cum-completezi-d700-216456.htm",
+    "title": "Inregistrare in scopuri de TVA pentru persoana fizica cu CNP. Cum completezi D700 - TVA e-TVA",
+    "question": "Cum se completeaza declaratia 700 in cazul unei persoane fizice care doreste sa se inregistreze in scopuri de TVA (nu este PFA sau II)? Aceasta persoana are mai multe imobile pe care doreste sa le inchirieze sau sa le vanda urmand sa depaseasca plafonul. Nu am gasit instructiuni dar banuiesc ca se selecteaza \"020-DIF pentru PF romane si straine care detin cod numeric personal\" iar apoi se completeaza sectiunea B.VII?",
+    "tags": [
+      "declaratia 700",
+      "tva",
+      "inchiriere imobil"
+    ],
+    "date_validity": "21 Feb 2026",
+    "expert": "Rodica Balanescu",
+    "expert_role": "Expert contabil, Consultant fiscal, Lichidator judiciar",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216454",
+    "url": "https://www.portalcontabilitate.ro/cota-de-tva-livrare-plante-vii-216454.htm",
+    "title": "Cota de TVA livrare plante vii - Cotele de TVA",
+    "question": "O societate care are codul CAEN 4776, comercializeaza plante decorative cu flori, plante exotice, arbusti, copaci ornamentali. Ce cota de TVA trebuie sa aplice societatea la vanzare?",
+    "tags": [
+      "cota de tva",
+      "codul CAEN 4776"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216451",
+    "url": "https://www.portalcontabilitate.ro/plata-impozitului-pe-veniturile-din-salarii-pentru-punct-de-lucru-216451.htm",
+    "title": "Plata impozitului pe veniturile din salarii pentru punct de lucru - Salarii",
+    "question": "Unde se plateste impozitul pe salarii pentru punctul de lucru? In contul Trezoreriei aferent sediului principal, dar pe CUI-ul sediului secundar, sau in contul Trezoreriei aferent localitatii unde se afla punctul de lucru?",
+    "tags": [
+      "impozit pe venit din salariu",
+      "punct de lucru",
+      "sediu social",
+      "declaratia 112"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4321"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216448",
+    "url": "https://www.portalcontabilitate.ro/plafon-tva-la-doua-societati-cu-acelasi-asociatadministrator-216448.htm",
+    "title": "Plafon TVA la doua societati cu acelasi asociat/administrator - TVA e-TVA",
+    "question": "Societatea A are asociat unic si administrator X, cifra de afaceri anuala de 300.000 lei, neplatitoare de TVA, iar societatea B are doi asociati, X si Y, administrator X, cifra de afaceri de 300.000 lei. Ambele firme desfasoara aceeasi activitate. Cifra de afaceri trebuie cumulata pentru ca ambele firme sa devina platitoare de TVA? Pot ramane neplatitoare de TVA? Dar daca doua societati care au acelasi asociat si administrator desfasoara activitati comerciale diferite, se cumuleaza cifra de afaceri pentru a deveni platitoare de TVA?",
+    "tags": [
+      "plafon TVA",
+      "cifra de afaceri",
+      "tva"
+    ],
+    "date_validity": "23 Feb 2026",
+    "expert": "Rodica Balanescu",
+    "expert_role": "Expert contabil, Consultant fiscal, Lichidator judiciar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4321"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216442",
+    "url": "https://www.portalcontabilitate.ro/distribuire-dividendesituatie-financiara-interimara-216442.htm",
+    "title": "Distribuire dividende interimare 2026 - Impozit pe profit",
+    "question": "O societate comerciala infiintata in luna februarie 2026 poate repartiza dividende interimare la sfarsitul trimestrul 1, 2, 3? Este vreo interdictie avand in vedere ca este societate nou infiintata si ca ar trebui inati finalizat anul 2026, reprtizat rezerve legale si abia din 2027 sa poata repartia dividende interimare? Va rog o argumenatie detaliata.",
+    "tags": [
+      "dividende interimare",
+      "rezerve legale"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "1071"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216439",
+    "url": "https://www.portalcontabilitate.ro/drept-de-deducere-tva-vanzari-intracomunitare-de-bunuri-la-distanta-216439.htm",
+    "title": "Drept de deducere tva vanzari intracomunitare de bunuri la distanta - OSS/IOSS",
+    "question": "Societatea comerciala X SRL desfasoara activitate economica de comert online cu articole vestimentare, depasind anterior plafonul de 10.000 euro. Clientii sunt persoane fizice din Romania si UE, iar societatea a aplicat regimul OSS pana la 30.09.2025. Societatea a fost exclusa din oficiu de la regimul special de TVA OSS UE Romania, stat membru de inregistrare, incepand cu data de 01.10.2025, si intra in perioada de carantina de 2 ani calendaristici incepand cu 01.10.2025. In prezent, societatea se afla in procedura de inregistrare fiscala in fiecare stat membru de consum si si-a exercitat dreptul de deducere pentru toata taxa aferenta achizitiilor interne din Romania si intracomunitare efectuate pentru perioada 01.10.202531.12.2025. Societatea a colectat taxa aferenta vanzarilor catre clienti din Romania, iar taxa aferenta vanzarilor intracomunitare a fost evidentiata in analitic cont 446 alte impozite si taxe. Avand in vedere situatia prezentata, reglementarile fiscale aplicabile ar putea fi: 1. Art. 297 alin. (4) lit. a si b caz in care societatea nu are drept de deducere pentru TVA aferenta achizitiilor interne si intracomunitare in perioada 01.10.2025 pana la data inregistrarii in statul membru respectiv; 2. Art. 275 alin. (1) lit. a regula generala de stabilire a locului livrarii de bunuri, caz in care societatea are obligatia colectarii TVA in Romania pentru toate vanzarile intracomunitare (exista exceptie art. 275 alin. (2)); 3. Nu exista implicatii fiscale, avand in vedere ca TVA este datorata in statul membru de consum si nu in Romania; 4. O alta abordare?",
+    "tags": [
+      "deducere tva",
+      "vanzari intracomunitare de bunuri la distanta",
+      "tva"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4791"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216436",
+    "url": "https://www.portalcontabilitate.ro/d406-rectificativa-216436.htm",
+    "title": "D406 rectificativa - SAF-T",
+    "question": "La intocmirea bilantului pentru 2025 am observat folosirea in timpul anului 2025 a contului 613 si a subcontului 613.1 este necesar sa modific sinteticul contului 613 in 613.2 si sa redepun SAF-T ul sau pot lasa asa situatia?",
+    "tags": [
+      "declaratia 406",
+      "declaratie rectificativa",
+      "bilant",
+      "saf-t"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6910"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216433",
+    "url": "https://www.portalcontabilitate.ro/capital-social-nevarsat-si-distribuire-de-dividende-216433.htm",
+    "title": "Capital social nevarsat si distribuire de dividende - Capital social",
+    "question": "Buna ziua. O firma infiintata in 2025, care nu a varsat pana in prezent capitalul social, dar care a realizat profit la sfarsitul anului, poate distribui dividende in 2026? Cum se aplica regula ANC, sa nu fie mai mic de 1/2 din capitalul social? Am vazut articole in care ANC este inlocuit cu capitaluri proprii. Pentru dividendele distribuite in 2026, ne raportam la randul capitaluri proprii din bilantul anual 2025? Multumesc.",
+    "tags": [
+      "sapital social",
+      "dividende",
+      "bilant"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Anca Ivanov",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216432",
+    "url": "https://www.portalcontabilitate.ro/inregistrare-in-scopuri-de-tva-cu-intarziere-216432.htm",
+    "title": "Inregistrare in scopuri de TVA cu intarziere - Inregistrare (sau obligatiile persoanelor impozabile)",
+    "question": "O PFA care presteaza servicii de consultanta IT online cu o societate din Taiwan a depasit cifra de afaceri de 300.000 lei in noiembrie 2023. Desfasoara doar acest tip de activitate cu beneficiari din afara UE. 1. Trebuia sa se inregistreze ca platitor de tva incepand cu noiembrie 2023? 2. Ce declaratii trebuie sa depuna? 3. Poate sa renunte la statutul de platitor de tva in 2026, avand in vedere OUG 22/2025?",
+    "tags": [
+      "servicii de consultanta IT",
+      "pfa",
+      "declaratii",
+      "declaratia 700"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6620"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216428",
+    "url": "https://www.portalcontabilitate.ro/monografie-leasing-financiar-216428.htm",
+    "title": "Monografie leasing financiar - Mijloace fixe",
+    "question": "Va rog sa-mi transmiteti monografia contabila pentru achizitia unui utilaj in leasing financiar. Procesul verbal de predare primire a fost semnat cu data de 13.10.2025.",
+    "tags": [
+      "leasing financiar",
+      "monografie contabila",
+      "dobanda"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Albescu Adina-Mihaela",
+    "expert_role": "Expert contabil - membru CECCAR din anul 2011, Auditor - membru CAFR si ASPAAS",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4120"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216423",
+    "url": "https://www.portalcontabilitate.ro/optiune-impozit-micro-infiintare-si-nerespectarea-conditiilor-de-aplicare-in-termne-de-30-zile-216423.htm",
+    "title": "Optiune impozit micro infiintare si nerespectarea conditiilor de aplicare in termne de 30 zile - Schimbare regim",
+    "question": "O societate comerciala, infiintata in data de 06.11.2025, a completat cererea la ONRC, optand sa fie platitoare de impozit micro. Societatea nu a angajat in termen de 30 de zile de la infiintare, fiind obligata, conform legislatiei, sa treaca la impozit pe profit. In vectorul fiscal apare: 1. Microintreprinderi data inceput 06.11.2025, data sfarsit 06.11.2025 2. Impozit pe profit data inceput 06.11.2025 Ar putea societatea in cauza ca, de la 01.01.2026, sa opteze sa fie platitoare de impozit pe venitul microintreprinderilor (indeplinind de data aceasta toate conditiile), sau se considera ca si-a exercitat optiunea de a fi micro in data de 06.11.2025?",
+    "tags": [
+      "microintreprinderi",
+      "impozit pe profit",
+      "impozit micro"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4711"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216422",
+    "url": "https://www.portalcontabilitate.ro/retinerea-impozitului-pe-chirii-platite-unei-persoane-cu-handicap-grav-obligatii-societate-216422.htm",
+    "title": "Retinerea impozitului pe chirii platite unei persoane cu handicap grav. Obligatii societate - Impozit pe venit",
+    "question": "Societatea a incheiat un contract de inchiriere cu o persoana fizica care are certificat de handicap grav. Inainte era scutit de impozitul pe chirii. Acum ca acesta se retine de catre societate (cei 8%) este necesar sa o retin din plata chiriei, sa o declar si sa o platesc prin D100?",
+    "tags": [
+      "impozit pe chirie",
+      "contract de inchiriere imobil",
+      "declaratia 100"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2562"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216417",
+    "url": "https://www.portalcontabilitate.ro/monografie-contabila-jocuri-de-noroc-216417.htm",
+    "title": "Monografie contabila jocuri de noroc - Contabilitate si monografii",
+    "question": "As dori sa va consult cu privire la monografia contabila in domeniul jocurilor de noroc online. Avem urmatorul exemplu pentru luna ianuarie: Depuneri clienti pe platforma prin procesatori de plati: 12.017.192,44 lei **Din care se retine 2% taxa de depunere, reprezentand: 240.343,85 lei Retrageri castiguri clienti platforma (prin procesatori de plati): 8.961.376,58 lei ** La care se aplica impozit retinut la sursa 4% = 358.455 lei Cum se determina venitul din activitatile de jocuri de noroc si care este monografia contabila corecta?",
+    "tags": [
+      "jocuri de noroc",
+      "monografie contabila",
+      "inregistrari contabile"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": false,
+      "caen": "9200"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216416",
+    "url": "https://www.portalcontabilitate.ro/neplatitor-de-tva-saf-t-216416.htm",
+    "title": "Neplatitor de TVA. SAF-T - SAF-T",
+    "question": "O Organizatie a Utilizatorilor de Apa a fost platitoare de TVA trimestrial in anul 2025. In 2025 s-a depus SAF-T trimestrial. Din 12.01.2026, ca urmare a solicitarii conform formularului 700 si a deciziei primite de la ANAF, inregistrarea in scopuri TVA a fost anulata. Se mai depune SAF-T si, daca da, se depune lunar sau trimestrial?",
+    "tags": [
+      "SAF-T",
+      "tva",
+      "declaratia 700"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "O.N.G.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "0"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216410",
+    "url": "https://www.portalcontabilitate.ro/prescriere-drept-de-a-solicita-tva-de-rambursat-216410.htm",
+    "title": "Prescriere drept de a solicita TVA de rambursat - Rambursare TVA",
+    "question": "O societate inregistreaza in anul 2019 TVA de recuperat in suma de 100.000 RON. In lunile aferente anilor 2020, 2021, 2022, 2023 si 2024, societatea inregistreaza TVA colectata; cu toate acestea, TVA deductibila este mai mare decat TVA colectata in fiecare luna. In consecinta, in fiecare perioada fiscala din acesti ani rezulta tot TVA de recuperat. In aceste conditii, se pune problema daca TVA de recuperat aferenta anului 2019 se prescrie in anul 2025 sau daca exista posibilitatea compensarii acesteia cu TVA colectata din lunile urmatoare.",
+    "tags": [
+      "rambursare tva",
+      "colectare tva",
+      "declaratia 300",
+      "colectare tva"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4650"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216408",
+    "url": "https://www.portalcontabilitate.ro/amenajare-teren-monografie-contabila-si-amortizare-216408.htm",
+    "title": "Amenajare teren monografie contabila si amortizare - Mijloace fixe",
+    "question": "O SRL cu obiect de activitate *service auto* si-a asfaltat curtea unde se afla situat 8service-ul auto*. Pe factura este trecu t*asfalt* si valoarea este de 32.000 lei. Care este monografia contabila? Cladirea si curtea unde se desfasoara activitatea si unde s-a asfaltat sunt proprietatea firmei SRL platitoare de tva incasare si impozit pe profit.",
+    "tags": [
+      "monografie contabila",
+      "amortizare",
+      "impozit pe profit",
+      "tva"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "caen": "5829"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216407",
+    "url": "https://www.portalcontabilitate.ro/termen-depunere-d406-216407.htm",
+    "title": "Termen depunere D406 - ONG",
+    "question": "O ONG, neplatitoare de TVA, are obligatia trimestriala de intocmire a declaratiei SAF-T (D406)?",
+    "tags": [
+      "ong",
+      "saf-t",
+      "declaratia 406"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Mihaela Corneanu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "O.N.G.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "8552"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216393",
+    "url": "https://www.portalcontabilitate.ro/impozitarea-veniturilor-din-drepturi-de-proprietate-intelectuala-platite-persoanelor-fizice-nerezidente-216393.htm",
+    "title": "Impozitarea veniturilor din drepturi de proprietate intelectuala platite persoanelor fizice nerezidente - Drepturi de proprietate intelectuala",
+    "question": "Societate comerciala incheie un contract de prestari servicii cu drepturi de proprietate intelectuala -servicii grafica design cu o persoana fizica cu NIF si sediu social in Spania. Ce obligatii fiscale are societatea in ceea ce priveste impozitul pe venitul din drepturi de autor sau pe veniturile obtinute de nerezidenti? In contract nu exista nici o mentiune in legatura cu aceste impozite. Ar trebui sa cerem certifficat de rezidenta fiscala pentru evitarea dublei impuneri?",
+    "tags": [
+      "drepturi de proprietate intelectuala",
+      "nerezident",
+      "nif",
+      "sediu social"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Justinian Cucu",
+    "expert_role": "Jurist si expert in proceduri fiscale",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "7422"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216389",
+    "url": "https://www.portalcontabilitate.ro/regim-tva-valoare-reziduala-leasing-financiar-extern-216389.htm",
+    "title": "Regim TVA rate leasing locatar din Romania, locator din Austria - Intracomunitare",
+    "question": "Se incheie un contract de leasing intre societatea mama din Austria si societatea-fiica din Romania pentru un echipament tehnologic. Acest echipament a fost realizat in Romania si cumparat de societatea-mama din Austria, dar fizic, echipamentul nu a parsit Romania. El se va folosi exclusiv in tara. Facturile ratelor de leasing (Austria catre Romania) sunt purtatoare de TVA? Se aplica taxarea inversa?",
+    "tags": [
+      "leasing",
+      "taxare inversa",
+      "tva"
+    ],
+    "date_validity": "08 Feb 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4212"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216384",
+    "url": "https://www.portalcontabilitate.ro/client-in-faliment-ajustare-tva-216384.htm",
+    "title": "Client in faliment. Ajustare TVA - Provizioane/ajustari",
+    "question": "Pot sa fac ajustare de TVA pentru un client intrat in faliment, dar pentru care nu am constituit provizion? Mentionez ca intreg soldul lui este in 4111.",
+    "tags": [
+      "client in faliment",
+      "ajustare tva",
+      "provizion"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Ionut Jinga",
+    "expert_role": "consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216379",
+    "url": "https://www.portalcontabilitate.ro/vouchere-de-fidelizare-acordate-clientilor-monografie-contabila-216379.htm",
+    "title": "Vouchere de fidelizare acordate clientilor. Monografie contabila - Comert",
+    "question": "Firma noastra are magazine alimentare, vanzare cu amanuntul. Am acordat clientiilor nostrii fideli cateva vouchere in valoare de 200 lei. Cum contabilizam la utilizarea vocherelor in magzaine?",
+    "tags": [
+      "vouchere de fidelizare",
+      "monografie contabila",
+      "vanzare cu amanuntul",
+      "inregistrari contabile"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Stan Cosmina",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "1011"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216378",
+    "url": "https://www.portalcontabilitate.ro/d300-2026-storno-avans-19procente-216378.htm",
+    "title": "D300 2026 - storno avans 19% - Declaratii TVA",
+    "question": "In data de 12.02.2026 a fost incarcat pe ANAF, noul formular 300 pentru luna ianuarie. Din acest formular au fost scoase vechile cotele de tva. In cazul in care mai avem stornari de avans care au cota veche de 19%, unde o incadram in noua declaratie?",
+    "tags": [
+      "declaratia 300",
+      "cota de tva",
+      "stornare avans"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Stan Cosmina",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "7112"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216377",
+    "url": "https://www.portalcontabilitate.ro/regimul-declararii-si-platii-impozitului-pe-salarii-pentru-puncte-de-lucru-in-alte-sectoare-din-bucuresti-216377.htm",
+    "title": "Regimul declararii si platii impozitului pe salarii pentru puncte de lucru in alte sectoare din Bucuresti - Salarii",
+    "question": "Firma are sediul social in Bucuresti Sector 3, unde are angajati, si mai are doua puncte de lucru: unul in Sector 1, unde are angajati; un alt punct de lucru in Sector 4, unde are angajati. Ambele puncte de lucru sunt inregistrate la ONRC. Conform modificarilor aduse Legii nr. 207/2015 prin introducerea art. 85, am solicitat si obtinut cod de inregistrare fiscala. OG nr. 6/2026 precizeaza ca, daca pe raza teritoriala a aceleiasi unitati/subdiviziuni administrativ-teritoriale se afla atat sediul social, cat si punctele de lucru, nu exista obligatia inregistrarii punctelor de lucru respective. 1. Sectoarele sunt unitati administrativ-teritoriale distincte? 2. Este necesar sa anulez cele doua coduri fiscale obtinute? 3. Daca am obligatia mentinerii acestor coduri, ce obligatii salariale se vireaza pe aceste doua coduri? 4. Codul IBAN al obligatiilor punctelor de lucru este acelasi cu codul IBAN aferent Sectorului 3 (sediul social) si doar codul fiscal se schimba (in conditiile in care nu am vector fiscal deschis la Sectorul 1 sau 4)?",
+    "tags": [
+      "impozit pe salarii",
+      "punct de lucru",
+      "declaratia 112"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "8559"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216375",
+    "url": "https://www.portalcontabilitate.ro/sume-pentru-formarea-posfesionala-a-salariatului-tratament-fiscal-declaratii-216375.htm",
+    "title": "Sume pentru formarea posfesionala a salariatului. Tratament fiscal. Declaratii - Venituri din alte surse",
+    "question": "Ma intererseaza daca un suma aferenta unui curs de formare profesionala-limba engleza, pentru contabilul angajat al societatii, societate care are contracte cu parteneri externi, este considerat venit in natura si ar trebui sa apara pe stat si in declaratia unica.",
+    "tags": [
+      "venit in natura",
+      "declaratia unica",
+      "curs de formare profesionala",
+      "declaratia 112"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Rodica Mantescu",
+    "expert_role": "Specialist Legislatia Muncii",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "caen": "7020"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216374",
+    "url": "https://www.portalcontabilitate.ro/drept-de-deducere-tva-factura-de-transport-auto-livrat-in-regimul-marjei-216374.htm",
+    "title": "Drept de deducere tva factura de transport. Auto livrat in regimul marjei - Drept de deducere",
+    "question": "La achizitia in regim de marja a unui autoturism de catre un revanzator, factura de transport de la partenerul intracomunitar, cu mentiunea taxare inversa, confera drept de deducere a TVA sau trebuie inregistrata cu taxare inversa (T) si TVA nedeductibila, avand in vedere ca achizitiile de bunuri in regim de marja nu dau drept de deducere a TVA?",
+    "tags": [
+      "deducere tva",
+      "factura de transport",
+      "tva"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216362",
+    "url": "https://www.portalcontabilitate.ro/facturare-servicii-in-ue-societate-cu-cod-special-de-tva-216362.htm",
+    "title": "Facturare servicii in UE. Societate cu cod special de TVA - Cotele de TVA",
+    "question": "In cazul unei prestari servicii catre UE de o intreprindere care nu este platitor de TVA, dar factureaza cu cod de TVA special, cum intocmeste factura si ce obligatii de plata are dupa facturare? Are cod TVA special, factureaza fara TVA, declara in d390?",
+    "tags": [
+      "cod special de TVA",
+      "declaratia 390",
+      "tva"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Denisa Alexe",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "7410"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216361",
+    "url": "https://www.portalcontabilitate.ro/incadrare-sume-in-4282-la-asociati-nerestituite-6588-vs-dividende-si-optiuni-de-regularizare-216361.htm",
+    "title": "TVA cofetarie/cafenea + comodat cu investitii + reducere capital + UPA (activitate proprie) - Comert",
+    "question": "1. Regimul TVA pentru produsele de cofetarie si cafenea Va rugam sa ne specificati cotele de TVA aplicabile in prezent pentru vanzarea de prajituri si cafea preparata (atat in regim de servire la masa, cat si la pachet). Care sunt criteriile de care trebuie sa tinem cont pentru aplicarea cotei reduse? Exista diferente de taxare intre produsul finit si serviciul de restaurant in acest context? 2. Implicatiile fiscale ale investitiilor efectuate intr-un spatiu luat in comodat O societate comerciala utilizeaza un imobil in baza unui contract de comodat de la o persoana fizica. S-a agreat ca, timp de 5 ani, societatea sa nu achite chirie, compensand folosirea prin investitiile si modernizarile realizate in spatiu. Ce obligatii declarative are persoana fizica in raport cu valoarea acestor investitii? 3. Procedura de reducere a capitalului social Societatea intentioneaza sa isi reduca capitalul social, sumele provenind dintr-o fuziune anterioara (inregistrate in relatia conturilor 1012 si 462). Care sunt pasii legali si etapele la Registrul Comertului (termene de opozitie, publicare in Monitorul Oficial)? Va rugam sa ne indicati notele contabile specifice pentru aceasta operatiune de compensare a datoriilor fata de asociati prin reducerea capitalului. 4. Regimul achizitiilor de la Unitati Protejate (Legea 448/2006) Societatea noastra detine statutul de unitate protejata si are angajate persoane cu handicap care se ocupa de asamblarea si punerea in functiune a unor echipamente complexe (ex: multifunctionale). Exista interpretari divergente privind deductibilitatea integrala a acestor bunuri de catre clienti in baza facilitatii pentru unitatile protejate. Unde putem gasi norme metodologice clare care sa defineasca activitatea proprie a persoanelor cu handicap in contextul asamblarii de produse? Ce elemente trebuie sa contina procesul tehnologic sau documentatia de vanzare pentru a elimina riscul ca beneficiarul (clientul) sa-i fie respinsa deducerea facturii?",
+    "tags": [
+      "tva",
+      "contract de comodat",
+      "investitii",
+      "reducere capital"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216360",
+    "url": "https://www.portalcontabilitate.ro/regim-tva-aplicabil-pentru-costuri-refacturate-216360.htm",
+    "title": "Regim TVA aplicabil pentru costuri refacturate - Facturare",
+    "question": "La sediul societatii, unde se desfasoara activitati de stomatologie, isi are sediul si un alt SRL. Utilitatile sunt platite de SRL-ul care are contract cu Electrica, Engie etc. Tinand cont ca SRL are cifra de afaceri mai mare de 395.000 lei, iar activitatea de stomatologie este scutita de plata TVA, cum se face facturarea sumelor catre celalalt SRL privind utilitatile comune si care sunt inregistrarile contabile?",
+    "tags": [
+      "costuri refacturate",
+      "cifra de afaceri",
+      "tva",
+      "inregistrari contabile"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "8623"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216358",
+    "url": "https://www.portalcontabilitate.ro/e-factura-pentru-persoane-fizice-pe-cnp-la-venituri-asimilate-salariilor-216358.htm",
+    "title": "RO e-Factura si colaborarea cu persoane fizice pe prestari servicii vs. indemnizatii asimilate salariilor - RO e-Factura",
+    "question": "In cadrul activitatii economice, colaboram cu persoane fizice neinregistrate fiscal, pe baza Contractelor de Prestari Servicii, pentru activitati ocazionale (activitati de expertiza tehnica). Aceste persoane vor avea obligatia de a se inscrie in Registrul RO e-Factura pana la 1 iunie 2026? Aceeasi intrebare se adreseaza si pentru persoanele fizice neinregistrate fiscal asimilate salariilor: indemnizatii pentru comisii, comitete, consilii? In cazul in care aceste persoane se inregistreaza in RO e-Factura de la 1 iunie, platile se vor efectua catre acestea doar pe baza facturilor emise de ele si transmise prin SPV?",
+    "tags": [
+      "e-factura",
+      "spv",
+      "factura"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Rodica Balanescu",
+    "expert_role": "Expert contabil, Consultant fiscal, Lichidator judiciar",
+    "society": {
+      "type": "O.N.G.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "9499"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216357",
+    "url": "https://www.portalcontabilitate.ro/inchiriere-de-la-persoana-fizica-impozit-pe-venit-si-inregistrari-contabile-216357.htm",
+    "title": "Inchiriere de la persoana fizica. Impozit pe venit si inregistrari contabile - Chirii",
+    "question": "Societatea are un contract de inchiriere pentru un spatiu comercial cu o persoana fizica. In contract este stabilita chiria in EUR. Cheltuielile cu utilitatile se vor achita separat de societate. Intrebarea noastra este ce impozit pe chirie vom retine la sursa: 10% sau 8% pentru persoana fizica si il vom vira la bugetul de stat? Plata se va face la cursul BNR din data platii. Am dori sa ne ajutati cu o monografie contabila si cu documentele care trebuie depuse de societate.",
+    "tags": [
+      "impozit pe venit",
+      "inregistrari contabile",
+      "impozit pe chirie",
+      "monografie contabila"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Constanta Popa",
+    "expert_role": "Expert contabil, auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "2229"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216338",
+    "url": "https://www.portalcontabilitate.ro/achizitie-intracomunitara-de-bunuri-pe-teritoriul-altui-stat-membru-urmata-ulterior-de-livrari-locale-cota-de-tva-216338.htm",
+    "title": "Achizitie intracomunitara de bunuri pe teritoriul altui stat membru urmata ulterior de livrari locale. Cota de TVA - TVA e-TVA",
+    "question": "Persoana juridica RO platitoare de TVA: * cumpara din Polonia accesorii si profile pentru usi/ferestre termopan; * transport CMR: furnizor Polonia Italia depozit tert Italia; * firma din Romania vinde catre clienti diversi din Italia (cu cod de TVA) materialele respective. 1. Inregistrare achizitie din Polonia: in factura, firma poloneza inscrie cessione intracomunitaria si factureaza fara TVA (cota TVA 0%). Cum declaram achizitia? In ce declaratii fiscale si la ce rubrica? 2. Vanzare ferestre si usi PVC/accesorii diverse (fara montaj) catre persoane juridice din Italia, cu cod de TVA: Cum declaram vanzarea? In ce declaratii fiscale si la ce rubrica? 3. In baza cererii unor clienti italieni, firma din RO contracteaza servicii de montaj ferestre si usi in Italia, de la prestatori locali (cu cod TVA intracomunitar si fara cod). Care este regimul acestora din punctul de vedere al TVA (declaratii fiscale si rubrici)? Firma din RO nu este inregistrata fiscal in Italia.",
+    "tags": [
+      "achizitie intracomunitara de bunuri",
+      "cota de tva",
+      "factura"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Monica Cernea",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4673"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216336",
+    "url": "https://www.portalcontabilitate.ro/tva-cofetariecafenea-comodat-cu-investitii-reducere-capital-upa-activitate-proprie-216336.htm",
+    "title": "TVA cofetarie/cafenea + comodat cu investitii + reducere capital + UPA (activitate proprie) - Comert",
+    "question": "1. Regimul TVA pentru produsele de cofetarie si cafenea Va rugam sa ne specificati cotele de TVA aplicabile in prezent pentru vanzarea de prajituri si cafea preparata (atat in regim de servire la masa, cat si la pachet). Care sunt criteriile de care trebuie sa tinem cont pentru aplicarea cotei reduse? Exista diferente de taxare intre produsul finit si serviciul de restaurant in acest context? 2. Implicatiile fiscale ale investitiilor efectuate intr-un spatiu luat in comodat O societate comerciala utilizeaza un imobil in baza unui contract de comodat de la o persoana fizica. S-a agreat ca, timp de 5 ani, societatea sa nu achite chirie, compensand folosirea prin investitiile si modernizarile realizate in spatiu. Ce obligatii declarative are persoana fizica in raport cu valoarea acestor investitii? 3. Procedura de reducere a capitalului social Societatea intentioneaza sa isi reduca capitalul social, sumele provenind dintr-o fuziune anterioara (inregistrate in relatia conturilor 1012 si 462). Care sunt pasii legali si etapele la Registrul Comertului (termene de opozitie, publicare in Monitorul Oficial)? Va rugam sa ne indicati notele contabile specifice pentru aceasta operatiune de compensare a datoriilor fata de asociati prin reducerea capitalului. 4. Regimul achizitiilor de la Unitati Protejate (Legea 448/2006) Societatea noastra detine statutul de unitate protejata si are angajate persoane cu handicap care se ocupa de asamblarea si punerea in functiune a unor echipamente complexe (ex: multifunctionale). Exista interpretari divergente privind deductibilitatea integrala a acestor bunuri de catre clienti in baza facilitatii pentru unitatile protejate. Unde putem gasi norme metodologice clare care sa defineasca activitatea proprie a persoanelor cu handicap in contextul asamblarii de produse? Ce elemente trebuie sa contina procesul tehnologic sau documentatia de vanzare pentru a elimina riscul ca beneficiarul (clientul) sa-i fie respinsa deducerea facturii?",
+    "tags": [
+      "tva",
+      "contract de comodat",
+      "investitii",
+      "reducere capital"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216331",
+    "url": "https://www.portalcontabilitate.ro/evidenta-cantitativ-valorica-si-monografie-contabila-pentru-activitati-agricole-216331.htm",
+    "title": "Evidenta cantitativ-valorica si monografie contabila pentru activitati agricole - Activitati agricole",
+    "question": "O societate comerciala de tip SRL, inregistrata in scopuri de TVA, platitoare de impozit pe profit, desfasoara activitate in agricultura, avand urmatoarele culturi: 1. Floarea-soarelui 19,47 ha 2. Porumb 21,36 ha 3. Grau 6,15 ha Are urmatoarele achizitii si consumuri: * motorina; * seminte; * tratamente. Va rog frumos sa imi prezentati detaliat cum ar trebui definite gestiunile cantitativ-valorice, care este monografia contabila pentru fiecare cultura in parte, consumul pe fiecare cultura, productia obtinuta, determinarea costului de productie pentru fiecare cultura, vanzarea si scaderea din gestiune a produselor vandute. De asemenea, va rog frumos sa imi prezentati o metodologie pentru situatia in care o parte din teren este primita in arenda, iar plata se face in bani si in natura. Sa presupunem ca in arenda este o suprafata de 9 ha, cate 3 ha pentru fiecare cultura.",
+    "tags": [
+      "evidenta cantitativ-valorica",
+      "monografie contabila",
+      "impozit pe profit",
+      "inregistrari contabile"
+    ],
+    "date_validity": "18 Feb 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "1071"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216330",
+    "url": "https://www.portalcontabilitate.ro/monografie-contabila-vanzare-marfa-216330.htm",
+    "title": "Monografie contabila vanzare marfa - Comert",
+    "question": "O societate comerciala isi factureaza la randul 1 livrarea marfurilor iar la randul 2 transportul marfurilor de la randul 1 pe care il efectueaza pentru clientul respectiv. Cum se inregistreaza cele doua pozitii in contabilitatea furnizorului si in cea a clientului?",
+    "tags": [
+      "monografie contabila",
+      "transport marfa",
+      "inregistrari contabile"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Albescu Adina-Mihaela",
+    "expert_role": "Expert contabil - membru CECCAR din anul 2011, Auditor - membru CAFR si ASPAAS",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "2550"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216326",
+    "url": "https://www.portalcontabilitate.ro/bunuri-lipsa-la-inventar-ajustare-tva-216326.htm",
+    "title": "Bunuri lipsa la inventar. Ajustare TVA - TVA e-TVA",
+    "question": "In urma inventarierii patrimoniului la dat de 31.12.2025, s-au constatat atat lipsuri, cat si plusuri la stocul din clasa 3. Minusul este neimputabil. 1. Care este cota de TVA folosita la ajustare, cea de la momentul achizitiei bunului lipsa sau 21%? 2. Se face autofactura pentru inregistrarea minusului cu tva aferenta sau doar 635 = 4426? 3. In cazul autofacturii se face cu data de 31.12.2025? Valorificarea s-a finalizat in 10.02.2026.",
+    "tags": [
+      "bunuri lipsa la inventar",
+      "ajustare tva",
+      "cota de TVA",
+      "inventariere patrimoniu"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Monica Cernea",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4321"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216321",
+    "url": "https://www.portalcontabilitate.ro/dividende-interimare-2025-si-impozit-declarat-216321.htm",
+    "title": "Dividende interimare 2025 si impozit declarat - Bilant",
+    "question": "Au fost distribuite dividende interimare in septembrie 2025 mai mari decat profitul de la sfarsitul anului. Suma ridicata sub forma de dividende nu depaseste profitul, si, prin urmare, nu mai este necesara regularizarea. Pentru impozitul declarat in plus se depune declaratie rectificativa 710 sau ramane platit asa cum s-a declarat, la nivelul dividendelor interimare distribuite?",
+    "tags": [
+      "dividende interimare",
+      "declaratie rectificativa",
+      "plata impozit",
+      "declaratia 710"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "8623"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216320",
+    "url": "https://www.portalcontabilitate.ro/iesire-prin-optiune-de-la-tva-ajustare-216320.htm",
+    "title": "Iesire prin optiune de la TVA. Ajustare - Stocuri",
+    "question": "Societatea X, platitoare de TVA, deoarece nu a depasit cifra de afaceri de 395.000 lei in anul 2025, a solicitat trecerea la regimul special de scutire. Societatea are gestiune global-valorica, iar stocul de marfa la data emiterii deciziei de anulare a codului de TVA este: Stoc marfa cont 371: 14.520 lei Adaos comercial cont 378: 2.000 lei TVA neexigibil cont 4428: 2.520 lei Ma intereseaza monografia contabila pentru ajustarea TVA la data anularii codului de TVA.",
+    "tags": [
+      "monografie contabila",
+      "ajustare tva",
+      "cod de tva",
+      "cifra de afaceri"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4771"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216316",
+    "url": "https://www.portalcontabilitate.ro/acoperire-pierdere-din-dividende-216316.htm",
+    "title": "Acoperire pierdere din dividende - Dividende",
+    "question": "Dividendele pentru care s-a platit impozit, folosite pentru acoperirea pierderii, se declara in declaratiile 100 si 205?",
+    "tags": [
+      "dividende",
+      "plata impozit",
+      "declaratia 100",
+      "declaratia 205"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "7111"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216314",
+    "url": "https://www.portalcontabilitate.ro/regularizarea-cass-si-calculul-impozitului-pentru-pfa-cu-optiune-cass-la-6-salarii-minime-anul-2025-216314.htm",
+    "title": "Regularizarea CASS si calculul impozitului pentru PFA cu optiune CASS la 6 salarii minime - anul 2025 - PFA/II/CMI",
+    "question": "O PFA cu activitate de meditatii se infiinteaza la 01.03.2025. Este un sistem real, individual. Nu obtine alte venituri din salarii sau alte surse si nu se incadreaza la exceptii privind calculul CAS si CASS. Opteaza in anul 2025 pentru plata CASS si depune declaratia unica in acest sens. Achita 630 lei in anul 2025, urmand ca diferenta de CASS, 1.800 lei, sa fie achitata pana la 25.05.2026. Acum, in 2026, se intocmeste declaratia unica cu veniturile realizate in 2025, astfel: Venituri incasate: 13.600 lei Cheltuieli deductibile: 2.234 lei Venit net: 11.366 lei Calculul corect al impozitului ar fi: (11.366 2.430 CASS) * 10% = 8.936 * 10% = 894 lei? Aplicatia de pe site-ul ANAF calculeaza impozit 1.023 lei si CASS 2.430 lei (CASS deductibil la calculul impozitului este 1.137 lei). Este corect asa sau trebuie bifat ceva in aplicatie pentru a lua in calcul 2.430 lei CASS deductibil? Trebuie sa se treaca undeva suma achitata in anul 2025 la CASS (630 lei), sau se va vedea in SPV dupa ce depune declaratia unica ca are de plata la CASS doar diferenta de 1.800 lei pentru anul 2025? Daca doreste sa fie asigurat la sanatate si dupa 25.05.2026, trebuie sa bifeze CASS prin optiune in 2026?",
+    "tags": [
+      "calcul impozit",
+      "pfa",
+      "cass"
+    ],
+    "date_validity": "14 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4941"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216313",
+    "url": "https://www.portalcontabilitate.ro/pfa-obligatii-cass-in-anul-2025-pensionar-venituri-sub-6-salarii-minime-si-pierdere-216313.htm",
+    "title": "PFA. Obligatii CASS in anul 2025. Pensionar. Venituri sub 6 salarii minime si pierdere - Venituri din alte surse",
+    "question": "Trebuie sa se plateasca CASS in urmatoarele situatii, in cazul unei PFA cu activitati independente? 1. Un pensionar are un PFA unde va obtine in anul 2025 venituri sub 6 salarii minime. 2. Un pensionar are un PFA unde va obtine in anul 2025 pierdere. 3. Un PFA va obtine in anul 2025 venituri sub 6 salarii minime. 4. Un PFA va obtine in anul 2025 pierdere.",
+    "tags": [
+      "pfa",
+      "venituri",
+      "activitati independente"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Nicolae Liviu",
+    "expert_role": "Economist",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216311",
+    "url": "https://www.portalcontabilitate.ro/regim-tva-pentru-servicii-de-constructii-216311.htm",
+    "title": "Regim TVA pentru servicii de constructii - Servicii",
+    "question": "Societate SRL neplatitoare de TVA doreste sa presteze lucrari de constructii pentru o firma din Elvetia. Cum trebuie sa procedeze si ce obligatii declarative are, in special in ceea ce priveste TVA?",
+    "tags": [
+      "servicii de constructii",
+      "tva",
+      "lucrari de constructii"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Anca Ivanov",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "4322"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216310",
+    "url": "https://www.portalcontabilitate.ro/analiza-regimului-tva-si-a-fluxurilor-financiare-in-cazul-livrarilor-de-bunuri-din-romania-catre-marea-britanie-prin-reprezentant-fiscal-216310.htm",
+    "title": "Analiza regimului TVA si a fluxurilor financiare in cazul livrarilor de bunuri din Romania catre Marea Britanie prin reprezentant fiscal - Intracomunitare",
+    "question": "O societate producatoare de mobila din Romania (X-RO), inregistrata in scopuri de TVA, isi desemneaza un reprezentant fiscal in Marea Britanie (X-UK), obtinand astfel un cod de inregistrare fiscala in UK. X-RO primeste comenzi de la un client din Marea Britanie (Y-UK). Dupa productie, X-RO emite o factura de vanzare fara TVA catre X-UK (reprezentantul fiscal), iar marfa este expediata direct din Romania catre clientul final Y-UK. Ulterior, Y-UK emite o autofactura cu TVA din Marea Britanie catre X-UK. In acest context, se solicita clarificarea urmatoarelor aspecte: 1. Este permis ca Y-UK sa efectueze plata direct catre X-RO, desi factura este emisa catre X-UK? Daca da, ce mentiuni ar trebui incluse la detaliile platii pentru a justifica corect tranzactia? 2. Este obligatoriu ca pe factura emisa de X-RO catre X-UK sa fie mentionat in mod expres faptul ca X-UK actioneaza ca reprezentant fiscal al X-RO in Marea Britanie? 3. Poate fi considerata factura emisa de X-RO catre X-UK un document comercial justificativ pentru export, in conditiile in care beneficiarul final si destinatarul efectiv al marfii este Y-UK? 4. Avand in vedere ca X-RO incaseaza plata direct de la clientul Y-UK, iar X-UK nu are cont bancar in Marea Britanie, va fi X-RO obligata sa achite TVA in UK? Ce mentiuni ar trebui incluse in detaliile platii pentru a justifica corect aceasta plata? Cum este tratata fiscal in Romania plata efectuata de X-RO catre statul britanic?",
+    "tags": [
+      "reprezentant fiscal",
+      "cod de inregistrare fiscala",
+      "factura de vanzare",
+      "autofactura"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "3109"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216308",
+    "url": "https://www.portalcontabilitate.ro/distribuire-dividende-interimare-2026-216308.htm",
+    "title": "Distribuire dividende interimare 2026 - Impozit pe profit",
+    "question": "O societate comerciala infiintata in luna februarie 2026 poate repartiza dividende interimare la sfarsitul trimestrul 1, 2, 3? Este vreo interdictie avand in vedere ca este societate nou infiintata si ca ar trebui inati finalizat anul 2026, reprtizat rezerve legale si abia din 2027 sa poata repartia dividende interimare? Va rog o argumenatie detaliata.",
+    "tags": [
+      "dividende interimare",
+      "rezerve legale"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "1071"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216302",
+    "url": "https://www.portalcontabilitate.ro/cass-aferenta-dividendelor-repartizate-in-2022-si-2025-momentul-realizarii-venitului-si-obligatia-declarativa-216302.htm",
+    "title": "CASS aferenta dividendelor repartizate in 2022 si 2025. Momentul realizarii venitului si obligatia declarativa - Dividende",
+    "question": "In decembrie 2022 s-au repartizat dividende in suma bruta de 1.052.632 lei, pentru care s-a retinut impozit in suma de 52.632 lei (cota 5%), declarat in D205. Suma neta, in valoare de 1.000.000 lei, a fost incasata de catre asociatul unic astfel: in anul 2023: 400.000 lei; in anul 2024: 150.000 lei; in anul 2025: 450.000 lei. In decembrie 2025 s-au repartizat dividende in suma bruta de 888.889 lei, pentru care s-a retinut impozit in suma de 88.889 lei (cota 10%), care va fi declarat in D205 pana la data de 28.02.2026. Din suma neta de 800.000 lei s-au incasat dividende in decembrie 2025 in suma de 40.000 lei. Mentionam ca impozitul pe dividende a fost declarat in D100 si virat in termen. Va rugam sa ne ajutati cu privire la declararea si plata CASS pentru fiecare an. Precizam ca, potrivit legislatiei in vigoare la acea data, am considerat ca, intrucat dividendele nu au fost achitate pana la 31.12.2022, am calculat si depus declaratia D212 pentru CASS in suma de 3.060 lei (2.550 lei salariul minim x 12 luni = 30.600 lei). Suma a fost achitata la ANAF.",
+    "tags": [
+      "dividende",
+      "cass",
+      "declaratia 205",
+      "declaratia unica"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216299",
+    "url": "https://www.portalcontabilitate.ro/corectarea-facturii-si-restituirea-tva-in-operatiuni-de-asigurare-scutite-de-taxa-216299.htm",
+    "title": "Corectarea facturii si restituirea TVA in operatiuni de asigurare scutite de taxa - Drept de deducere",
+    "question": "O societate primeste factura de la OMNIASIG cu TVA. Firma plateste si ulterior, Omniasig storneaza factura. Suma achitata este restituita dar fara TVA.",
+    "tags": [
+      "corectare factura",
+      "tva",
+      "scutire de taxe"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4642"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216295",
+    "url": "https://www.portalcontabilitate.ro/vanzare-mijloc-fix-obligativitate-ajustare-tva-216295.htm",
+    "title": "Vanzare mijloc fix. Obligativitate ajustare TVA - Ajustare TVA",
+    "question": "Daca dorim sa vindem mijloace fixe amortizate integral (laptopuri, telefoane), avem obligativitatea sa le mentinem in gestiunea societatii timp de 5 ani, datorita faptului ca am dedus TVA la achizitia lor, sau, daca le vindem cu TVA, suntem exonerate de aceasta obligatie? Putem vinde doar mijloace fixe amortizate integral sau si pe cele care nu sunt integral amortizate, daca le facturam cu TVA?",
+    "tags": [
+      "ajustare tva",
+      "vanzare mijloc fix",
+      "amortizare"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2611"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216291",
+    "url": "https://www.portalcontabilitate.ro/monografie-contabila-pescuit-216291.htm",
+    "title": "Monografie contabila pescuit - Contabilitate si monografii",
+    "question": "O societate are codul CAEN 4632 comert cu ridicata produse peste si codul CAEN 0312 - pescuit in ape dulci. Societatea pescuieste in ape dulci si duce pestele la un depozit de colectare, primeste c/v. produselor conform facturii emise. Care este monografia contabila prin care se inregistreaza pescuitul marfii (a pestelui) pe care o vinde, avand in vedere ca nu cumpara pestele si il revinde? El pescuieste in baza unei autorizatii emise de DSV si vinde tot ceea ce a prins la un depozit.",
+    "tags": [
+      "codul CAEN 4632",
+      "comert cu ridicata produse",
+      "monografie contabila"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216289",
+    "url": "https://www.portalcontabilitate.ro/salariat-administrator-si-asociat-unic-munca-in-weekend-specifica-salariatului-216289.htm",
+    "title": "Salariat, administrator si asociat unic. Munca in weekend specifica salariatului - Salarii",
+    "question": "Un magazin alimentar care este deschis in fiecare zi, 12 ore, are 2 angajati. Se lucreaza astfel: un angajat lucreaza 2 zile a cate 12 ore, urmate de 2 zile consecutive libere. In cursul lunii, unul dintre angajati isi da demisia, ramanand ca cel de-al doilea angajat, care este si administrator, sa isi schimbe programul de lucru de luni pana vineri, 8 ore pe zi. La un eventual control, avand in vedere ca sunt rapoarte Z scoase si in zilele de weekend, acesta poate presta aceasta munca in calitate de asociat unic? Sau care ar fi solutia pentru a acoperi aceste ore lucrate de administrator?",
+    "tags": [
+      "asociat unic",
+      "control"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Constanta Popa",
+    "expert_role": "Expert contabil, auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6810"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216285",
+    "url": "https://www.portalcontabilitate.ro/tratament-tva-factura-de-transport-aerian-monografie-contabila-216285.htm",
+    "title": "Tratament TVA factura de transport aerian. Monografie contabila - Comert",
+    "question": "In cazul in care avem o factura de transport (charter flight) de la un furnizor din Anglia, factura va fi inregistrata cu taxare inversa? Mentionez ca serviciile sunt prestate in favoarea asociatului, in cazul in care se aplica taxarea inversa, as vrea ca aceasta taxa sa fie nedeductibila, care este monografia contabila?",
+    "tags": [
+      "factura de transport",
+      "tva",
+      "monografie contabila",
+      "taxare inversa"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4771"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216283",
+    "url": "https://www.portalcontabilitate.ro/ajustare-tva-client-in-faliment-216283.htm",
+    "title": "Ajustare TVA client in faliment - Ajustare TVA",
+    "question": "Suma de 100.000 lei provine din factura emisa in 2013 catre un client. La data de 01.03.2017 s-a dispus deschiderea procedurii generale a insolventei clientului, iar suma de 100.000 lei a fost inscrisa la masa credala. La 29.05.2019 s-a dispus inceperea procedurii falimentului clientului, iar la 09.06.2025 s-a emis sentinta judecatoreasca definitiva de faliment. Pentru suma de 100.000 lei se mai poate ajusta TVA in baza art. 287 lit. d) din Codul fiscal?",
+    "tags": [
+      "ajustare tva",
+      "client in faliment",
+      "insolventa",
+      "tva"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Mihaela Corneanu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4639"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216281",
+    "url": "https://www.portalcontabilitate.ro/tva-la-cotizatii-de-membru-si-cursuri-online-primite-din-ueuk-de-un-pfi-medic-art-317-216281.htm",
+    "title": "TVA la cotizatii de membru si cursuri online primite din UE/UK de un PFI medic (art. 317) - TVA e-TVA",
+    "question": "PFI medic, platitor de TVA pentru servicii intracomunitare conform art. 317 din Codul Fiscal, achita anual o cotizatie de membru la mai multe asociatii profesionale din domeniul medical din UE si din afara UE. 1. Primesc factura din Belgia pentru taxa de membru (pentru care primesc si un certificat de membru, dar nu primesc un serviciu efectiv) fara TVA (le-am transmis codul de TVA intracomunitar), cu mentiunea pe factura No Belgian VAT due according to art. 44 VAT Directive. Pentru aceasta factura, trebuie sa declar in Formularul 301 si 390 si sa platesc TVA in Romania sau pot sa consider ca intra la scutiri conform art. 292 lit. k din Codul Fiscal si sa nu declar nimic? 2. Primesc factura de la o asociatie profesionala din UK, tot pentru cotizatia de membru. Aceasta vine fara TVA, cu mentiunea ca serviciul este exceptat de TVA. Pot sa o consider scutita conform art. 292 lit. k si sa nu platesc TVA in Romania? 3. Primesc factura de la o fundatie din Spania pentru cursuri online de medicina, iar pe factura este mentionat ca serviciul este exceptat de TVA. Aceasta factura trebuie declarata in Formularul 301 si 390 si trebuie sa platesc TVA in Romania, avand in vedere ca este o prestare de servicii online?",
+    "tags": [
+      "cotizatii de membru",
+      "tva",
+      "declaratia 301",
+      "declaratia 390"
+    ],
+    "date_validity": "20 Feb 2026",
+    "expert": "Rodica Balanescu",
+    "expert_role": "Expert contabil, Consultant fiscal, Lichidator judiciar",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216274",
+    "url": "https://www.portalcontabilitate.ro/regimul-aplicabil-detasarii-salariatilor-in-alte-state-membre-ue-216274.htm",
+    "title": "Regimul aplicabil detasarii salariatilor in alte state membre UE - Salarii",
+    "question": "Va rog sa-mi confirmati procedura si obligativitatea obtinerii Formularului A1,eliberat de CNPP, pentru personalul delegat in strainatate, atat pentru delegari pe termen scurt (pana la 24 luni), cat si pentru delegari pe termen lung (peste 24 luni).",
+    "tags": [
+      "formularul a1",
+      "detasare salariati",
+      "delegatie"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Derscariu Radu Cristian",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "7220"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216273",
+    "url": "https://www.portalcontabilitate.ro/deductibilitate-amortizare-auto-cu-utilizare-mixta-216273.htm",
+    "title": "Deductibilitate amortizare auto cu utilizare mixta - Mijloace fixe",
+    "question": "Pentru o societate care foloseste masina firmei in regim mixt. Amortizarea in limita deductibila de 1.500 ron/auto se considera intregral deductibila la calculul impozitului pe profit sau jumatate din 1.500 ron este deductibla?",
+    "tags": [
+      "amortizare",
+      "calcul impozit pe profit",
+      "deductibilitate"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Anca Ivanov",
+    "expert_role": "Expert contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216272",
+    "url": "https://www.portalcontabilitate.ro/plata-impozitului-pe-salarii-la-punctul-de-lucru-216272.htm",
+    "title": "Plata impozitului pe salarii la punctul de lucru - Salarii",
+    "question": "Societatea cu sediul social in Olt si punct de lucru in Dolj, unde isi desfasoara activitatea doi angajati, a obtinut CUI pentru Dolj. Unde se plateste impozitul pe salarii si contributiile: la Trezoreria Olt, pe CUI-ul sediului social, sau in contul Trezoreriei aferent localitatii Dolj?",
+    "tags": [
+      "sediu social",
+      "plata impozit",
+      "contributii"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Olguta Crevelescu",
+    "expert_role": "Expert Contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4730"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216270",
+    "url": "https://www.portalcontabilitate.ro/monografie-contabila-factura-scont-acordat-216270.htm",
+    "title": "Monografie contabila factura scont acordat - RO e-Factura",
+    "question": "Am semnat un acord cu un client. Acesta presupune ca respectivul client sa plateasca o suma in avans, in schimbul unui sconto: 1. Va rog sa validati nota contabila in cazul emiterii unei facturi de sconto: 411 = 767 (cu semnul minus) 4427 2. Factura este purtatoare de TVA? Ce cota de TVA se aplica? Precizez ca facturile platite in avans au atat cota de 21%, cat si cota de 11%. Cum procedam, din punct de vedere al TVA, in cazul facturii de sconto pe care o emitem? 3. Factura cu minus se transmite in e-Factura ca o nota de credit obisnuita sau exista anumite particularitati de care trebuie tinut cont?",
+    "tags": [
+      "monografie contabila",
+      "tva",
+      "e-Factura",
+      "cota de tva"
+    ],
+    "date_validity": "17 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "4638"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216269",
+    "url": "https://www.portalcontabilitate.ro/tratament-fiscal-tva-emitere-facturi-prestari-servicii-de-consultanta-tehnica-216269.htm",
+    "title": "Tratament fiscal TVA. Emitere facturi prestari servicii de consultanta tehnica - TVA e-TVA",
+    "question": "Societatea noastra are un contract cu o firma din Maroc pentru doua tipuri de servicii: * Societatea din Maroc a contractat o firma din Portugalia pentru a-i construi o matrita, iar societatea noastra s-a ocupat de toata partea tehnica si a tinut legatura cu firma din Portugalia, astfel incat matrita sa fie realizata in parametri optimi. * Societatea noastra a ajutat firma din Maroc sa castige mai multe proiecte cu diverse societati; s-a ocupat de intalnirile cu acestea, de tot ce inseamna partea tehnica, desen tehnic etc. Cand facturam pentru cele doua cazuri catre firma din Maroc, factura se va emite fara TVA?",
+    "tags": [
+      "servicii de consultanta tehnica",
+      "tva",
+      "factura"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2226"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216268",
+    "url": "https://www.portalcontabilitate.ro/plafon-trecere-la-impozit-pe-profit-si-tva-lunar-incepand-cu-1012026-216268.htm",
+    "title": "Plafon trecere la impozit pe profit si TVA lunar incepand cu 1.01.2026 - Conditii incadrare",
+    "question": "O societate are, la sfarsitul anului 2025 (31.12.2025): CA = 490.314,13 lei (rulaj 2025 cont 704) Rulaj cont 7588 = 15.702,48 lei (vanzare mijloc fix) Rulaj cont 7651 = 3.112,63 lei Rulaj cont 766 = 0,95 lei Total venituri = 509.130,19 lei. Depaseste plafonul pentru microintreprindere si devine platitoare de impozit pe profit si trece la TVA lunar in 2026? Nu am depus inca formularul 700; este corect sa il depun acum daca se depasesc plafoanele?",
+    "tags": [
+      "impozit pe profit",
+      "tva",
+      "plafon",
+      "microintreprindere"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216266",
+    "url": "https://www.portalcontabilitate.ro/impozit-pe-venitul-nerezidentilor-in-cazul-comisioanelor-216266.htm",
+    "title": "Tratament fiscal servicii pro for trip - Locul livrarii/prestarii",
+    "question": "O sucursala din Romania a unei societati-mama din UE utilizeaza o platforma pentru achizitia de bilete de avion si servicii de cazare hoteliera, atat in Romania, cat si in alte state din Europa. Factura primita de la platforma, care are cod fiscal din Spania, cuprinde trei pozitii: * Bilet de avion 300 euro cu mentiunea Operatiune supusa Regimului Special al Agentiilor de Turism (STAR/TOMS). * Cazare hotel 150 euro cu mentiunea Operatiune supusa Regimului Special al Agentiilor de Turism (STAR/TOMS). * PRO for TRIP 20 euro cu mentiunea Taxare inversa. Operatiune localizata la sediul clientului in conformitate cu prevederile Directivei TVA 2006/112/CE. Pentru pozitia 3 (PRO for TRIP), se aplica mecanismul taxarii inverse sau aceasta valoare trebuie tratata conform aceluiasi regim fiscal aplicabil cheltuielii principale din factura? Acest PRO for TRIP ar putea fi considerat comision? Iar in cazul acesta se aplica si impozitul pe nerezidenti.",
+    "tags": [
+      "impozit pe nerezidenti",
+      "taxare inversa",
+      "cheltuieli"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Anca Bilas",
+    "expert_role": "Expert contabil si Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4650"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216259",
+    "url": "https://www.portalcontabilitate.ro/tva-prestari-intracomunitare-de-servicii-sau-servicii-taxabile-in-romania-216259.htm",
+    "title": "TVA. Prestari intracomunitare de servicii sau servicii taxabile in Romania - Facturare",
+    "question": "Societate inregistrata in scopuri de TVA in Romania presteaza servicii de comunicare si PR catre o societate inregistrata in scopuri de TVA in Olanda. In aceste conditii, dupa verificarea codului de TVA al beneficiarului pe VIES si confirmarea valabilitatii acestuia, s-a emis factura fara TVA. Beneficiarul refuza factura fara TVA si solicita emiterea ei cu TVA din Romania. Va rog sa imi comunicati care ar fi implicatiile pentru societatea din Romania in cazul in care emite factura cu TVA si o inregistreaza ca operatiune taxabila in Romania.",
+    "tags": [
+      "factura",
+      "tva",
+      "cod de tva",
+      "servicii de comunicare si PR"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216257",
+    "url": "https://www.portalcontabilitate.ro/plafon-tva-216257.htm",
+    "title": "Plafon TVA - Inregistrare (sau obligatiile persoanelor impozabile)",
+    "question": "O SRL care are ca domeniu de activitate 8621 Activitati de asistenta medicala generala si presteaza servicii medicale de medicina de familie, decontate de CASMB, precum si alte servicii medicale si consultatii medicale, doreste ca, prin angajatul si asociatul unic acreditat de diferite institutii, sa efectueze si servicii de predare cursuri conform CAEN introdus recent 8559 Alte forme de invatamant n.c.a. Pentru serviciile decontate de casa si serviciile medicale prestate, societatea nu avea obligativitatea inregistrarii ca platitor de TVA, chiar daca cifra de afaceri din aceste activitati scutite fara drept de deducere a depasit plafonul de 395.000 lei. 1. In ce conditii ar putea presta si noua activitate de predare de cursuri, care, separat, nu depaseste plafonul de TVA? 2. Este necesar sa factureze cu TVA prestarea de servicii de predare de cursuri sau, avand in vedere ca persoana fizica angajata este acreditata si va efectua cursurile, acestea sunt considerate tot scutite fara drept de deducere? 3. Este necesar ca societatea sa fie acreditata si ce organism elibereaza aceste acreditari pentru a beneficia de regimul de scutire fara drept de deducere? 4. Daca totusi societatea se inregistreaza ca platitor de TVA si factureaza cu TVA aceste servicii, doar cheltuielile aferente activitatilor cu cursuri vor genera TVA deductibil, restul cheltuielilor nefiind deductibile? 5. Putem deduce individual doar cheltuielile aferente cursurilor in decontul de TVA si sa nu aplicam metoda proratei? 6. Cum recomandati sa procedam in conditiile in care vom fi obligati la inregistrarea ca platitori de TVA? In conditiile in care societatea in sine nu se poate acredita de organismul special, cu ce cota de TVA ar trebui facturate aceste cursuri?",
+    "tags": [
+      "plafon TVA",
+      "drept de deducere",
+      "cheltuieli"
+    ],
+    "date_validity": "12 Feb 2026",
+    "expert": "Gabi Popescu",
+    "expert_role": "Auditor financiar",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216256",
+    "url": "https://www.portalcontabilitate.ro/tva-prestari-servicii-prin-intermediul-bolt-sisau-uber-216256.htm",
+    "title": "TVA. Prestari servicii prin intermediul Bolt si/sau Uber - TVA e-TVA",
+    "question": "Am o societate in care administratorul presteaza servicii in sistem ride-sharing prin BOLT si Uber. Societatea este platitoare de TVA, insa, avand in vedere volumul redus al prestarilor (aproximativ 30.000 euro pe an), ar dori sa iasa din sfera platitorilor de TVA. 1. Este posibil ca activitatea sa fie desfasurata in conditiile in care Uber si BOLT solicita in mod obligatoriu codul de TVA? 2. Cum ar putea societatea sa-si optimizeze fiscal activitatea din perspectiva TVA, avand in vedere ca isi colecteaza TVA pentru prestarile proprii de transport, dar pentru facturile emise de BOLT si Uber se aplica taxarea inversa si, practic, aceasta situatie nu sprijina cash-flow-ul, societatea ajungand sa plateasca 21% din toate incasarile fara a putea deduce TVA aferenta facturilor de la BOLT si Uber?",
+    "tags": [
+      "tva",
+      "uber",
+      "bolt",
+      "taxare inversa"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Amelia Dumitras",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": true,
+      "caen": "6201"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216255",
+    "url": "https://www.portalcontabilitate.ro/agentie-de-turism-d394-216255.htm",
+    "title": "Agentie de turism. D394 - Scutiri",
+    "question": "La aceasta agentie de turism majoritatea achizitiilor sunt scutite cu drept de deducere. La fel si livrarile, cu exceptia celor care sunt emise cu regimul marjei. Care dintre acestea se declara in D394 si care nu? Mentionez ca am inspectie fiscala si mi se cere sa fac rectificative, unde sa apara toate facturile primite si emise.",
+    "tags": [
+      "agentie de turism",
+      "declaratia 394",
+      "drept de deducere"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "7911"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216250",
+    "url": "https://www.portalcontabilitate.ro/abonamente-medicale-pentru-membrii-familiei-salariatilor-216250.htm",
+    "title": "Abonamente medicale pentru membrii familiei salariatilor - Contabilitate si monografii",
+    "question": "Societatea X SRL achita pentru salariati un abonament de servicii de medicina a muncii care include si alte servicii medicale. Plata pentru fiecare salariat este de 100 lei/luna. Salariatii pot adauga si membri ai familiei, iar in acest caz abonamentul este de 150 lei, diferenta de 50 lei fiind suportata de salariat. Firma achita intreaga valoare de 150 lei, iar salariatul restituie lunar suma de 50 lei catre firma. 1. Rog frumos sa ne furnizati monografia contabila, modul de declarare in D112 si implicatiile fiscale. 2. Este corect sa se declare in D112 la servicii medicale suma de 100 lei?",
+    "tags": [
+      "abonamente medicale",
+      "declaratia 112",
+      "servicii de medicina a muncii",
+      "monografie contabila"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Andreea Paunoiu",
+    "expert_role": "Expert Contabil, Expert in legislatia muncii (Membru acreditat UNELM)",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "6621"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216249",
+    "url": "https://www.portalcontabilitate.ro/cota-redusa-de-tva-continut-total-de-zahar-216249.htm",
+    "title": "Cota redusa de TVA. Continut total de zahar - TVA e-TVA",
+    "question": "Avem in plan un nou articol si apelam la suportul dvs. pentru alocarea corecta a cotei de TVA. Grill Camembert cu sos de zmeura = un pachet ambalat in cutie de carton, format din 2 x Camembert de 100 g + sos de zmeura 30 g. * Continutul de zahar pentru Camembert este",
+    "tags": [
+      "cota redusa de TVA",
+      "tva"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Ramona Balasu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216246",
+    "url": "https://www.portalcontabilitate.ro/cass-pfa-salariat-salarii-realizate-sub-plafonul-de-6-salarii-minime-pe-economie-216246.htm",
+    "title": "Contributii PFA salariat - Contabilitate si monografii",
+    "question": "Daca am o PFA care a realizat in 2025 un venit net de 1046 lei si in acelasi timp a realizat si venituri din salarii de 22.520 lei, datoreaza CASS de 2430 lei sau la diferenta dintre 24.300lei si 22.520 lei, adica 178 lei?",
+    "tags": [
+      "PFA",
+      "venituri din salarii",
+      "cass",
+      "contributii"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6920"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216243",
+    "url": "https://www.portalcontabilitate.ro/plata-impozitului-pe-teren-al-asociatului-si-retinerea-sumei-din-drepturile-cuvenite-216243.htm",
+    "title": "Plata impozitului pe teren al asociatului si retinerea sumei din drepturile cuvenite - Dividende",
+    "question": "Un membru asociat doreste sa ii platim impozitul pe teren la primarie pe anul acesta, urmand sa ii retinem suma din drepturile cuvenite pe anul acesta. Este posibil acest lucru, deoarece ar fi ca un avans din drepturile cuvenite, care sunt considerate dividende la societatile agricole infiintate pe baza Legii 36/1991?",
+    "tags": [
+      "impozit pe teren",
+      "dividende",
+      "creanta"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.A.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "0111"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216242",
+    "url": "https://www.portalcontabilitate.ro/conditii-speciale-de-impozitarea-a-redeventelor-intre-persoane-afiliate-nerezidente-216242.htm",
+    "title": "Conditii speciale de impozitarea a redeventelor intre persoane afiliate nerezidente - Redevente",
+    "question": "Suntem o societate din Romania care vinde licente Microsoft Basic 12 luni catre o societate din Serbia. Pana acum prezentam certificatul de rezidenta si NU ne retineau niciun fel de redeventa in baza Conventiei de evitare a dublei impuneri cu Serbia. Acum este prima data cand ne retin redeventa la sursa. Cand au procedat corect? Atunci sau acum? 1. Va rugam sa ne spuneti cum se procedeaza corect cu retinerea redeventei. 2. Faptul ca societatea din Serbia este afiliata cu societatea noastra schimba datele problemei din acest punct de vedere al retinerii redentei la sursa?",
+    "tags": [
+      "redevente",
+      "nerezident",
+      "conventia de evitare a dublei impuneri"
+    ],
+    "date_validity": "19 Feb 2026",
+    "expert": "Justinian Cucu",
+    "expert_role": "Jurist si expert in proceduri fiscale",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6201"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216240",
+    "url": "https://www.portalcontabilitate.ro/ajustare-tva-client-in-faliment-e-factura-216240.htm",
+    "title": "Ajustare TVA client in faliment. e-Factura - RO e-Factura",
+    "question": "Trebuie sa emitem o factura pentru ajustarea bazei de impozitare a TVA conform art. 287 lit. d) din Codul fiscal ca urmare a pronuntarii sentintei de faliment a clientului. Se transmite aceasta factura in sistemul RO e-Factura?",
+    "tags": [
+      "ajustare TVA",
+      "e-factura",
+      "faliment",
+      "factura"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Georgiana Secan",
+    "expert_role": "Specialist fiscal-contabil",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2332"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216239",
+    "url": "https://www.portalcontabilitate.ro/monografie-contabila-participare-la-constituirea-patrimoniului-unei-asociatii-216239.htm",
+    "title": "Monografie contabila participare la constituirea patrimoniului unei asociatii - Contabilitate si monografii",
+    "question": "Societatea participa cu 1.000 lei la constituirea patrimoniului initial al unei asociatii patronale. Care este monografia contabila pentru aceasta operatiune si tratamentul fiscal?",
+    "tags": [
+      "monografie contabila",
+      "patrimoniu",
+      "inregistrari contabile"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.A.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2712"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216238",
+    "url": "https://www.portalcontabilitate.ro/contributii-pfa-salariat-216238.htm",
+    "title": "Contributii PFA salariat - Contabilitate si monografii",
+    "question": "Daca am o PFA care a realizat in 2025 un venit net de 1046 lei si in acelasi timp a realizat si venituri din salarii de 22.520 lei, datoreaza CASS de 2430 lei sau la diferenta dintre 24.300lei si 22.520 lei, adica 178 lei?",
+    "tags": [
+      "PFA",
+      "venituri din salarii",
+      "cass",
+      "contributii"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Gina Popescu",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "P.F.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "6920"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216237",
+    "url": "https://www.portalcontabilitate.ro/refacturare-salariu-angajat-catre-o-firma-din-grup-216237.htm",
+    "title": "Refacturare salariu angajat catre o firma din grup - Cotele de TVA",
+    "question": "Societatea noastra a angajat un salariat de cetatenie romana care va lucra pentru o alta firma din grup, cu sediul in Dubai. Noi va trebui sa refacturam salariul si alte cheltuieli aferente acestei firme din Dubai. Persoana in cauza va lucra din Romania si este salariat cu contract de munca; prestarea se face in Romania. Ce trebuie sa urmarim, ce cota de TVA trebuie sa folosim si avem nevoie de certificat de rezidenta?",
+    "tags": [
+      "refacturare salariu",
+      "cota de tva",
+      "certificat de rezidenta fiscala"
+    ],
+    "date_validity": "16 Feb 2026",
+    "expert": "Stan Cosmina",
+    "expert_role": "Economist",
+    "society": {
+      "type": "S.A.",
+      "employees": "11-50 angajati",
+      "vat_payer": true,
+      "caen": "4673"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216233",
+    "url": "https://www.portalcontabilitate.ro/tratamentul-fiscal-al-donatiei-catre-persoana-fizicaimpact-asupra-impozitului-pe-profit-216233.htm",
+    "title": "Sponsorizare catre ONG cu plata directa la persoana fizica - ONG",
+    "question": "O societate vrea sa sponsorizeze lunar o persoana cu dizabilitati, dar, ca o masura de siguranta, doreste sa vireze sumele respective direct in contul persoanei fizice cu probleme. Poate sa intocmeasca un contract cu o ONG in care sa fie mentionat faptul ca banii sunt virati direct in contul persoanei fizice? Mai beneficiaza de facilitatile fiscale in acest caz? Dar daca doneaza lunar bani in contul persoanei fizice cu dizabilitati trebuie sa intocmeasca un contract de donatie la notar? Ce impozite datoreaza in cazul donatiilor?",
+    "tags": [
+      "sponsorizare",
+      "ong",
+      "plata impozit",
+      "facilitati fiscale"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4120"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216229",
+    "url": "https://www.portalcontabilitate.ro/corectie-factura-216229.htm",
+    "title": "Corectie factura - Corectarea erorilor",
+    "question": "In luna octombrie 2025 am inregistrat gresit o factura. Inregistrarile se fac manual, pozitie cu pozitie, nu se preiau automat din SPV. Eu am inregistrat cu 56,08 lei mai mult o factura fata de valoarea acesteia (46,35 + TVA 21% = 9,73). Pe factura erau produse care trebuiau inregistrate pe o anumita gestiune (magazin cu amanuntul, am incarcat gestiunea corect) si factura mai avea o pozitie cu discount, pe care nu am inregistrat-o, in valoare de -56,08 lei. Acum, la inceput de an, pe baza unui extras de cont, am observat diferenta si greseala. Cum este corect sa inregistrez aceasta eroare? Cu o nota contabila pentru a regla si TVA, si furnizorul, sau imi propuneti alta varianta?",
+    "tags": [
+      "corectie factura",
+      "inregistrari contabile",
+      "tva",
+      "spv"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Elena Popescu",
+    "expert_role": "Expert Contabil si Consultant Fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "4673"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216222",
+    "url": "https://www.portalcontabilitate.ro/neplatitor-de-tva-prestari-servicii-client-ue-216222.htm",
+    "title": "Neplatitor de TVA. Prestari servicii client UE - Intracomunitare",
+    "question": "Societate din Romania neplatitoare de TVA factureaza catre client din Bulgaria serviciu de evaluare teren (situat in Romania). Mentionez societatea nu detine cod de TVA intracomunitar, iar clientul are cod valid VIES. Ce obligatii declarative are societatea?",
+    "tags": [
+      "evaluare teren",
+      "cod de TVA intracomunitar"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6831"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216220",
+    "url": "https://www.portalcontabilitate.ro/facturi-de-chirie-pentru-un-spatiu-neutilizat-deducere-tva-216220.htm",
+    "title": "Facturi de chirie pentru un spatiu neutilizat. Deducere TVA - Import/Export",
+    "question": "Daca o societate care a demarat activitatea relativ recent (1-2 ani), cu scop de initiere productie. Compania inchiriaza spatiul de productie si birouri, plateste chirie unei firme din afara UE. Factura de chirie este emisa cu TVA. Daca pe termen mediu se dovedeste ca activitatea economica anticipata nu se lanseaza, exista argumente in favoarea deducerii TVA si recuperarii lui ulterioare?",
+    "tags": [
+      "factura de chirie",
+      "deducere tva",
+      "tva"
+    ],
+    "date_validity": "14 Feb 2026",
+    "expert": "Negoita Oana-Maria",
+    "expert_role": "Expert contabil, Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "peste 50 angajati",
+      "vat_payer": true,
+      "caen": "2931"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216216",
+    "url": "https://www.portalcontabilitate.ro/regularizare-dividende-interimare-216216.htm",
+    "title": "Regularizare dividende interimare - Dividende",
+    "question": "In cursul exercitiului financiar 2025, societatea a procedat la repartizarea trimestriala de dividende interimare (Trim. I-III), utilizand formula contabila 463 = 456 si 446. In februarie 2026, odata cu depunerea situatiilor financiare anuale si intocmirea hotararii AGA, s-a efectuat repartizarea profitului net al intregului exercitiu 2025 (121 la 117 / 117 la 457) si inchiderea contului de activ prin formula 457 = 463. Astfel, in soldul contului 457 apar dividendele brute aferente trimestrului 4/ 2025. 1. Cand se inregistreaza impozitul pe dividende pentru T4, astfel incat soldul creditor al contului 457 sa reflecte exclusiv datoria neta exigibila? La data intocmirii hotararii AGA sau in luna efectuarii platii de dividende catre asociat? 2. Avand in vedere ca, la data bilantului din februarie 2026, coexista un sold creditor in contul 456 (aferent interimarelor repartizate si neplatite in 2025) si un sold in contul 457 (aferent repartizarii definitive a profitului pe 2025), este corecta si obligatorie, sub aspectul prezentarii fidele a bilantului, transferarea soldului din 456 in 457 pentru a centraliza intreaga datorie certa fata de asociati?",
+    "tags": [
+      "dividende interimare",
+      "inregistrari contabile",
+      "hotararea aga",
+      "datorie"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Elena Garofil",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "caen": "7112"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216212",
+    "url": "https://www.portalcontabilitate.ro/cursuri-de-formare-profesionala-drept-de-deducere-tva-216212.htm",
+    "title": "Cursuri de formare profesionala. Drept de deducere TVA - Drept de deducere",
+    "question": "O SRL cu regim mixt din punctul de vedere al TVA ofera: * cursuri de pregatire scutite de taxa, pentru care este autorizat conform art. 292 alin. (1) lit. f); * cursuri pentru care colecteaza TVA. Cursurile scutite de taxa sunt facturate: * ca SFDD catre persoane fizice rezidente/nerezidente si catre persoane juridice romane; * cu taxare inversa, SDD, catre persoane juridice din UE cu cod valid in VIES. In ceea ce priveste cursurile autorizate furnizate catre persoane juridice din UE, este corect ca acestea sa fie facturate cu taxare inversa, respectiv sa fie considerate venituri SDD la calculul pro-ratei? Cursurile se presteaza fizic in Romania si depind de un echipament fix (un simulator de zbor). Echipamentul fix este montat intr-un imobil din Romania. Societatea presteaza si servicii de inchiriere a echipamentului, facturile pentru acest serviciu fiind emise toate cu TVA 21%. Ne puteti confirma daca este corect?",
+    "tags": [
+      "cursuri de formare profesionala",
+      "drept de deducere tva",
+      "servicii de inchiriere",
+      "taxare inversa"
+    ],
+    "date_validity": "15 Feb 2026",
+    "expert": "Monica Cernea",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": true,
+      "caen": "6220"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216210",
+    "url": "https://www.portalcontabilitate.ro/microintreprindere-nou-infiintata-fara-salariati-216210.htm",
+    "title": "Microintreprindere nou infiintata fara salariati - Declaratii",
+    "question": "O societate infiintata in 28.01.2026 care s-a declarat platitoare de impozit pe venit si care nu intentioneaza sa faca angajari prea curand, cand trebuie sa trimita declaratia de trecere la impozit pe profit si cu ce data?",
+    "tags": [
+      "microintreprindere",
+      "impozit pe venit",
+      "declaratia 700"
+    ],
+    "date_validity": "12 Feb 2026",
+    "expert": "Denisa Alexe",
+    "expert_role": "Consultant fiscal",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "0 angajati",
+      "vat_payer": false,
+      "caen": "7112"
+    },
+    "scraped_at": "2026-05-15"
+  },
+  {
+    "id": "portal-216209",
+    "url": "https://www.portalcontabilitate.ro/corectare-eroare-leasing-auto-la-neplatitor-de-tva-tva-omisa-din-cost-216209.htm",
+    "title": "Corectare eroare leasing auto la neplatitor de TVA (TVA omisa din cost) - Leasing",
+    "question": "Firma SRL, in anul 2021, a luat o masina in leasing. Fiind la inceput, am inregistrat valoarea de achizitie a autoturismului fara TVA. Acum, in 2025, am realizat eroarea. Ce mai pot face acum?",
+    "tags": [
+      "leasing auto",
+      "tva",
+      "inregistrari contabile",
+      "monografie contabila"
+    ],
+    "date_validity": "13 Feb 2026",
+    "expert": "Liviu Sapunaru",
+    "expert_role": "Consultant fiscal, Expert Contabil, Practician in Insolventa",
+    "society": {
+      "type": "S.R.L.",
+      "employees": "1-10 angajati",
+      "vat_payer": false,
+      "caen": "8623"
+    },
+    "scraped_at": "2026-05-15"
   }
 ]

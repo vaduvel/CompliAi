@@ -196,6 +196,40 @@ export const FISCAL_CORPUS: KnowledgeEntry[] = [
     last_verified: "2026-05-14",
   },
   // ===========================================================================
+  // REDIRECTIONARE 20% / 0.75% — Declarația D177 către ONG
+  // ===========================================================================
+  {
+    id: "decl-d177-redirectionare-ong",
+    tags: ["D177", "redirectionare", "ONG", "sponsorizare", "impozit profit"],
+    title: "Declarația D177 — Redirectionare impozit profit către ONG",
+    body: `D177 este formularul pentru redirectionarea unei părți din impozitul pe profit către o entitate nonprofit (ONG/biserică).
+
+LIMITA DE REDIRECTIONARE — important pentru a evita respingerea:
+Suma redirectionată NU poate depăși MINIMUL dintre:
+- 20% × impozitul pe profit declarat anual
+- 0.75% × cifra de afaceri anuală
+
+Se alege întotdeauna VARIANTA MAI MICĂ (cea care rezultă suma mai puțin).
+
+ORDINE OBLIGATORIE de depunere:
+1. ÎNTÂI D101 (impozit pe profit anual) — ANAF folosește această sumă ca referință
+2. APOI D177 — ANAF face cross-check automat: dacă suma redirectionată nu se încadrează în limita 20%/0.75%, declarația e RESPINSĂ
+
+TERMEN: 25 iunie anul curent, pentru anul fiscal precedent. După această dată redirectionarea nu mai e posibilă.
+
+ELIGIBILITATE ONG: doar ONG-uri din Registrul entităților/cult de pe site-ul ANAF. Verificare obligatorie ÎNAINTE de depunere.
+
+NU SE FAC ÎNREGISTRĂRI CONTABILE — D177 e doar redirectionare ANAF, nu generează note contabile.
+
+DATE NECESARE: CIF ONG, denumire ONG, cod IBAN beneficiar, suma redirectionată (max calculată).`,
+    sources: [
+      { label: "Cod Fiscal art. 25 alin. (4) lit. i)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF cu modificările ulterioare — formularul D177", ref: "https://anaf.ro" },
+      { label: "Legea 32/1994 privind sponsorizarea", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  // ===========================================================================
   // ÎNCHIDEREA LUNII — workflow secvențial
   // ===========================================================================
   {
