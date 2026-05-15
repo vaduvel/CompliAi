@@ -23,25 +23,56 @@ export function FiscalCopilotDashboard() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [briefing, setBriefing] = useState<DailyBriefing | null>(null);
   const [alerts, setAlerts] = useState<MatchPathAlert[]>([]);
+  const [portfolioEmpty, setPortfolioEmpty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [briefingLoading, setBriefingLoading] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [authError, setAuthError] = useState(false);
+
+  const loadAlerts = () => {
+    fetch("/api/fiscal-copilot/alerts")
+      .then((r) => {
+        if (r.status === 401) {
+          setAuthError(true);
+          return null;
+        }
+        return r.json();
+      })
+      .then((data: { alerts?: MatchPathAlert[]; portfolioEmpty?: boolean } | null) => {
+        if (!data) return;
+        setAlerts(data.alerts || []);
+        setPortfolioEmpty(!!data.portfolioEmpty);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
 
   useEffect(() => {
     // 1. Health check (fast)
     fetch("/api/fiscal-copilot/health")
-      .then((r) => r.json())
-      .then(setHealth)
+      .then((r) => {
+        if (r.status === 401) {
+          setAuthError(true);
+          return null;
+        }
+        return r.json();
+      })
+      .then((h) => h && setHealth(h))
       .catch(() => setHealth({ ok: false, reason: "Network error", corpus: 0, model: "?" }));
 
     // 2. Alerts (fast — no LLM)
-    fetch("/api/fiscal-copilot/alerts")
-      .then((r) => r.json())
-      .then((data: { alerts: MatchPathAlert[] }) => {
-        setAlerts(data.alerts || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    loadAlerts();
   }, []);
+
+  const seedDemo = async () => {
+    setSeeding(true);
+    try {
+      await fetch("/api/fiscal-copilot/portfolio/seed-demo", { method: "POST" });
+      loadAlerts();
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const fetchBriefing = async () => {
     setBriefingLoading(true);
@@ -53,6 +84,24 @@ export function FiscalCopilotDashboard() {
       setBriefingLoading(false);
     }
   };
+
+  if (authError) {
+    return (
+      <div className="container mx-auto max-w-2xl space-y-4 p-12 text-center">
+        <h1 className="text-2xl font-bold">FiscCopilot — Necesar login</h1>
+        <p className="text-muted-foreground">
+          Asistentul fiscal AI rulează cu auth real. Datele tale sunt izolate per cabinet (orgId).
+          Conectează-te pentru a accesa portofoliul tău și memoria personalizată.
+        </p>
+        <a
+          href="/login"
+          className="inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Mergi la Login
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-7xl space-y-6 p-6">
@@ -67,6 +116,23 @@ export function FiscalCopilotDashboard() {
           GDPR + secret profesional CECCAR by design.
         </p>
       </header>
+
+      {portfolioEmpty && (
+        <div className="rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+          <h3 className="mb-2 text-lg font-semibold text-amber-900">Portofoliul tău e gol</h3>
+          <p className="mb-4 text-sm text-amber-800">
+            Adaugă primul client real, sau încarcă portofoliul demo (5 clienți + 3 proceduri standard) pentru a explora rapid.
+          </p>
+          <div className="flex justify-center gap-2">
+            <Button onClick={seedDemo} disabled={seeding}>
+              {seeding ? "Încarc demo..." : "Încarcă demo portfolio"}
+            </Button>
+            <Button variant="outline" disabled>
+              Adaugă client real (UI în lucru)
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="briefing" className="w-full">
         <TabsList>

@@ -9,6 +9,8 @@
 
 import { askGemma, checkGemmaAvailable, type GemmaResponse } from "./gemma-client";
 import { retrieveRelevant, formatContextForPrompt, type RetrievalResult } from "./rag";
+import { logEpisode } from "./memory/episodic";
+import { clientFacts, factsAsContext } from "./memory/semantic";
 
 export interface AIAnswer {
   question: string;
@@ -16,6 +18,8 @@ export interface AIAnswer {
   sources: Array<{ label: string; ref: string; entry_id: string }>;
   confidence: "high" | "medium" | "low";
   retrievedEntries: number;
+  /** Facts despre client folosite ca context suplimentar */
+  factsUsed: number;
   latencyMs: number;
   model: string;
 }
@@ -36,22 +40,48 @@ TONUL: profesional, prietenos, clar. NU folosi jargon excesiv. NU folosi emotico
 
 /**
  * Răspunde la o întrebare fiscală.
+ *
+ * @param opts.orgId — dacă e furnizat, log episode + use memory facts
+ * @param opts.clientId — dacă e furnizat, injectează facts despre acest client în context
  */
 export async function askExpert(
   question: string,
-  opts: { model?: "gemma4:e2b"; topN?: number } = {}
+  opts: {
+    model?: "gemma4:e2b";
+    topN?: number;
+    orgId?: string;
+    clientId?: string;
+  } = {}
 ): Promise<AIAnswer> {
   const start = Date.now();
   const topN = opts.topN ?? 3;
 
-  // 1. RAG retrieval
+  // 1. RAG retrieval (knowledge base)
   const retrieved = retrieveRelevant(question, topN);
   const context = formatContextForPrompt(retrieved);
+
+  // 1b. Semantic memory facts (if client context is provided)
+  let factsContext = "";
+  let factsCount = 0;
+  if (opts.orgId && opts.clientId) {
+    const facts = await clientFacts(opts.orgId, opts.clientId, 0.4);
+    factsCount = facts.length;
+    if (facts.length > 0) {
+      factsContext = `
+
+## Context specific despre client (din memoria istorică):
+
+${factsAsContext(facts)}
+
+Foloseste aceste informații DOAR ca background — răspunde la întrebare cu informația din "Context fiscal" de mai sus.`;
+    }
+  }
 
   // 2. Build prompt
   const userPrompt = `Context fiscal (din baza de cunoștințe verificată):
 
 ${context}
+${factsContext}
 
 ---
 
@@ -74,12 +104,26 @@ Răspunde conform regulilor de mai sus. Folosește DOAR informațiile din contex
       timeoutMs: 90_000,
     });
   } catch (err) {
+    // Log error episode
+    if (opts.orgId) {
+      await logEpisode({
+        orgId: opts.orgId,
+        kind: "ai_query",
+        clientId: opts.clientId,
+        payload: {
+          question,
+          error: err instanceof Error ? err.message : String(err),
+        },
+        outcome: "error",
+      }).catch(() => undefined);
+    }
     return {
       question,
       answer: `[Eroare: nu am putut contacta modelul local. Verifică Ollama. Detalii: ${err instanceof Error ? err.message : String(err)}]`,
       sources: [],
       confidence: "low",
       retrievedEntries: retrieved.length,
+      factsUsed: factsCount,
       latencyMs: Date.now() - start,
       model: "error",
     };
@@ -94,12 +138,31 @@ Răspunde conform regulilor de mai sus. Folosește DOAR informațiile din contex
     r.entry.sources.map((s) => ({ label: s.label, ref: s.ref, entry_id: r.entry.id }))
   );
 
+  // 6. Log episode (audit trail + future consolidation)
+  if (opts.orgId) {
+    await logEpisode({
+      orgId: opts.orgId,
+      kind: "ai_query",
+      clientId: opts.clientId,
+      payload: {
+        question,
+        answer_excerpt: gemma.text.slice(0, 200),
+        confidence,
+        retrievedEntries: retrieved.length,
+        factsUsed: factsCount,
+        latencyMs: Date.now() - start,
+      },
+      outcome: "success",
+    }).catch(() => undefined);
+  }
+
   return {
     question,
     answer: gemma.text,
     sources,
     confidence,
     retrievedEntries: retrieved.length,
+    factsUsed: factsCount,
     latencyMs: Date.now() - start,
     model: gemma.model,
   };

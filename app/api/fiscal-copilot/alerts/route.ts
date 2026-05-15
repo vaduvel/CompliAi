@@ -1,27 +1,39 @@
 import { NextResponse } from "next/server";
-import { runAllPaths } from "@/lib/fiscal-copilot/match-paths/paths";
-import { DEMO_CLIENTS, generateDemoEvents } from "@/lib/fiscal-copilot/demo-portfolio";
+import { getOrgContext } from "@/lib/server/org-context";
+import { runAlertsForCabinet } from "@/lib/fiscal-copilot/run-alerts";
+import { isPortfolioEmpty, seedDemoPortfolio } from "@/lib/fiscal-copilot/portfolio-store";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/fiscal-copilot/alerts
  *
- * Returnează toate alertele active pe demo portfolio.
- * Fast (no LLM). Util pentru polling UI.
+ * Rulează Match Paths pe portofoliul REAL al cabinetului logat (per orgId).
+ * Fast (~50ms): no LLM, just deterministic rules.
+ *
+ * Dacă portofoliul e gol → returnează empty array + flag pentru UI să sugereze seed demo.
  */
 export async function GET() {
-  const today = new Date();
-  const allEvents = generateDemoEvents(today);
+  const ctx = await getOrgContext();
+  const orgId = ctx.orgId;
 
-  const allAlerts = DEMO_CLIENTS.flatMap((profile) => {
-    const events = allEvents.filter((e) => e.clientId === profile.id);
-    return runAllPaths(profile, events, today);
-  });
+  if (await isPortfolioEmpty(orgId)) {
+    return NextResponse.json({
+      generatedAt: new Date().toISOString(),
+      count: 0,
+      alerts: [],
+      portfolioEmpty: true,
+      hint: "Portofoliul tău e gol. POST /api/fiscal-copilot/portfolio/seed-demo pentru seed demo, sau POST /api/fiscal-copilot/clients pentru adăugare client real.",
+    });
+  }
+
+  // No logEpisodes on GET polling — only on explicit "refresh"
+  const result = await runAlertsForCabinet(orgId, new Date(), { logEpisodes: false });
 
   return NextResponse.json({
-    generatedAt: new Date().toISOString(),
-    count: allAlerts.length,
-    alerts: allAlerts,
+    generatedAt: result.generatedAt,
+    count: result.totalAlerts,
+    alerts: result.alerts,
+    portfolioEmpty: false,
   });
 }
