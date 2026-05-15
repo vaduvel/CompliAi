@@ -4324,4 +4324,1024 @@ NU SE SCAD din nou provizioane (sunt deja în calculul activelor nete).`,
     ],
     last_verified: "2026-05-15",
   },
+  {
+    id: "d212-declaratie-unica",
+    tags: ["D212", "Declarația Unică", "PFA", "PFI", "CMI", "profesii liberale", "CASS", "CAS", "OPANAF 2719/2025"],
+    title: "D212 Declarația Unică — PFA/PFI/CMI + impozit + CAS + CASS",
+    body: `Cod Fiscal art. 122 + OPANAF 2719/2025 + OPANAF 2736/2025 (modele actualizate 2026).
+
+DEFINIȚIE D212:
+Declarația Unică privind impozitul pe venit și contribuțiile sociale datorate de persoanele fizice = formularul UNIC pentru:
+- PFA (Persoană Fizică Autorizată)
+- PFI (Persoană Fizică Independentă)
+- II (Întreprindere Individuală)
+- IF (Întreprindere Familială)
+- CMI/CMV (Cabinet Medical Individual/Veterinar)
+- Profesii liberale (avocat, notar, executor judecătoresc, psiholog, mediator)
+- Persoane fizice cu venituri din chirii, dividende, dobânzi
+- Asociați PJ pentru venituri impozabile
+
+OBLIGAȚIE depunere D212:
+1. Persoane fizice cu venituri DIN ACTIVITĂȚI INDEPENDENTE (PFA, II, CMI, profesii)
+2. Persoane fizice cu venituri DIN CHIRII (peste 80 RON/lună)
+3. Persoane fizice cu venituri DIN INVESTIȚII (dividende > 6 salarii minime)
+4. Persoane fizice cu VENITURI DIN STRĂINĂTATE (oriunde > 6 salarii minime)
+5. Persoane fizice care depășesc plafoanele de venit pentru CAS/CASS
+
+STRUCTURA D212 (2025+):
+- Capitolul I: Date identificare contribuabil
+- Capitolul II: VENITURI ESTIMATIVE pentru anul curent (impozit + CAS + CASS)
+- Capitolul III: VENITURI REALIZATE anul anterior + recalcul
+
+VENITURI ÎN SISTEM REAL vs NORME VENIT (alegere PFA/II/CMI):
+SISTEM REAL:
+- Venit impozabil = Venituri ÎNCASATE - Cheltuieli PLĂTITE deductibile (contabilitate partidă simplă)
+- Impozit 10% pe venit net
+- CAS 25% dacă venit > 6 salarii minime brute (24.300 lei în 2025)
+- CASS 10% dacă venit > 6 salarii minime brute
+
+NORME VENIT:
+- Aplicabile DOAR pentru anumite activități CAEN (transport, comerț local, agricultură, alimentație publică) — listă MFP
+- Venit forfetar pe lună stabilit de Direcția Județeană Finanțe
+- Impozit 10% pe venit NORMAT (NU venit real)
+- CAS/CASS calculat pe venit NORMAT
+- ATENȚIE 2025+: norme venit RESTRÂNSE (multe activități scoase din lista de norme)
+
+PLAFOANE 2025 pentru PFA/PFI/CMI:
+- Salariu minim 2025: 4.050 RON brut
+- 6 salarii minime: 24.300 RON anual (prag CAS+CASS)
+- 12 salarii minime: 48.600 RON anual (prag CAS la 12 salarii)
+- 24 salarii minime: 97.200 RON anual (prag CAS la 24 salarii)
+
+CALCUL CAS pentru PFA (sistem real):
+- Venit < 6 salarii minime → CAS opțional 0 lei (NU se plătește)
+- Venit 6-12 salarii minime → CAS 25% × 6 salarii = 6.075 lei
+- Venit 12-24 salarii minime → CAS 25% × 12 salarii = 12.150 lei
+- Venit > 24 salarii minime → CAS 25% × 24 salarii = 24.300 lei
+
+CALCUL CASS pentru PFA (sistem real):
+- Venit < 6 salarii minime → CASS 10% × salariu minim × 12 luni = ~4.860 lei (obligatoriu chiar fără venit)
+- Venit 6-12 salarii minime → CASS 10% × 6 salarii = 2.430 lei
+- Venit 12-24 salarii minime → CASS 10% × 12 salarii = 4.860 lei
+- Venit > 24 salarii minime → CASS 10% × 24 salarii = 9.720 lei
+
+PFA fără ACTIVITATE — OBLIGAȚII:
+- PFA care nu a desfășurat activitate în 2024 → totuși obligat la CASS 2024 (10% × salariu minim × 12 luni)
+- EXCEPȚII: pensionari, salariați cu salariu peste 24 salarii minime, persoane cu handicap
+- Soluție: SUSPENDARE PFA la ONRC → scutire CASS pe perioada suspendării
+
+PROFESII LIBERALE (avocat, notar):
+- CAS la Casa de Asigurări proprie a profesiei (NU la CAS de stat)
+- Plata CAS direct la Casa Asigurări Avocaților / Notarilor / Mediatorilor
+- CASS la CNAS de stat (declarat în D212)
+- Atenție: CAS plătit la casa proprie e DEDUCTIBIL în D212 (reduce baza impozabilă)
+
+DEDUCERI și CHELTUIELI în SISTEM REAL:
+- Cheltuieli aferente activității (chirie, utilități, comunicații, contabil)
+- 50% TVA + 50% cheltuieli auto mixt
+- Cotizații profesionale obligatorii (CECCAR, Barou, OAR): deductibile 100% la venit net
+- Cotizații facultative (până la 5% venit): deductibile la impozit (NU la CAS/CASS)
+- Cheltuieli formare profesională continuă: deductibile
+- Donații (max 5% venit): deductibile
+
+TERMENE depunere D212:
+- 25 MAI anul următor (pentru venit anual realizat anul precedent)
+- 25 MAI anul curent (pentru venit estimat anul curent — opțional, doar pentru CAS/CASS)
+- 25 MAI 2026 pentru venit realizat 2025 + estimat 2026
+
+PRECOMPLETARE D212 (Ordinul ANAF 2719/2025):
+- Sistem ANAF precompletează automat datele din SAF-T, e-Factura, D205, D207
+- Contribuabilul verifică + corectează + transmite
+- Reduce semnificativ erori comune (CNP greșite, sume duplicate)
+
+DECONTAREA OBLIGAȚIILOR D212:
+- Plata 2 TRANȘE: 25% la depunere (până 25 mai) + 75% până la 25 noiembrie
+- Bonificație 3% la PLATA INTEGRALĂ la depunere (Cod Fiscal art. 130 modificat)
+- Plata electronică prin SPV sau ghișeu virtual
+
+DIRECȚIONARE 3.5% (din D212):
+PFA poate redirecționa până la 3.5% din impozitul anual către ONG (similar D230 pentru salariați).
+Procedură: completare anexă în D212 cu beneficiar (cont IBAN + CIF)
+
+REGISTRU JURNAL ÎNCASĂRI ȘI PLĂȚI (RJIP):
+PFA în sistem real ține:
+- RJIP (cronologic încasări/plăți)
+- Registru Inventar (cu mențiune activelor)
+- Pentru PFA plătitor TVA: D300 lunar/trimestrial + D394
+
+PFA PLĂTITOR DE TVA:
+- Înregistrare la TVA: opțional sub 88.500 lei (pragul mic), obligatoriu peste
+- D212 conține veniturile FĂRĂ TVA (TVA NU este venit propriu)
+- Cheltuielile FĂRĂ TVA deductibilă (TVA dedus deja prin D300)
+
+CAZ SPECIFIC: PFA AVOCATURĂ
+- CAS la Casa Asigurări Avocaților (NU declarată în D212 secțiunea CAS — DOAR plata pe document)
+- CASS în D212 ca pentru orice PFA
+- Cotizație Barou (cotizație profesională obligatorie): deductibilă la venit net
+
+CAZ COASIGURATI SĂNĂTATE (Legea 141/2025):
+Pentru persoane fără venituri proprii (soți/copii) care depind de altă persoană:
+- D212 anexă coasigurați cu contribuție 2.430 RON/an (2 tranșe)
+- Întreținătorul plătește CASS pentru coasigurați
+
+REGULA DEPUNERE PFA fără ACTIVITATE 2026:
+PFA înființată în 2026 fără contracte: dacă în 2026 nu generează venituri, depune D212 cu venituri 0 sau SUSPENDĂ la ONRC.
+
+REGISTRU PARTIDĂ SIMPLĂ — TVA la încasare:
+PFA plătitor de TVA cu TVA la încasare:
+- Venit impozabil în D212 = ÎNCASĂRI fără TVA (regula partidă simplă)
+- TVA gestionat separat în D300 (cu jurnal TVA la încasare)
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. CIF PFA + actul autorizare (CUI ONRC)
+2. Contract spațiu sediu profesional
+3. Contracte încheiate cu clienții
+4. RJIP + Registru Inventar (în partida simplă)
+5. Pentru profesii liberale: carnet profesional valabil
+6. Factura/bonuri pentru toate veniturile + cheltuielile deductibile`,
+    sources: [
+      { label: "Cod Fiscal art. 122 (impozit venit PF independente)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 2719/2025 (procedură precompletare D212)", ref: "https://anaf.ro" },
+      { label: "OPANAF 2736/2025 (model + gestionare D212)", ref: "https://anaf.ro" },
+      { label: "L 141/2025 (coasigurați CASS)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "d230-d177-directionare-3-5",
+    tags: ["D230", "D177", "3.5%", "redirecționare", "ONG", "bursă privată", "unitate cult", "impozit anual"],
+    title: "D230 + D177 — Direcționare 3.5% impozit către ONG/cult",
+    body: `Cod Fiscal art. 56 alin. 1^1 + art. 79 + OPANAF 15/2021 (D230) + OPANAF (D177 — micro).
+
+D230 — REDIRECȚIONARE 3.5% IMPOZIT VENIT (Persoane Fizice):
+Aplicabil pentru:
+- Salariați (impozit pe salarii reținut prin D112)
+- PFA/PFI/CMI (impozit prin D212)
+- Persoane fizice cu alte venituri impozabile
+
+DESTINAȚII PERMISE pentru 3.5%:
+1. ENTITĂȚI NON-PROFIT (asociații, fundații, ONG-uri) — cu CIF + cod special
+2. UNITĂȚI DE CULT (biserici, mănăstiri, parohii)
+3. BURSE PRIVATE pentru studenți/elevi (max 1.500 RON/lună/bursier)
+
+CONDIȚII OBLIGATORII pentru BENEFICIAR:
+1. Înscris în Registrul Entităților Non-Profit (ANAF) — verificare anuală
+2. CIF + cod bancar IBAN valid
+3. Activitate desfășurată conform statut
+4. NU este entitate publică, NU este partid politic, NU este sindicat
+
+DEPUNERE D230:
+- Termen: până la 25 MAI anul următor (pentru impozit anul precedent)
+- Modalități: SPV electronic SAU formular scriptic la AFP-ul de domiciliu fiscal
+- Documente atașate: copie certificat înregistrare beneficiar (ANAF nu mai cere — verificare automată)
+
+CALCUL 3.5%:
+- Maxim 3.5% × IMPOZIT ANUAL DATORAT (NU venit anual)
+- Exemplu: salariu net 4.000 RON/lună × 12 luni = 48.000 RON brut → impozit 16% = 7.680 RON → maxim direcționabil 268 RON
+
+IMPACT FISCAL:
+- Direcționarea 3.5% NU reduce impozitul datorat (este o redistribuire post-impozit)
+- Banii rămân INTEGRAL la stat dacă NU se direcționează
+- Beneficiarul primește direct sumele de la Trezoreria Statului (NU prin firmă)
+
+D177 — REDIRECȚIONARE 3.5% IMPOZIT MICRO (Microîntreprinderi):
+Microîntreprinderile pot redirecționa până la 3.5% din impozitul anual micro (1% sau 3%) către:
+- ONG / fundație
+- Unități de cult
+
+CONDIȚII D177:
+- Bilanțul anual depus la termen (pentru a fi micro)
+- Impozit micro plătit integral
+- Beneficiar înscris în Registrul Entităților Non-Profit
+
+DEPUNERE D177:
+- Termen: 25 MARTIE anul următor (similar D101 pentru profit, dar pentru micro)
+- Format: declarație nominativă cu beneficiari + sume
+- Maxim 3.5% × IMPOZIT MICRO anual
+
+EXEMPLU CALCUL D177:
+- Cifră afaceri 2025: 800.000 RON
+- Impozit micro 3% (cu salariați): 24.000 RON
+- Maxim direcționabil 3.5%: 840 RON
+- Hotărâre micro: distribuire 840 RON către ONG Fundatia X (CIF ____)
+
+DIFERENȚE D230 vs D177:
+| Aspect | D230 (PF) | D177 (Micro) |
+|---|---|---|
+| Cine depune | Persoane fizice | Microîntreprinderi |
+| Impozit bază | Impozit venit PF (10/16%) | Impozit micro (1/3%) |
+| Termen | 25 mai | 25 martie |
+| Procent max | 3.5% | 3.5% |
+| Beneficiari | ONG, cult, burse | ONG, cult |
+
+MONOGRAFIE CONTABILĂ — DIRECȚIONARE PROFIT MICRO:
+Direcționarea NU se înregistrează ca cheltuială (este redistribuire impozit):
+- ANAF transfer direct din Trezoreria Statului către beneficiar
+- Firma plătește impozit micro INTEGRAL la stat
+- D177 informativă: ANAF folosește pentru calcul redistribuire
+
+D177 vs SPONSORIZARE (Legea 32/1994):
+- Sponsorizare = cheltuială cu credit fiscal (max 0.75% CA sau 20% impozit)
+- D177 = redirecționare 3.5% din impozit deja datorat
+- AVANTAJ D177 (micro): NU reduce profit micro (cheltuiala sponsorizare ar reduce)
+- DEZAVANTAJ D177: doar 3.5% din impozit (sponsorizarea poate fi mai mare)
+
+CONTRACT EXPLICIT cu BENEFICIARUL:
+NU este obligatoriu pentru D230/D177 (suficient datele identificare ONG)
+Recomandare: contract de "redirecționare" pentru transparență, mai ales pentru sume mari
+
+REGULA "FIFO" pentru REDIRECȚIONĂRI:
+Dacă cota disponibilă 3.5% este mai mică decât suma cerută în D230/D177, ANAF redistribuie PROPORȚIONAL între beneficiari.
+
+REGISTRU PUBLIC ANAF:
+Lista entităților non-profit eligibile pentru D230/D177 este publicată pe site ANAF cu actualizare anuală.
+Verificare obligatorie ÎNAINTE de depunere (entități care își pierd statut → 3.5% se pierde)
+
+CONSECINȚE NEDEPUNERE:
+- D230: 3.5% rămâne la stat (NU este sancțiune)
+- D177: 3.5% rămâne la stat
+- NU se sancționează nedepunerea
+
+CONSECINȚE EROARE BENEFICIAR (CIF greșit):
+- ANAF respinge declarația dacă beneficiar invalid
+- Rectificativă posibilă în termenul de depunere
+- După termen: imposibilitate corectare`,
+    sources: [
+      { label: "Cod Fiscal art. 56 alin. 1^1 (credit fiscal sponsorizare micro)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 79 (3.5% impozit anual)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 15/2021 (D230)", ref: "https://anaf.ro" },
+      { label: "OPANAF (D177 — micro)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "d700-vector-fiscal-modificare",
+    tags: ["D700", "vector fiscal", "modificare obligații", "TVA", "salarii", "trimestru", "perioada fiscală"],
+    title: "D700 Vector fiscal — modificare obligații declarative",
+    body: `OPANAF 3725/2017 + modificări ulterioare (D700 — formular declarații electronice).
+
+DEFINIȚIE VECTOR FISCAL:
+Vector fiscal = lista obligațiilor declarative + plată ale unei firme. Fiecare firmă are vector fiscal individual înregistrat la ANAF.
+
+COMPONENTE VECTOR FISCAL:
+1. TVA (cod TVA, perioadă fiscală — lunară/trimestrială/semestrială/anuală)
+2. Impozit profit / impozit micro
+3. Impozit pe salarii (D112 lunar)
+4. Contribuții sociale (CAS, CASS)
+5. Accize (dacă aplicabil)
+6. Impozit pe dividende
+7. Alte impozite specifice (mineritul, jocuri noroc)
+
+FORMULAR D700:
+Înlocuiește formulare anterioare (010, 020, 040) pentru DECLARARE ELECTRONICĂ a modificărilor vector fiscal.
+
+CÂND SE DEPUNE D700:
+1. ÎNREGISTRARE OBLIGAȚII NOI:
+   - Înregistrare TVA (depășire prag 88.500 sau opțiune)
+   - Înregistrare TVA intracomunitar (cod special pentru achiziții IC)
+   - Înregistrare ca plătitor accize
+   - Trecere la impozit profit (din micro)
+
+2. MODIFICARE OBLIGAȚII EXISTENTE:
+   - Schimbare perioadă fiscală TVA (lunar → trimestrial sau invers)
+   - Modificare adresă sediu/punct lucru
+   - Modificare cod CAEN (după actualizare ONRC)
+   - Schimbare administrator/reprezentant legal
+
+3. RADIERE OBLIGAȚII:
+   - Renunțare la TVA (sub prag)
+   - Trecere de la profit la micro
+   - Suspendare activitate la ONRC
+
+4. ÎNCETARE ACTIVITATE:
+   - Dizolvare societate
+   - Radiere ONRC
+
+D060 vs D700:
+- D060 = ÎNREGISTRARE FISCALĂ INIȚIALĂ (la înființare firmă sau punct de lucru nou)
+- D700 = MODIFICAREA / RADIEREA vector fiscal după înregistrare
+- Pentru puncte de lucru cu salariați (Legea 245/2025): D060 pentru CIF distinct + D700 pentru update vector
+
+SECȚIUNI ÎN D700:
+
+SECȚIUNEA 1 — Date identificare societate (CIF, denumire, adresă, CAEN principal)
+
+SECȚIUNEA 2 — Acțiuni cerute:
+- Înregistrare obligație nouă (bifă + detalii)
+- Modificare obligație existentă (bifă + detalii noi)
+- Radiere obligație (bifă)
+
+SECȚIUNEA 3 — Detalii TVA:
+- Cod TVA (RO + 9 cifre)
+- Perioadă fiscală: lunar / trimestrial / semestrial / anual
+- Dată început / sfârșit perioadă
+- TVA la încasare (DA/NU)
+
+SECȚIUNEA 4 — Impozit profit/micro:
+- Plătitor profit (DA/NU)
+- Plătitor micro 1% sau 3% (DA/NU)
+- Anul fiscal (calendaristic sau modificat)
+
+SECȚIUNEA 5 — Salariați:
+- Plătitor impozit salarii (DA/NU)
+- CIF punct lucru cu salariați (dacă diferit)
+
+SECȚIUNEA 6 — Sedii secundare:
+- Listă puncte lucru (cu CIF distinct dacă există)
+- Adresă fiecare punct
+
+TERMEN DEPUNERE D700:
+- 30 ZILE de la modificarea efectivă (Cod Procedură Fiscală art. 88)
+- Pentru depășire prag TVA: 10 ZILE de la depășire
+- Pentru schimbare perioadă fiscală: 25 ianuarie anul aplicării
+
+SCHIMBARE PERIOADĂ FISCALĂ TVA:
+- Trecere de la TRIMESTRIAL la LUNAR:
+  - Obligatorie când: efectuare achiziție intracomunitară
+  - Opțională oricând (decizie management)
+  - D700 la 25 ianuarie anul aplicării
+  - Atenție: trecerea la lunar e DEFINITIVĂ pentru anul respectiv
+
+- Trecere de la LUNAR la TRIMESTRIAL:
+  - Posibilă DOAR dacă în anul precedent cifra afaceri < 100.000 EUR
+  - Și fără achiziții intracomunitare în anul precedent
+  - D700 la 25 ianuarie anul aplicării
+
+REGULA NEFICĂ pentru TVA: dacă cifra afaceri SCADE sub 100.000 EUR în 2025, dar firma a fost lunar în 2025 + a făcut achiziție IC → poate alege să rămână lunar sau să treacă trimestrial pentru 2026 (cu D700)
+
+D094 = DECLARAȚIE ANUALĂ pentru cifra afaceri trimestrial fără IC:
+- Depusă de firme TRIMESTRIAL care nu au făcut achiziții IC anul precedent
+- Termen: 25 IANUARIE anul curent pentru anul precedent
+- Confirmă rămânerea în regim trimestrial
+
+CAZ ACTUALIZARE COD CAEN Rev. 3:
+Firma actualizează codul CAEN la ONRC (din CAEN Rev. 2 în CAEN Rev. 3):
+- D700 secțiunea CAEN cu noul cod
+- Termen: 30 zile de la mențiunea ONRC
+- Atenție: dacă nu se actualizează în D700, ANAF poate trimite notificare cu cod CAEN învechit
+
+CAZ ACTUALIZARE ADRESĂ SEDIU SOCIAL:
+- D700 secțiunea sediu + ADRESĂ NOUĂ
+- Atașare document de la ONRC cu noua adresă
+- Termen: 30 zile de la mențiune ONRC
+- Atenție: schimbare adresă poate schimba AFP-ul de domiciliu fiscal → procedură separată
+
+DOCUMENTE OBLIGATORII pentru D700:
+1. Hotărâre AGA / decizie administrator pentru modificare
+2. Document de la ONRC dacă modificare ONRC (act adițional + extras nou)
+3. Pentru schimbare TVA: calcul plafon + documente justificative
+4. Pentru punct lucru: contract spațiu + CIF nou (dacă obținut D060)
+
+SANCȚIUNI nedepunere D700:
+- Nedepunere la termen: 1.000 - 5.000 RON (Cod Procedură Fiscală)
+- Activitate cu vector fiscal incorect: ajustare retroactivă + accesorii`,
+    sources: [
+      { label: "OPANAF 3725/2017 (D700 vector fiscal)", ref: "https://anaf.ro" },
+      { label: "Cod Procedură Fiscală art. 88 (înregistrare fiscală)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 316 (înregistrare TVA)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "d394-d390-livrari-intracomunitare",
+    tags: ["D394", "D390", "VIES", "livrări intracomunitare", "achiziții IC", "informativă", "lunar"],
+    title: "D394 + D390 — Declarații TVA livrări/achiziții (intern + intracomunitar)",
+    body: `Cod Fiscal art. 324, 325 + OPANAF 3281/2020 (D394) + OPANAF 705/2020 (D390).
+
+D394 — DECLARAȚIE INFORMATIVĂ INTERN:
+Conține DETALII tranzacții cu PARTENERI ROMÂNI (cod TVA RO) pe luna/trimestrul respectiv.
+
+OBLIGAȚIE DEPUNERE D394:
+- Toate firmele înregistrate TVA (cod 316 sau 317)
+- Inclusiv firme cu cod special (achiziții intracomunitare doar)
+- Inclusiv firme cu pro-rata
+
+PERIODICITATE D394:
+- Identică cu D300 (lunar sau trimestrial)
+- Termen: 25 luna/trimestrul următor
+
+CONȚINUT D394:
+- Secțiunea A: livrări către parteneri RO (cu CIF cumpărător)
+- Secțiunea B: achiziții de la furnizori RO (cu CIF furnizor)
+- Secțiunea C: livrări/achiziții cu TAXARE INVERSĂ (deșeuri, scrap, aur, electronice — cod special "T")
+- Secțiunea D: livrări/achiziții cu COD SPECIAL (Brexit UK, Norvegia, etc.)
+
+CORELAȚIE D394 ↔ D300:
+- Total livrări D394 trebuie să corespundă cu rândul 1-3 D300
+- Total achiziții D394 trebuie să corespundă cu rândul 23 D300 (TVA deductibil)
+- Necorelări → notificare ANAF + obligatoriu explicate
+
+VERIFICARE ANAF prin D394:
+- Cross-check automatic: dacă firma X declară livrare 10.000 lei către firma Y, dar firma Y nu declară achiziția → notificare cu solicitare clarificare
+- Penalități: 1.000 - 5.000 RON pentru necorelare repetată
+
+D390 — DECLARAȚIE RECAPITULATIVĂ INTRACOMUNITARĂ (VIES):
+Conține tranzacții cu PARTENERI UE (cod TVA altul decât RO) pe luna respectivă.
+
+OBLIGAȚIE DEPUNERE D390:
+- Firme cu cod TVA art. 316 (normal) sau art. 317 (special pentru achiziții IC)
+- Numai în lunile cu tranzacții IC (NU depunere obligatorie în luni fără tranzacții)
+
+PERIODICITATE D390:
+- ÎNTOTDEAUNA LUNAR (NU trimestrial, chiar dacă firma are TVA trimestrial)
+- Termen: 25 luna următoare cu tranzacții IC
+
+CONȚINUT D390:
+- Secțiunea I: livrări intracomunitare scutite (cumpărător PJ UE cu cod TVA valid)
+- Secțiunea II: prestări servicii IC către PJ UE
+- Secțiunea III: achiziții IC bunuri (autoadjucare TVA prin reverse charge)
+- Secțiunea IV: prestări servicii IC primite de la PJ UE (reverse charge)
+- Secțiunea V: livrări TRIANGULARE (operațiuni 3-flux)
+
+VALIDITATE COD TVA PARTENER UE:
+- OBLIGATORIE verificare la VIES (https://ec.europa.eu/taxation_customs/vies) ÎNAINTE de declarare
+- Cod invalid → tratament ca livrare DOMESTICĂ (TVA RO)
+- Cod valid → livrare IC scutită (cu evidență D390)
+
+CAZ COD TVA RO ANULAT:
+Dacă firma RO și-a pierdut codul TVA (suspendat 1 semestru fără activitate):
+- Cumpărător din alt stat UE → tratează achiziția ca import (cu obligație plată TVA în statul propriu)
+- Firma RO: rezilizarea facturilor primite cu TVA din alt stat (D311 — TVA cod anulat)
+- D390: NU se depune pentru perioada fără cod TVA
+- D311 obligatoriu (cumpărări UE cu TVA reverse charge)
+
+OPERAȚIUNI TRIANGULARE — REGULA D390 secțiunea V:
+A (RO) → B (CZ) → C (DE) cu transport direct A → C:
+- A facturează B (livrare scutită IC din RO)
+- B facturează C (cu TVA DE — sau cu scutire dacă C plătește TVA în DE)
+- Pentru B (intermediar) — măsură simplificare: B NU se înregistrează în DE (declarație simplificată în D390)
+- A: declară în D390 livrarea către B
+- C: declară în D390 (din DE) achiziția de la B
+
+NOTĂ DE CREDIT (CN) pentru ACHIZIȚII IC:
+- CN primită de la furnizor UE pentru reducere preț ulterioară
+- Declarare D300: ajustare rd 5 + rd 6 (TVA achiziție IC negativă)
+- Declarare D390: secțiunea III cu valori negative (achiziție IC ajustată)
+- D394: NU (operațiunea NU este cu partener RO)
+
+SUME RAPORTATE ÎN D390:
+- Valori FĂRĂ TVA (TVA gestionat separat în D300 cu reverse charge)
+- Conversia în RON la curs BNR ziua tranzacției
+- Sume cumulate pe partener (NU pe factură individuală)
+
+CAZ INCORECT: TVA FACTURAT ÎN AFARA UE (TVA INVALID):
+Furnizor UE emite factură cu TVA RO sau alt TVA invalid pentru achiziția IC:
+- Solicitare furnizor: emitere CREDIT NOTE (corectare cu TVA 0)
+- Sau emitere nouă factură corectă
+- Refuz ÎNREGISTRARE CONTABILĂ cu TVA invalid (NU se deduce TVA fictiv)
+
+ATENȚIE: PRESTĂRI SERVICII IC vs LIVRĂRI BUNURI IC:
+- LIVRARE BUNURI IC: locul prestării e ȚARA EXPEDITORULUI (RO pentru export RO)
+- PRESTARE SERVICII IC: locul prestării e ȚARA BENEFICIARULUI (regula B2B — sediul economic beneficiar)
+
+Pentru servicii IC către PJ UE:
+- Furnizor RO: factură SCUTITĂ DE TVA RO (TVA reverse la beneficiar)
+- D390: secțiunea II
+- D394: NU (operațiunea NU în RO)
+
+SANCȚIUNI nedepunere D394/D390:
+- 500 - 5.000 RON per declarație neidentificată
+- Penalități de nedeclarare 0.08%/zi pentru sume care ar fi trebuit declarate
+- Pentru repetitivitate: posibilă suspendare cod TVA`,
+    sources: [
+      { label: "Cod Fiscal art. 324-325 (declarații TVA)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 3281/2020 (D394 actualizat)", ref: "https://anaf.ro" },
+      { label: "OPANAF 705/2020 (D390)", ref: "https://anaf.ro" },
+      { label: "VIES — verificare cod TVA UE", ref: "https://ec.europa.eu/taxation_customs/vies" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "f7000-dac7-operatori-platforme",
+    tags: ["F7000", "DAC7", "platforme online", "Airbnb", "OLX", "eMag", "vânzări online", "operator platformă"],
+    title: "F7000 + DAC7 — Operatori platforme online (Airbnb, OLX, eMag)",
+    body: `Cod Procedură Fiscală art. 291^5 + OANAF 1996/2023 + Directiva UE DAC7 (2021/514).
+
+CONTEXT DAC7:
+Directiva (UE) 2021/514 (DAC7) obligă platformele online să raporteze către autoritățile fiscale ale statelor membre datele tranzacțiilor utilizatorilor — vânzători de pe platformă.
+
+DOMENIUL APLICĂRII DAC7:
+1. Închiriere imobile (Airbnb, Booking.com, Vrbo, Homelidays, Spotahome)
+2. Vânzare bunuri (eMag Marketplace, OLX, Amazon, eBay)
+3. Servicii personale (Uber, Bolt — taxi alternativ; FreelanceR, Fiverr — servicii diverse)
+4. Închiriere mijloace de transport (auto, bărci, vehicule recreative)
+
+ENTITĂȚI OBLIGATE LA RAPORTARE (Operatori Platforme):
+- Operatori UE: rapotează în statul de sediu (cu mecanism schimb informații)
+- Operatori non-UE: trebuie să se înregistreze ÎNTR-UN STAT UE (sau să nominalizeze reprezentant)
+- Operatori RO: raportare directă la ANAF prin F7000
+
+FORMULAR F7000:
+Conține:
+- Date identificare OPERATOR platformă (CIF, denumire, sediu)
+- Date PERIOADĂ raportare (anul calendaristic)
+- DETALII pentru fiecare VÂNZĂTOR de pe platformă:
+  - CNP / CIF
+  - Venituri totale anuale (per trimestru detaliat)
+  - Comisioane reținute de platformă
+  - Adresă bancară (IBAN)
+  - Pentru imobile: adresă imobil, perioade închiriere, număr nopți
+
+TERMEN DEPUNERE F7000:
+- 31 IANUARIE anul următor (pentru tranzacțiile anului anterior)
+- Format electronic prin SPV
+
+OPERATORI ROMÂNI cu OBLIGAȚIE F7000:
+- Platforme online cu sediu în RO (eMag, OLX RO)
+- Platforme cu reprezentant RO desemnat
+- Atenție: chiar platforme mari (Airbnb, Booking) au desemnări specifice pentru RO
+
+IMPACT PENTRU VÂNZĂTORI PF / FIRME:
+1. PERSOANE FIZICE care vând pe OLX/eMag/Airbnb:
+   - ANAF primește detalii anuale de la platformă (F7000)
+   - Cross-check cu D212 (Declarația Unică)
+   - Discrepanțe → notificare ANAF + impunere venit nedeclarat
+
+2. PFA/SRL care vând pe platforme:
+   - Datele din F7000 cross-checked cu D300 (TVA) + D101/D212
+   - Discrepanțe → control fiscal
+
+PRAGURI DAC7 (raportare obligatorie):
+- > 30 tranzacții/an pe platformă
+- > 2.000 EUR venituri totale anual
+
+Sub aceste praguri: raportare NU obligatorie de operator (vânzător scapă de radar — DAR rămâne obligația proprie de declarare venituri)
+
+CAZ AIRBNB — IMPORT NR. NOPȚI:
+Pentru închiriere casa/cameră turistic pe Airbnb:
+- D212 PFA cu cod CAEN 5510 sau 5520
+- F7000 conține detalii: număr nopți + valoare/noaptea + adresa
+- Cross-check ANAF: discrepanță între F7000 și D212 → impunere venit ascuns
+
+CAZ ÎNCHIRIERE PERSOANĂ FIZICĂ (NU PFA):
+- Persoană fizică cu venit din chirie peste 80 RON/lună → D212 obligatoriu
+- Airbnb raportează în F7000 → cross-check cu D212
+- Atenție: pentru închiriere ocazională (1-2 luni/an), tot trebuie declarat
+
+CAZ ÎNCHIRIERE ÎN SCOP TURISTIC (FISA CAPACITATE CAZARE — OPANAF 398/2021):
+- Pentru maxim 5 camere închiriate turistic
+- Fișa capacitate cazare la AFP cu detalii camere + tarife
+- Impozit anual fix per cameră (norma venit) sau sistem real în D212
+
+REGISTRU PUBLIC OPERATORI:
+ANAF menține registru public al operatorilor de platforme înregistrați pentru DAC7. Verificare: https://anaf.ro/registru-operatori-platforme
+
+CONSECINȚE DEPUNERE LIPSĂ F7000:
+Pentru operator:
+- Amendă 50.000 - 100.000 RON
+- Posibilă suspendare activitate în RO
+
+Pentru vânzător (cross-check ANAF):
+- Impunere retroactivă venit nedeclarat (10-50% impozit + CAS + CASS)
+- Penalități: 0.02%/zi dobândă + 0.01%/zi penalitate
+
+RECOMANDARE pentru VÂNZĂTORI:
+1. Înregistrare cont fiscal corect (CNP în profil platformă)
+2. Declarare venituri în D212 la timp (până 25 mai anul următor)
+3. Păstrare documentație tranzacții (printscreen-uri profil + extrase plată)
+4. Pentru închiriere imobile: contract de închiriere cu fiecare chiriaș (chiar și Airbnb generează contract simplificat)
+
+PERSPECTIVĂ 2026+: extindere DAC7 la criptomonede (DAC8):
+- DAC8 va impune platforme crypto să raporteze tranzacții cu monede virtuale
+- Termen aplicare: 2026 (în transpunere RO)
+- F7001 sau formular separat (în pregătire)`,
+    sources: [
+      { label: "Cod Procedură Fiscală art. 291^5 (DAC7 transpunere)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 1996/2023 (F7000)", ref: "https://anaf.ro" },
+      { label: "Directiva (UE) 2021/514 (DAC7)", ref: "https://eur-lex.europa.eu" },
+      { label: "OPANAF 398/2021 (Fișa capacitate cazare)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "d406-saft-complet",
+    tags: ["D406", "SAF-T", "Standard Audit File", "Active", "lunar", "trimestrial", "anual", "OPANAF"],
+    title: "D406 SAF-T — declarație completă (lunar + trimestrial + anual Active)",
+    body: `OPANAF 1783/2021 + actualizări (D406 — Standard Audit File for Tax).
+
+DEFINIȚIE SAF-T:
+Standard Audit File for Tax (XML structurat OECD) — declarație detaliată cu TOATE datele contabile + fiscale ale firmei pe perioadă specifică. Obligatoriu pentru toate firmele RO din 2025.
+
+OBLIGAȚIE PERIODICITATE:
+1. SAF-T LUNAR/TRIMESTRIAL: identic cu perioada TVA (D300)
+   - Firme cu D300 lunar: SAF-T lunar
+   - Firme cu D300 trimestrial: SAF-T trimestrial
+   - Termen: 25 luna/trimestrul următor (același cu D300)
+
+2. SAF-T ANUAL ACTIVE:
+   - Conține EXCLUSIV evidența mijloacelor fixe + amortizare
+   - Termen: 31 MAI anul următor (cu termenul bilanțului)
+   - Obligatoriu pentru TOATE firmele cu evidență contabilă (inclusiv micro)
+
+STRUCTURA D406 LUNAR/TRIMESTRIAL:
+- Header: identificare firmă + perioadă + soft contabilitate
+- MasterFiles: liste master (clienți, furnizori, conturi, taxe, produse)
+- SalesInvoices: facturi emise (cu detalii rânduri + TVA)
+- PurchaseInvoices: facturi primite
+- Payments: plăți + încasări
+- Movements: mișcări stoc (dacă există)
+- GeneralLedgerEntries: înregistrări jurnal cu cont debit/credit
+
+STRUCTURA D406 ANUAL ACTIVE:
+- Header simplificat
+- MasterFiles: doar conturi contabile + clase imobilizări
+- Assets: lista TOTALĂ a mijloacelor fixe la 31.12
+  - Valoare achiziție / Valoare reevaluată
+  - Amortizare cumulată
+  - Valoare netă contabilă
+  - Categorie amortizare (HG 2139/2004 — clase utile)
+  - Date achiziție + recepție
+
+GENERARE D406:
+- Soft contabilitate (SAGA, eDevSoft, Mentor, Wizcount) — generator automat XML
+- Validare cu DUK Integrator (online ANAF) ÎNAINTE de depunere
+- Erori frecvente: corelații lipsă, valori NULL, format date incorect
+
+VALIDARE FORMATIVĂ:
+1. Conturi din MasterFiles trebuie să corespundă cu cele din SalesInvoices/PurchaseInvoices
+2. Sume facturi trebuie să corespundă cu sumele din GeneralLedgerEntries
+3. TVA pe facturi trebuie să corespundă cu D300
+
+ERORI COMUNE D406 LUNAR:
+- Cont contabil INVALID (cont care nu există în MasterFiles)
+- Cota TVA INVALIDĂ pentru data tranzacției (ex: 19% după 01.07.2025)
+- CNP/CIF furnizor/client INVALID (verificare CUI)
+- Tip factură INCORECT (380 normală, 388 storno, 384 corectivă)
+- Lipsă referință la documentul inițial pentru storno
+
+ERORI COMUNE D406 ANUAL ACTIVE:
+- Lipsă cod IMOBILIZARE (clasa HG 2139/2004)
+- Amortizare cumulată > valoare achiziție (eroare evident)
+- Data achiziție lipsă/invalidă
+- Mijloc fix transferat dar prezent în listă
+
+REGULA ANULUI FISCAL MODIFICAT:
+Pentru firme cu an fiscal diferit de calendaristic (ex: 01.04 - 31.03):
+- D406 ANUAL ACTIVE: pentru anul fiscal (NU calendaristic)
+- Termen: 31 mai după sfârșit an fiscal
+- D406 LUNAR: tot pe lună calendaristică (NU fiscală)
+
+CAZ FIRMĂ ÎN LICHIDARE:
+- D406 ANUAL ACTIVE pentru perioada până la radiere
+- Termen: similar cu bilanțul de lichidare (S1039)
+- Eroare frecventă: tip declarație "A" (anual) cu perioadă PARȚIALĂ → respinsă de ANAF
+- Soluție: contact departament tehnic ANAF pentru formă specifică
+
+D406 PENTRU FIRME FĂRĂ ACTIVITATE:
+- Firmă cu DECLARAȚIE INACTIVITATE: NU trebuie D406 lunar
+- Firmă fără tranzacții dar fără declarație inactivitate: D406 GOL (cu header dar fără facturi/plăți)
+- D406 ANUAL ACTIVE: obligatoriu dacă există mijloace fixe în evidență (chiar pentru firme fără activitate)
+
+D406 RECTIFICATIV:
+- Permis pentru corecturi
+- Bifă în header "rectificativ" + referință D406 inițial
+- Termen: 5 ani de la depunerea inițială
+- Atenție: rectificativă D406 poate forța recalcul D300 (corelație automată ANAF)
+
+PROCESARE ANAF — TIMP DE RĂSPUNS:
+- Validare automată: 1-5 zile lucrătoare
+- Probleme: "În prelucrare" >7 zile → contact departament tehnic ANAF
+- Confirmare validare: prin SPV (notificare automată)
+
+SANCȚIUNI nedepunere D406:
+- Lunar: 1.000 - 5.000 RON per declarație neidentificată
+- Anual Active: 5.000 - 10.000 RON
+- Repetitivitate: control fiscal automat + posibilă recalculare retroactivă
+
+CINE TREBUIE SĂ DEPUNĂ D406 ANUAL ACTIVE:
+- Toate firmele cu mijloace fixe în evidență (cont 213-216)
+- Inclusiv micro
+- Inclusiv PFA cu evidență contabilă în partidă simplă (dacă au mijloace fixe pe firmă)
+- ONG cu activitate economică + mijloace fixe
+
+CINE ESTE SCUTIT DE D406 ANUAL ACTIVE:
+- Firme cu DECLARAȚIE INACTIVITATE depusă
+- Firme fără mijloace fixe (rar — chiar firmă mică are computer, mobilier)
+- PFA în partidă simplă FĂRĂ mijloace fixe pe firmă (totul personal)
+
+CAZ TRECERE DE LA MICRO LA PROFIT:
+Trecerea în cursul anului (depășire prag micro):
+- D406 LUNAR: continuă identic (nu se modifică formatul pe baza categoriei impozit)
+- D406 ANUAL ACTIVE: nemodificat (rămâne pe an calendaristic)`,
+    sources: [
+      { label: "OPANAF 1783/2021 (D406 SAF-T)", ref: "https://anaf.ro" },
+      { label: "OECD Standard Audit File for Tax", ref: "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/SAF-T.htm" },
+      { label: "HG 2139/2004 (clase amortizare)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "d311-tva-cod-anulat",
+    tags: ["D311", "TVA cod anulat", "art. 316 alin. 11", "Cod Fiscal", "achiziție UE", "regularizare TVA"],
+    title: "D311 — TVA colectat pentru firme cu cod TVA anulat",
+    body: `Cod Fiscal art. 324 alin. 10 + OPANAF 188/2018 (D311).
+
+CONTEXT D311:
+Firmele cărora le-a fost ANULAT codul de TVA (din diverse motive — inactivitate, neconformare) au în continuare obligația să PLĂTEASCĂ TVA pentru anumite tranzacții, chiar fără cod TVA valabil.
+
+CAZURI ANULARE COD TVA (Cod Fiscal art. 316 alin. 11):
+a) NU au depus deconturi TVA pentru 1 SEMESTRU (firme cu TVA trimestrial) sau 2 SEMESTRE consecutive (firme cu TVA lunar)
+b) Au depus deconturi cu sume ZERO 6 luni consecutiv (firmă fără activitate)
+c) NU au îndeplinit obligațiile declarative repetate
+d) Au înregistrat retroactiv evaziune fiscală TVA
+e) Modificare structură asociați/administratori cu probleme fiscale
+g) Schimbare adresă sediu fără notificare ANAF
+h) Riscul fiscal mare (criterii specifice ANAF)
+
+DUPĂ ANULAREA COD TVA:
+- Firma NU MAI POATE deduce TVA pe achiziții
+- Firma NU MAI POATE colecta TVA pe vânzări (factură fără TVA)
+- DAR: pentru ACHIZIȚII INTRACOMUNITARE și anumite tranzacții speciale — firma RĂMÂNE obligată la plata TVA
+
+OBLIGAȚIE D311:
+Firma cu cod TVA anulat trebuie să depună D311 dacă în luna respectivă a:
+1. Făcut achiziții intracomunitare (cu TVA care altfel s-ar plăti prin reverse charge)
+2. Achiziții servicii intracomunitare cu reverse charge
+3. Primit livrări cu TAXARE INVERSĂ pe teritoriul RO (deșeuri, scrap, electronice)
+4. Importat bunuri (dacă plătit TVA la vamă în plus de declarația vamală)
+
+CONȚINUT D311:
+- Identificare firmă (CIF — fără RO, fiind anulat)
+- Perioada raportare (luna)
+- Tranzacții cu TVA colectat care trebuie plătit:
+  - Secțiunea 1: achiziții IC bunuri
+  - Secțiunea 2: prestări servicii IC primite
+  - Secțiunea 3: taxare inversă internă
+  - Secțiunea 4: alte tranzacții TVA datorat
+
+TERMEN DEPUNERE D311:
+- Lunar: 25 a lunii următoare cu tranzacții
+- Plata TVA datorat: până la 25 luna următoare
+
+CALCUL TVA D311:
+Pentru achiziții IC:
+- Bunuri 200.000 EUR achiziție din Cehia (cu cod TVA RO anulat):
+- TVA RO datorat: 200.000 EUR × curs BNR × 21% = ~210.000 RON TVA de plată
+- Înregistrare contabilă:
+  301 = 401 (200.000 EUR × curs)
+  635 = 4423 (TVA 21% suplim — cheltuială NEDEDUCTIBILĂ la profit)
+  4423 = 5121 (plată)
+
+CAZUL: FACTURĂ FURNIZOR UE CU TVA ÎN PLUS:
+Furnizor UE emite factură cu TVA propriul (ex: TVA cehă 21%):
+- Firma RO NU poate deduce TVA cehesc
+- Trebuie plătit TVA RO 21% prin D311 (pe valoarea FĂRĂ TVA cehesc)
+- Solicitare furnizor: credit note pentru TVA cehesc + recalcul fără TVA
+
+DIFERENȚA D311 vs D300:
+D300:
+- Pentru firme cu cod TVA VALID
+- Permite atât TVA colectat cât și TVA dedus
+- Sold final = de plată sau de rambursare
+
+D311:
+- Pentru firme cu cod TVA ANULAT
+- DOAR TVA DE PLATĂ (NU se mai deduce)
+- Sold final = ÎNTOTDEAUNA de plată (nu există rambursare)
+
+REVENIREA LA COD TVA VALID:
+Procedură reglare după anulare:
+1. Depunere D700 cu cerere reactivare cod TVA
+2. Plata datoriilor istorice TVA + accesorii
+3. ANAF evaluează situația (30-60 zile)
+4. Reactivare cod TVA (cu nou cod sau cu vechi cod)
+5. După reactivare: trecere la D300 normal
+
+CAZUL: FIRMĂ CU COD TVA ANULAT face VÂNZĂRI:
+Vânzarea făcută de firmă cu cod anulat:
+- Factură EMISĂ FĂRĂ TVA (mențiune "TVA neaplicabil - cod anulat conform art. 316")
+- Cumpărător RO: NU poate deduce TVA (NU există TVA pe factură)
+- Vânzător: NU mai are obligație D300 (DAR ANAF poate impune retroactiv dacă veniturile depășesc pragul)
+
+D094 — Declarație anuală cifra afaceri trimestrial fără IC:
+Pentru firmele TVA trimestrial care vor să rămână trimestrial (nu au achiziții IC):
+- Depusă anual până la 25 IANUARIE
+- Confirmă cifra de afaceri și absență achiziții IC
+- Permite menținere perioadă trimestrială
+
+VECTOR FISCAL după ANULARE COD TVA:
+- Vector fiscal se actualizează automat de ANAF după anulare
+- D700 NU este obligatoriu (operațiune automată ANAF)
+- Verificare în SPV: Fișa pe Plătitor confirmă anularea
+
+CAZ FIRMĂ CU TVA ANULAT + ACHIZIȚIE BUNURI BULGARIA:
+- Achiziție 2.000 EUR (bunuri) din Bulgaria în ianuarie 2026
+- Cod TVA RO anulat din decembrie 2025
+- Obligație: D311 ianuarie 2026 cu TVA 21% pe 2.000 EUR
+- TVA datorat: ~2.000 EUR × 4.95 RON × 21% = ~2.080 RON
+- Plata: până la 25 februarie 2026
+- D390: NU se depune (firma nu mai are cod TVA valabil pentru VIES)`,
+    sources: [
+      { label: "Cod Fiscal art. 316 alin. 11 (anulare cod TVA)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 324 alin. 10 (D311)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 188/2018 (D311)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "f083-e-factura-nerezidenti",
+    tags: ["F083", "e-Factura", "nerezidenți", "operatori economici străini", "RO e-Factura", "SPV"],
+    title: "F083 — e-Factura pentru operatori economici nerezidenți",
+    body: `OUG 120/2021 + OPANAF 1831/2021 + OUG 130/2023 (e-Factura).
+
+CONTEXT:
+Sistemul național RO e-Factura este obligatoriu pentru tranzacții B2B și B2G în RO din 2024+. Operatorii economici NEREZIDENȚI care fac tranzacții în RO pot opta să utilizeze sistemul.
+
+FORMULAR F083:
+"Opțiune privind utilizarea, de către operatorii economici nerezidenți, a sistemului național privind factura electronică RO e-Factura"
+
+CINE POATE DEPUNE F083:
+- Operatori economici nerezidenți (firme străine) cu activitate ocazională în RO
+- NU au cod fiscal RO permanent
+- Vor să emită facturi electronice prin sistem RO e-Factura
+
+CONȚINUT F083:
+- Identificare operator nerezident (denumire, CIF străin, adresă)
+- Țara de origine
+- Tipul tranzacțiilor preconizate (vânzări/cumpărări în RO)
+- Opțiune utilizare RO e-Factura (DA/NU)
+- Beneficiari români preconizați (dacă cunoscut)
+
+OBLIGAȚII după ÎNREGISTRARE F083:
+1. Operatorul primește cod RO E-FACTURA (similar cod fiscal dar pentru e-Factura)
+2. Acces în SPV cu acest cod (limitat la funcționalitate e-Factura)
+3. Emitere facturi prin RO e-Factura cu cod beneficiar RO
+4. Primire facturi de la furnizori RO prin sistem
+
+DIFERENȚE F083 vs ÎNREGISTRARE TVA RO:
+| Aspect | F083 (e-Factura) | Cod TVA RO |
+|---|---|---|
+| Scop | Doar utilizare e-Factura | TVA complet (D300, D394, D390) |
+| Cod atribuit | RO E-FACTURA | RO + 9 cifre TVA |
+| Obligații | Doar emiterea/primirea e-Factura | TVA complet + raportare |
+| Termen procesare | 5-10 zile | 30-60 zile |
+
+CAZ TIPIC F083:
+Firmă germană fără cod TVA RO permanent, dar care vinde ocazional în RO (B2B):
+- F083 + cod RO E-FACTURA
+- Emitere facturi prin sistem (cu codul TVA german pe factură — pentru livrări IC scutite)
+- Beneficiarii RO primesc facturi în SPV (cu reverse charge dacă achiziție IC)
+
+NU TREBUIE F083 dacă:
+- Firma străină are cod TVA RO permanent (folosește RO + cod TVA pentru e-Factura)
+- Tranzacțiile sunt scutite total de e-Factura (ex: vânzare către PF — B2C exclus)
+
+INTRARE ÎN OBLIGAȚIE e-Factura pentru NEREZIDENȚI:
+2026+ a fost extinsă obligația și la operatorii nerezidenți cu CONTRACTE PERMANENTE de furnizare cu firme RO. Procedura:
+- Operatorul nerezident depune F083
+- Devine emisor obligat în RO e-Factura
+- Sancțiuni similare cu cele pentru rezidenți (1.000-10.000 RON per factură neemisă)
+
+CONTRACTE OCAZIONALE — F083 nu obligatoriu:
+Pentru tranzacții ocazionale (1-2 facturi pe an), F083 nu este obligatoriu (factura poate fi emisă fără e-Factura, doar pe e-mail).
+
+CAZUL: SUCURSALĂ FIRMĂ STRĂINĂ ÎN RO:
+- Sucursala primește cod fiscal RO automat (la înregistrare ONRC)
+- NU este nerezident — NU depune F083 (folosește cod RO TVA propriu)
+
+CAZUL: REPREZENTANT FISCAL RO desemnat de FIRMĂ STRĂINĂ:
+- Reprezentantul fiscal este o firmă RO cu cod TVA
+- Folosește codul RO TVA al reprezentantului pentru toate operațiunile firmei străine
+- F083 NU este necesar (există deja cod RO TVA)
+
+SANCȚIUNI nedepunere F083 când obligatoriu:
+- 5.000 - 50.000 RON per perioadă neidentificată
+- Pentru repetitivitate: posibilă suspendare activitate operator în RO
+
+CONEXIUNE F083 cu OSS/IOSS:
+F083 NU înlocuiește OSS (One-Stop-Shop) sau IOSS pentru B2C în UE:
+- OSS: pentru vânzări B2C la distanță în UE (declarație centralizată într-un stat)
+- IOSS: pentru import bunuri sub 150 EUR
+- F083: pentru e-Factura B2B în RO specific
+
+Sunt sisteme SEPARATE — un operator nerezident poate avea toate cele 3 simultan.`,
+    sources: [
+      { label: "OUG 120/2021 (e-Factura)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 1831/2021 (F083)", ref: "https://anaf.ro" },
+      { label: "OUG 130/2023 (extindere e-Factura)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "d207-d401-d402-d403-nerezidenti",
+    tags: ["D207", "D401", "D402", "D403", "nerezidenți", "venituri RO", "rezidenți UE", "impozit reținut sursa"],
+    title: "D207 + D401/402/403 — Declarații informative venituri nerezidenți UE",
+    body: `Cod Fiscal art. 223-235 (impozit nerezidenți) + OPANAF specifice.
+
+CONTEXT:
+România are obligația de a raporta către statele UE veniturile obținute pe teritoriul RO de cetățenii/firmele acelor state (schimb automatic informații fiscale — DAC2).
+
+D207 — Declarație informativă privind impozitul reținut la sursă (NEREZIDENȚI):
+Conține detalii pentru fiecare plată făcută unei persoane nerezidente (PF sau PJ) pentru:
+- Salarii / remunerații administratori (D402 separat)
+- Dividende
+- Dobânzi
+- Redevențe
+- Royalties / drepturi proprietate intelectuală
+- Comisioane
+- Cheltuieli administrative
+
+PERIODICITATE D207:
+- ANUALĂ
+- Termen: 28/29 FEBRUARIE anul următor
+
+CONȚINUT D207:
+- CIF/CNP nerezident + nume + adresă
+- Statul de rezidență
+- Tipul venitului (cod specific)
+- Suma BRUTĂ plătită
+- Cota impozit reținut la sursă (în funcție de CDI)
+- Impozit reținut efectiv
+
+CDI (Convenții pentru evitarea dublei impuneri):
+România are CDI cu majoritatea statelor lumii. Pentru fiecare beneficiar trebuie verificat:
+1. Are CDI cu RO?
+2. Cota impozit redusă conform CDI?
+3. Certificat rezidență fiscală prezentat de beneficiar (obligatoriu pentru cota redusă)
+
+EXEMPLE COTE:
+- Dividende: standard 10% / cu CDI 5% (pentru companii) / 15% (pentru persoane fizice — variabil)
+- Dobânzi: standard 10% / cu CDI 0% sau 5% / 10%
+- Redevențe: standard 10% / cu CDI 5% / 10%
+- Servicii management/consultanță: standard 10% / cu CDI 0% pentru anumite statele
+
+CAZ TIPIC SERVICII IT NEREZIDENT:
+Firma RO plătește 10.000 EUR servicii IT către firmă din Moldova:
+- CDI Romania-Moldova: cotă impozit servicii 10%
+- Reținere la sursă: 10.000 × 10% = 1.000 EUR
+- Plată netă: 9.000 EUR
+- D207 anual cu detalii
+
+CAZ EXCEPȚIE — UE 2003/49/CE (Dividende intra-grup):
+Pentru dividende plătite de la filială RO către părinte UE cu participație > 10% + minim 1 an:
+- COTĂ 0% impozit nerezidenți
+- Condiții: certificat rezidență + declarație participație
+- D207 anual cu mențiune 0% impozit
+
+D401 — Declarație informativă PROPRIETĂȚI IMOBILIARE rezidenți UE:
+- Persoane fizice rezidenți UE care DEȚIN imobile în RO
+- Date: adresa imobil + valoare estimată + cotă proprietate
+- Raportare la statul de rezidență al proprietarului (schimb automat informații)
+
+OBLIGAȚIE DECLARARE D401:
+- Notarii și consilierii imobiliari pentru transferuri proprietate
+- Primăriile pentru proprietățile înregistrate
+- Termen: anual până la 28 februarie
+
+D402 — Declarație informativă VENITURI SALARIALE rezidenți UE:
+- Angajatori RO care plătesc salarii către rezidenți UE care lucrează în RO
+- Detalii: nume, CNP, sumă brută anuală, impozit reținut, perioada de muncă
+
+OBLIGAȚIE DEPUNERE D402:
+- Toți angajatorii care au în 2025 cel puțin un salariat rezident fiscal UE
+- Termen: 28 februarie 2026
+
+CAZ TIPIC D402:
+Cetățean Germania angajat la firmă RO ca consultant:
+- Salariu 5.000 EUR/lună × 12 luni = 60.000 EUR anual
+- Impozit RO 16% reținut: 9.600 EUR
+- D112 lunar (raportare RO) + D402 anuală (schimb cu Germania)
+- Cetățeanul german declară venitul și în Germania (cu credit pentru impozitul RO conform CDI)
+
+D403 — Declarație informativă ASIGURĂRI DE VIAȚĂ rezidenți UE:
+- Companii asigurări care vând produse de viață pentru rezidenți UE
+- Detalii: poliță, primă anuală, beneficiar
+- Termen: anual (similar D401/402)
+
+CAZ A1 — DETAȘARE UE:
+Pentru salariații RO detașați în UE:
+- Formular A1 obligatoriu (UE 883/2004)
+- Permite menținere CAS în RO (nu dublă contribuție)
+- Emis de Casa Națională Pensii la cerere
+- Termen valabilitate: 24 luni (cu posibilitate prelungire)
+
+CAZ ADMINISTRATOR FIRMĂ RO REZIDENT NEREZIDENT FISCAL:
+Cetățean RO cu domiciliu fiscal în SUA, asociat majoritar firmă RO:
+- Dividende RO → reținere 10% (impozit nerezident)
+- D207 anual cu detalii
+- Nu se aplică CDI RO-SUA pentru dividende (cota standard 10%)
+- Pentru salarii: dacă lucrează efectiv în RO → impozit normal RO + CAS + CASS
+- Pentru salarii dacă în SUA: scutire RO + impozit SUA
+
+DOCUMENTE OBLIGATORII pentru CDI:
+Pentru a aplica cota redusă conform CDI, beneficiarul trebuie să prezinte:
+1. CERTIFICAT REZIDENȚĂ FISCALĂ (emis de autoritatea fiscală a statului de rezidență)
+2. Termen valabilitate certificat: 1 an
+3. Declarație pe propria răspundere beneficiar (proprietar efectiv venituri)
+4. Anexă la D207 / contabilitate firmă
+
+FĂRĂ CERTIFICAT REZIDENȚĂ → cotă standard RO (10%):
+Dacă beneficiar nu prezintă certificat → reținere la sursă cu cota standard (de obicei 10%).
+Beneficiar poate solicita rambursare ulterioară prin procedura specială (cerere ANAF + dovezi).
+
+RECOMANDARE:
+Întotdeauna verificare CDI pentru beneficiarul nerezident ÎNAINTE de plată — evită rambursări complicate ulterioare.`,
+    sources: [
+      { label: "Cod Fiscal art. 223-235 (impozit nerezidenți)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF 48/2019 (D207)", ref: "https://anaf.ro" },
+      { label: "OPANAF 2727/2015 (D401, D402, D403)", ref: "https://anaf.ro" },
+      { label: "Tratate CDI România", ref: "https://anaf.ro/conventii-fiscale" },
+    ],
+    last_verified: "2026-05-15",
+  },
 ];
