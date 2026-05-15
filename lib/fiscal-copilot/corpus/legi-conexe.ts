@@ -2376,4 +2376,914 @@ SANCȚIUNI NEDEPUNERE N408:
     ],
     last_verified: "2026-05-15",
   },
+  {
+    id: "diurna-administrator-asociat-fara-cim",
+    tags: ["diurnă", "administrator", "asociat", "contract mandat", "delegație", "plafon 2.5x"],
+    title: "Diurnă administrator/asociat fără CIM — condiții + plafon neimpozitare",
+    body: `Cod Fiscal art. 76 alin. 2 lit. l + Codul Muncii art. 43-45 (diurnă delegație) + L 31/1990 (administrator).
+
+REGULA FUNDAMENTALĂ:
+Diurna se acordă DOAR persoanelor care au RAPORT contractual cu firma:
+- Salariați cu CIM (Cod Muncii) — diurnă pe ordin deplasare
+- Administratori cu contract mandat — diurnă pe deplasare în interesul societății
+- Directori cu contract de management — similar
+- NU asociați simpli (fără funcție/CIM) — NU primesc diurnă
+
+ASOCIAT SIMPLU (NU administrator, NU angajat):
+- NU poate primi diurnă (lipsă raport contractual operațional)
+- Poate primi DOAR DIVIDENDE (la distribuire profit)
+- Eventuale rambursări cheltuieli reale ocazionate de deplasări în interes social = DOAR pe baza decont cu documente justificative (transport, cazare), NU diurnă forfetară
+- Tratament: 1174 sau 658 = 462 (datorie față de asociat) → 462 = 5121 plată
+
+ADMINISTRATOR cu CONTRACT MANDAT:
+- POATE primi diurnă pentru deplasări în interesul societății
+- Diurnă neimpozabilă în limita 2.5× salariu minim brut × zile deplasare (Cod Fiscal art. 76 alin. 2 lit. l)
+- 2025: 2.5 × 4.050 / 21 = ~482 RON/zi maxim neimpozabil
+- Peste plafon: impozabil ca venit asimilat salariului (16% impozit + CAS 25% + CASS 10%)
+- DEDUCTIBILĂ la firmă la calcul profit indiferent de impozabil/neimpozabil
+
+CONDIȚII MINIME pentru diurnă administrator/director:
+1. CONTRACT MANDAT scris (semnat + datat la ONRC)
+2. Mandatul prevede expres dreptul la diurnă pentru deplasări
+3. Hotărâre AGA pentru cuantum diurnă (poate fi diferit de plafon legal)
+4. Ordin de deplasare semnat pentru fiecare deplasare
+5. Justificare scop deplasare (negociere contract, achiziție utilaje, ședință consiliu admin)
+
+ADMINISTRATOR FĂRĂ CONTRACT MANDAT (numit doar prin hotărâre AGA):
+- POATE primi diurnă, dar tratament DIFERIT:
+- Diurna se consideră VENIT DIN ALTE SURSE (Cod Fiscal art. 114)
+- Impozabil 10% reținut la sursă
+- NU se aplică plafonul 2.5× (acela este doar pentru raport salarial/mandat)
+
+RENUNȚARE LA DIURNĂ:
+- Administrator/salariat poate renunța în scris la diurnă pentru o deplasare specifică
+- Documentație: declarație scrisă semnată + atașată ordin deplasare
+- ATENȚIE: dacă firma decide să nu plătească diurna (NU renunțare proprie), poate fi considerat avantaj nedat → control fiscal poate adăuga obligații retroactiv
+
+DIRECTOR GENERAL cu CONTRACT MANDAT:
+Similar administrator: diurnă admisă cu plafon neimpozabil 2.5× salariu minim.
+Sed: contract trebuie să specifice că poate participa la ședințe consiliul de administrație în alte localități cu drept la diurnă.
+
+SCENARIU SPECIFIC: ASOCIAT 50% + DIRECTOR MANAGEMENT
+Dacă asociatul este și director general cu contract management:
+- Diurnă: DA (în calitate de director, NU asociat)
+- Plafon: 2.5× salariu minim/zi (regulile salariale)
+- D112: declarare în secțiunea F1 (diurnă neimpozabilă)
+
+MONOGRAFIE CONTABILĂ:
+A) Plată diurnă administrator/director:
+   625 = 462 / 542 (cheltuieli deplasare — DEDUCTIBILĂ)
+   Sau dacă cu CIM: 625 = 421
+B) Plată efectivă:
+   462/542/421 = 5311/5121
+
+INTERZISE:
+- Asociat fără funcție + fără CIM care primește "diurnă" → recodificare obligatorie ca dividende mascate sau plată în natură (impozit 10% + CAS/CASS suplimentare)
+- Administrator care nu se deplasează efectiv (diurnă pe document) → ANAF poate recodifica ca salariu fictiv (Cod Fiscal art. 13)
+
+DOCUMENTAȚIE PENTRU CONTROL FISCAL:
+1. Contract mandat / hotărâre AGA numire administrator
+2. Ordin de deplasare semnat (cu rută, scop, durată)
+3. Documente justificative deplasare (bilete avion, cazare — chiar dacă nu decontate)
+4. Recommendation: foi de parcurs dacă deplasarea este cu auto firmă
+5. Notă scop deplasare (corelare cu activitatea economică)`,
+    sources: [
+      { label: "Cod Fiscal art. 76 alin. 2 lit. l (plafon diurnă neimpozabilă)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 114 (venituri alte surse — 10%)", ref: "https://legislatie.just.ro" },
+      { label: "L 31/1990 art. 137-152 (administratori)", ref: "https://legislatie.just.ro" },
+      { label: "Codul Muncii art. 43-45 (delegație)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "cheltuieli-sociale-plafon-5-fond-salarii",
+    tags: ["cheltuieli sociale", "5% fond salarii", "8 martie", "Crăciun", "ajutor înmormântare", "team building", "ajutor social"],
+    title: "Cheltuieli sociale — plafon 5% fond salarii (8 martie, Crăciun, ajutor înmormântare)",
+    body: `Cod Fiscal art. 25 alin. 3 lit. b + Cod Fiscal art. 76 alin. 4 (avantaje neimpozabile salariați).
+
+DEFINIȚIE CHELTUIELI SOCIALE:
+Cheltuieli efectuate pentru salariați (și familii lor) ca beneficii sociale (NU salariu, NU diurnă):
+- Cadouri ocazia 8 martie, Crăciun, Paste
+- Tichete cadou (Legea 165/2018)
+- Bilete odihnă/tratament (decontare totală sau parțială)
+- Ajutoare înmormântare (la deces salariat sau membru familie)
+- Ajutoare boli grave (cancer, AVC, accidente)
+- Cadouri ocazia copilărie (8 iunie, 1 iunie)
+- Team building / evenimente corporate
+- Petrecere Crăciun / sărbători firmă
+- Abonamente sportive (Benefit 7Card, World Class)
+- Cheltuieli SPA salariați
+- Activități sportive organizate de firmă (cros, maraton companii)
+
+PLAFON DEDUCTIBILITATE GLOBAL (Cod Fiscal art. 25 alin. 3 lit. b):
+TOATE cheltuielile sociale cumulat: max 5% din valoarea cheltuielilor cu salariile (cont 641) ale anului fiscal.
+
+EXEMPLU CALCUL:
+- Fond salarii anual: 800.000 lei
+- Plafon cheltuieli sociale deductibile: 800.000 × 5% = 40.000 lei
+- Dacă cheltuieli sociale = 50.000 lei → 40.000 deductibile + 10.000 nedeductibile
+
+PE CATEGORII SPECIFICE (Cod Fiscal art. 76 alin. 4):
+
+A) CADOURI 8 MARTIE / CRĂCIUN / PASTE pentru SALARIATE/SALARIATI:
+- NEIMPOZABILĂ la salariat: 300 RON/cadou/eveniment (inclusiv pentru copii)
+- Peste 300 RON: impozabil ca avantaj în natură (salariu)
+- DEDUCTIBILĂ la firmă în limita 5% (cumulativ cu alte cheltuieli sociale)
+- TVA: nedeductibilă pe cadouri (cheltuială protocol/social — art. 297 Cod Fiscal)
+- Monografie: 6458 = 401 (cheltuială cu cadouri) — NEDEDUCTIBILĂ TVA inclus
+
+B) AJUTOR ÎNMORMÂNTARE:
+- NEIMPOZABILĂ la salariat: nelimitată (Cod Fiscal art. 76 alin. 4 lit. a)
+- DEDUCTIBILĂ la firmă în limita 5% (cumulativ)
+- Acordat la decesul: salariatului, soțului/soției, copiilor, părinților, fraților/surorilor
+- Documente: copie certificat deces + cerere salariat + decizie administrator
+- Monografie: 6458 = 421 sau 462 (la decedat salariat — beneficiar familie)
+
+C) AJUTOR BOLI GRAVE:
+- Cancer, AVC, intervenții cardiologice grave, transplant, accidente grave
+- NEIMPOZABILĂ la salariat: nelimitată
+- DEDUCTIBILĂ la firmă în limita 5%
+- Documente: adeverință medicală + cerere salariat
+- Aplicabil și pentru membri familie (soț, copii, părinți)
+
+D) TEAM BUILDING / EVENIMENTE CORPORATE:
+- NEIMPOZABILĂ la salariat: dacă PARTICIPAREA este OBLIGATORIE (declarat în decizie)
+- IMPOZABILĂ: dacă participare voluntară → considerat avantaj în natură (impozit + CAS + CASS pe fiecare participant)
+- DEDUCTIBILĂ la firmă în limita 5% (sau 100% dacă demonstrabil scop business: formare, comunicare strategică)
+- Documente: agendă obligatorie + listă participanți + materiale formare/team building
+- Cheltuieli aferente: cazare, masă, activități team building, transport
+
+E) ABONAMENTE SPORTIVE (Benefit, World Class, 7Card):
+- NEIMPOZABILĂ la salariat: până la 100 EUR/lună/salariat (1.200 EUR/an)
+- DEDUCTIBILĂ la firmă: 100% (NU intră în cei 5% sociale — categorie distinctă Cod Fiscal art. 25 alin. 1)
+- Documente: factură + listă beneficiari + adeziune scrisă salariat
+- Monografie: 6458 = 401
+
+F) BILETE ODIHNĂ/TRATAMENT:
+- NEIMPOZABILĂ la salariat: până la o limită egală cu salariul mediu brut pe economie/an/salariat (~7.700 RON în 2025)
+- DEDUCTIBILĂ la firmă în limita 5%
+- Decontare integrală sau parțială (procent stabilit prin contract colectiv muncă)
+
+G) PETRECERE CRĂCIUN / EVENIMENTE pentru SALARIAȚI + PARTENERI:
+Aici se DIVIZEAZĂ tratamentul:
+- Partea pentru salariați: cheltuială socială (5%)
+- Partea pentru parteneri/colaboratori: protocol (2%)
+- Estimare proporțională după număr participanți
+- Documentație: listă participanți divizată (salariați + externi)
+
+MONOGRAFIE GENERALĂ:
+A) Achiziție bunuri/servicii pentru cheltuieli sociale:
+   6458 = 401 (Cheltuieli cu avantaje în natură salariați + cheltuieli sociale)
+   4426 = 401 (TVA — atenție: NEDEDUCTIBIL pentru majoritatea cheltuielilor sociale)
+
+B) La sfârșit an — calcul depășire plafon 5%:
+   - Sume peste 5% fond salarii → ANEXĂ D101 ca cheltuieli nedeductibile
+   - Suma neimpozabilă la salariat NU se include în baza CAS/CASS/impozit
+   - Suma impozabilă peste plafon individual (de ex. cadou 500 RON > 300 plafon) → impozit + CAS + CASS pe diferența 200 RON
+
+DECLARAȚII:
+- D112: include avantajele impozabile (la fiecare salariat afectat)
+- D101: anexa cheltuieli nedeductibile (sume peste 5%)
+- D406 SAF-T: detalii beneficii salariale
+
+ATENȚIE: AJUTOR ÎNMORMÂNTARE pentru AVANGI/ASOCIAȚI (NU salariați):
+- NU intră la cheltuieli sociale (acela e pentru salariați)
+- Acordat ca decizie administrator → impozit pe venit nerezident (10% reținut) + NEDEDUCTIBIL la firmă`,
+    sources: [
+      { label: "Cod Fiscal art. 25 alin. 3 lit. b (plafon 5% cheltuieli sociale)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 76 alin. 4 (avantaje neimpozabile salariați)", ref: "https://legislatie.just.ro" },
+      { label: "Legea 165/2018 (tichete cadou + tichete masă)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "refacturare-utilitati-chiriasi-704-vs-758",
+    tags: ["refacturare", "utilități", "chiriași", "704", "758", "TVA refacturare", "energie", "apă"],
+    title: "Refacturare utilități chiriași — 704 vs 758 + tratament TVA",
+    body: `OMFP 1802/2014 + Cod Fiscal art. 286 alin. 4 (refacturare TVA).
+
+PROBLEMA RECURENTĂ:
+Proprietar spațiu primește facturi utilități (energie electrică, apă, gaze) pe propriul cod fiscal, dar utilizarea este a chiriașilor. Refacturare obligatorie cu tratament fiscal corect.
+
+DEBATE CLASIC: 704 (venituri prestări servicii) vs 758 (venituri din recuperarea cheltuielilor)
+
+REGULA CANONICĂ (OMFP 1802/2014):
+- Dacă refacturarea este la VALOAREA EXACTĂ a facturii primite (fără adaos) → CONT 758 (venituri din recuperarea cheltuielilor)
+- Dacă refacturarea este cu ADAOS sau în pachet cu chiria → CONT 704 (venituri prestări servicii)
+
+CAZ A) REFACTURARE FĂRĂ ADAOS (recuperare costuri pură):
+Monografie proprietar:
+1. Înregistrare factură utilități primită:
+   605/6051/6052 = 401 (cheltuieli energie/apă/gaze)
+   4426 = 401 (TVA dedus)
+2. Refacturare către chiriaș:
+   4111 = 758 (venituri recuperare cheltuieli — valoare exactă fără adaos)
+   4111 = 4427 (TVA colectat)
+   ATENȚIE: 758 NU intră în cifra de afaceri (NU contribuie la praguri TVA, NU se declară la calcul plafon micro)
+3. Anulare cheltuieli inițiale:
+   758 = 605/6051/6052 (compensare — opțional, evită dublă înregistrare)
+
+CAZ B) REFACTURARE INCLUSĂ ÎN CHIRIE (pachet):
+Monografie:
+1. Înregistrare factură utilități primită:
+   605 = 401 (cheltuială deductibilă a proprietarului — devine costul prestării serviciului închiriere)
+   4426 = 401 (TVA dedus)
+2. Factură chirie + utilități unitate către chiriaș:
+   4111 = 706 (chirie) sau 704 (servicii)
+   4111 = 4427 (TVA colectat pe valoare totală)
+   Cheltuielile rămân în 605 (deductibile ca aferente venitului din chirie)
+
+REGULA TVA (Cod Fiscal art. 286 alin. 4 + art. 297):
+- TVA refacturat IDENTIC cu TVA primit (cota + sumă) — măsură simplificare
+- ATENȚIE: dacă utilitatea este facturată cu TVA către proprietar dar chiriașul nu poate deduce (ex: spital, școală scutită), refacturarea rămâne cu TVA — chiriașul suportă TVA-ul ca cost
+
+CAZ C) UTILITĂȚI cu CONTOR INDIVIDUAL pe CHIRIAȘ:
+Recomandare: contractul de furnizare să fie încheiat DIRECT pe chiriaș (NU pe proprietar). Atunci nu mai e refacturare, ci facturare directă de furnizor către chiriaș. Proprietarul nu intermediază.
+
+CAZ D) FACTURĂ pe COD FISCAL PROPRIETAR dar LOC CONSUM CHIRIAȘ:
+Refacturare obligatorie (la valoare exactă cu cont 758) — vezi cazul A.
+Furnizorul utilităților trebuie notificat să modifice loc consum și/sau să încheie contract direct cu chiriașul (recomandare).
+
+CAZ E) CHIRIE PERSOANĂ FIZICĂ pentru SEDIU SOCIAL SRL:
+- Contract pe SRL — utilitățile rămân pe cod fiscal SRL
+- Deductibilitate: 100% (utilizare exclusivă activitate economică)
+- TVA: deductibilă 100%
+- Dacă facturile sunt pe persoană fizică proprietar: refacturare cu cont 758 sau notificare furnizor pentru schimbare
+
+CAZ F) PERSOANĂ FIZICĂ ÎNCHIRIEZE LA SRL (proprietar PF):
+- Persoană fizică NU poate factura — venit din chirie se declară în D212 (declarație unică)
+- Utilități plătite de PF rămân pe PF (NU se refacturează cu factură de la PF la SRL)
+- Soluție: contract chirie BRUT (chirie + utilități incluse) — PF suportă utilități din chiria primită
+
+TRATAMENT FISCAL la CALCUL PROFIT:
+- Cheltuieli utilități primite + refacturate → NEDEDUCTIBILE (compensate de venitul recuperare)
+- Sau alternativ: deductibile dacă sunt corelate direct cu venitul din chirie
+
+ANAF a clarificat (Circular 2023):
+Refacturarea exactă cu cont 758 este metoda preferată (transparentă, urmărire directă, fără impact pe profit).
+
+FACTURĂ REFACTURARE - elemente obligatorii:
+- Mențiune "Refacturare utilități pentru spațiul ___ (adresa)"
+- Perioada de consum acoperită
+- Referință la factura inițială (număr + furnizor)
+- Defalcare pe categorii (apă, electric, gaze) dacă există contoare separate
+- TVA aplicată identic cu cea de pe factura inițială`,
+    sources: [
+      { label: "OMFP 1802/2014 (conturi 704, 706, 758)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 286 alin. 4 (refacturare TVA)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 297 (drept deducere TVA)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "capitalizare-dobanda-proiect-imobil",
+    tags: ["capitalizare dobândă", "OMFP 1802", "IAS 23", "proiect imobil", "credit", "cost îndatorare", "împrumut asociat"],
+    title: "Capitalizare dobândă proiect imobil — OMFP 1802 + condiții",
+    body: `OMFP 1802/2014 cap. 5 (costuri îndatorare) + IAS 23 (referință internațională).
+
+REGULA FUNDAMENTALĂ:
+Dobânda + comisioanele aferente unui ÎMPRUMUT folosit pentru achiziția/construcția unui ACTIV CU CICLUL LUNG DE PREGĂTIRE (>12 luni de la dobândire până la utilizare/vânzare) → SE CAPITALIZEAZĂ în costul activului (NU se trece pe cheltuială financiară curentă).
+
+ACTIVE ELIGIBILE PENTRU CAPITALIZARE:
+- Construcții imobiliare (clădiri, hale, depozite, ansambluri rezidențiale)
+- Echipamente complexe cu instalare lungă (>12 luni)
+- Active necorporale dezvoltate intern (software propriu, brevete)
+- Stocuri cu ciclu fabricație lung (>12 luni)
+
+CONDIȚII CUMULATIVE (OMFP 1802/2014):
+1. Activul necesită >12 luni pentru a fi finalizat
+2. Există împrumut DIRECT identificabil pentru achiziția activului (sau parte dintr-un împrumut general utilizat pentru activ)
+3. Costurile de îndatorare sunt direct atribuibile activului
+4. Activul nu este încă pus în funcțiune/vândut
+
+PERIOADA DE CAPITALIZARE:
+- Începe: când au început cheltuielile + împrumutul + lucrările pe activ
+- Suspendare: când lucrările sunt OPRITE pentru perioade lungi (>3 luni)
+- Încetează: când activul este FINALIZAT și pus în funcțiune (recepție definitivă)
+
+MONOGRAFIE CONTABILĂ CAPITALIZARE:
+
+A) Pentru clădire în curs de construcție (cont 231):
+   1. Înregistrare dobândă (în loc de 666):
+      231 = 1684 (capitalizare dobândă pe cost construcție)
+   2. La recepție finală:
+      212 = 231 (transfer la cont mijloace fixe)
+   3. Amortizare ulterioară pe valoarea TOTALĂ (inclusiv dobânda capitalizată)
+
+B) Pentru teren în curs amenajare (cont 211 sau 231):
+   Pentru terenuri pure (NU se amortizează): capitalizare DOAR pe perioada lucrărilor de amenajare semnificative
+   - Dacă terenul rămâne neamenajat, NU se capitalizează dobânda (NU există activ în pregătire)
+
+C) Pentru ansamblu imobiliar (dezvoltator imobiliar):
+   - Active înregistrate ca STOCURI (cont 371) — apartamente destinate vânzării
+   - Capitalizare pe stocuri:
+     371 = 1684 (capitalizare dobândă pe cost stoc)
+   - La vânzare: cheltuiala apartamentului inclus capitalizat (607 = 371)
+
+EXEMPLU CONCRET:
+SRL achiziționează teren 16M EUR cu împrumut asociat 16M EUR cu dobândă 6% anuală.
+- Dobândă lunară: ~80.000 EUR/lună
+- Lucrări construcție ansamblu imobiliar (durata 36 luni)
+- Dobândă cumulată pe toată construcția: 2.880.000 EUR
+
+Capitalizare pe stoc:
+231 = 1684 (lunar 80.000 EUR × curs BNR)
+La final construcție (36 luni): transfer la 371 cu valoare totală 16M + 2.88M = 18.88M EUR
+La vânzare apartamente: 607 = 371 (pe fiecare unitate)
+
+LIMITĂRI FISCALE (Cod Fiscal art. 25):
+- Dobândă capitalizată = NU intră în limitele cheltuielilor cu dobânzile deductibile (art. 25 alin. 1 lit. b)
+- Aceasta devine COST AL ACTIVULUI, deci INTRARE ÎN AMORTIZARE FISCALĂ (NU cheltuială financiară)
+- Pentru ansambluri imobiliare destinate VÂNZĂRII: deductibilă la momentul vânzării apartamentului (parte din cost vândut)
+- Pentru imobile destinate UTILIZĂRII PROPRII: deductibilă prin amortizare pe durata utilizării
+
+DOBÂNDĂ după FINALIZARE ACTIV (după recepție):
+- Trece pe cheltuială financiară curentă (cont 666)
+- Aplicabile limitări OUG 156/2024 + Cod Fiscal art. 25 alin. 1 lit. b (deductibilitate limitată dobânzi)
+
+ÎMPRUMUT ASOCIAT pentru PROIECT IMOBIL:
+- Dobândă LEGAL aplicabilă: max nivelul dobânzii ROBOR + 4 procente (Cod Fiscal art. 25 alin. 8)
+- Peste limita legală: NEDEDUCTIBILĂ (chiar și capitalizată)
+- Cota dobândă REZONABILĂ pe piață (pentru transfer pricing dacă afiliat)
+- Contract împrumut OBLIGATORIU (scris, datat, semnat AGA)
+
+CAZ: ÎMPRUMUT GENERAL utilizat parțial pentru activ:
+Calcul capitalizare PROPORȚIONALĂ:
+Dobândă capitalizabilă = Dobândă totală × (Cheltuieli activ / Total împrumut)
+
+DEZAVANTAJ NECAPITALIZARE:
+Dacă firma nu capitalizează (înregistrează tot pe 666):
+- Profit denaturat anul curent (cheltuială mare imediată)
+- ANAF poate AJUSTA în control fiscal → impunere retroactivă cu capitalizare obligatorie (la activele eligibile)
+- Documentare politică contabilă SCRISĂ pentru opțiunea (capitalizare vs cheltuială imediată)`,
+    sources: [
+      { label: "OMFP 1802/2014 cap. 5 (costuri îndatorare)", ref: "https://legislatie.just.ro" },
+      { label: "IAS 23 (Borrowing Costs)", ref: "https://www.ifrs.org" },
+      { label: "Cod Fiscal art. 25 alin. 1 lit. b (deductibilitate dobânzi)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 25 alin. 8 (dobândă afiliați)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "decontare-transport-salariati",
+    tags: ["decontare transport", "abonament", "combustibil salariat", "art. 76", "deductibilitate", "neimpozabil"],
+    title: "Decontare transport salariați la/de la locul de muncă",
+    body: `Cod Fiscal art. 76 alin. 4 lit. p + Codul Muncii art. 197.
+
+REGULA GENERALĂ:
+Decontarea transportului salariaților la și de la locul de muncă = facilitate ce poate fi NEIMPOZABILĂ în condiții specifice.
+
+MODALITĂȚI DE DECONTARE:
+
+A) ABONAMENT TRANSPORT PUBLIC:
+- NEIMPOZABILĂ la salariat: integral, fără plafon (Cod Fiscal art. 76 alin. 4 lit. p)
+- DEDUCTIBILĂ la firmă: 100% (cont 6588 sau 6451 — cheltuieli cu personalul)
+- Documente: factură/bon cu CIF firmă pe numele firmei (NU al salariatului)
+- Aplicabil: STB, RATB, metro, alte transporturi publice
+- Atenție: dacă bonuri/abonamente pe numele salariatului → NU sunt deductibile (avantaj salarial impozabil)
+
+Monografie:
+6458 = 401 (cheltuieli sociale — transport public)
+Sau: 6451 = 401 (cheltuieli cu personalul — dacă declarat ca beneficiu legal)
+
+B) DECONT BONURI COMBUSTIBIL (transport propriu salariat):
+- NEIMPOZABILĂ la salariat: în limita 7.5 litri × distanță acasă-serviciu × număr zile lucrătoare × preț carburant
+- Peste plafon: impozabil ca avantaj salarial
+- DEDUCTIBILĂ la firmă: 100% pe partea neimpozabilă + 50% pe partea impozabilă peste plafon (pentru cheltuieli auto mixt — vezi entrie foi parcurs)
+- Documentație: bon combustibil cu cod firmă tipărit + declarație salariat km parcurși zilnic
+
+REGULA SPECIFICĂ DECONT COMBUSTIBIL (NU pentru deplasări — pentru transport zilnic):
+- Cheltuiala este DECONT TRANSPORT, NU cheltuială auto pură
+- Deductibilitate INTEGRALĂ (NU se aplică regula 50% pentru auto mixt)
+- Justificare: este compensare cost transport pentru salariat (similar abonament transport public)
+
+C) PLATĂ CHIRIE APARTAMENT pentru SALARIAT (cazare):
+- NEIMPOZABILĂ la salariat: dacă salariatul are domiciliul în ALTĂ localitate decât locul muncii (Cod Fiscal art. 76 alin. 4 lit. q)
+- Plafon: maxim 20% din salariul minim brut pe țară pe lună (~810 RON în 2025)
+- Peste plafon: impozabil
+- DEDUCTIBILĂ la firmă: 100% (cheltuieli cu personalul)
+- Documente: contract chirie + factură proprietar + dovada domiciliu diferit salariat
+
+D) MAȘINĂ DE SERVICIU pentru NAVETĂ:
+- NEIMPOZABILĂ DOAR dacă uzul personal este NEEXISTENT
+- Pentru uz personal admis: avantaj salarial impozabil (calcul după valoarea contabilă auto)
+- Cele 50% TVA + 50% cheltuieli auto pentru regim mixt se aplică
+
+E) TRANSPORT ORGANIZAT FIRMĂ (autocar firmă pentru salariați):
+- NEIMPOZABILĂ la salariat: integral
+- DEDUCTIBILĂ la firmă: 100%
+- Documente: program transport + listă salariați transportați
+
+DECLARAȚII:
+- D112: include partea impozabilă (dacă există depășire plafon)
+- Pe linie F1: avantaje neimpozabile
+- Pe linie G: avantaje impozabile
+
+CAZ SPECIFIC: SALARIAT cu DOMICILIU în ACEEAȘI LOCALITATE
+- NU se poate aplica facilitatea chirie (plafon 20% salariu minim) — doar dacă salariatul SCHIMBĂ domiciliul în altă localitate
+- Decontare transport zilnic = aplicabil normal
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Decizie administrator privind politica decontare transport
+2. Contract individual muncă cu mențiune decontare (dacă există)
+3. Bonuri/abonamente cu cod firmă
+4. Declarații lunare salariat (km parcurși acasă-serviciu)
+5. Listă salariați eligibili + suma decontată pe fiecare
+
+ATENȚIE LA ANAF:
+- Dacă bonurile sunt PE NUMELE SALARIATULUI (NU al firmei): se consideră RAMBURSARE PERSONALĂ → impozabilă ca salariu
+- Recomandare: bonurile să fie EMISE direct pe firmă (cu cod fiscal firmă tipărit)
+- Abonamentele trebuie să fie nominative + emise pe firmă (NU pe salariat personal)`,
+    sources: [
+      { label: "Cod Fiscal art. 76 alin. 4 lit. p, q (avantaje neimpozabile transport)", ref: "https://legislatie.just.ro" },
+      { label: "HG 714/2018 (decontare combustibil delegații)", ref: "https://legislatie.just.ro" },
+      { label: "Codul Muncii art. 197 (obligație angajator transport)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "sucursala-punct-lucru-strainatate",
+    tags: ["sucursală", "punct lucru străinătate", "Moldova", "Bulgaria", "Germania", "stabilirea permanentă"],
+    title: "Sucursală/punct lucru în străinătate — tratament fiscal românesc",
+    body: `Cod Fiscal art. 25 alin. 1 + Tratate eviti dublă impunere (CDI).
+
+DEFINIȚII:
+- SUCURSALĂ în străinătate = entitate fără personalitate juridică, înregistrată local
+- FILIALĂ în străinătate = entitate cu personalitate juridică (companie separată)
+- PUNCT DE LUCRU/ȘANTIER în străinătate = activitate temporară (sub 6-12 luni de obicei)
+
+PRINCIPII FUNDAMENTALE:
+1. Sucursala românească în străinătate = parte din firma română — contabilitate consolidată în RO
+2. Veniturile sucursalei sunt impozabile în RO (cu aplicare CDI — credit fiscal pentru impozit plătit în străinătate)
+3. Cheltuielile sucursalei sunt deductibile în RO (dacă corelate cu venituri impozabile)
+
+CONTABILITATE SUCURSALĂ STRĂINĂTATE:
+- Sucursala ține contabilitate LOCALĂ (conform legislației țării unde funcționează)
+- La sfârșit lună/trimestru: TRANSFER situație contabilă în RO (în lei) pentru consolidare
+- Conturi tehnice de consolidare în RO:
+  481 (decontări între unități) sau 6/7 (venituri/cheltuieli intersucursale)
+
+MONOGRAFIE STANDARD:
+
+A) CHELTUIELI SUCURSALĂ (din situație locală):
+   În RO:
+   6xx = 481 (cheltuieli aferente sucursală — translatate la curs BNR sfârșit lună)
+
+B) VENITURI SUCURSALĂ:
+   În RO:
+   481 = 7xx (venituri aferente sucursală — translatate la curs)
+
+C) PROFIT SUCURSALĂ:
+   La sfârșit an: profitul/pierderea SUCURSALEI se include în profitul global al firmei RO
+   Impozit profit: pe profitul GLOBAL (RO + sucursală) la cota 16%
+   Credit fiscal: impozit deja plătit local (Moldova/Bulgaria) — se deduce din impozit profit datorat în RO
+
+D) RAMBURSARE CHELTUIELI între SEDIU CENTRAL și SUCURSALĂ:
+   Ranbursarea NU este venit/cheltuială (sunt aceeași entitate juridică) — folosire cont 481
+
+CAZ A) SUCURSALĂ în MOLDOVA:
+- CDI Romania-Moldova prevede: profitul sucursalei impozabil la sursă (Moldova) + credit fiscal în RO
+- Contabilitate locală în Moldova (legislația moldovenească)
+- Raportare în RO: situație lunară + situație anuală consolidată
+- Atenție: salariile din Moldova trebuie raportate în D112 conform legislației RO (cu credit pentru impozit reținut local)
+- TVA: NU se aplică TVA RO pe veniturile sucursalei (impozitabile în Moldova)
+
+CAZ B) PUNCT LUCRU în BULGARIA cu COD TVA BG:
+- Cod TVA bulgar pentru livrări locale în Bulgaria
+- Veniturile facturate cu TVA BG (NU TVA RO) — declarate în decont BG
+- Cheltuielile achiziționate cu cod TVA BG — declarate în decont BG
+- În RO: doar consolidare pentru calcul profit (impozit profit pe profitul global)
+
+CAZ C) ȘANTIER în GERMANIA (durată > 12 luni):
+- Devine STABILIREA PERMANENTĂ în Germania (CDI Romania-Germania)
+- Profit alocat șantierului = impozabil în Germania
+- Veniturile facturate clientului german pot fi cu sau fără TVA RO (în funcție de TVA reverse charge)
+- Salariații detașați necesită formular A1 (UE) pentru evitarea dublă contribuție CAS
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Hotărâre AGA înființare sucursală
+2. Înregistrare la autoritățile locale (registru comerțului, autoritate fiscală)
+3. Contract înregistrare sucursală (statul respectiv)
+4. Bilanț + cont profit/pierdere LOCAL + RO (consolidat)
+5. Politică contabilă scrisă pentru consolidare (curs valutar utilizat, periodicitate)
+
+DETAȘARE SALARIAȚI în UE (pentru șantiere/punct lucru):
+- Formular A1 obligatoriu (UE) — emis de Casa Națională Pensii din RO
+- Documentare detașare conform Directiva 96/71/CE (UE) + cod muncă local
+- Salariații rămân plătitori de CAS în RO (cu A1) — NU CAS local
+- Diurnă conform reglementări țara destinație (peste plafonul RO se aplică plafonul RO pentru impozit)
+
+CAZ DETAȘARE în TURCIA (non-UE):
+- NU se aplică A1 (non-UE)
+- Aplicabile reguli CDI Romania-Turcia + reguli muncii Turcia
+- Salariații pot fi obligați la dublă contribuție (RO + Turcia) — căutare scutire prin CDI
+
+VECTOR FISCAL:
+- TVA: rămâne pe firma RO (sucursala NU are personalitate juridică separată)
+- Impozit profit: pe profit consolidat RO + sucursală
+- Salarii: D112 pentru salariații RO + raportare locală pentru salariați la sucursală`,
+    sources: [
+      { label: "Cod Fiscal art. 25 alin. 1 (deductibilitate cheltuieli)", ref: "https://legislatie.just.ro" },
+      { label: "Tratate evitare dublă impunere (CDI) — model OCDE", ref: "https://www.oecd.org" },
+      { label: "Regulament UE 883/2004 (coordonare securitate socială + A1)", ref: "https://eur-lex.europa.eu" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "bonificatie-3-impozit-oug-107",
+    tags: ["bonificație", "3% impozit", "OUG 107/2024", "micro", "impozit profit", "venit neimpozabil"],
+    title: "Bonificație 3% impozit (OUG 107/2024) — monografie + tratament fiscal",
+    body: `OUG 107/2024 (Pillar 2 + măsuri fiscale) + Cod Fiscal art. 1, 56.
+
+REGULA BONIFICAȚIEI:
+OUG 107/2024 a introdus bonificația 3% din impozitul declarat și plătit la termen pentru:
+- Microîntreprinderi (impozit 1% sau 3%)
+- Plătitori impozit profit (cota 16%)
+- Aplicabilă pentru anul fiscal 2024+ (cu plată la termen integrală)
+
+CONDIȚII OBLIGATORII pentru aplicare:
+1. Declarația D100/D101 depusă în termen
+2. Impozit plătit INTEGRAL în termen (NU plată parțială)
+3. Fără datorii fiscale restante > 200 RON (Cod Procedură Fiscală)
+4. Firma NU este în insolvență/dizolvare/lichidare
+
+CALCUL BONIFICAȚIE:
+Bonificație = Impozit datorat × 3%
+
+EXEMPLU:
+- Microîntreprindere impozit 1% pe 2024: 50.000 RON
+- Bonificație 3%: 50.000 × 3% = 1.500 RON
+- Impozit efectiv plătit: 50.000 - 1.500 = 48.500 RON
+
+OPERARE PRACTICĂ:
+1. La depunere D100 trimestrial/D101 anual: se completează valoarea impozitului INTEGRAL (50.000 RON)
+2. Sistemul ANAF aplică automat bonificația dacă condițiile sunt îndeplinite
+3. Plata efectivă: 48.500 RON
+4. Decizia ANAF de bonificație: emisă în 30-60 zile + apariție pe Fișa pe Plătitor
+
+MONOGRAFIE CONTABILĂ:
+A) Înregistrare impozit datorat (anul corespunzător — 2024 pentru bonificație 2024):
+   691 = 4411 (impozit profit datorat — 50.000 RON)
+
+B) Plata efectivă:
+   4411 = 5121 (48.500 RON — plata redusă cu bonificația)
+
+C) ÎNREGISTRARE BONIFICAȚIE PRIMITĂ (la primirea deciziei ANAF):
+   4411 = 7588 (Venituri din bonificații — 1.500 RON)
+   Sau alternativ: 4411 = 6919 (Cheltuieli ajustare impozit — negative)
+
+D) ANUL CONTABIL DE ÎNREGISTRARE:
+   - Bonificația 2024 → înregistrare în anul primirii deciziei (cel mai des 2025)
+   - În baza contabilității de exercițiu: dacă decizia se primește înainte de închidere bilanț 2024, se include în 2024
+   - Pentru bilanț depus: înregistrare în 2025 cu 7588 (venit anul curent)
+
+TRATAMENT FISCAL (Cod Fiscal art. 23 alin. 1 lit. b):
+BONIFICAȚIA = VENIT NEIMPOZABIL la calcul impozit profit (NU se include în baza impozabilă anul primirii)
+
+ATENȚIE: NU se include în CIFRA AFACERI (pentru praguri TVA, micro, etc.)
+
+DECLARAȚII:
+- D101 / D300: bonificația apare automat ca regularizare (NU se completează manual)
+- D406 SAF-T: înregistrare tranzacție cu cod special
+
+CAZ MICROÎNTREPRINDERE:
+- Bonificație DOAR pe impozitul micro (1% sau 3%)
+- NU se aplică pe impozitul pe dividende (aceasta nu este impozit pe profit)
+- Se aplică pe impozit calculat pe veniturile firmei (NU pe veniturile asociaților)
+
+CAZ PIERDERE FISCALĂ (impozit profit = 0):
+- NU se aplică bonificație (nu există impozit datorat)
+- Excepție: dacă firma are pierdere DAR are impozit minim (Cod Fiscal art. 24) → bonificație pe impozitul minim
+
+PIERDERE BONIFICAȚIE:
+Dacă firma plătește cu ÎNTÂRZIERE (chiar și 1 zi):
+- Bonificația SE PIERDE
+- Impozit datorat: 100% (50.000 din exemplu)
+- Penalități pe întârziere: 0.02% + 0.01% pe zi
+
+REVOCARE BONIFICAȚIE (Cod Procedură Fiscală art. 188):
+ANAF poate revoca bonificația ulterior dacă:
+- Se descoperă datorii fiscale nedeclarate la momentul aplicării
+- Inspecție fiscală constată evaziune
+- Firma intră în insolvență ulterior
+
+DOCUMENTAȚIE pentru CONTROL:
+1. Decizia ANAF de aplicare bonificație (din Fișa pe Plătitor)
+2. Extras de cont cu plata în termen
+3. Confirmare ANAF emitere bonificație
+4. Înregistrare contabilă cu cont 7588`,
+    sources: [
+      { label: "OUG 107/2024 (bonificație 3% impozit)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 23 alin. 1 lit. b (venituri neimpozabile)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Procedură Fiscală art. 188 (revocare beneficii)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "renuntare-imprumut-asociat",
+    tags: ["renunțare împrumut", "asociat", "4551", "1068", "capital", "venit impozabil", "ANC negativ"],
+    title: "Renunțare împrumut asociat — venit impozabil vs capitalizare în capital",
+    body: `Cod Fiscal art. 23, 31 + L 31/1990 (proceduri capital) + L 239/2025 (active net contabil).
+
+CONTEXTUL RECURENT:
+Asociatul a împrumutat societatea (cont 4551 — Decontări cu asociați conturi curente). Acum vrea să renunțe la împrumut pentru:
+- Acoperire pierderi reportate (1171 debitor)
+- Reglare activ net contabil negativ (cerinta L 31/1990 art. 153^24 + L 239/2025)
+- Consolidare capital
+
+OPȚIUNI DE TRATAMENT:
+
+OPȚIUNEA 1: RENUNȚARE LA ÎMPRUMUT — VENIT IMPOZABIL
+Asociatul scrie declarație de renunțare la creanță (împrumut + dobânzi).
+
+Monografie:
+4551 = 7588 (Venituri din anulare datorii)
+
+CONSECINȚE FISCALE:
+- Venit IMPOZABIL la calcul profit (Cod Fiscal art. 23 — venituri din anularea datoriilor sunt impozabile)
+- Cota: 16% impozit profit (sau 1%/3% micro pe cifră de afaceri — atenție: include venitul în cifra de afaceri!)
+- Impact micro: poate face firma să iasă din regim micro dacă depășește 500K EUR
+
+OPȚIUNEA 2: APORT LA CAPITAL SOCIAL (majorare capital)
+Asociatul transferă creanța în capital prin majorare capital social.
+
+Procedură ONRC:
+1. Hotărâre AGA majorare capital prin conversie creanță
+2. Raport evaluator autorizat (dacă creanța valuta sau peste plafon)
+3. Mențiune ONRC majorare capital
+4. Modificare statut
+
+Monografie:
+4551 = 1012 (creanța devine capital social)
+Sau pentru aport în natură:
+4551 = 1041/1042 (prime emisiune capital)
+
+CONSECINȚE FISCALE:
+- NU este venit impozabil (Cod Fiscal art. 23 alin. 1 lit. a — aport capital)
+- NU intră în cifra de afaceri
+- Nu afectează regim micro
+
+DEZAVANTAJ: procedura ONRC e mai lentă (30-60 zile) + costuri (taxe ONRC, evaluator)
+
+OPȚIUNEA 3: APORT LA REZERVE FACULTATIVE (1068)
+Asociatul renunță la împrumut și banii sunt înregistrați ca rezerve facultative (cont 1068).
+
+Monografie:
+4551 = 1068 (Rezerve provenite din alte surse)
+
+CONSECINȚE FISCALE:
+- Tratament intermediar: NU venit impozabil curent
+- DAR la distribuire ulterioară: impozabil ca dividende (16% sau alt regim)
+- Util pentru acoperire pierderi reportate fără majorare capital
+
+ACOPERIRE PIERDERI REPORTATE (1171 debitor):
+Combinație cu 1068 sau 1175:
+1068 = 1171 (acoperire pierdere din rezerve)
+Sau:
+1175 (Rezerve reprezentând surplus realizat din rezerve din reevaluare) = 1171
+
+PROCEDURĂ STANDARD pentru ACTIV NET NEGATIV (L 31/1990 art. 153^24 + L 239/2025):
+Dacă ANC < 50% capital social → obligatoriu reglare în 2 ani:
+1. Aport asociați (capital sau 1068)
+2. Reducere capital (până la nivel ANC pozitiv)
+3. Conversie împrumut asociat în capital
+
+DOCUMENTAȚIE OBLIGATORIE pentru ANULARE ÎMPRUMUT:
+1. Contract împrumut original (semnat, datat)
+2. Hotărâre AGA renunțare la creanță (specifică suma + data + scop)
+3. Declarație asociat de renunțare (scrisă, semnată, datată)
+4. Notă explicativă în Registru Inventar
+5. Pentru capitalizare: hotărâre AGA majorare + raport evaluator (dacă > prag)
+
+RENUNȚARE DOBÂNDĂ (NU principal):
+Dacă asociatul renunță DOAR la dobânzi (păstrează principalul):
+4551 = 7588 (venit din anulare dobândă — IMPOZABIL)
+Sau dacă dobânda nu a fost încă acumulată:
+NU se înregistrează nimic (nu există datorie)
+
+CAZ DIVIDENDE NEÎNCASATE de ASOCIAT (renunțare):
+Renunțarea la dividende votate dar neîncasate:
+457 = 7588 (venit din anulare datorii dividende — IMPOZABIL)
+Atenție: impozit pe dividende deja reținut și plătit (impozit 8% sau 10%) → NU se recuperează
+
+ATENȚIE CONTROL ANAF:
+ANAF poate recodifica renunțarea la împrumut ca DIVIDENDE MASCATE dacă:
+- Asociatul are alte beneficii similare
+- Renunțarea este corelată cu profituri mari în firmă
+- Lipsește documentația justificativă a împrumutului inițial
+
+PROCEDURA RECOMANDATĂ pentru ACTIV NET NEGATIV:
+1. Evaluare situație contabilă (balanță + ANC)
+2. Hotărâre AGA cu alegere opțiune (capital vs rezerve vs venit)
+3. Documentație complete (renunțare scrisă, AGA, evaluator dacă e cazul)
+4. Înregistrare contabilă corectă
+5. Declarații fiscale (D100/D101 dacă opțiune cu venit impozabil)
+6. ONRC dacă majorare capital`,
+    sources: [
+      { label: "Cod Fiscal art. 23, 31 (venituri impozabile + neimpozabile)", ref: "https://legislatie.just.ro" },
+      { label: "L 31/1990 art. 153^24 (activ net contabil)", ref: "https://legislatie.just.ro" },
+      { label: "L 239/2025 (modificări regim activ net)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (conturi 1068, 4551)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "reduceri-comerciale-vs-financiare-709-667-609",
+    tags: ["reduceri", "discount", "709", "667", "609", "scont", "rabat", "discount volum"],
+    title: "Reduceri comerciale vs financiare — 709 vs 667 vs 609",
+    body: `OMFP 1802/2014 + Cod Fiscal art. 286 (baza impozabilă TVA).
+
+DEFINIȚII:
+- REDUCERE COMERCIALĂ = legată de TRANZACȚIE (volum, fidelizare, calitate produs) → afectează VENITUL/COSTUL
+- REDUCERE FINANCIARĂ = legată de PLATĂ (plată anticipată, scont prompt-pay) → afectează VENITURI/CHELTUIELI FINANCIARE
+
+REDUCERI COMERCIALE — CONTURI 709 (la furnizor) / 609 (la cumpărător):
+
+CONT 709 = "Reduceri comerciale acordate" (la furnizor — afectează venit)
+CONT 609 = "Reduceri comerciale primite" (la cumpărător — afectează cost)
+
+Exemple:
+- Discount volum (peste prag cifră vânzări)
+- Rabat pentru calitate redusă
+- Discount fidelizare client recurent
+- Reducere pentru lansare produs
+
+MONOGRAFIE FURNIZOR (acordare discount comercial pe factură separată ulterior):
+1. Înregistrare factură discount:
+   709 = 4111 (storno parțial venit — ROȘU sau cu minus)
+   4427 = 4111 (storno TVA colectat aferent reducerii)
+
+2. Pentru DISCOUNT VOLUM TRIMESTRIAL (autofacturare):
+   709 = 4111 (cu minus pe fiecare factură de discount)
+
+MONOGRAFIE CUMPĂRĂTOR (primire discount comercial):
+1. Înregistrare factură discount primită:
+   401 = 609 (reducere cost — cu minus din factură furnizor)
+   401 = 4426 (storno TVA dedusă inițial)
+
+REDUCERI FINANCIARE — CONTURI 667 (la cumpărător) / 767 (la furnizor):
+
+CONT 667 = "Cheltuieli privind sconturile acordate" (la cumpărător — PLĂTITOR primește scont)
+CONT 767 = "Venituri din sconturi obținute" (la furnizor — DESTINATAR plătește scont)
+
+WAIT — INVERS:
+- Scontul de DECONTARE acordat la PLATĂ ANTICIPATĂ:
+  - FURNIZOR acordă scont → 667 (cheltuială financiară)
+  - CUMPĂRĂTOR primește scont → 767 (venit financiar)
+
+Acesta este sensul standard în OMFP 1802/2014 (cont 667 e la furnizor care acordă scont, NU cumpărător).
+
+CLARIFICARE FINALĂ (Cod Fiscal + OMFP 1802):
+- 667 (Cheltuieli sconturi acordate) = furnizor care acordă scont pt plată anticipată client
+- 767 (Venituri sconturi obținute) = client care primește scont pt plată anticipată
+
+DIFERENȚA CHEIE — IMPACT TVA:
+- REDUCERE COMERCIALĂ (709/609): AFECTEAZĂ baza impozabilă TVA → reducere TVA colectat/dedus
+- REDUCERE FINANCIARĂ (667/767): NU afectează baza impozabilă TVA (scontul e financiar, NU comercial)
+
+EXEMPLU PRACTIC FACTURĂ:
+Furnizor X facturează către Client Y:
+- Servicii cazare: 10.000 RON
+- Masă festivă: 20.000 RON
+- Total: 30.000 RON
+- Discount 10% (3.000 RON) — REDUCERE COMERCIALĂ
+- TVA 21% pe baza redusă: (30.000 - 3.000) × 21% = 5.670 RON
+- Total factură: 27.000 + 5.670 = 32.670 RON
+
+Înregistrare la furnizor:
+4111 = 706 (cazare 10.000)
+4111 = 704 (masă 20.000)
+4111 = 709 (discount -3.000)
+4111 = 4427 (TVA 5.670 pe baza netă)
+
+Total contabil: 4111 debit cu 32.670, credit 27.000 (venituri nete) + 5.670 TVA
+
+CONT 609 vs 6041 / 6042:
+- 609 = doar reduceri ulterioare la facturile deja înregistrate (la achiziții servicii/materii prime/marfă)
+- 6041 = pe materii prime / 6042 = pe materiale auxiliare (reduceri pe facturi inițiale)
+
+Pentru REDUCERI ULTERIOARE primite, se folosește 609 (NU 6041/6042) pentru claritate.
+
+CAZ AUTOFACTURARE pentru DISCOUNT VOLUM:
+Furnizor emite factură pe minus (autofacturare) pentru discount calculat trimestrial pe baza vânzărilor:
+- 709 = 4111 (cu valoare negativă)
+- 4427 = 4111 (cu valoare negativă pentru TVA aferent)
+
+Declarații:
+- D300: reducere baza impozabilă (rândul corespunzător cotei)
+- D394: factură de discount cu valori negative
+- D406 SAF-T: tip factură "381" (factură de reducere/anulare)
+
+DISTINCȚIE IMPORTANTĂ — CONT 667 vs CONT 6588:
+- 667 = SCONT ACORDAT pentru plată anticipată (cheltuială FINANCIARĂ)
+- 6588 = PIERDERE din creanțe nerecuperabile, anulare datorii, etc. (cheltuială OPERAȚIONALĂ)
+
+DACĂ se aplică SCONT pe PLATĂ ANTICIPATĂ:
+- Termenul plății facturii: 60 zile
+- Client plătește în 10 zile (în 50 zile mai devreme)
+- Scont 2% pentru promptpay
+- Calcul: 2% × valoare factură = sumă scont
+
+Înregistrare furnizor (scont acordat):
+667 = 4111 (scont acordat client — cheltuială financiară DEDUCTIBILĂ)
+Nu se ajustează TVA (scontul este financiar, nu comercial)
+
+Înregistrare cumpărător (scont primit):
+401 = 767 (scont primit — venit financiar IMPOZABIL)
+Nu se ajustează TVA dedusă inițial`,
+    sources: [
+      { label: "OMFP 1802/2014 (conturi 709, 609, 667, 767)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 286 alin. 4 (reduceri comerciale și baza TVA)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "provizioane-concedii-odihna-neefectuate",
+    tags: ["provizioane", "concedii odihnă", "151", "1518", "CO neefectuate", "OMFP 1802", "IAS 19"],
+    title: "Provizioane concedii odihnă neefectuate — obligație + monografie",
+    body: `OMFP 1802/2014 + IAS 19 (Employee Benefits) + Codul Muncii art. 144-149.
+
+OBLIGAȚIE LEGALĂ:
+La sfârșitul fiecărui exercițiu (31.12) entitățile contabile sunt OBLIGATE să constituie provizioane pentru concediile de odihnă neefectuate ale salariaților (drepturi câștigate dar neutilizate).
+
+BAZA LEGALĂ:
+- Codul Muncii art. 144: dreptul la concediu se naște în fiecare an calendaristic
+- Codul Muncii art. 149: dacă concediul nu se efectuează, salariatul are dreptul la compensare în bani (la încetare CIM) sau report
+- OMFP 1802/2014: obligație constituire provizion (principiul prudenței)
+
+CALCUL PROVIZION:
+Pentru fiecare salariat:
+1. Determinare zile CO ACUMULATE neutilizate până la 31.12
+2. Calcul valoare zi CO neefectuat = salariu mediu brut zilnic × (1 + contribuții angajator)
+3. Total provizion = Σ (zile neutilizate × valoare zi × contribuții)
+
+EXEMPLU:
+Salariat cu salariu brut 5.000 RON/lună (21 zile lucrătoare):
+- Salariu zilnic brut: 5.000 / 21 = 238 RON
+- Contribuții angajator (CAS 2.25% pe muncă specială + CAM 2.25%): ~4.5%
+- Valoare zi CO: 238 × 1.045 = 249 RON
+- Dacă are 5 zile CO neefectuate: provizion = 5 × 249 = 1.245 RON
+
+MONOGRAFIE CONTABILĂ:
+
+A) CONSTITUIRE PROVIZION (31.12 fiecare an):
+   6812 = 1518 (Cheltuieli cu provizioane — Alte provizioane pentru riscuri și cheltuieli)
+   Sau direct cu cont specific 151x conform politicii contabile
+
+B) UTILIZARE PROVIZION (anul următor când se efectuează CO sau se compensează):
+   1518 = 7812 (Reluare provizion — venit din anulare provizion)
+
+C) PLATĂ CONCEDIU ODIHNĂ (în luna efectuării):
+   641 = 421 (cheltuieli salariale)
+   Sau dacă utilizezi provizion: 6412 = 1518 cu storno paralel
+
+TRATAMENT FISCAL:
+
+D) DEDUCTIBILITATE PROVIZION:
+- Provizionul pentru CO neefectuate: DEDUCTIBIL la calcul impozit profit (Cod Fiscal art. 26 alin. 1 lit. a)
+- Limită: max 7 zile CO neefectuate per salariat (la legal 20-25 zile/an)
+- Peste 7 zile: necesar documentație suplimentară (refuz salariat documentat, imposibilitate concediu)
+
+E) RELUARE PROVIZION ANUL URMĂTOR:
+- Venit IMPOZABIL la momentul reluării (când CO se efectuează sau se compensează)
+- Compensare cu cheltuiala efectivă (641) — efect net zero pe profit
+
+DOCUMENTAȚIE OBLIGATORIE (control fiscal):
+1. Pontaj salariați 2025 cu evidență zile CO efectuate / neefectuate
+2. Calcul provizion pe fiecare salariat (anexă)
+3. Decizie administrator constituire provizion
+4. Politică contabilă scrisă privind provizioane CO
+
+EFECTE LIPSĂ PROVIZION:
+Dacă firma NU constituie provizion:
+- Înregistrare lipsește pe seama prudenței (RAPORT AUDIT critică)
+- La control fiscal: ANAF poate IMPUNE constituirea retroactivă + ajustare profit
+- Bilanț distorsionat (datoriile salariale subestimate)
+- La încetare CIM: cheltuiala bruscă cu compensare CO (impact mare pe anul respectiv)
+
+CAZ COMPENSARE BANI la ÎNCETARE CIM:
+Când un salariat încetează CIM cu CO neefectuate:
+- OBLIGATORIE compensare în bani (Cod Muncii art. 149)
+- Calcul: zile CO neefectuate × salariu mediu zilnic
+- Contribuții normale (CAS + CASS + impozit) pe această sumă
+- DEDUCTIBILĂ integral la firmă
+
+CAZ SPECIAL: CONCEDIU MEDICAL NEEFECTUAT
+- NU se aplică provizion pentru concediu medical (acela e drept ce nu se "acumulează")
+- Provizionul vizează DOAR concediul de odihnă (CO)
+
+PROVIZIOANE SIMILARE recomandate (OMFP 1802):
+- Provizion pentru ore suplimentare neutilizate (compensare bani)
+- Provizion pentru a 13-a salariu / bonusuri (dacă există clauză în CIM/CCM)
+- Provizion pentru pensionări viitoare cu compensații
+- Provizion garanție execuție (vezi entrie dedicate)
+- Provizion litigii (Cod Fiscal art. 26 — deductibil cu condiții)`,
+    sources: [
+      { label: "OMFP 1802/2014 (provizioane)", ref: "https://legislatie.just.ro" },
+      { label: "IAS 19 (Employee Benefits)", ref: "https://www.ifrs.org" },
+      { label: "Codul Muncii art. 144-149 (concedii)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 26 (deductibilitate provizioane)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
 ];
