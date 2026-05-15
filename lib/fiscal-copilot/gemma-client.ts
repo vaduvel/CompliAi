@@ -1,13 +1,28 @@
 /**
- * FiscCopilot — Local LLM client (Gemma via Ollama)
+ * FiscCopilot — Local LLM client (multi-model via Ollama / Tauri llama.cpp)
  *
- * Privacy-first: rulează LOCAL prin Ollama. Datele NU pleacă din serverul nostru.
- * Fallback opțional la cloud (Claude/GPT) pentru reasoning complex.
+ * Privacy-first: rulează LOCAL. Datele NU pleacă.
  *
- * Default model: gemma4:e2b (5.1B params, Q4_K_M, ~16s/răspuns scurt pe Apple Silicon)
+ * Default model: gemma3:4b (3.3GB disk, ~4GB RAM, RO calitate solidă)
+ *   - Verifier-ii fac math + logic (deterministic)
+ *   - Modelul DOAR verbalizează verdictul în română
+ *   - Asta permite model mic fără halucinație math
+ *
+ * Selectare per RAM hardware user (Tauri first-run wizard):
+ *   - <12GB: phi3.5:3.8b (RO mai slab dar funcțional)
+ *   - 12-20GB: gemma3:4b (default recomandat) ⭐
+ *   - 20-32GB: gemma3:12b (premium, RO best)
+ *   - 32+GB: gemma4:e2b sau gemma2:9b (premium top)
  */
 
-export type GemmaModel = "gemma4:e2b" | "gemma2:2b" | "llama3.1:8b";
+export type GemmaModel =
+  | "gemma3:4b"       // ⭐ DEFAULT — RO excelentă, 4GB RAM
+  | "phi3.5:3.8b"     // Low-RAM fallback (RO mai slab)
+  | "gemma3:12b"      // Premium 20+GB RAM
+  | "gemma4:e2b"      // Multimodal (text+vision), 7GB RAM
+  | "gemma2:2b"       // Ultra-light (NU recomandat pentru fiscal)
+  | "llama3.2:3b"     // NU recomandat (halucinează lege RO)
+  | "llama3.1:8b";    // Heavy fallback
 
 export interface GemmaOptions {
   model?: GemmaModel;
@@ -29,7 +44,10 @@ export interface GemmaResponse {
 }
 
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const DEFAULT_MODEL: GemmaModel = "gemma4:e2b";
+// Default: gemma3:4b (3.3GB, RO excelent, 4GB RAM)
+// Override via env: FISCAL_COPILOT_MODEL=phi3.5:3.8b (etc.)
+const DEFAULT_MODEL: GemmaModel =
+  (process.env.FISCAL_COPILOT_MODEL as GemmaModel) || "gemma3:4b";
 
 /**
  * Apelează Gemma local via Ollama HTTP API.

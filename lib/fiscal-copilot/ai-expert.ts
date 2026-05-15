@@ -23,6 +23,12 @@ import {
   type VerifierData,
   type VerifierResult,
 } from "./fiscal-verifiers";
+import {
+  extractFiscalData,
+  clientProfileToContext,
+  findCriticalMissingFields,
+} from "./client-fiscal-extractor";
+import { getClient, listEvents } from "./portfolio-store";
 
 export interface AIAnswer {
   question: string;
@@ -93,11 +99,28 @@ export async function askExpert(
   const topN = opts.topN ?? 3;
   const askClarifying = opts.askClarifying ?? true;
 
-  // 0. DETERMINISTIC VERIFIERS — pre-LLM
-  // Trecem întrebarea prin verifierii deterministi. Dacă unul detectează aplicabilitate:
-  //   - Are toate datele → verdict injectat în prompt
-  //   - Lipsesc date → scurt-circuit LLM, returnăm clarifying questions
-  const verifierResults = runVerifiers(question, opts.verifierData);
+  // 0a. AUTO-EXTRACT date din clientId (dacă furnizat) — bridge ClientProfile → VerifierData
+  // Asta înlocuiește form-urile: contabilul nu mai completează manual ce există deja în portofoliu.
+  let autoExtractedData: VerifierData = {};
+  let clientContext = "";
+  if (opts.orgId && opts.clientId) {
+    try {
+      const client = await getClient(opts.orgId, opts.clientId);
+      if (client) {
+        const events = await listEvents(opts.orgId, { clientId: opts.clientId });
+        autoExtractedData = extractFiscalData(client, events, 2025);
+        clientContext = clientProfileToContext(client);
+      }
+    } catch {
+      // Tolerant — dacă nu găsim clientul, mergem fără date pre-fillate
+    }
+  }
+
+  // Merge: date din portfolio + override manual (dacă user trimite în opts.verifierData)
+  const finalData: VerifierData = { ...autoExtractedData, ...(opts.verifierData ?? {}) };
+
+  // 0b. DETERMINISTIC VERIFIERS — pre-LLM
+  const verifierResults = runVerifiers(question, finalData);
   const missingData = collectMissingData(verifierResults);
   const hasAnyApplicableVerifier = verifierResults.length > 0;
 
@@ -150,12 +173,13 @@ Foloseste aceste informații DOAR ca background — răspunde la întrebare cu i
     }
   }
 
-  // 2. Build prompt — include verdicts deterministe DACĂ există
+  // 2. Build prompt — context fiscal + verdicte deterministe + date client
   const userPrompt = `Context fiscal (din baza de cunoștințe verificată):
 
 ${context}
 ${verdictsContext}
 ${factsContext}
+${clientContext ? `\n## Context client curent:\n${clientContext}\n` : ""}
 
 ---
 
