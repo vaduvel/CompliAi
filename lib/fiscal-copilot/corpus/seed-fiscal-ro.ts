@@ -196,6 +196,209 @@ export const FISCAL_CORPUS: KnowledgeEntry[] = [
     last_verified: "2026-05-14",
   },
   // ===========================================================================
+  // PFA / PFI / CMI — pattern density din batch Portal 2026-05-15
+  // ===========================================================================
+  {
+    id: "pfa-cass-pensionar",
+    tags: ["CASS", "pensionar", "PFA", "art 174", "plafon"],
+    title: "CASS pentru pensionar cu PFA — datorează 10% pe venit net",
+    body: `Pensionarii care obțin venituri din activități independente (PFA, PFI, drepturi autor, etc.) DATOREAZĂ CASS pe venitul respectiv, chiar dacă pensia este scutită de contribuții.
+
+Regulă cheie (art. 174 Cod Fiscal):
+- CASS se calculează 10% × venitul net realizat din activitate independentă
+- NU se aplică plafonul minim de 6 salarii minime pentru pensionari când venitul e mai mic
+- Dobânzile bancare separate sub plafonul de 6 salarii minime NU generează CASS
+
+Exemple practice:
+- Pensionar cu PFA expert tehnic, venit net 1.365 RON → CASS = 136 RON (10%)
+- Pensionar cu cabinet medical PFI, venit net 10.477 RON → CASS = 1.048 RON
+- Dacă venitul depășește plafonul 6 salarii minime, CASS se aplică la nivelul plafonului
+
+ATENȚIE: chiar dacă venitul e mic, CASS rămâne datorată pentru activitatea independentă.`,
+    sources: [
+      { label: "Cod Fiscal art. 174", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 170 (plafon CASS)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 155 alin. (1) lit. g)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "pfa-fara-activitate-cass",
+    tags: ["CASS", "PFA", "fără activitate", "opțional", "art 180"],
+    title: "PFA fără activitate — CASS opțional, nu obligatoriu",
+    body: `Persoanele cu PFA care au înregistrat venit net zero sau pierdere într-un an fiscal NU datorează CASS obligatoriu.
+
+Regulă (art. 174 alin. 2 Cod Fiscal):
+- Sub plafonul de 6 salarii minime → nu există obligație CASS
+- Sub plafonul de 6 salarii minime + pierdere → idem
+- Activitate suspendată ONRC → idem
+
+OPȚIONAL: Pot opta pentru plata CASS prin Declarația Unică (art. 180), la nivelul plafonului de 6 salarii minime, pentru a beneficia de asigurarea de sănătate publică. Plata anticipată asigură până la sfârșitul anului, regularizare la finalizare.
+
+Cazuri tipice: medic cu PFA care n-a avut activitate 2021-2025 → fără CASS obligatoriu, dar fără asigurare medicală. Soluția: opțional prin DU.`,
+    sources: [
+      { label: "Cod Fiscal art. 174 alin. (2)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 180 (asigurare opțională)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "pfa-salariu-minim-plafon-anual",
+    tags: ["salariu minim", "plafon", "CASS", "CAS", "art 135"],
+    title: "Plafon CASS/CAS = salariul minim de la 1 ianuarie (nu cel modificat în iulie)",
+    body: `Confuzie frecventă în 2026: salariul minim brut crește din iulie 2026, dar plafoanele anuale CASS/CAS NU se modifică.
+
+Regulă (art. 135¹ alin. (3) Cod Fiscal):
+- Plafoanele 6 și 12 salarii minime pentru CASS/CAS se calculează în funcție de salariul minim brut în vigoare LA 1 IANUARIE a anului respectiv
+- Majorarea de la jumătatea anului NU modifică baza de calcul
+
+Exemplu 2026: salariu minim la 1.01.2026 = 4.050 RON
+- Plafon 6 salarii minime CASS = 24.300 RON
+- Plafon 12 salarii minime CAS = 48.600 RON
+- Indiferent ce se modifică în iulie 2026, aceste praguri rămân pentru anul fiscal 2026.
+
+Asta înseamnă: contribuabilii care depășesc pragul calculat la 1 ianuarie datorează CASS/CAS chiar dacă cresterea de la iulie ar muta pragul.`,
+    sources: [
+      { label: "Cod Fiscal art. 135¹ alin. (3)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "pf-d070-vs-d700",
+    tags: ["D070", "D700", "PFA", "PFI", "modificare ANAF"],
+    title: "D070 vs D700 — confuzie frecventă pe modificări fiscale",
+    body: `Confuzie comună: D700 e pentru PERSOANE JURIDICE (SRL, SA, etc.), D070 e pentru PERSOANE FIZICE (PFA, PFI, II, CMI).
+
+Reguli:
+- **D010** — Cerere înregistrare/modificare PJ (SRL) — folosită la ONRC pentru aspecte care nu apar pe D700
+- **D070** — Declarație de înregistrare fiscală PF (PFA/PFI/II/CMI). Folosită la modificare elemente fiscale (CAEN, sediu, regim TVA, fuziune cabinete, etc.)
+- **D700** — Modificare elemente fiscale ulterioare înregistrării PJ. NU se aplică pentru PF.
+
+Caz tipic: cabinet individual de insolvență (CII) fuzionează cu alt cabinet:
+- ❌ NU completezi D700 (nu există rubrici pentru fuziune CII)
+- ❌ NU completezi D010 (e pentru ONRC, nu pentru fiscale PF)
+- ✅ Completezi D070 la organul fiscal competent
+
+Pentru SRL care fuzionează: D700 + acte ONRC + D199.`,
+    sources: [
+      { label: "OPANAF 2.890/2022 (D070)", ref: "https://anaf.ro" },
+      { label: "OPANAF (D700 — modificare PJ)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "pfa-cheltuieli-medicale-titular",
+    tags: ["PFA", "cheltuieli deductibile", "medical", "titular", "art 68"],
+    title: "Cheltuieli medicale titular PFA — NEDEDUCTIBILE",
+    body: `Cheltuielile medicale ale titularului PFA nu sunt deductibile fiscal, chiar dacă afectează capacitatea de muncă.
+
+Regulă (art. 68 alin. (4) și (7) Cod Fiscal):
+Sunt deductibile DOAR cheltuielile efectuate "în scopul desfășurării activității" și "în vederea obținerii veniturilor". Cheltuielile medicale personale ale titularului:
+- NU sunt în scopul activității (sunt cheltuieli personale)
+- NU contribuie direct la obținerea veniturilor (chiar dacă indirect afectează prestația)
+
+Exemplu: cabinet medical PFI, titularul face operație cataractă pentru a continua activitatea → cheltuiala NU se deduce, chiar dacă pare logic.
+
+Excepție: cheltuieli medicale pentru ANGAJAȚI (controale medicale obligatorii, medicina muncii) — DEDUCTIBILE conform art. 68 alin. (4) lit. h).
+
+Recomandare: cheltuieli medicale titular = personale, fără bilet trezorerie pe PFA.`,
+    sources: [
+      { label: "Cod Fiscal art. 68 alin. (4)-(7)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "pfa-autoturism-mixt",
+    tags: ["PFA", "autoturism", "amortizare", "cheltuieli", "art 28", "art 68"],
+    title: "Autoturism mixt PFA — 50% cheltuieli + 1500 lei/lună amortizare max",
+    body: `Achiziție și utilizare autoturism mixt (PFA + uz personal) — reguli specifice.
+
+DOBÂNDA CREDIT PERSONAL: NEDEDUCTIBILĂ
+- Creditul personal contractat pe persoană fizică NU pe PFA → dobânda nu se include în cheltuieli PFA
+- Soluția corectă: credit pe PFA (mai dificil de obținut) sau achiziție directă cu numerar/cont PFA
+
+AMORTIZAREA AUTOTURISMULUI:
+- Maxim 1.500 RON/lună pentru autovehicule (art. 28 alin. (4) lit. l Cod Fiscal)
+- Durată normală: 60 luni (5 ani)
+- Înregistrare ca activ în patrimoniul PFA
+
+CHELTUIELI MIXTE (carburant, asigurare, întreținere, ITP):
+- Deductibile în proporție de 50% (art. 68 alin. (4) lit. r) — limitare specifică autoturisme mixte
+- Necesar foaie de parcurs sau dovezi proporție utilizare profesională
+
+LIMITARE NUMERAR (Legea 70/2015):
+- Plata pentru achiziție trebuie făcută PRIN TRANSFER BANCAR
+- Plafon numerar 5.000 RON/zi între PJ și PF/PFA
+- Pentru autoturism (zeci de mii RON): obligatoriu OP din contul PFA
+
+Pentru Uber/taxi: dacă autoturismul e folosit EXCLUSIV pentru activitate → 100% deductibil, fără limitare 50%.`,
+    sources: [
+      { label: "Cod Fiscal art. 68 alin. (4) lit. r)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 28 alin. (4) lit. l)", ref: "https://legislatie.just.ro" },
+      { label: "Legea 70/2015 (numerar)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "pfa-poprire-salariu-cumulat",
+    tags: ["poprire", "PFA", "executare silită", "salariu", "art 729"],
+    title: "Poprire pe PFA + salariat la aceeași firmă — cumulează 1/3 din net total",
+    body: `Persoana fizică autorizată NU are personalitate juridică distinctă de titular. Patrimoniul PFA = patrimoniul persoanei fizice (cu mențiunea separată pentru bunuri afectate activității).
+
+Implicație poprire (art. 729 Cod de Procedură Civilă):
+Dacă o persoană este SIMULTAN salariat și titular PFA la aceeași firmă, poprirea se aplică PE TOTAL venituri (salariu + sume facturate prin PFA), NU separat.
+
+Procent reținere:
+- 1/3 din venitul net total (după impozite, contribuții) pentru obligații fiscale, civile
+- 1/2 pentru pensii alimentare
+
+Cine aplică: angajatorul/plătitorul are obligația aplicării popririi cumulate. Comunicarea de la organul de executare specifică suma totală de reținut.
+
+Erori frecvente:
+- ❌ Reținere 1/3 doar din salariu (pierd 1/3 din PFA)
+- ❌ Refuz aplicare poprire pe PFA "pentru că e altă persoană"
+- ✅ Calculează net total (salariu + PFA facturat) → reține 1/3 din total
+
+Confuzia provine din ideea greșită că PFA = entitate separată. Juridic e EXTENSIE a persoanei fizice.`,
+    sources: [
+      { label: "Cod Procedură Civilă art. 729", ref: "https://legislatie.just.ro" },
+      { label: "OUG 44/2008 (PFA — fără personalitate juridică)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "conventie-civila-risc-reincadrare",
+    tags: ["convenție civilă", "reîncadrare", "drepturi de autor", "art 7", "Cod Muncii"],
+    title: "Convenție civilă cu propriul salariat — risc reîncadrare ca relație de muncă",
+    body: `Încheierea unei convenții civile cu propria firmă (când persoana este deja salariată acolo) prezintă risc FOARTE RIDICAT de reîncadrare ca relație de muncă de către ANAF și ITM.
+
+Criterii reîncadrare (art. 7 Cod Fiscal + art. 10 Cod Muncii):
+- Activitatea din convenție coincide cu atribuțiile postului → REÎNCADRARE
+- Munca se desfășoară în programul salariat → REÎNCADRARE
+- Folosește mijloacele angajatorului → REÎNCADRARE
+- Subordonare ierarhică → REÎNCADRARE
+- Plata e regulată/fixă (nu pentru rezultat specific) → REÎNCADRARE
+
+Consecințe reîncadrare:
+- Recalcul CAS, CASS, impozit pe venit ca salariu (3-5 ani retroactiv)
+- Penalități + dobânzi
+- ITM amendă pentru muncă nedeclarată
+- Riscă chiar evaziune fiscală (Legea 199/2023 audit intensiv)
+
+Alternative legale:
+- Act adițional la CIM cu atribuții suplimentare + spor pe ore extraordinare
+- Drepturi de autor (DA1) — doar pentru opere intelectuale REAL diferite
+- Contract de management (pentru funcții executive specifice)
+
+Caz tipic: universitate vrea convenție civilă cu profesor propriu pentru cercetare. RISC: dacă proiectul are caracter didactic/cercetare obișnuită → reîncadrare.`,
+    sources: [
+      { label: "Cod Fiscal art. 7 (definitii)", ref: "https://legislatie.just.ro" },
+      { label: "Codul Muncii art. 10", ref: "https://legislatie.just.ro" },
+      { label: "Legea 199/2023 (audit intensiv)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  // ===========================================================================
   // REDIRECTIONARE 20% / 0.75% — Declarația D177 către ONG
   // ===========================================================================
   {
