@@ -340,6 +340,82 @@ export const PATH_SAFT_DEADLINE: MatchPath = {
 };
 
 // ============================================================================
+// PATH 6: Închidere lună neefectuată (luna anterioară)
+// ============================================================================
+export const PATH_INCHIDERE_LUNA: MatchPath = {
+  id: "inchidere-luna",
+  name: "Închidere lună — workflow incomplet",
+  description:
+    "Verifică dacă pentru luna anterioară s-au făcut cei 7 pași de închidere (stocuri → TVA → P&L → diferențe curs).",
+  detect: (client, events, today) => {
+    // PFA și II au regim simplificat (partida simplă), nu au full closing
+    if (client.type === "PFA" || client.type === "II") return [];
+
+    // Luna anterioară target
+    const prevMonth = new Date(today);
+    prevMonth.setMonth(prevMonth.getMonth() - 1);
+    const periodKey = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth() + 1).padStart(2, "0")}`;
+
+    // Trebuie să existe înregistrare event de tip "declaration_submitted" cu meta.kind="inchidere_luna" + periodKey
+    // Sau eveniment manual logged că închiderea s-a făcut
+    const closingDone = events.some(
+      (e) =>
+        e.type === "declaration_submitted" &&
+        (e.meta?.kind === "inchidere_luna" || e.meta?.kind === "closing") &&
+        e.meta?.period === periodKey
+    );
+    if (closingDone) return [];
+
+    // Termen îndrumător: 15 ale lunii curente pentru luna anterioară (înainte de D300/D112)
+    const indicativeDeadline = new Date(Date.UTC(today.getFullYear(), today.getMonth(), 15));
+    const daysToD15 = daysBetween(indicativeDeadline, today);
+
+    // Doar dacă suntem în luna care urmează lunii de închis, până în jur de 25
+    if (daysToD15 < -10 || daysToD15 > 25) return [];
+
+    let severity: MatchPathAlert["severity"];
+    if (daysToD15 < 0) severity = "high"; // după 15, presează D300/D112 25
+    else if (daysToD15 <= 5) severity = "medium";
+    else severity = "low";
+
+    // Trimester end → urgență mai mare (impozit + D100)
+    const prevMonthIdx = prevMonth.getMonth(); // 0=jan ... 11=dec
+    const isQuarterEnd = [2, 5, 8, 11].includes(prevMonthIdx);
+    if (isQuarterEnd && daysToD15 < 0) severity = "urgent";
+
+    return [
+      {
+        pathId: "inchidere-luna",
+        pathName: "Închidere lună",
+        clientId: client.id,
+        clientName: client.name,
+        severity,
+        detectedAt: today.toISOString(),
+        title: `Închidere ${periodKey} ${daysToD15 < 0 ? `INCOMPLETĂ (deadline indicativ trecut cu ${Math.abs(daysToD15)} zile)` : `recomandat până în ${daysToD15} zile`}`,
+        explanation: `${client.name}: nu am detectat înregistrare de închidere lună pentru ${periodKey}. Workflow-ul standard are 7 pași secvențiali (stocuri → TVA → avansuri → amortizare → P&L → diferențe curs). ${isQuarterEnd ? "Sfârșit de trimestru — adaugă impozit profit/venit + D100 + OP-uri." : ""} Termenul indicativ de finalizare e 15 ale lunii curente (înainte de D300/D112/D406 care vin pe 25).`,
+        actionSteps: [
+          "Verifică pasul 1: operații contabile stocuri (gestiuni cant-val).",
+          "Verifică pasul 2: descărcare mărfuri (gestiuni global-val) — sold 371 ≥ 0.",
+          "Pas 3: închidere TVA — reconciliază jurnale vs 4428.",
+          "Pas 4-5: cheltuieli/venituri în avans + amortizare imobilizări.",
+          "Pas 6: închidere venituri/cheltuieli prin 121.",
+          "Pas 7: diferențe de curs (auto, curs BNR).",
+          isQuarterEnd
+            ? "Trimester end: impozit profit + nota contabilă + Declarația 100 + OP-uri."
+            : "Verifică balanța finală și marchează închiderea ca depusă pentru audit.",
+        ],
+        legalSources: [
+          { label: "SAGA Manual — Închidere Lună (workflow standard)", ref: "manual.sagasoft.ro/sagac/topic-48-inchidere-luna.html" },
+          { label: "Reglementări contabile OMFP 1802/2014", ref: "monitoruloficial.ro" },
+          { label: "Cod Fiscal Titlul II + III", ref: "legislatie.just.ro" },
+        ],
+        deadlineDate: indicativeDeadline.toISOString(),
+      },
+    ];
+  },
+};
+
+// ============================================================================
 // REGISTRY
 // ============================================================================
 export const ALL_MATCH_PATHS: MatchPath[] = [
@@ -348,6 +424,7 @@ export const ALL_MATCH_PATHS: MatchPath[] = [
   PATH_CASA_MARCAT,
   PATH_MICRO_PRAG,
   PATH_SAFT_DEADLINE,
+  PATH_INCHIDERE_LUNA,
 ];
 
 /**

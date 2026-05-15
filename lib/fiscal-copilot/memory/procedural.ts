@@ -205,7 +205,76 @@ export async function seedDefaultProcedures(orgId: string): Promise<void> {
     ],
   });
 
-  // Procedura 3: Răspuns notificare e-TVA
+  // Procedura 3: Închidere lună (7 pași + adaos trimestrial)
+  await upsertProcedure({
+    orgId,
+    name: "inchidere_luna",
+    tags: ["închidere lună", "balanță", "TVA", "amortizare", "diferențe curs"],
+    steps: [
+      {
+        action: "operatii_contabile_stocuri",
+        description: "Înregistrare note contabile pentru mișcările de stocuri (gestiuni cant-val)",
+        produces: ["note_stocuri"],
+      },
+      {
+        action: "descarcare_marfuri_globala",
+        description: "Generare note global-valorice cu coeficient K. Sold 371 ≥ 0.",
+        requires: ["note_stocuri"],
+        produces: ["note_descarcare"],
+      },
+      {
+        action: "inchidere_TVA",
+        description:
+          "Note de regularizare TVA + compensare TVA plată/recuperat. Verifică jurnale vs solduri 4428.",
+        requires: ["note_descarcare"],
+        produces: ["note_tva", "decont_d300_pregatit"],
+      },
+      {
+        action: "cheltuieli_venituri_avans",
+        description: "Transfer lunar pe costuri/venituri din 471/472.",
+        requires: ["note_tva"],
+        produces: ["note_avans"],
+      },
+      {
+        action: "amortizare_imobilizari",
+        description: "Note amortizare format 16811=280x, 26811=281x.",
+        requires: ["note_avans"],
+        produces: ["note_amortizare"],
+      },
+      {
+        action: "inchidere_venituri_cheltuieli",
+        description: "Transfer prin contul 121 (profit/pierdere) cu analitică per an.",
+        requires: ["note_amortizare"],
+        produces: ["balanta_inainte_de_curs"],
+      },
+      {
+        action: "calcul_diferente_curs",
+        description: "Reevaluare conturi în valută la curs BNR. Note auto, nu manuale.",
+        requires: ["balanta_inainte_de_curs"],
+        produces: ["balanta_lunii_inchisa"],
+      },
+      {
+        action: "trimestru_impozit_profit",
+        description:
+          "Doar martie/iunie/septembrie/decembrie. Calcul impozit + nota contabilă + registru fiscal.",
+        requires: ["balanta_lunii_inchisa"],
+        produces: ["nota_impozit_profit", "registru_fiscal"],
+      },
+      {
+        action: "trimestru_d100",
+        description: "Declarația 100 (obligații la buget) + OP/FV.",
+        requires: ["nota_impozit_profit"],
+        produces: ["recipisa_d100"],
+      },
+      {
+        action: "anual_d101",
+        description: "Doar decembrie. Declarația 101 anual + verificare manuală.",
+        requires: ["balanta_lunii_inchisa", "recipisa_d100"],
+        produces: ["recipisa_d101"],
+      },
+    ],
+  });
+
   await upsertProcedure({
     orgId,
     name: "raspuns_notificare_etva",

@@ -196,6 +196,46 @@ export const FISCAL_CORPUS: KnowledgeEntry[] = [
     last_verified: "2026-05-14",
   },
   // ===========================================================================
+  // ÎNCHIDEREA LUNII — workflow secvențial
+  // ===========================================================================
+  {
+    id: "inchidere-luna-workflow",
+    tags: ["închidere lună", "workflow", "SAGA", "balanță", "TVA", "amortizare"],
+    title: "Închidere lună — workflow standard contabilitate RO",
+    body: `Închiderea lunii contabile urmează un workflow STRICT SECVENȚIAL în 7 pași (pattern preluat din SAGA, valabil generic):
+
+1. **Înregistrare operații contabile stocuri** — generează note contabile pentru mișcările de stocuri din gestiuni cantitativ-valorice. ESTE primul pas pentru că afectează costul mărfurilor.
+
+2. **Descărcare mărfuri vândute (global-valorică)** — pentru gestiuni global-valorice, folosește coeficient K. Restricție: soldul 371 nu trebuie să devină negativ.
+
+3. **Închidere TVA** — generează note de regularizare TVA, compensează automat TVA de plată cu TVA de recuperat. Verifică concordanța între jurnalele TVA și soldurile conturilor 4428.
+
+4. **Cheltuieli/venituri în avans** — transferă lunar pe costuri/venituri sumele din avans (471, 472).
+
+5. **Amortizare imobilizări** — generează notele de amortizare. Format standard: "Amort.Imobilizare 16811 = 280x" și "Amort.Imobilizare 26811 = 281x".
+
+6. **Închidere conturi venituri și cheltuieli** — transferă prin contul 121 (profit și pierdere). Permite analitică distinctă per an.
+
+7. **Calcul diferențe de curs** — reevaluează conturi în valută la sfârșitul lunii (curs BNR oficial). Restricție: nu se introduc manual note contabile pe diferențe de curs.
+
+ADAOS LA SFÂRȘIT DE TRIMESTRU (martie, iunie, septembrie, decembrie):
+- Impozit pe profit (firme normale) → calculează + generează nota contabilă + registrul fiscal
+- Impozit pe venit microîntreprinderi → generează declarațiile 107 și 177
+- Declarația 100 (obligații la buget) + ordine de plată / foi de vărsământ
+
+ADAOS LA SFÂRȘIT DE AN (decembrie):
+- Declarația 101 (impozit profit anual) — preluare din balanță + verificare manuală
+- Declarația 392/700 — înlocuit formularul 094 din 2023
+
+REGULĂ DE AUR: revenirea la lună anterioară necesită devalidare ÎN ORDINE INVERSĂ (de la pas 7 la pas 1). Facturile reevaluate (pas 7) nu mai pot fi devalidate, deci atenție la cursul valutar.`,
+    sources: [
+      { label: "SAGA Manual — Închidere Lună", ref: "manual.sagasoft.ro/sagac/topic-48-inchidere-luna.html" },
+      { label: "Cod Fiscal Titlul II (impozit profit)", ref: "legislatie.just.ro" },
+      { label: "Reglementări contabile OMFP 1802/2014", ref: "monitoruloficial.ro" },
+    ],
+    last_verified: "2026-05-14",
+  },
+  // ===========================================================================
   // CALENDAR FISCAL CHEIE
   // ===========================================================================
   {
