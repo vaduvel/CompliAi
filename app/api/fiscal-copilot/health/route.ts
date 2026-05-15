@@ -4,6 +4,7 @@ import { sagaCorpusStats } from "@/lib/fiscal-copilot/corpus/saga-manual";
 import { forumInsightsStats } from "@/lib/fiscal-copilot/corpus/forum-insights";
 import { codFiscalStats } from "@/lib/fiscal-copilot/corpus/cod-fiscal";
 import { portalQuestionsStats } from "@/lib/fiscal-copilot/corpus/portal-questions";
+import { LEGI_CONEXE_CORPUS } from "@/lib/fiscal-copilot/corpus/legi-conexe";
 
 export const dynamic = "force-dynamic";
 
@@ -26,11 +27,12 @@ export async function GET() {
     corpus: {
       seed: health.corpus,
       codFiscal: codFiscal.count,
+      legiConexe: LEGI_CONEXE_CORPUS.length,
       portalQuestions: portal.count,
       sagaManual: saga.count,
       forumInsights: forum.count,
       totalEntries:
-        health.corpus + codFiscal.count + portal.count + saga.count + forum.count,
+        health.corpus + codFiscal.count + LEGI_CONEXE_CORPUS.length + portal.count + saga.count + forum.count,
       codFiscalCharsKB: Math.round(codFiscal.totalChars / 1024),
       portalCharsKB: Math.round(portal.totalChars / 1024),
       sagaCharsKB: Math.round(saga.totalChars / 1024),

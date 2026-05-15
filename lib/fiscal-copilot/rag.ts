@@ -12,6 +12,7 @@
  */
 
 import { FISCAL_CORPUS, type KnowledgeEntry } from "./corpus/seed-fiscal-ro";
+import { LEGI_CONEXE_CORPUS } from "./corpus/legi-conexe";
 import { loadSagaManualCorpus } from "./corpus/saga-manual";
 import { loadForumInsightsCorpus } from "./corpus/forum-insights";
 import { loadCodFiscalCorpus } from "./corpus/cod-fiscal";
@@ -20,7 +21,7 @@ import { loadPortalQuestionsCorpus } from "./corpus/portal-questions";
 export interface RetrievalResult {
   entry: KnowledgeEntry;
   score: number;
-  source: "seed" | "saga-manual" | "forum-insights" | "cod-fiscal" | "portal-questions";
+  source: "seed" | "saga-manual" | "forum-insights" | "cod-fiscal" | "portal-questions" | "legi-conexe";
 }
 
 const STOP_WORDS = new Set([
@@ -187,6 +188,13 @@ export async function retrieveRelevantAsync(
     }))
     .filter((r) => r.score > 0);
 
+  // Legi conexe — autoritate secundară (CPF, L 31/1990, OUG 44/2008, L 82/1991, ONG, OG 28/1999)
+  const legiConexeResults: RetrievalResult[] = LEGI_CONEXE_CORPUS.map((entry) => ({
+    entry,
+    score: scoreEntry(entry, tokens) * 1.4,
+    source: "legi-conexe" as const,
+  })).filter((r) => r.score > 0);
+
   const seedResults: RetrievalResult[] = FISCAL_CORPUS.map((entry) => ({
     entry,
     score: scoreEntry(entry, tokens) * 1.2, // 20% boost for curated seed
@@ -226,6 +234,7 @@ export async function retrieveRelevantAsync(
 
   return [
     ...codFiscalResults,
+    ...legiConexeResults,
     ...seedResults,
     ...forumResults,
     ...sagaResults,
