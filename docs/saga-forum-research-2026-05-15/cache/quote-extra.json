@@ -1,0 +1,817 @@
+{
+ "wtp_explicit": [
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-03-06",
+   "title": "Keez creste pretul din nou",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1j35jb7/keez_creste_pretul_din_nou/",
+   "snippet": "Lol, la Solo plătesc 1200 lei pe an, plătitor tva",
+   "match": "plătesc 1200 lei"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-03-04",
+   "title": "Keez creste pretul din nou",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1j35jb7/keez_creste_pretul_din_nou/",
+   "snippet": "De la solo n-am primit nimic. Oricum îi mai țin o lună-2 până îmi termin magazinul și apoi o să mă ocup singur de conta, că plătesc 119 lei doar ca să am o interfață mișto cu care nu pot face mai nimic.\n\nCa idee, 90% din task-uri se pot integra într-un soft, care poate fi operat de administrator și verificat de contabil pentru conformitate. ANAF are un API pentru e-factura, și sunt sigur că există ceva și pentru celelalte mizerii. Volu",
+   "match": "plătesc 119 lei"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-03-04",
+   "title": "Keez creste pretul din nou",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1j35jb7/keez_creste_pretul_din_nou/",
+   "snippet": "ar ca nu erau zeci de mii de lei ci de euro) din cauza unei contabile proaste, dar care sigur e mai priceputa overall decat un average joe. Sigur, nu merita 119 lei pe luna pt contabilitate :).",
+   "match": "merita 119 lei"
+  },
+  {
+   "src": "Reddit r/programare",
+   "date": "2024-11-20",
+   "title": "Sugestiile voastre pentru un program de facturare",
+   "url": "https://reddit.com/r/programare/comments/1gsjoeq/sugestiile_voastre_pentru_un_program_de_facturare/",
+   "snippet": "sa adun facturi, bonuri fiscale si ordine de deplasare, sa le organizez si sa le trimit. Daca un serviciu din astea 2-3 ore ar face sa dureze 30min, as da 15€ pe luna (firma mea e micro, entitate de freelancer).",
+   "match": "as da 15"
+  }
+ ],
+ "saga_complaints": [
+  {
+   "src": "SAGA Forum",
+   "date": "2026-04-06",
+   "title": "eroare D112 martie 2026",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61595",
+   "snippet": "Citează\nam lucrat pe varianta ultima 602 si saga nu a rezolvat problema",
+   "match": "saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-04-01",
+   "title": "eroare D112 martie 2026",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61595",
+   "snippet": "Citează\nva multumesc. Voi incerca sa descarc varianta de pe site-ul ANAF. Oare cei de la SAGA nu vor remedia problema? Am incercat sa generez o declaratie si la o firma unde nu am concediu medical si acolo sunt erori, alte erori, dar tot nu se valideaza",
+   "match": "SAGA nu"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "ART. 119 exact determinarea compensarii in baza pierderii o defineste\n\ndaca anul trecut am avut zero castig pe ibkr si zero pierdere, anul asta \" Câștigul net anual impozabil din transferul titlurilor de valoare,\" este exact cat declara brokerul in CRS minus zero pierderea declarata in sectiunea pierderi din anul trecut\n\ntreaba cu recuperare pe 5 ani",
+   "match": "baza pierd"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2025-12-17",
+   "title": "EROARE D112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60645",
+   "snippet": "Citează\nAm scapat de atentionare modificand manula D112, din Saga nu se genereaza corect in situatia de mai sus.\nB1_6 Ore lucrate efectiv în lună are suma (desi teoretic contractul de mandat nu ar trebui sa fie cu ore ca nu se face pontaj si Revisal)\nSuma de la B1_5 Bază de calcul CAM am scris-o manual la b1_10 Bază de calcul indemnizatie de ŞOMAJ (unde Saga genera",
+   "match": "Saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2025-07-15",
+   "title": "Eroare conectare Saga licienta activa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59371",
+   "snippet": "sfatuiesc sa schimbati modul de lucru. Oricum nu puteti se pretindeti de la echipa Saga sa programeze altfel decat poate ea.\nSi eu va asigur ca daca saga este configurat corespunzator si se are grija de modul cum se face actualizarea , copiile de siguranta si organizarea societatilor, nu exista nici o problema cu el.\nAsta e si roulul acestui forum, sa constientizam situatiile deranjante si neproductive si sa incercam sa le diminuam sau sa le ocolim. Si d",
+   "match": "saga este"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2025-07-13",
+   "title": "Eroare conectare Saga licienta activa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59371",
+   "snippet": "r. La urmatoarea rulare saga si introducerea credentialelor corecte, saga va completa singur noile ID-uri de activare. Inainte se facea manual pt. ca saga nu folosea internetul, acuma internetul este obligatoriu, pt. a lasa programul saga sa completeze ID-urile de activare care le genereaza. Deci utilizatorul trebuie sa aiba grija unde si cum ruleaza programul saga pt. ca in functie de mediul de lucru se genereaza ID-uri diferite (calculatoare diferite,",
+   "match": "saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2025-05-13",
+   "title": "Cumulare pozitii efactura/raport de gestiune/eroare introducere pret vanzare",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59011",
+   "snippet": "de achizitie. deci, repet, cand pun un pret de vanzare calculat pe calculator cu 25% saga trece automat alt procent acolo. si degeaba il modifici ca saga nu schimba nimic",
+   "match": "saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2025-03-11",
+   "title": "Eroare SAF-T-Cont contabil corect",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58406",
+   "snippet": "Citează\nDa,programul Saga este actualizat la zi.\nUnde este D406 de test?Eu am generat pentru test un D406 nu pentru a trimite la ANAF,tocmai pentru a vedea din timp ce erori ar putea fi si a corecta .",
+   "match": "Saga este"
+  },
+  {
+   "src": "Reddit r/programare",
+   "date": "2024-11-16",
+   "title": "Sugestiile voastre pentru un program de facturare",
+   "url": "https://reddit.com/r/programare/comments/1gsjoeq/sugestiile_voastre_pentru_un_program_de_facturare/",
+   "snippet": "functii sunt mult mai mici decat cele de la Smartbill/Saga. \n\nAcolo oamenii au de platit salarii, infrastructuri mai vechi, mentenanta pe aplicatii ( Saga are niste ani, ma indoiesc ca folosesc tehnologii noi/performante). Ne avand angajati momentan, pot rezista destul de bine un cost mic al abonamentului. Plus, nu toata lumea are nevoie de Saga, altfel Oblio,Smartbill nu ar mai fi folosite. Iar multi folosesc Oblio doar pentru ca au avut acel an gratuit",
+   "match": "Saga are"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-11-21",
+   "title": "Erori D112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54468",
+   "snippet": "nat cota de 10%sănătate. Din cei 200 lei neimpozabili doar doar partea aferenta zilelor efectiv lucrate se scade din baza de calcul sănătate cf D112. Saga nu știe să facă.",
+   "match": "Saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2022-02-16",
+   "title": "SAF-T - declaratia 406",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015",
+   "snippet": "sunt contribuabil mijlociu si depinde de aprobarea costurilor cu saf-t de catre cei din management, care habar nu au de legislatia din Romania.\nDaca Saga nu intentioneaza sa lucreze la Saf-t, macar sa stim sa ne organizam altfel.\nMultumesc anticipat!",
+   "match": "Saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2021-02-08",
+   "title": "actualizare Decl 112,  anul nu se poate modifica, ramne tot 2020, Cand actualiza",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48849",
+   "snippet": ". Intocmiti cu datele necesare, salariati, cnp, etc si asa puteti sa trimiteti prin e-guvernare.ro.\nPoftim? Da eroare? Oare de ce?\nExact. Astia de la Saga nu-si fac treaba....\nO zi cu zambete (am furat sloganul).",
+   "match": "Saga nu"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2017-06-07",
+   "title": "import din alte aplicatii",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=38167",
+   "snippet": "une: 01 vinzare\ndenumire articol: aspirina 500 mg de exemplu\nfiecare furnizor are un cod in Saga, In pharmec are alt cod si se dubleaza\ncontul 401 in Saga are un analitic pentru fiecare furnizor, din preluare pharmec mi-i scoate pe toti cu sintetic 401",
+   "match": "Saga are"
+  }
+ ],
+ "fiscal_anxiety": [
+  {
+   "src": "SAGA Forum",
+   "date": "2026-05-12",
+   "title": "Erori validare D406 Active",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61456",
+   "snippet": "Citează\nScuze ! ca am uitat sa mentionez in mesajul anterior ,cele patru imobilizari la care face referire mesajul de eroare sunt amortizate integral dar nu au fost scoase din uz.",
+   "match": "am uitat sa"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-05-10",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "chis in 2019, sa platesc 3500 sau ceva de genul, dupa care acuma cateva luni am primit decizie de anulare a acelei decizii de impunere, acuma primesc somatie cu titlu de executare sa platesc 8500 de ron pentru acei 3500 plus accesorii...",
+   "match": "somatie"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "ularul de contact din SPV, dar au trecut de mult cele 30 de zile in care erau obligati sa imi raspunda si nu am primit niciun raspuns.\n\nAzi am primit somatie cu termen de 15 zile pentru plata a aproximativ 9500 de lei pentru ca nu am platit taxele pentru 2020-2021 un PFA care **nu mai exista din** **2019**.\n\nAm vorbit si cu un avocat. Ce altceva as mai putea face?\n\n***LE: Am rezolvat la ANAF. Norocul meu ca am dat peste o doamna inspector capabila sa ex",
+   "match": "somatie"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "ic.\n\nIn opinia mea mergi la ANAF si discuta personal cu ei legat de acest aspect, incearca sa intelegi pe ce baza ti s-a trimis somatia. Faptul ca in somatie scrie ca trebuie sa depui declaratia pe 2020 e gresit din start.\n\nIn acelasi timp, ar trebui sa fii sincer sa stii daca nu cumva e alt motiv pentru care ti-au trimis somatia, daca nu cumva ai avut alte venituri.",
+   "match": "somatie"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "Asta îmi aduce aminte de silința de plată pe care am primit-o pentru o amendă care a fost deja plătită acum 3 ani. Noroc că am avut dovada și mi-au anulat-o din sistem.\n\nBut wait, there's more: Încă am de plătit 10 lei pentru procesarea acestei amenzi pe platformă. Greșeală de-a lor :))\n\nSisteme de căcat verificate de Inginerul Șef de Sistem Bugetar pe nume \"Las' că am eu un",
+   "match": "amendă"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "Asta imi aduce aminte de acum 2 ani cand am primit ordin de executare silita pentru o amenda pe care am platit-o la 30 de minute dupa ce am primit-o.\n🤦🏼‍♂️🤦🏼‍♂️🤦🏼‍♂️",
+   "match": "amenda"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "ANAF, cea mai proastă instituție publică din România, nu mai locuiesc în România de ceva timp, am depus de nu mai știu câte ori declarație de renunțare la reședință fiscală în România și de fiecare dată găsesc motive de respingere. Deja și buletinul mi-a fost anulat pe motiv că nu mai locuiesc efectiv în România și ei tot găsesc motive să îmi respingă cererea de renunțare la reședință fiscală.",
+   "match": "nu mai știu"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "nu ma lasă pdf-ul lor sa las spațiul ala gol acolo, foarte user friendly de altfel. Ei cu greșeala asta mi-am facut de lucru in 2025 cand mi-a venit somație sa plătesc 6500 pe venituri din alta activitate decat cea pe care fusese înființat pfa-ul. Mi-a luat 3 săptămâni sa rezolv, pana când am dat de cineva de la anaf care sa ma ajute. Cel mai bine mergi la anaf si rezolvi cu ei.",
+   "match": "somație"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "ANAF o trage, nu este tras... Am avut o amendă din 2009, că am plecat după o fată în alt oraș cu trenul și am fost prins fără bilet. Am fost la primărie și am luat chitanța și le-am dat cu ea în cap. Mi-a plătit-o bunică-mea, că i-a spus \"Receptorul\" că mă arestează, ăștia. 🥴🥴🤣🤣😂😂😂 ce l-am înjurat după faza aia.",
+   "match": "amendă"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-03-13",
+   "title": "D205 Rectificativa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61464",
+   "snippet": "Citează\nDepui rectificativa 205 : nu primesti amenda, ca tu ai depus initiala si rectificativa inlocuieste initiala.",
+   "match": "amenda"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-03-12",
+   "title": "D205 Rectificativa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61464",
+   "snippet": "iva\nCitează\nBuna seara ,\nAm depus D205 in februarie numai cu dividendele distribuite din 457 brute 500.000 lei platite 450.000 lei Iimpozit 50 000 si am uitat sa trec dividendele interimare distribuite la T3 2025 de 350.000 si platite 250.000 lei impozit am platit 35000 lei la 20 01 2026 ( sa beneficez de 10% impozit )\nAcum m am informat de la colegi ca in declaratia 205 se trec toate dividendele distribuite totale din 2025 (indiferent ca au fost interimare",
+   "match": "am uitat sa"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-03-12",
+   "title": "D205 Rectificativa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61464",
+   "snippet": "sau nu) si platite prin 456/457=5121 si impozitul aferent distribuitelor interimare.\nCe fac acum fac Rectificativa ? nu se dubleaza sumele ? primesc amenda de intarziere?\nDU inca nu am depus asa ca acolo o sa am grija .\nVa multumesc frumos de solutia oferita.",
+   "match": "amenda"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-03-09",
+   "title": "CALCUL CONCEDIU MEDICAL INCEPAND cu 2026",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61222",
+   "snippet": "Citează\nBuna ziua,\nva rog sa ma ajutati cu urmatoarea speta. M-am zapacit cu totul si nu mai stiu cum sa interpretez legea.\nAm un salariat cu 2 concedii medicale in luna martie 2026 astfel:\nC1 initial: cod indemnizatie 06 cu spitalizare - 04.03 - 09.03.2026\nC2 in continuare: cod indemnizatie 01 cu spitalizare - 10.03 - 23.03.2026\nMedia zilnica este 241.59 lei\nVa rog sa imi spuneti daca am inreg",
+   "match": "nu mai stiu"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-07",
+   "title": "Notificare ANAF venituri ramburs olx",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6oe2a/notificare_anaf_venituri_ramburs_olx/",
+   "snippet": "deci ai depis rectificativa si platit pana la urma 10% plus penalitati pe 8000 ron?",
+   "match": "penalitati"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "tat este omul de rand care cu onestitate, incearca sa depuna corect declaratia unica si Anaf vine la limita prescrierii si il santajeaza cu impunere, amenda, poprire conturi bancare sau invitatii la sediu pentru discutii explicative despre veniturile lui pe brokeri straini, pentru care a platit deja integral impozit, dar acel impozit e ca si inexistent pentru ei, cat timp ei interpreteaza sursa ca dintr-o tara diferita.\n\n\n\nIar apoi vin indivizi online",
+   "match": "amenda"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "Imi spui te rog, daca ai schimbat doar tara, ti-au dat penalitati si dobanzi de platit? Sau daca suma datorata e aceeasi, se considera ca e deja platita? Mersi.",
+   "match": "penalitati"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-27",
+   "title": "ANAF vrea sa ma omoare!",
+   "url": "https://reddit.com/r/robursa/comments/1qnkj3n/anaf_vrea_sa_ma_omoare/",
+   "snippet": "e mail. Ca primisem o eroare și i-am întrebat ce sa fac sa o rezolv. \n\nCred ca încearcă norocul. Și dacă începi sa le răspunzi ca să rezolvi situația nu mai știu cum sa procedeze...",
+   "match": "nu mai știu"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-01-26",
+   "title": "Ați interacționat cu Ana? Cum se \"comporta\"? 😄",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1qndzvw/ați_interacționat_cu_ana_cum_se_comporta/",
+   "snippet": "Avand in vedere ca somatiile ANAF se trimit automat, fara verificarea veridicitatii datelor invocate in somatie in mod cert se poate mult, mult mai rau.",
+   "match": "somatie"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-12-01",
+   "title": "ANAF vrea să-mi ia casa",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1pafexb/anaf_vrea_sămi_ia_casa/",
+   "snippet": "sculat, în cuamtum de să-mi ia casa, dar asta nu necesită informare prin poștă din partea lor. Trimit un mesaj, după care trimit alt mesaj că-mi dau amendă că n-am citit mesajul.\n\nDacă ăsta nu-i abuz, nu știu ce e.  \n\n\nCa norocul că mi-a trecut prin minte să verific dacă am ceva mesaje, și s-a întâmplat fix în weekend după care mai urmează și o zi liberă. Superb mod de a sta 3 zile pe jar.",
+   "match": "amendă"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2025-09-12",
+   "title": "Raportari eronate IBKR &gt;Anaf pentru \"Venituri din strainatate\"",
+   "url": "https://reddit.com/r/robursa/comments/1neuvxg/raportari_eronate_ibkr_anaf_pentru_venituri_din/",
+   "snippet": "Nu stiu daca este castig de curs, ca nu ai tinut suma aia mai mult timp, mai ales daca s-a facut autoconversie.\n\nApropo, am uitat sa mentionez, ce am patit eu, a patit si un prieten cu Tradeville si un ETF in EUR. Banuiesc ca aceeasi speta. Dar la el, suma era de 316 RON si a hotarat sa plateasca 30 ron si rectificativa decat sa stea sa explice.\n\nCred ca totul tine de ce raporteaza brokerul. Anaf doar iti trimite notificare daca",
+   "match": "am uitat sa"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2025-09-12",
+   "title": "Raportari eronate IBKR &gt;Anaf pentru \"Venituri din strainatate\"",
+   "url": "https://reddit.com/r/robursa/comments/1neuvxg/raportari_eronate_ibkr_anaf_pentru_venituri_din/",
+   "snippet": "lutar acolo. Arata ca USD.EUR. Nu are ce sa impoziteze.\n\nPractic ce e in raportul ala se interpreteaza ca: ai schimbat X dolari pe Y euro sau invers (nu mai stiu exact). Ce sa impoziteze cand e la cursul din ziua aia minus ceva comision?\n\nAre si CRS-ul meu asa ceva ca investesc in mai multe tari deci valute multiple.\n\nDescarca tot istoricul de tranzactionare in flex query.",
+   "match": "nu mai stiu"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-24",
+   "title": "Am primit raspuns. Notificare anaf venituri ramburs",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/am_primit_raspuns_notificare_anaf_venituri_ramburs/",
+   "snippet": "va penatitati in total 2400lei si doar asa s-a stins. Am primit ulterior un document prin care se inceteaza urmarirea.\n\n  \nDaca nu platesti acumulezi penalitati si cu indiferenta vei ajunge la popriri. Cu prostu\"scuze \"softu\"nu te pune. Sistemul este automat si te curenteaza chiar daca nu este moral sau corect.\n\nVa doresc succes la toti!",
+   "match": "penalitati"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-23",
+   "title": "Notificare ANAF venituri ramburs olx",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6oe2a/notificare_anaf_venituri_ramburs_olx/",
+   "snippet": "fizice ai nevoie de acte de imprumut/donatie cu respectivele persoane ca sa dovedesti ca acele sume nu provin din vanzari.\n\nIn privinta dobanzilor si penalitatilor, ele pot dubla suma datorata. Penalitatea de nedeclarare este de 0,08%/zi, iar dobanda este de 0,02%/zi. Daca se achita toata suma datorata, penalitatea de nedeclarare se reduce cu 75%. Daca se depaseste pragul de 6 salarii minime, se datoreaza si CASS (10% din suma). Daca se depasesc 12 salarii",
+   "match": "penalitati"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-22",
+   "title": "Am primit raspuns. Notificare anaf venituri ramburs",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/am_primit_raspuns_notificare_anaf_venituri_ramburs/",
+   "snippet": "sau pierdere.\n\nDacă nu faci nimic garantat îți vor pune poprire pe taxele aferente acelor 14k ca fiind 100% profit adică 10% sau cât era, 16% acuma? Nu mai știu. Și eventual cass.",
+   "match": "Nu mai știu"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-22",
+   "title": "Am primit raspuns. Notificare anaf venituri ramburs",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/am_primit_raspuns_notificare_anaf_venituri_ramburs/",
+   "snippet": "ot de la Antifrauda) care …. Inca nu se regaseste in rolul meu fiscal de la anaf … dupa 3 luni de la emitere. Noaptea mintii … \nAh, si vor sa bage si penalitati peste.",
+   "match": "penalitati"
+  }
+ ],
+ "support_pain": [
+  {
+   "src": "SAGA Forum",
+   "date": "2025-08-02",
+   "title": "Eroare conectare Saga licienta activa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59371",
+   "snippet": "itudinea utilizatorului ramane decizia sa analizeze si sa inteleaga ce sa faca, vedeti punctul 8.5 si 8.7 din Licenta. Recunosc ca nu prea mai exista suport tehnic de specialitate pentru mediul de lucru, adica ce nu tine de obligatia legala a acordului de licentiere, ci tine de zona gri (acea situatie cand ori e de la windows ori e de la program ori e de la retea) tocmai pentru ca programul saga a devenit mult mai complex si nu mai e o simpla aplicatie locala",
+   "match": "suport tehnic"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-22",
+   "title": "Am primit raspuns. Notificare anaf venituri ramburs",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/am_primit_raspuns_notificare_anaf_venituri_ramburs/",
+   "snippet": "e scurt s ar traduce asa \"nu conteaza, sunteti obligat sa completati d212 si sa faceti dovada tuturor achizitiilor si veniturilor din vanzari\". Wtf?\n\nSun la anaf. Imi raspunde o doamna drăguță, ii spun situatia mea, ii citesc email ul primit de la ei la care ea \"doamne fereste rade .. n am mai auzit asa raspuns in cazul asta. Nu stiu ce sa va zic, ce sa faceti. Mai asteptati un pic\"..\n\nDeci ce plua mea?",
+   "match": "Sun la anaf"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-22",
+   "title": "Notificare ANAF venituri ramburs olx",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6oe2a/notificare_anaf_venituri_ramburs_olx/",
+   "snippet": "e le-am cumparat si vandut in pierdere sau primit de-a lungul anilor si dupa nu mi-au mai placut. Nu am facut nici un profit din asta. Am incercat sa sun la ANAF antifrauda, (au sediul undeva la Piata Presei) dar nici nu se formeaza numarul. Am fost la ANAF in Sector 4 si acolo m-au amenintat ca sa imi iau avocat sa pregatesc toate hartiile care dovedesc achizitiile pentru ca ar putea cota de impozitare sa ajunga pana la 60% din suma rambursului. \n\nAm trimi",
+   "match": "sun la ANAF"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2024-05-09",
+   "title": "IBKR și ANAF, combinatie fatala ",
+   "url": "https://reddit.com/r/robursa/comments/1co1ytl/ibkr_și_anaf_combinatie_fatala/",
+   "snippet": "c în statementul din 2021 (are vreo 27 de pagini...) și vad cât profit am făcut, impozitul datorat era de ordinul a câteva sute de lei. Zic totuși sa sun la Anaf-ul de la care am primit sa întreb cum rezolv mai exact, dacă pot sa depun acum declarație etc. Aici începe circul: tanti de la ANAF îmi zice ca figurez cu venituri de vreo 30 de ori mai mari decât în realitate (ah și cireașa de pe tort, ea vedea suma respectiva în HUF și aparent nu știe cum e cu cu",
+   "match": "sun la Anaf"
+  }
+ ],
+ "multitool_pain": [],
+ "time_lost": [
+  {
+   "src": "SAGA Forum",
+   "date": "2026-04-01",
+   "title": "eroare D112 martie 2026",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61595",
+   "snippet": "Citează\nmultumesc din suflet micleac890!!! am facut ce m-ai sfatuit si se valideaza declaratia fara erori!!! si cand ma gandesc ca am stat vreo 2 ore sa imi bat capul...si a mers asa repede!",
+   "match": "2 ore sa"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "Nu știu de ce mi-ai pierdut timpul atunci, dacă nu ai chef de discuții. În capul tău e o varza totala și jumătate din lucrurile pe care le scrii nu au sens, iar cealaltă jumătate trebuie să o citesc de 2-3 ori ca să înțeleg ce zici.\n\nEu îți dau articole din codul fiscal și argumente pe ce susțin. \n\nTu nu ești capabil să înțelegi c",
+   "match": "pierdut timp"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-11-30",
+   "title": "ANAF vrea să-mi ia casa",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1pafexb/anaf_vrea_sămi_ia_casa/",
+   "snippet": "Ron sau 10000 Ron.\n\nEu am avut măcar șansă că nu a fost o sumă care să mă falimenteze (cum este în cazul lui OP) și am ales să o plătesc în loc să-mi pierd timpul dându-i în judecată.",
+   "match": "pierd timp"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2024-07-02",
+   "title": "De ce noi romanii acceptam toate rahaturile astea de la guvern?",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1dtsmup/de_ce_noi_romanii_acceptam_toate_rahaturile_astea/",
+   "snippet": "inteles si eu ca factura pe hartie nu are nici o valoare. Dar de ce trebuie eu sa verific sa vad daca el a trimis factura in SPV sau nu si sa imi mai pierd timpul sa sun la furnizor si apoi sa fac plangeri. Pe mine cine ma plateste pentru timpul ala? Responsabilitatea mea directa e sa trimit facturile pe care le emit in SPV nu sa stau sa verific fiecare furnizor. De exemplu, eu am primit deja in aceste 2 zile 5 facturi din care numai 2 apar pana in momentu",
+   "match": "pierd timp"
+  }
+ ],
+ "ai_mentioned": [
+  {
+   "src": "SAGA Forum",
+   "date": "2024-07-16",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "colegii mai sus... se poate macar un reminder configurabil gen \" mai aveti 1-x zile sa transmiteti facturile, doriti sa le transmitem?\" Vorbesc cand ai SAGa deschis... cum sunt la multe programe unde ai reminder de salvare la un anumit timp...\nAr fi util pentru cei care emit relativ putine facturi cu clienti mai putin \"hotariti\" unde exista probabilitatea sa trebuiasca sa modifici o factura intr-o zi 2 de la emitere...\nTot apropo de Efactura...nu",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-07-16",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "igurabil gen \" mai aveti 1-x zile sa transmiteti facturile, doriti sa le transmitem?\" Vorbesc cand ai SAGa deschis... cum sunt la multe programe unde ai reminder de salvare la un anumit timp...\nAr fi util pentru cei care emit relativ putine facturi cu clienti mai putin \"hotariti\" unde exista probabilitatea sa trebuiasca sa modifici o factura intr-o zi 2 de la emitere...\nTot apropo de Efactura...nu am gasit cum as putea genera facturile in format po",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-07-01",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "a facturile din e-factura. Stiu ca exista varianta sa iti completeze automat cota tva curenta la toate pozitiile goale insa nu prea ajuta atunci cand ai 2 sau chiar 3 cote tva pe aceeasi factura...",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-07-01",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "ta de TVA?\nDaca lucrezi pe \"nedefinit\" (global-valoric), cum vrei sa iti recunoasca pretul de vanzare, iar daca lucrezi cantitativ-valoric, pentru ce ai mai lucra la pret de vanzare?",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-06-27",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "labil ( ex saga uitat deschis ) am inceput sa cred ca ar putea fi posibila implementarea acestei functionalitati .\nSa ruleze optiunea respectiva cind ai programul deschis sau sa ii ceri sa faca o verificare ( gen cl sau fz cind le adauga datele ) etc .... nu stiu .....\nbalazse = \" Precis se poate realiza, dar intrebarea este la cati utilizatori ii de folos acest lucru \" ?\nLa cei cu volum mare de facturi , la cei care au mult de lucru si sunt tot pe",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-06-26",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "e-factura\nFunctionalitati utile legate de e-factura :\n1. robot care sa trimita fc de vinzare validate automat dupa x zile maxim 5 ( setat de utilizator ) in e-factura . Are oblio si fgo .\nAceasta optiune ar fi foarte utila si vorbesc din experienta am patit in feb 24 cind am inceput cu e-factura insa in acel moment am schimbat modul de facturare in sensul ca a",
+   "match": "bot"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-06-26",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "gaWeb (sper ca stiu corect), consider ca se poate rezolva mai usor acea automatizare. La desktop totusi ii un pic mai altfel, zic eu. La o adica daca ai doar o singura firma ii un lucru, dar daca ai mai multe deja cred ca ii mai dificil. Pe langa faptul ca trebuie sa fie pornit tot timpul calculatorul (sau cel putin in perioada pentru care este setat transmiterea) si setarea pentru fiecare firma in parte.\nPrecis se poate realiza, dar intrebarea est",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-06-26",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "ate rezolva mai usor acea automatizare. La desktop totusi ii un pic mai altfel, zic eu. La o adica daca ai doar o singura firma ii un lucru, dar daca ai mai multe deja cred ca ii mai dificil. Pe langa faptul ca trebuie sa fie pornit tot timpul calculatorul (sau cel putin in perioada pentru care este setat transmiterea) si setarea pentru fiecare firma in parte.\nPrecis se poate realiza, dar intrebarea este la cati utilizatori ii de folos acest lucru.",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-04-25",
+   "title": "Eroare D100",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55941",
+   "snippet": "Eu ma minunez cand vad asemenea postari : daca ai depus D100, de ce sa redepui?!!!",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-04-25",
+   "title": "Eroare D100",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55941",
+   "snippet": "Pentru AlinaS\nNu \"domnule pomparaus\", ci \"doamna Pomparau\".\nUnde ai vazut aroganta in postarea lui Silvia?\nActualizarea programului nu are nici o legatura cu depunerea unei declaratii.\nDe altfel, eroarea vorbeste de la sine, iar daca s-a depus o declaratie si recipisa este valida, atunci inseamna ca totul este corect, iar la D.100 daca doresti sa corectezi suma, at",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-02-26",
+   "title": "eroare d112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55455",
+   "snippet": "Ai constructii si nu ai bifa la beneficiaza de facilitati?!\nSau daca nu beneficiaza, scoate bifa.",
+   "match": "Ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-02-09",
+   "title": "E-factura erori generare cod SPV",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264",
+   "snippet": "Schimba USb in care il ai.. reporneste calculatorul... dezinstaleaza si reinstaleaza drive token... asta e ..\n„Nu inteligența ne face mari, ci bunătatea inimii. Nu contează cât de mult știi, ci cât de mult bine faci.”",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-02-09",
+   "title": "E-factura erori generare cod SPV",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264",
+   "snippet": "ea, AUTOMATĂ, de către softurile înregistrate, a codului SPV! Dacă ele funcționează prost, acel cod SPV nu poate fi obținut.\nEu am tot spus - când nu ai cunoștințe tehnice sau nu pricepi ce se întâmplă tehnic legat de o problemă sau alta, stai în banca ta și nu te băga. Ăia de la asistență contribuabili nu vor să facă asta și pace. Și ce e deranjant, e faptul că oamenii care caută răspuns la ei, pe chestiuni tehnice, sunt evident atehnici și nu au",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-01-04",
+   "title": "Eroare e-Factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767",
+   "snippet": "[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-01-04",
+   "title": "Eroare e-Factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767",
+   "snippet": "[CITAT]\n[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-01-04",
+   "title": "Eroare e-Factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767",
+   "snippet": "Dar, repet, XML-ul a fost valid din moment ce l-am primit si descarcat din SPV.\n[CITAT]\n[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-01-04",
+   "title": "Eroare e-Factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767",
+   "snippet": ", XML-ul a fost valid din moment ce l-am primit si descarcat din SPV.\n[CITAT]\n[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios este, ca s",
+   "match": "Ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-01-04",
+   "title": "Eroare e-Factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767",
+   "snippet": "ce l-am primit si descarcat din SPV.\n[CITAT]\n[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios este, ca si pentru facturi PRIMITE azi de l",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-01-03",
+   "title": "Eroare e-Factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767",
+   "snippet": "Salut,\nAm avut acelasi tip de eroare si se rezolva prin reinstalare chiar daca ai ultima versiune.\nGabriel D.",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-11-22",
+   "title": "Erori D112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54468",
+   "snippet": "ut să-mi spuneți ce este cu D112. Eu v-am cerut să-mi indicați unde în legislație scrie că cei 200 lei se împart proporțional cu salariul atunci când ai medicale.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-07-20",
+   "title": "eroare declaratie 406 Saf-T",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53898",
+   "snippet": "Citează\nNu ai analitice specifice D406.",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-07-20",
+   "title": "eroare declaratie 406 Saf-T",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53898",
+   "snippet": "Citează\nAnaliticile pe care le accepta D406 sunt de natura .001 , ceea ce tu nu ai.",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-06-25",
+   "title": "eroare generare pdf declaratie 112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53710",
+   "snippet": "Pentru IordanS\nTe-ai asigurat ca fisierul pdf sa fie asociat la deschidere cu Adobe (mai exact cu Adobe Reader si nu cu versiunea de editor)?\nDaca mergi la \"Task manager\" la \"Process\", precis nu mai ruleaza in \"background\" programul Adobe?\nCe versiune a Adobe Reader folosesti?",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-06-23",
+   "title": "eroare generare pdf declaratie 112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53710",
+   "snippet": "Nu te-ai gândit să apeși „Permitere”?",
+   "match": "ai"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-05-25",
+   "title": "eroare in d112 din Saga",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53652",
+   "snippet": "Mergi in stat si vezi din detalii la asig.5 sa nu cumva sa ai suma la \"venituri fara contributii\".",
+   "match": "ai"
+  }
+ ],
+ "romanian_strong_quotes": [
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-05-14",
+   "title": "ANA de la ANAF este ANALFABET",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1tba2ox/ana_de_la_anaf_este_analfabet/",
+   "snippet": "Site-ul e praf. Cine l-a facut nici nu stie unde se foloseste un buton si unde un text box spre exemplu. Chatbotu ala cu poza unei persone este atat de prost implementat ca nici nu am cuvinte. E un job care necesita putin timp chiar si pentru o singura persoana. Nu pot sa-mi imaginez ca cineva ar plati mai mult d",
+   "match": "praf"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-03-17",
+   "title": "Somatie ANAF - 9500 de lei",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/somatie_anaf_9500_de_lei/",
+   "snippet": "Mă desteptulule tu citești? A spus cu venit zero .te trezești vb aiurea, abia aștept să se bage poliția pe Reddit sa vă scoată pe alte tine",
+   "match": "aiurea"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-02-27",
+   "title": "ordin de plata pt punctul de lucru D112 an 2026",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61163",
+   "snippet": "im si de ce platim acolo.\nMi-a luat 40 de minute ca sa reusesc sa gasesc pe cineva la ANAF.\nNu am reusit nici in Ilfov si nici in Bucuresti,\nAm sunat aiurea.\nSI am rugat sa mi se spuna cum se fac platile la punctul de lucru.\nDoamna mi-a spus: Se fac la Trezoreria unde este arondata mama, dar se pune codul fiscal al Puiului (al punctului de lucru).\nAm confirmarea ca asa este:\nAm achitat de 2 ori in Trezoreria unde se afla punctul de lucru. S-au intors b",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-02-02",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "aveam revolut si am pus tarile total aiurea. am pus us la unele care nu erau us pt ca eu credeam ca e in functie de bursa unde se tranzactioneaza 😂 in anul urmatoe la cfd-uri pe etoro am pus tot us, desi trebuia tara lu etoro. primele declaratii au fost total varza. abia de prin 2023( deci pt 2022) am inceput sa pun tarile dupa isin. la ince",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "pozitate la sursă de US, cum plm să declari că acțiunile sunt din Irlanda pentru că acolo e brokerul? N-are nicio logică.\n\nMotivul pentru care ANAF e tâmpit și îți impune după 5 ani venituri pe țara brokerului e din cauza CRS prin care brokerul declară venitul brut la final de an, NU PROFITUL SAU PIERDERILE. Poți verifica chiar tu ce a trimis IBKR ANAF-ului din statements - tax - CRS report. Vezi doar că are și un disclaimer pe ultima pagină: \"Interact",
+   "match": "tâmpit"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "Legislatia romana e praf si fiecare o interpreteaza cum vrea de asta si multe greseli/pareri.\n\nIncerc sa trimit prin formularul de contact la ANAF. Sper ca e functional. Ideea este sa am dovada scrisa in caz ma informeaza gresit.\n\nLE: am trimis catre anaf solicitare de clarificare. O sa revin cu raspunsul lor.",
+   "match": "praf"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2026-01-31",
+   "title": "Declaratia 212 pt IBKR trebuie depusa cu venituri pe Irlanda",
+   "url": "https://reddit.com/r/robursa/comments/1qs2yrh/declaratia_212_pt_ibkr_trebuie_depusa_cu_venituri/",
+   "snippet": "Hahaha eu stiu cat de prafi sunt, crede-ma ca sunt patit de multi ori cu ei. Insa in caz de actiune in instanta din partea mea, ajuta.",
+   "match": "praf"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-01-19",
+   "title": "Experienta Solo - cum am pierdut bani si timp din cauza suportului",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1qh0ae0/experienta_solo_cum_am_pierdut_bani_si_timp_din/",
+   "snippet": "te de la el si trebuie mereu sa ma lupt sa vorbesc cu un agent. \nPrefer sa astept 1-2 zile sa imi raspunda cineva decat sa risc sa primesc informatii aiurea sau sa trebuiasca sa-l conving sa ma transfere unui agent.",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2026-01-19",
+   "title": "Experienta Solo - cum am pierdut bani si timp din cauza suportului",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1qh0ae0/experienta_solo_cum_am_pierdut_bani_si_timp_din/",
+   "snippet": "salut sunt botu\n\nscz ca te-am trimis aiurea voiam sa zic Piatra-Neamt",
+   "match": "aiurea"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2026-01-09",
+   "title": "Cod fiscal pentru fiecare punctde lucru de la 1 salariat",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60715",
+   "snippet": "p coadă.\nCertificatul constatator de la ONR are toate datele sediului secundar.\nREVISAL este absolut o idioțenie să ceri. Motivul fiind că nu ceri de tâmpit cod fiscal. Ceri că știi că ai salariat.\nCum zic. O mizerie!\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+   "match": "tâmpit"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-11-30",
+   "title": "ANAF vrea să-mi ia casa",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1pafexb/anaf_vrea_sămi_ia_casa/",
+   "snippet": "ah ... ai dreptate ... nu putem face concus intre idiotii care ne scutura de averi si daca \"se exista\" un regim mai tampit ca altul, se pare ca nici nu prea avem motive sa ne plangem ca deh ... se poate si mai rau.",
+   "match": "tampit"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2025-09-12",
+   "title": "Raportari eronate IBKR &gt;Anaf pentru \"Venituri din strainatate\"",
+   "url": "https://reddit.com/r/robursa/comments/1neuvxg/raportari_eronate_ibkr_anaf_pentru_venituri_din/",
+   "snippet": "bătaie de joc, tipic.",
+   "match": "bătaie de joc"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-08-13",
+   "title": "Keez vs StartCo | Recomandare servicii de contabilitate 100% online pt SRL?",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1c5j56n/keez_vs_startco_recomandare_servicii_de/",
+   "snippet": "z in nici un caz. Afisaza pretul pe site, iar dupa cateva luni (mai putin de 5) iti baga 15 Eur plus. ca au crescut preturi. Mi-au facturat 2 facturi aiurea in afara de cea lunara. Pentru ca au gresit, le-au stornat. Dar eu m-am ales cu 25% depasire de documente la abonament si mi-au facturat deci inca 15EUR depasire de abonament :). Ca am avut multe facturi, nah. La exit mai vor sa le platesc factura pe august desi i-am anuntat ca vom pleca in alta pa",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-23",
+   "title": "Am primit raspuns. Notificare anaf venituri ramburs",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/am_primit_raspuns_notificare_anaf_venituri_ramburs/",
+   "snippet": "Și dacă omiți câteva? Nu intri la capitolul fals în declarații? E total aiurea să te pui să faci asta. Eu nu mai țin minte dacă mă întrebi acum ce naiba am vândut anul trecut, dar să mă pui să îți spun la virgulă tot din 2019. \n\nEste o porcărie ce fac, efectiv. Total aiurea.",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-23",
+   "title": "Am primit raspuns. Notificare anaf venituri ramburs",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/am_primit_raspuns_notificare_anaf_venituri_ramburs/",
+   "snippet": "inte dacă mă întrebi acum ce naiba am vândut anul trecut, dar să mă pui să îți spun la virgulă tot din 2019. \n\nEste o porcărie ce fac, efectiv. Total aiurea.",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-07-22",
+   "title": "Notificare ANAF venituri ramburs olx",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1m6oe2a/notificare_anaf_venituri_ramburs_olx/",
+   "snippet": "Foamea mare că până acum stăteau cu degetul în funduleț și luau bani aiurea, iar acum le este frică de Bolojan și știu că zboară dacă nu au randament. Dar din disperare încearcă să bage mâna în buzunarul tuturor. Să îi văd pe ăia care le plâng de milă când intră în grevă din cauza lui Bolojan că îi pune ăla să muncească și mai și dă afară din ei..",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2025-03-22",
+   "title": "Am gresit. Big time. And I need some help",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1jg0h4l/am_gresit_big_time_and_i_need_some_help/",
+   "snippet": "a că ăștia stau și taie amenzi săracului întreprinzător, sunt false. \n\nDu-te acolo, vorbește, și sunt sigur că se rezolvă. Nu-ți dă nimeni amendă așa aiurea-n tramvai.",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/programare",
+   "date": "2025-01-07",
+   "title": "De ce ANAF nu are formular online de completare a declaratiilor (ex. declaratia ",
+   "url": "https://reddit.com/r/programare/comments/1hvtq3t/de_ce_anaf_nu_are_formular_online_de_completare_a/",
+   "snippet": "Ca programatorii lor și in general programatorii angajați la stat sunt praf si pulbere la programat si sunt angajati de moca sa le bea cafeaua din oficiu si sa se futa in birourile incalzite cu sisteme de incalzire de pe vremea lui ceasca in loc sa faca ceva. Daca ati vazut site-ul celor de la cna si programul de salarizare al profesorilor n-aveti ce sa imi reprosati. Trei",
+   "match": "praf"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2024-07-16",
+   "title": "e-factura",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299",
+   "snippet": "Tot apropo de Efactura...nu am gasit cum as putea genera facturile in format portrait nu landscape...cu toate ca au 2 randuri imi scoate 2 pagini de aiurea cu \"informatii livrare/plata etc\" pe pagina 2...\nInca o propunere... generare e-factura in format pdf la primire sau transmitere...asta ar fi utila pentru arhivare...si pentru verificare daca s-au primit fisierele xml si semnatura corect...(pdf generat pe baza fisierelor salvare pe disc...)",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/RoFiscalitate2",
+   "date": "2024-07-02",
+   "title": "De ce noi romanii acceptam toate rahaturile astea de la guvern?",
+   "url": "https://reddit.com/r/RoFiscalitate2/comments/1dtsmup/de_ce_noi_romanii_acceptam_toate_rahaturile_astea/",
+   "snippet": "iesim in strada?\nDaca stiti de vre-un protest legat de asta va rog sa ma anuntati pentru ca eu una m-am saturat sa fiu ingropata in taskuri din astea tampite si sa nu imi ajunga ziua sa fac lucruri care defapt ajuta afacerea mea si sa trebuiasca sa fac rapoarte si verificari si tot felul de tampenii pe care statul le cere in ultimul timp.",
+   "match": "tampit"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2024-05-13",
+   "title": "IBKR și ANAF, combinatie fatala ",
+   "url": "https://reddit.com/r/robursa/comments/1co1ytl/ibkr_și_anaf_combinatie_fatala/",
+   "snippet": "incalca legea. Sunt obligati prin lege sa rezolve amiabil dispute de genul asta si sa prezume buna ta credinta, nu sa faca ei pe vitejii si sa piarda aiurea timpul/banii contribuabilului. Ei lucreaza pentru noi, nu noi pentru ei. Nu traim in Rusia (inca).\n\nTraduci prima si ultima pagina sa nu platesti aiurea pentru pagini irelevante. Pot fi multe pagini in Activity Statement anual chiar si pentru un cont relativ banal cu doar cateva ETF-uri globale si",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2024-05-13",
+   "title": "IBKR și ANAF, combinatie fatala ",
+   "url": "https://reddit.com/r/robursa/comments/1co1ytl/ibkr_și_anaf_combinatie_fatala/",
+   "snippet": "rea timpul/banii contribuabilului. Ei lucreaza pentru noi, nu noi pentru ei. Nu traim in Rusia (inca).\n\nTraduci prima si ultima pagina sa nu platesti aiurea pentru pagini irelevante. Pot fi multe pagini in Activity Statement anual chiar si pentru un cont relativ banal cu doar cateva ETF-uri globale si actiuni.\n\nVor mai multe detalii, eu le-as da tabelul in Excel, tradus de mine + coloane suplimentare din care reiese conversia catre RON + tara de origin",
+   "match": "aiurea"
+  },
+  {
+   "src": "Reddit r/robursa",
+   "date": "2024-05-09",
+   "title": "IBKR și ANAF, combinatie fatala ",
+   "url": "https://reddit.com/r/robursa/comments/1co1ytl/ibkr_și_anaf_combinatie_fatala/",
+   "snippet": "ititatea din  UK. Then Brexit happend și parca în 2021 contul meu a fost mutat pe noua entitate din Ungaria. \n\nUn an foarte volatil, cu multe decizii tâmpite, dar cumva am reușit sa închei anul ala cu un oarecare profit. Fast forward to 2022, îmi deschid cont pe SPV și am fost sigur ca am depus declarația unica și ca am plătit impozitul (am făcut asta pt încă 2 persoane în ultima săptămână când se putea, \"ajută-mă și pe mine etc\" ). Anyway, se pare ca",
+   "match": "tâmpit"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2023-09-15",
+   "title": "erori la validare D112",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54037",
+   "snippet": "stul pe un fișier PDF)\n...urmați pașii de mai jos\nTools =&gt; Certificates =&gt; Digitally Sign =&gt; marcati/definiti cu mouse-ul un dreptunghi pe suprafata fisierului si aplicati semnatura acolo\na) dacă nu reușiți să semnați, problema e legată de semnătură/certificat; reinstalați (...) sau solicitați suportul tehnic al emitentului semnăturii\nb) dacă reușiți să semnați și cu toate astea aveți probleme la semnarea declarațiilor, posibil să fi modific",
+   "match": "praf"
+  },
+  {
+   "src": "SAGA Forum",
+   "date": "2010-08-18",
+   "title": "registrul de casa",
+   "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=12511",
+   "snippet": "Citează\nfelicitari, eu astept sa moara tampitii aia de la minister care inca fac documente pt noi",
+   "match": "tampit"
+  }
+ ]
+}

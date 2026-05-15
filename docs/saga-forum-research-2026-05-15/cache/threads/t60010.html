@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="ro">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>eroare comutare sistem client-server-client - Forum SAGA</title>
+
+
+	<link rel="canonical" href="https://www.sagasoft.ro/forum/viewtopic.php?t=60010">
+
+<!--
+	phpBB style name: Allan Style - SUBSILVER
+	Based on style:   prosilver (this is the default phpBB3 style)
+	Based on style:   subsilver2 (this is the default phpBB3 style)
+	Original author:  Tom Beddard ( http://www.subBlue.com/ )
+	Modified by old:   Merlin, Allan
+	Modified by :   SKRS
+	Modified by :   Turaiel
+-->
+
+<link href="./assets/css/font-awesome.min.css?assets_version=17" rel="stylesheet">
+<link href="./styles/AllanStyle-SUBSILVER/theme/stylesheet.css?assets_version=17" rel="stylesheet">
+<link href="./styles/AllanStyle-SUBSILVER/theme/ro/stylesheet.css?assets_version=17" rel="stylesheet">
+
+
+
+
+<!--[if lte IE 9]>
+	<link href="./styles/AllanStyle-SUBSILVER/theme/tweaks.css?assets_version=17" rel="stylesheet">
+<![endif]-->
+
+
+
+
+
+</head>
+<body id="phpbb" class="nojs notouch section-viewtopic ltr ">
+
+<div id="header-subsilver">
+	<a id="top" class="top-anchor" accesskey="t"></a>
+		<div class="headerbar" role="banner">
+					<div class="inner">
+
+			<div id="site-description" class="site-description">
+				<a id="logo" class="logo" href="./index.php?sid=ee088a285b426e4d5c25e47e8be1b6af" title="Prima pagină">
+					<span class="site_logo"></span>
+				</a>
+				<h1>Forum SAGA</h1>
+				<p>Aici ne tutuim, vorbim, ne imprietenim</p>
+				<p class="skiplink"><a href="#start_here">Treci peste conţinut</a></p>
+			</div>
+
+									<div id="search-box" class="search-box search-header" role="search">
+				<form action="./search.php?sid=ee088a285b426e4d5c25e47e8be1b6af" method="get" id="search">
+				<fieldset>
+					<input name="keywords" id="keywords" type="search" maxlength="128" title="Căutare după cuvinte cheie" class="inputbox search tiny" size="20" value="" placeholder="Căutare…" />
+					<button class="button button-search" type="submit" title="Căutare">
+						<i class="icon fa-search fa-fw" aria-hidden="true"></i><span class="sr-only">Căutare</span>
+					</button>
+					<a href="./search.php?sid=ee088a285b426e4d5c25e47e8be1b6af" class="button button-search-end" title="Căutare avansată">
+						<i class="icon fa-cog fa-fw" aria-hidden="true"></i><span class="sr-only">Căutare avansată</span>
+					</a>
+					<input type="hidden" name="sid" value="ee088a285b426e4d5c25e47e8be1b6af" />
+
+				</fieldset>
+				</form>
+			</div>
+						
+			</div>
+					</div>
+</div>
+
+
+<div id="wrap" class="wrap">
+	<div id="page-header">
+				<div class="navbar-top" role="navigation">
+	<div class="inner">
+
+	<ul id="nav-main" class="nav-main linklist" role="menubar">
+
+		<li id="quick-links" class="quick-links dropdown-container responsive-menu" data-skip-responsive="true">
+			<a href="#" class="dropdown-trigger">
+				<i class="icon fa-bars fa-fw" aria-hidden="true"></i><span>Legături rapide</span>
+			</a>
+			<div class="dropdown">
+				<div class="pointer"><div class="pointer-inner"></div></div>
+				<ul class="dropdown-contents" role="menu">
+					
+											<li class="separator"></li>
+																									<li>
+								<a href="./search.php?search_id=unanswered&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" role="menuitem">
+									<i class="icon fa-file-o fa-fw icon-gray" aria-hidden="true"></i><span>Vezi subiecte fără răspuns</span>
+								</a>
+							</li>
+							<li>
+								<a href="./search.php?search_id=active_topics&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" role="menuitem">
+									<i class="icon fa-file-o fa-fw icon-blue" aria-hidden="true"></i><span>Vezi subiecte active</span>
+								</a>
+							</li>
+							<li class="separator"></li>
+							<li>
+								<a href="./search.php?sid=ee088a285b426e4d5c25e47e8be1b6af" role="menuitem">
+									<i class="icon fa-search fa-fw" aria-hidden="true"></i><span>Căutare</span>
+								</a>
+							</li>
+					
+										<li class="separator"></li>
+
+									</ul>
+			</div>
+		</li>
+
+				<li data-skip-responsive="true">
+			<a href="/forum/app.php/help/faq?sid=ee088a285b426e4d5c25e47e8be1b6af" rel="help" title="Întrebări puse frecvent" role="menuitem">
+				<i class="icon fa-question-circle fa-fw" aria-hidden="true"></i><span>FAQ</span>
+			</a>
+		</li>
+						
+			<li class="rightside"  data-skip-responsive="true">
+			<a href="./ucp.php?mode=login&amp;redirect=viewtopic.php%3Ff%3D11%26t%3D60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Autentificare" accesskey="x" role="menuitem">
+				<i class="icon fa-power-off fa-fw" aria-hidden="true"></i><span>Autentificare</span>
+			</a>
+		</li>
+						</ul>
+
+	</div>
+</div>
+
+<div class="navbar" role="navigation">
+	<div class="inner">
+
+	<ul id="nav-breadcrumbs" class="nav-breadcrumbs linklist navlinks" role="menubar">
+						
+		<li class="breadcrumbs" itemscope itemtype="http://schema.org/BreadcrumbList">
+			
+							<span class="crumb" itemtype="https://schema.org/ListItem" itemprop="itemListElement" itemscope><a href="./index.php?sid=ee088a285b426e4d5c25e47e8be1b6af" itemtype="https://schema.org/Thing" itemscope itemprop="item" accesskey="h" data-navbar-reference="index"><i class="icon fa-home fa-fw"></i><span itemprop="name">Prima pagină</span></a><meta itemprop="position" content="1" /></span>
+
+											
+								<span class="crumb" itemtype="https://schema.org/ListItem" itemprop="itemListElement" itemscope data-forum-id="15"><a href="./viewforum.php?f=15&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" itemtype="https://schema.org/Thing" itemscope itemprop="item"><span itemprop="name">Despre programe</span></a><meta itemprop="position" content="2" /></span>
+															
+								<span class="crumb" itemtype="https://schema.org/ListItem" itemprop="itemListElement" itemscope data-forum-id="11"><a href="./viewforum.php?f=11&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" itemtype="https://schema.org/Thing" itemscope itemprop="item"><span itemprop="name">Chestiuni tehnice</span></a><meta itemprop="position" content="3" /></span>
+							
+					</li>
+		
+					<li class="rightside responsive-search">
+				<a href="./search.php?sid=ee088a285b426e4d5c25e47e8be1b6af" title="Vezi opţiuni căutare avansată" role="menuitem">
+					<i class="icon fa-search fa-fw" aria-hidden="true"></i><span class="sr-only">Căutare</span>
+				</a>
+			</li>
+			</ul>
+
+	</div>
+</div>
+
+<div class="navbar-top-link">
+	<div class="inner">
+		<ul>
+			<li class="navbar-top-link-left"><a href="./search.php?search_id=unanswered&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">Vezi subiecte fără răspuns</a></li>
+			<li class="navbar-top-link-left"><a href="./search.php?search_id=active_topics&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">Vezi subiecte active</a></li>
+
+											</ul>
+	</div>
+</div>
+	</div>
+
+	
+	<a id="start_here" class="anchor"></a>
+	<div id="page-body" class="page-body" role="main">
+		
+		
+<h2 class="topic-title"><a href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">eroare comutare sistem client-server-client</a></h2>
+<!-- NOTE: remove the style="display: none" when you want to have the forum description on the topic body -->
+<div style="display: none !important;">Retea, baze de date, salvari, restaurari etc.<br /></div>
+
+
+<div class="action-bar bar-top">
+	
+			<a href="./posting.php?mode=reply&amp;f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="button" title="Răspunde">
+							<span>Scrie răspuns</span> <i class="icon fa-reply fa-fw" aria-hidden="true"></i>
+					</a>
+	
+			<div class="dropdown-container dropdown-button-control topic-tools">
+		<span title="Utilitare subiect" class="button button-secondary dropdown-trigger dropdown-select">
+			<i class="icon fa-wrench fa-fw" aria-hidden="true"></i>
+			<span class="caret"><i class="icon fa-sort-down fa-fw" aria-hidden="true"></i></span>
+		</span>
+		<div class="dropdown">
+			<div class="pointer"><div class="pointer-inner"></div></div>
+			<ul class="dropdown-contents">
+																												<li>
+					<a href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af&amp;view=print" title="Versiune printabilă" accesskey="p">
+						<i class="icon fa-print fa-fw" aria-hidden="true"></i><span>Versiune printabilă</span>
+					</a>
+				</li>
+											</ul>
+		</div>
+	</div>
+	
+			<div class="search-box" role="search">
+			<form method="get" id="topic-search" action="./search.php?sid=ee088a285b426e4d5c25e47e8be1b6af">
+			<fieldset>
+				<input class="inputbox search tiny"  type="search" name="keywords" id="search_keywords" size="20" placeholder="Căutare în acest subiect…" />
+				<button class="button button-search" type="submit" title="Căutare">
+					<i class="icon fa-search fa-fw" aria-hidden="true"></i><span class="sr-only">Căutare</span>
+				</button>
+				<a href="./search.php?sid=ee088a285b426e4d5c25e47e8be1b6af" class="button button-search-end" title="Căutare avansată">
+					<i class="icon fa-cog fa-fw" aria-hidden="true"></i><span class="sr-only">Căutare avansată</span>
+				</a>
+				<input type="hidden" name="t" value="60010" />
+<input type="hidden" name="sf" value="msgonly" />
+<input type="hidden" name="sid" value="ee088a285b426e4d5c25e47e8be1b6af" />
+
+			</fieldset>
+			</form>
+		</div>
+	
+			<div class="pagination">
+			16 mesaje
+							<ul>
+		<li class="active"><span>1</span></li>
+				<li><a class="button" href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af&amp;start=15" role="button">2</a></li>
+				<li class="arrow next"><a class="button button-icon-only" href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af&amp;start=15" rel="next" role="button"><i class="icon fa-chevron-right fa-fw" aria-hidden="true"></i><span class="sr-only">Următorul</span></a></li>
+	</ul>
+					</div>
+		</div>
+
+
+
+
+<div id="subsilver-nav-topic">
+	<div class="inner"><div class="post has-profile">
+		<div class="leftsided postbody subsilver-topic-title">Mesaj</div>
+		<div class="leftsided postprofile subsilver-topic-author">Autor</div>
+	</div></div>
+</div>
+
+			<div id="p336017" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336017">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=118543&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">9</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Joi Feb 20, 2020 2:53 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336017">
+
+						<h3 class="first"><a href="./viewtopic.php?p=336017&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336017">eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336017&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336017&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336017" onclick="prompt('Mesaj #1',this.href); return false;">#1</a></span>
+									<a class="unread" href="./viewtopic.php?p=336017&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336017" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a></strong> &raquo; </span><time datetime="2025-09-12T15:32:22+00:00">Vin Sep 12, 2025 6:32 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Intampinam o eroare dupa instalarea aplicatiei SAGA C pe un PC cand incercam sa comutam in sistemul client - server - client.<br>
+Am atasat o captura, va rugam o sugestie pentru a rezolva cumva problema.<br>
+Multumim.</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336018" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336018">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=15783&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">772</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Noi 25, 2008 12:00 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336018">
+
+						<h3 ><a href="./viewtopic.php?p=336018&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336018">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336018&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336018&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336018" onclick="prompt('Mesaj #2',this.href); return false;">#2</a></span>
+									<a class="unread" href="./viewtopic.php?p=336018&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336018" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a></strong> &raquo; </span><time datetime="2025-09-12T16:03:09+00:00">Vin Sep 12, 2025 7:03 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Descrieti care este eroarea!? Este de retea, de port 3060, de serviciu firebird?<br>
+Confgurati manual saga client. Daca nu aveti baze de date local pe acel pc si doriti doar conectarea la un anume server configurati un fisier text denumit <strong class="text-strong">configcs.txt</strong> pe care-l salvati in folderul de instalare saga.<br>
+De exemplu daca serverul dvs. este in reteaua locala si are ip-ul <strong class="text-strong">192.168.100.100</strong> si are instalat pe el saga cu bazele de date in folderul <strong class="text-strong">D:\Saga C.3.0\</strong> scrieti in acest fisier de configurare urmatoarele:<br>
+<strong class="text-strong">192.168.100.100:D:\Saga C.3.0\</strong><br>
+Salvati si porniti programul. Daca serverul e configurat corespunzator, are ip-ul fix si portul 3060 deblocat atunci ar trebui sa vedeti lista cu societatile din server.</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336024" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336024">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=118543&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">9</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Joi Feb 20, 2020 2:53 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336024">
+
+						<h3 ><a href="./viewtopic.php?p=336024&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336024">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336024&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336024&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336024" onclick="prompt('Mesaj #3',this.href); return false;">#3</a></span>
+									<a class="unread" href="./viewtopic.php?p=336024&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336024" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a></strong> &raquo; </span><time datetime="2025-09-12T18:15:59+00:00">Vin Sep 12, 2025 9:15 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Am creat fisierul configcs cu datele respective, acuma incearca sa se conecteze direct la server dar primesc din nou eroarea din captura</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336028" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336028">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=15783&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">772</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Noi 25, 2008 12:00 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336028">
+
+						<h3 ><a href="./viewtopic.php?p=336028&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336028">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336028&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336028&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336028" onclick="prompt('Mesaj #4',this.href); return false;">#4</a></span>
+									<a class="unread" href="./viewtopic.php?p=336028&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336028" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a></strong> &raquo; </span><time datetime="2025-09-12T20:38:32+00:00">Vin Sep 12, 2025 11:38 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Scrieti textual ce apare in eroare... nu cred ca puteti atasa imagini.</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336029" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336029">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=118543&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">9</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Joi Feb 20, 2020 2:53 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336029">
+
+						<h3 ><a href="./viewtopic.php?p=336029&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336029">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336029&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336029&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336029" onclick="prompt('Mesaj #5',this.href); return false;">#5</a></span>
+									<a class="unread" href="./viewtopic.php?p=336029&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336029" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a></strong> &raquo; </span><time datetime="2025-09-13T01:54:11+00:00">Sâm Sep 13, 2025 4:54 am</time>
+			</p>
+			
+			
+			
+			<div class="content">Mesaj eroare : Programul nu s-a putut conecta la baza de date: DBNAME=192.168.1.177/3060:D:\Saga C.3.0\config.fdb;CHARSET=WIN1252; Client=C:\USER\USER\SAGA C.3.0\FbClient\fbclient.dll: Eroare de conectivitate: [ODBC Firebird Driver] imposibil de finalizat solicitarea de retea catre gazda "192.168.1.177". Nu s-a putut stabili o conexiune.[ODBC Firebird Driver] imposibil de finalizat solicitarea de retea catre gazda "192.168.1.177". Si ma intreaba daca activez ecranul de configurare al conexiunii la server, raspund DA si imi spune ca Programul nu s-a putut conecta la baza de date de pe server. Verificati daca serverul este pornit si aveti acces.</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336030" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336030">
+			<dt class="no-profile-rank has-avatar">
+				<div class="avatar-container">
+																<a href="./memberlist.php?mode=viewprofile&amp;u=53832&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="avatar"><img class="avatar" src="./download/file.php?avatar=53832_1550857929.jpg" width="170" height="171" alt="Avatar utilizator" /></a>														</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=53832&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">nitum187</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=53832&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">89</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Iun 18, 2013 4:44 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336030">
+
+						<h3 ><a href="./viewtopic.php?p=336030&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336030">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336030&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336030&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336030" onclick="prompt('Mesaj #6',this.href); return false;">#6</a></span>
+									<a class="unread" href="./viewtopic.php?p=336030&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336030" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=53832&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">nitum187</a></strong> &raquo; </span><time datetime="2025-09-13T03:16:39+00:00">Sâm Sep 13, 2025 6:16 am</time>
+			</p>
+			
+			
+			
+			<div class="content">Verifica IP urile la ambele calculatoare. Daca esti local, le poti pune manual, fixe. Faci o poza si o poti urca undeva online, gen: <strong class="text-strong">https://postimages.org/</strong>   apoi pui in postare link catre...<br>
+In afara de asta asa cum a spus si colegul <strong class="text-strong">@ciucam544</strong> trebuie sa ai si portul 3060 deblocat, daca nu ai idee cum se face, deschizi CMD cu Run as administrator si pui comanda:<br>
+<strong class="text-strong">cmd /k netsh advfirewall firewall add rule name="Firebird SAGA BazaDate" dir=in action=allow protocol=TCP localport=3060</strong><br>
+cu asta adaugi exceptie port TCP 3060 in firewall-ul de windows. Si ar fi bine sa mai dai o comanda pentru pornire Serviciu Firebird:<br>
+<strong class="text-strong">cmd /k net start FirebirdServerFirebird30_Saga</strong></div>
+
+			
+			
+									
+									<div id="sig336030" class="signature">"Two things are infinite, the universe and human stupidity, and I’m not sure about the universe" - Albert Einstein</div>
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336031" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336031">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=15783&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">772</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Noi 25, 2008 12:00 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336031">
+
+						<h3 ><a href="./viewtopic.php?p=336031&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336031">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336031&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336031&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336031" onclick="prompt('Mesaj #7',this.href); return false;">#7</a></span>
+									<a class="unread" href="./viewtopic.php?p=336031&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336031" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a></strong> &raquo; </span><time datetime="2025-09-13T07:12:34+00:00">Sâm Sep 13, 2025 10:12 am</time>
+			</p>
+			
+			
+			
+			<div class="content">Verificare port 3060 la adresa introdusa<br>
+<strong class="text-strong">3060_check.cmd</strong>
+<div class="codebox"><p>Cod: <a href="#" onclick="selectCode(this); return false;">Selectaţi tot</a></p><pre><code>@echo off
+setlocal EnableDelayedExpansion
+:START
+cls
+echo ----------------------------
+echo     Verificare port 3060
+echo ----------------------------
+set /p tinta=Nume server sau IP :
+:: === PowerShell in command ===
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; ^
+$tinta = '%tinta%'; $port = 3060; ^
+try { ^
+    $ipObj = @(); foreach ($ip in [System.Net.Dns]::GetHostAddresses($tinta)) { if ($ip.AddressFamily -eq 'InterNetwork') { $ipObj += $ip } }; ^
+    if ($ipObj.Count -eq 0) { throw 'Nicio adresa IPv4 gasita.' }; ^
+    $tintaIP = $ipObj[0].ToString(); ^
+    Write-Host 'Adresa tinta: ' $tintaIP; ^
+    Write-Host 'Se face ping pe tinta...'; ^
+    $ping = $(cmd /c ping -n 1 -w 500 $tintaIP); ^
+    if ($ping -match 'TTL=') { ^
+        Write-Host '[OK] Tinta raspunde la ping.' -ForegroundColor Green; ^
+        Write-Host 'Se verifica portul 3060...'; ^
+        $durata = Measure-Command { ^
+            $client = New-Object System.Net.Sockets.TcpClient; ^
+            $async = $client.BeginConnect($tintaIP, $port, $null, $null); ^
+            $wait = $async.AsyncWaitHandle.WaitOne(2000, $false); ^
+            if ($wait -and $client.Connected) { ^
+                $client.EndConnect($async); ^
+                Write-Host 'Portul 3060 DESCHIS pe ' + $tintaIP -ForegroundColor Green ^
+            } else { ^
+                Write-Host 'Portul 3060 INCHIS sau TIMEOUT pe ' + $tintaIP -ForegroundColor DarkGray ^
+            }; ^
+            $client.Close(); ^
+        }; ^
+        Write-Host ('Durata verificarii: {0:N2} secunde' -f $durata.TotalSeconds) -ForegroundColor Cyan ^
+    } else { throw 'Ping esuat.' } ^
+} catch { ^
+    Write-Host '[X] Eroare: ' $_ -ForegroundColor Red; ^
+}; ^
+"
+echo.
+pause
+goto START
+</code></pre></div></div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336038" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336038">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=118543&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">9</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Joi Feb 20, 2020 2:53 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336038">
+
+						<h3 ><a href="./viewtopic.php?p=336038&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336038">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336038&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336038&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336038" onclick="prompt('Mesaj #8',this.href); return false;">#8</a></span>
+									<a class="unread" href="./viewtopic.php?p=336038&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336038" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a></strong> &raquo; </span><time datetime="2025-09-13T13:18:16+00:00">Sâm Sep 13, 2025 4:18 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Buna,<br>
+ Asta e raspunsul daca rulez scriptul de mai sus :<br>
+<br>
+  Verificare port 3060<br>
+----------------------------<br>
+Nume server sau IP :192.168.1.177<br>
+Adresa tinta:  192.168.1.177<br>
+Se face ping pe tinta...<br>
+[OK] Tinta raspunde la ping.<br>
+Se verifica portul 3060...<br>
+Portul 3060 DESCHIS pe  + 192.168.1.177<br>
+Durata verificarii: 0.06 secunde<br>
+<br>
+Press any key to continue . . .<br>
+<br>
+Captura cu eroarea am pus-o aici:<br>
+https://postimg.cc/0KCk3QZr<br>
+Dupa cum zice acolo ar fi o problema cu ODBC - Firebird<br>
+Multumesc fain!</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336044" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336044">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=15783&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">772</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Noi 25, 2008 12:00 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336044">
+
+						<h3 ><a href="./viewtopic.php?p=336044&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336044">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336044&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336044&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336044" onclick="prompt('Mesaj #9',this.href); return false;">#9</a></span>
+									<a class="unread" href="./viewtopic.php?p=336044&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336044" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a></strong> &raquo; </span><time datetime="2025-09-13T15:25:41+00:00">Sâm Sep 13, 2025 6:25 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Deci daca portul e deschis si baza de date este acolo e problema de serviciu firebird pe server (192.168.1.177). Incercati o reinstalare de firebird <span style="color:#0000BF">https://www.sagasoft.ro/programe/Utils/Setup_Firebird30_ServerComponents_Offline.exe</span><br>
+Daca ar fi lipsit indexul cu firme din server (config.fdb) ar fi dat eroarea asta: Connectivity error: [ODBC Firebird Driver]File Database is not found [ODBC Firebird Driver]File Database is not found<br>
+Petru a copia mesajul de eroare saga dati click pe mesaj si apasati CTRL+C.<br>
+PS: in situatia in care pe server aveti mai multe ip-uri alocate sau lan-uri, verificati prioritatea (interface metric) si incercati doar cu ipv4 (dezactivati temporar ipv6)</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336065" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336065">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=118543&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">9</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Joi Feb 20, 2020 2:53 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336065">
+
+						<h3 ><a href="./viewtopic.php?p=336065&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336065">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336065&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336065&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336065" onclick="prompt('Mesaj #10',this.href); return false;">#10</a></span>
+									<a class="unread" href="./viewtopic.php?p=336065&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336065" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a></strong> &raquo; </span><time datetime="2025-09-14T17:19:41+00:00">Dum Sep 14, 2025 8:19 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Acuma dupa instalare a firebird am cealalta eroare:<br>
+---------------------------<br>
+Eroare conectare<br>
+---------------------------<br>
+Programul nu s-a putut conecta la baza de date.<br>
+DBNAME=192.168.1.177/3060:D:\Saga C.3.0\config.fdb;CHARSET=WIN1252;Client=C:\SAGA C.3.0\FbClient\fbclient.dll;<br>
+Connectivity error: [ODBC Firebird Driver]File Database is not found [ODBC Firebird Driver]File Database is not found<br>
+Activez ecranul de configurare al conexiunii la server?<br>
+---------------------------<br>
+Yes   No   <br>
+---------------------------<br>
+Intre timp am facut o salvare a bazei. IP e unul singur pe 177, setat manual.<br>
+<br>
+Deci cronologic, pe server era saga de mai multa vreme, am aceeasi versiune si pe client, instalata acuma si ideea era sa conectam clientul la baza de pe 177. Tot ce s-a instalat corect, fara erori.<br>
+Pe server se poate lucra normal.<br>
+<br>
+Daca salvez baza si reinstalez pe curat si serverul si clientul or fi sanse mai mari sa mearga?<br>
+multumesc</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336069" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336069">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=15783&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">772</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Noi 25, 2008 12:00 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336069">
+
+						<h3 ><a href="./viewtopic.php?p=336069&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336069">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336069&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336069&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336069" onclick="prompt('Mesaj #11',this.href); return false;">#11</a></span>
+									<a class="unread" href="./viewtopic.php?p=336069&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336069" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a></strong> &raquo; </span><time datetime="2025-09-14T20:06:51+00:00">Dum Sep 14, 2025 11:06 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">Este foarte probabil ca pe server sa aveti <strong class="text-strong">lista de firme</strong> in format vechi (<strong class="text-strong">firme.dbf</strong>) si saga sa nu o actualizeze in format nou firebird (<strong class="text-strong">config.fdb</strong>) pt. ca aveti si firme in formatul vechi (netransformate in client-server - server). Incercati pe server sa intalati saga intr-un alt folder si sa creeati macar o societate din nou si sa restaurati in acea instalare. (adica <strong class="text-strong">D:\SagaServerTest\</strong>)<br>
+Apoi configurati saga din celalalt pc cu fisierul configcs.txt <strong class="text-strong">192.168.1.177:D:\SagaServerTest\</strong><br>
+Daca functioneaza, deja ati prins experienta si va fi usor sa redenumiti instalarile si sa configurati ca atare. Spor! (eventual lasati un contact in mesaj privat pt. mai multe detalii)</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336590" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336590">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=130026&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">popa298</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=130026&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">10</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mie Iul 07, 2021 10:51 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336590">
+
+						<h3 ><a href="./viewtopic.php?p=336590&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336590">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336590&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336590&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336590" onclick="prompt('Mesaj #12',this.href); return false;">#12</a></span>
+									<a class="unread" href="./viewtopic.php?p=336590&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336590" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=130026&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">popa298</a></strong> &raquo; </span><time datetime="2025-09-23T08:55:27+00:00">Mar Sep 23, 2025 11:55 am</time>
+			</p>
+			
+			
+			
+			<div class="content">Buna ziua, <br>
+Eroarea este acceasi. <br>
+AM avut retea cu IP fix, care din nu stiu ce motive s-a modificat la "automat". Azi colegele mi-au spus ca nu mai pot accesa programul. Am repus IP fix ce a fost anterior, dar nu pot accesa saga pe calculatoarele colegelor. Imi spune ca nu sepoate conecta la baza de date pe server, dupa care se inchide. Nu pot modifica in saga sa ii dau ip -ul serverului. Mentionez ca programele sunt actualizate la zi. <br>
+Ce sa fac cum sa fac ca sa pot schimba IP din programele client sa vada serverul?</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336595" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336595">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=15783&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">772</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mar Noi 25, 2008 12:00 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336595">
+
+						<h3 ><a href="./viewtopic.php?p=336595&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336595">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336595&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336595&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336595" onclick="prompt('Mesaj #13',this.href); return false;">#13</a></span>
+									<a class="unread" href="./viewtopic.php?p=336595&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336595" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a></strong> &raquo; </span><time datetime="2025-09-23T09:07:11+00:00">Mar Sep 23, 2025 12:07 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">In primul rand trebuie sa stiti adresa IP a serverului  sau macar numele lui. Unde ati repus IP anterior. Lasa-ti un nr. in privat si va rezolv cu retelistica. Sunt prea multe variabile si conditionari ca sa ghicesc in ce situatie sunteti.<br>
+PS: situatie rezolvata - configcs.txt pe clienti actualizat corespunzator</div>
+
+			
+			
+													<div class="notice">
+					Ultima oară modificat Mar Sep 23, 2025 1:29 pm de către <a href="./memberlist.php?mode=viewprofile&amp;u=15783&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">ciucam544</a>, modificat 1 dată în total.
+									</div>
+			
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p336599" class="post has-profile bg1">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile336599">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=130026&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">popa298</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=130026&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">10</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Mie Iul 07, 2021 10:51 am</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content336599">
+
+						<h3 ><a href="./viewtopic.php?p=336599&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336599">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=336599&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=336599&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336599" onclick="prompt('Mesaj #14',this.href); return false;">#14</a></span>
+									<a class="unread" href="./viewtopic.php?p=336599&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p336599" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=130026&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">popa298</a></strong> &raquo; </span><time datetime="2025-09-23T09:22:53+00:00">Mar Sep 23, 2025 12:22 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">@ciucam544 aveti nr meu in privat</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+				<div id="p339831" class="post has-profile bg2">
+		<div class="inner">
+
+		<dl class="postprofile" id="profile339831">
+			<dt class="no-profile-rank no-avatar">
+				<div class="avatar-container">
+																			</div>
+								<a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a>							</dt>
+
+									
+		<dd class="profile-posts"><strong>Mesaje:</strong> <a href="./search.php?author_id=118543&amp;sr=posts&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">9</a></dd>		<dd class="profile-joined"><strong>Membru din:</strong> Joi Feb 20, 2020 2:53 pm</dd>		
+		
+						
+						
+		</dl>
+
+		<div class="postbody">
+						<div id="post_content339831">
+
+						<h3 ><a href="./viewtopic.php?p=339831&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p339831">Re: eroare comutare sistem client-server-client</a></h3>
+
+													<ul class="post-buttons">
+																																									<li>
+							<a href="./posting.php?mode=quote&amp;f=11&amp;p=339831&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="Răspuns cu citat" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">Citează</span>
+							</a>
+						</li>
+														</ul>
+							
+						<p class="author"><span class="posti"><a href="./viewtopic.php?p=339831&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p339831" onclick="prompt('Mesaj #15',this.href); return false;">#15</a></span>
+									<a class="unread" href="./viewtopic.php?p=339831&amp;sid=ee088a285b426e4d5c25e47e8be1b6af#p339831" title="Mesaj">
+						<i class="icon fa-file fa-fw icon-lightgray icon-md" aria-hidden="true"></i><span class="sr-only">Mesaj</span>
+					</a>
+								<span class="responsive-hide">de <strong><a href="./memberlist.php?mode=viewprofile&amp;u=118543&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="username">oross385</a></strong> &raquo; </span><time datetime="2025-12-14T14:20:56+00:00">Dum Dec 14, 2025 4:20 pm</time>
+			</p>
+			
+			
+			
+			<div class="content">avem aceeasi problema:<br>
+acuma am pe un laptop baza de date pe care lucrez si am instalat pe un alt laptop aceeasi versiune.<br>
+primesc aceeasi eroare cand incerc sa ma conectez ca client server de pe al doilea.<br>
+Serverul am functioneaza ca si client server<br>
+pe client am facut fisierul configs cu ip-ul serverului luat din aplicatie si calea catre saga c.3.0. Nu vad firmele de pe server. vad doar firma cu care am initializat clientul.<br>
+Am renuntat la gonfigs.txt<br>
+Am incercat pe client in mod client server cu ip-ul de server luat din aplicatia de pe server. Nu merge<br>
+Am incercat pe client in mod client server cu ip-ul de server. Nu merge.<br>
+La director baza de date de pe server am incercat cu s:\c\saga c3.0\0001, cu 192.168.68.113\c\saga c3.0\0001, cu 192.168.681\c\saga c3.0\0001, cu Desktop-ksc2ehm\saga c.3.0, cu c:\saga c3.0\0001, nu mai am variante...</div>
+
+			
+			
+									
+									
+						</div>
+
+		</div>
+
+				<div class="back2top">
+						<a href="#top" class="top" title="Sus">
+				<i class="icon fa-chevron-circle-up fa-fw icon-gray" aria-hidden="true"></i>
+				<span class="sr-only">Sus</span>
+			</a>
+					</div>
+		
+		</div>
+	</div>
+
+	<hr class="divider" />
+	
+
+	<div class="action-bar bar-bottom">
+	
+			<a href="./posting.php?mode=reply&amp;f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="button" title="Răspunde">
+							<span>Scrie răspuns</span> <i class="icon fa-reply fa-fw" aria-hidden="true"></i>
+					</a>
+		
+		<div class="dropdown-container dropdown-button-control topic-tools">
+		<span title="Utilitare subiect" class="button button-secondary dropdown-trigger dropdown-select">
+			<i class="icon fa-wrench fa-fw" aria-hidden="true"></i>
+			<span class="caret"><i class="icon fa-sort-down fa-fw" aria-hidden="true"></i></span>
+		</span>
+		<div class="dropdown">
+			<div class="pointer"><div class="pointer-inner"></div></div>
+			<ul class="dropdown-contents">
+																												<li>
+					<a href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af&amp;view=print" title="Versiune printabilă" accesskey="p">
+						<i class="icon fa-print fa-fw" aria-hidden="true"></i><span>Versiune printabilă</span>
+					</a>
+				</li>
+											</ul>
+		</div>
+	</div>
+
+			<form method="post" action="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af">
+		<div class="dropdown-container dropdown-container-left dropdown-button-control sort-tools">
+	<span title="SORT_OPTIONS" class="button button-secondary dropdown-trigger dropdown-select">
+		<i class="icon fa-sort-amount-asc fa-fw" aria-hidden="true"></i>
+		<span class="caret"><i class="icon fa-sort-down fa-fw" aria-hidden="true"></i></span>
+	</span>
+	<div class="dropdown hidden">
+		<div class="pointer"><div class="pointer-inner"></div></div>
+		<div class="dropdown-contents">
+			<fieldset class="display-options">
+							<label>Afişează: <select name="st" id="st"><option value="0" selected="selected">Toate mesajele</option><option value="1">1 zi</option><option value="7">7 zile</option><option value="14">2 săptămâni</option><option value="30">1 lună</option><option value="90">3 luni</option><option value="180">6 luni</option><option value="365">1 an</option></select></label>
+								<label>Sortează după: <select name="sk" id="sk"><option value="a">Autor</option><option value="t" selected="selected">Dată mesaj</option><option value="s">Subiect</option></select></label>
+				<label>SORT_DIRECTION: <select name="sd" id="sd"><option value="a" selected="selected">Crescător</option><option value="d">Descrescător</option></select></label>
+								<hr class="dashed" />
+				<input type="submit" class="button2" name="sort" value="Du-te" />
+						</fieldset>
+		</div>
+	</div>
+</div>
+		</form>
+	
+	
+	
+			<div class="pagination">
+			16 mesaje
+							<ul>
+		<li class="active"><span>1</span></li>
+				<li><a class="button" href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af&amp;start=15" role="button">2</a></li>
+				<li class="arrow next"><a class="button button-icon-only" href="./viewtopic.php?f=11&amp;t=60010&amp;sid=ee088a285b426e4d5c25e47e8be1b6af&amp;start=15" rel="next" role="button"><i class="icon fa-chevron-right fa-fw" aria-hidden="true"></i><span class="sr-only">Următorul</span></a></li>
+	</ul>
+					</div>
+	</div>
+
+
+<div class="action-bar actions-jump">
+		<p class="jumpbox-return">
+		<a href="./viewforum.php?f=11&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="left-box arrow-left" accesskey="r">
+			<i class="icon fa-angle-left fa-fw icon-black" aria-hidden="true"></i><span>Înapoi la “Chestiuni tehnice”</span>
+		</a>
+	</p>
+	
+		<div class="jumpbox dropdown-container dropdown-container-right dropdown-up dropdown-left dropdown-button-control" id="jumpbox">
+			<span title="Mergi la" class="button button-secondary dropdown-trigger dropdown-select">
+				<span>Mergi la</span>
+				<span class="caret"><i class="icon fa-sort-down fa-fw" aria-hidden="true"></i></span>
+			</span>
+		<div class="dropdown">
+			<div class="pointer"><div class="pointer-inner"></div></div>
+			<ul class="dropdown-contents">
+																				<li><a href="./viewforum.php?f=15&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-cat-link"> <span> Despre programe</span></a></li>
+																<li><a href="./viewforum.php?f=1&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Diverse</span></a></li>
+																<li><a href="./viewforum.php?f=12&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Sugestii</span></a></li>
+																<li><a href="./viewforum.php?f=7&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Erori, bug-uri..</span></a></li>
+																<li><a href="./viewforum.php?f=11&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Chestiuni tehnice</span></a></li>
+																<li><a href="./viewforum.php?f=13&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; SAGA B</span></a></li>
+																<li><a href="./viewforum.php?f=14&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; SAGA PS</span></a></li>
+																<li><a href="./viewforum.php?f=18&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; PubLine, MarketLine</span></a></li>
+																<li><a href="./viewforum.php?f=25&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; SAGA WEB</span></a></li>
+																<li><a href="./viewforum.php?f=16&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-cat-link"> <span> Probleme contabile</span></a></li>
+																<li><a href="./viewforum.php?f=8&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Diverse</span></a></li>
+																<li><a href="./viewforum.php?f=9&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Salarii</span></a></li>
+																<li><a href="./viewforum.php?f=10&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Legislatie</span></a></li>
+																<li><a href="./viewforum.php?f=17&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-cat-link"> <span> Diverse</span></a></li>
+																<li><a href="./viewforum.php?f=4&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Abonamente si preturi</span></a></li>
+																<li><a href="./viewforum.php?f=5&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Despre site</span></a></li>
+																<li><a href="./viewforum.php?f=6&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" class="jumpbox-sub-link"><span class="spacer"></span> <span>&#8627; &nbsp; Alte probleme</span></a></li>
+											</ul>
+		</div>
+	</div>
+
+	</div>
+
+
+			</div>
+
+
+<div id="page-footer" class="page-footer" role="contentinfo">
+	<div class="navbar" role="navigation">
+	<div class="inner">
+
+	<ul id="nav-footer" class="nav-footer linklist" role="menubar">
+		<li class="breadcrumbs">
+									<span class="crumb"><a href="./index.php?sid=ee088a285b426e4d5c25e47e8be1b6af" data-navbar-reference="index"><i class="icon fa-home fa-fw" aria-hidden="true"></i><span>Prima pagină</span></a></span>					</li>
+		
+				<li class="rightside">Ora este UTC+03:00 Europe/Bucharest</li>
+							<li class="rightside">
+				<a href="./ucp.php?mode=delete_cookies&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" data-ajax="true" data-refresh="true" role="menuitem">
+					<i class="icon fa-trash fa-fw" aria-hidden="true"></i><span>Şterge toate cookie-urile forumului</span>
+				</a>
+			</li>
+														</ul>
+
+	</div>
+</div>
+
+	<div class="copyright">
+				Style developed by <a href="https://zumaclub.ru/">Zuma Portal</a>, Turaiel,
+		<p class="footer-row">
+			<span class="footer-copyright">Furnizat de <a href="https://www.phpbb.com/">phpBB</a>&reg; Forum Software &copy; phpBB Limited</span>
+		</p>
+				<p class="footer-row">
+			<span class="footer-copyright">Translation/Traducere: <a href="http://www.phpbb.ro/">phpBB România</a></span>
+		</p>
+						<p class="footer-row" role="menu">
+			<a class="footer-link" href="./ucp.php?mode=privacy&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="PRIVACY_LINK" role="menuitem">
+				<span class="footer-link-text">PRIVACY_LINK</span>
+			</a>
+			|
+			<a class="footer-link" href="./ucp.php?mode=terms&amp;sid=ee088a285b426e4d5c25e47e8be1b6af" title="TERMS_LINK" role="menuitem">
+				<span class="footer-link-text">TERMS_LINK</span>
+			</a>
+		</p>
+					</div>
+
+	<div id="darkenwrapper" class="darkenwrapper" data-ajax-error-title="Eroare AJAX" data-ajax-error-text="Ceva a funcționat eronat la procesarea cererii dvs." data-ajax-error-text-abort="Cerere abandonată." data-ajax-error-text-timeout="Cerera a expirat, încercați din nou." data-ajax-error-text-parsererror="Ceva a funcționat prost și serverul a returnat o valoare invalidă.">
+		<div id="darken" class="darken">&nbsp;</div>
+	</div>
+
+	<div id="phpbb_alert" class="phpbb_alert" data-l-err="Eroare!" data-l-timeout-processing-req="Cererea a expirat.">
+		<a href="#" class="alert_close">
+			<i class="icon fa-times-circle fa-fw" aria-hidden="true"></i>
+		</a>
+		<h3 class="alert_title">&nbsp;</h3><p class="alert_text"></p>
+	</div>
+	<div id="phpbb_confirm" class="phpbb_alert">
+		<a href="#" class="alert_close">
+			<i class="icon fa-times-circle fa-fw" aria-hidden="true"></i>
+		</a>
+		<div class="alert_text"></div>
+	</div>
+</div>
+
+</div>
+
+<div>
+	<a id="bottom" class="anchor" accesskey="z"></a>
+	</div>
+
+<script src="./assets/javascript/jquery-3.5.1.min.js?assets_version=17"></script>
+<script src="./assets/javascript/core.js?assets_version=17"></script>
+
+
+
+<script src="./styles/prosilver/template/forum_fn.js?assets_version=17"></script>
+<script src="./styles/prosilver/template/ajax.js?assets_version=17"></script>
+<script src="./styles/AllanStyle-SUBSILVER/template/jquery-ui.js?assets_version=17"></script>
+<script src="./styles/AllanStyle-SUBSILVER/template/collapse.js?assets_version=17"></script>
+
+
+
+</body>
+</html>

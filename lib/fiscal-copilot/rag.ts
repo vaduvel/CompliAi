@@ -13,11 +13,12 @@
 
 import { FISCAL_CORPUS, type KnowledgeEntry } from "./corpus/seed-fiscal-ro";
 import { loadSagaManualCorpus } from "./corpus/saga-manual";
+import { loadForumInsightsCorpus } from "./corpus/forum-insights";
 
 export interface RetrievalResult {
   entry: KnowledgeEntry;
   score: number;
-  source: "seed" | "saga-manual";
+  source: "seed" | "saga-manual" | "forum-insights";
 }
 
 const STOP_WORDS = new Set([
@@ -180,6 +181,16 @@ export async function retrieveRelevantAsync(
     source: "seed" as const,
   })).filter((r) => r.score > 0);
 
+  // Forum insights — boost 1.15x (real pain catalog, mai concrete decât manual)
+  const forum = await loadForumInsightsCorpus();
+  const forumResults: RetrievalResult[] = forum
+    .map((entry) => ({
+      entry,
+      score: scoreEntry(entry, tokens) * 1.15,
+      source: "forum-insights" as const,
+    }))
+    .filter((r) => r.score > 0);
+
   const saga = await loadSagaManualCorpus();
   const sagaResults: RetrievalResult[] = saga
     .map((entry) => ({
@@ -189,7 +200,7 @@ export async function retrieveRelevantAsync(
     }))
     .filter((r) => r.score > 0);
 
-  return [...seedResults, ...sagaResults]
+  return [...seedResults, ...forumResults, ...sagaResults]
     .sort((a, b) => b.score - a.score)
     .slice(0, topN);
 }

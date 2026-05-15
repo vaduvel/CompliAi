@@ -1,0 +1,807 @@
+{
+ "counts": {
+  "D100": 10,
+  "D394": 9,
+  "D112": 91,
+  "wtp_pay": 13,
+  "D101": 9,
+  "D406_SAFT": 104,
+  "eFactura": 33,
+  "concediu_medical": 14,
+  "DUK": 57,
+  "SAGA_Web": 84,
+  "SPV": 32,
+  "crash_loss": 12,
+  "D300": 3,
+  "REGES": 23,
+  "D205": 1
+ },
+ "examples": {
+  "D100": [
+   {
+    "tid": "197",
+    "title": "Noutati legislative",
+    "date": "2005-11-28",
+    "text": "Autodeclararea obligatiilor prin OPT\nCitează\nORDIN nr. 1.521 din 10 octombrie 2005\npentru completarea continutului declaratiilor fiscale si utilizarea formularului \"Ordin de plata pentru Trezoreria Statului\" (OPT) pentru declararea obligatiilor de plata la bugetul general consolidat\nEMITENT: MINISTERUL FINAN?ELOR PUBLICE\nPUBLICAT IN: MONITORUL OFICIAL nr. 1.055 din 26 noiembrie 2005\nIn temeiul prevederilor art. 11 alin. (5) din Hotarirea Guvernului nr. 208/2005 privind organizarea si functionarea Ministerului Finantelor Publice si a Agentiei Nationale de Administrare Fiscala, cu modificarile si completarile ulterioare, având în vedere prevederile art. 84 alin. (4) si ale art. 196 alin. (2) din Ordonanta Guvernului nr. 92/2003 privind Codul de procedura fiscala, republicata, cu modificarile si completarile ulterioare,\nministrul finantelor publice emite urmatorul ordin:\nART. I\nAnexa nr. 1 la Ordinul ministrului finantelor publice nr. 281/2004 privind aprobarea modelului si continutului formularului 100 \"Declaratie privind obligatiile de plata la bugetul general consolidat\", cod 14.13.01.01/a, cu modificarile si completarile ulterioare, publicat în Monitorul Oficial al României, Partea I, nr. 158 din 23 februarie 2004, se înlocuieste cu anexa nr. 1 la prezentul ordin.\nART. II\nOrdinul ministrului finantelor publice nr. 600/2004 privind aprobarea modelului si continutului formularului 710 \"Declaratie rectificativa\", cod 14.13.01.00/r, publicat în Monitorul Oficial al Rom?niei, Partea I, nr. 397 din 4 mai 2004, se modifica dupa cum urmeaza:\n1. Anexa nr. 1 se înlocuieste cu anexa nr. 2 la prezentul ordin.\n2. Punctul 1 din anexa nr. 2 \"Instructiuni de completare a formularului 710 - Declaratie rectificativa\", cod 14.13.01.00/r\" se înlocuieste cu urmatorul text:\n\"1. Declaratia rectificativa se utilizeaza pentru corectarea impozitelor/taxelor declarate la bugetul de stat, stabilite de catre platitori prin autoimpunere sau cu regim de retinere la sursa, precum si a contributiilor sociale datorate de angajatori si retinute de catre acestia de la asigurati.\nAtentie! Sumele înscrise în declaratie nu cuprind diferentele de impozite, taxe si contributii sociale stabilite prin actele de control.\"\n3. Punctul 4.1 \"Date privind declaratia rectificata\" din anexa nr. 2 \"Instructiuni de completare a formularului 710 - Declaratie rectificativa\", cod 14.13.01.00/r\" se înlocuieste cu urmatorul text:\n\"4.1. Perioada de raportare\nIn rubrica \"Luna\" se înscrie cu cifre arabe numarul lunii la care se refera obligatia sau numarul ultimei luni a perioadei de raportare, dupa caz (01 pentru luna ianuarie sau 03 pentru trimestrul 1).\nAnul la care se refera declaratia se înscrie cu cifre arabe, cu 4 caractere (de exemplu: 2005).\"\nART. III\nAnexa nr. 1 la Ordinul ministrului finantelor publice nr. 256/2004 pentru aprobarea modelului si continutului formularului 300 \"Decont de taxa pe valoarea adaugata\", cod 14.13.01.02, publicat în Monitorul Oficial al României, Partea I, nr. 129 din 12 februarie 2004, se înlocuieste cu anexa nr. 3 la prezentul ordin.\nART. IV\nAnexa nr. 1 la Ordinul ministrului finantelor publice nr. 257/2004 pentru aprobarea modelului si continutului formularului 301 \"Decont special de taxa pe valoarea adaugata\", cod 14.13.01.02/s, publicat în Monitorul Oficial al României, Partea I, nr. 129 din 12 februarie 2004, se înlocuieste cu anexa nr. 4 la prezentul ordin.\nART. V\n(1) Platitorii de impozite, taxe si contributii sociale pot utiliza pentru declararea obligatiilor de plata la bugetul general consolidat, prevazute în anexa nr. 3 la Ordinul ministrului finantelor publice nr. 281/2004 privind aprobarea modelului si continutului formularului 100 \"Declaratie privind obligatiile de plata la bugetul general consolidat\", cod 14.13.01.01/a, cu modificarile si completarile ulterioare, formularul \"Ordin de plata pentru Trezoreria Statului\" (OPT), aprobat prin Ordinul ministrului finantelor publice nr. 246/2005 pentru aprobarea Normelor metodologice privind utilizarea si completarea ordinului de plata pentru Trezoreria Statului (OPT), publicat în Monitorul Oficial al României, Partea I, nr. 206 din 10 martie 2005.\nFormularul \"Ordin de plata pentru Trezoreria Statului\" (OPT) se poate utiliza pentru declararea obligatiilor bugetare, în situatia în care pentru fiecare obligatie bugetara sunt îndeplinite cumulativ urmatoarele conditii:\na) în perioada de raportare rezulta sume de plata;\nb) în perioada de raportare suma datorata este egala cu suma de plata, nefiind influentata de sume deductibile pentru care exista obligatia de declarare;\nc) suma de plata pentru perioada de raportare se achita integral si pana la termenul de plata prevazut de lege.\nIn situatia în care contribuabilul utilizeaza Ordinul de plata pentru Trezoreria Statului ca instrument declarativ, fara a respecta conditiile prevazute mai sus, documentul de plata nu va fi considerat declaratie a obligatiilor de plata la bugetul general consolidat, iar sumele achitate vor stinge obligatii fiscale conform prevederilor art. 111 alin. (2) din Ordonanta Guvernului nr. 92/2003 privind Codul de procedura fiscala, republicata, cu modificarile si completarile ulterioare.\n(2) In situatia în care formularul \"Ordin de plata pentru Trezoreria Statului\" (OPT) se utilizeaza pentru declararea obligatiilor de plata, se înscrie valoarea 1 în caseta \"Tip document\" din cadrul rubricii \"Nr. de evidenta a platii\", a carei structura a fost aprobata prin Ordinul ministrului finantelor publice nr. 1.870/2004 pentru aprobarea Instructiunilor de completare a numarului de evidenta a platii, publicat ?n Monitorul Oficial al României, Partea I, nr. 1.256 din 27 decembrie 2004.\n(3) Completarea si depunerea formularului \"Ordin de plata pentru Trezoreria Statului\" (OPT) se efectueaza în conformitate cu dispozitiile prevazute în anexa nr. 1 la Ordinul ministrului finantelor publice nr. 246/2005 pentru aprobarea Normelor metodologice privind utilizarea si completarea ordinului de plata pentru Trezoreria Statului (OPT). Data depunerii declaratiei se considera data platii, conform legii.\n(4) Platitorii de impozite, taxe si contributii sociale care utilizeaza pentru declararea obligatiilor bugetare formularul \"Ordin de plata pentru Trezoreria Statului\" (OPT) în conditiile prevazute mai sus nu mai depun formularul 100 \"Declaratie privind obligatiile de plata la bugetul general consolidat\" pentru obligatiile respective. Pentru declararea obligatiilor bugetare pentru care în perioada de raportare nu sunt îndeplinite conditiile prevazute la alin. (1) se utilizeaza numai formularul 100 \"Declaratie privind obligatiile de plata la bugetul general consolidat\", cod 14.13.01.01/a.\n(5) In situatia în care contribuabilul a utilizat mai multe cai de transmitere a declaratiei fiscale, va fi înregistrata prima declaratie depusa, conform legii: Declaratia privind obligatiile de plata la bugetul general consolidat (formular 100) sau Ordinul de plata pentru Trezoreria Statului (OPT), dupa caz. Orice corectie ulterioara a unei sume declarate se face prin depunerea unei declaratii fiscale rectificative, în conditiile legii.\nART. VI\nAnexele nr. 1-4 fac parte integranta din prezentul ordin.\nART. VII\nDirectia generala de gestiune a impozitelor si contributiilor din cadrul Agentiei Nationale de Administrare Fiscala, Directia generala a tehnologiei informatiei din cadrul Ministerului Finantelor Publice, Directia generala de administrare a marilor contribuabili, directiile generale ale finantelor publice judetene si a municipiului Bucuresti, precum si, dupa caz, directiile de specialitate din cadrul Ministerului Finantelor Publice si Agentiei Nationale de Administrare Fiscala vor duce la îndeplinire prevederile prezentului ordin.\nART. VIII\nPrezentul ordin va fi publicat în Monitorul Oficial al României, Partea I.\np. Ministrul finantelor publice,\nMara Rimniceanu,\nsecretar de stat\nBucuresti, 10 octombrie 2005.\nNr. 1.521.\n---------\nDupa cum se observa, o firma va putea utiliza OPT-ul ca document de autodeclarare a obligatiilor fiscale daca respecta cumulativ cele 3 conditii si nu va mai trebui sa intocmeasca si sa depuna declaratia 100.\nTip document in structura numarului de evidenta a platii este cifra de la pozitia 18:\n\" 1.5. Tip document - se completeaza cu:\n- 1 pentru ordin de plata care poate constitui si declaratie - ?n situatia ?n care plata obligatiei se face la termenul legal;\n- 0 pentru restul situatiilor.\"\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=197"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nNu, aici e \"buba\" - nu e aceeasi suma.\nSumele din ecranul de calcul impozit sunt corecte (am verificat si D100 la cele 3 trimestre) - nu-mi dau seama ce-mi scapa .",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nBonificatia o completezi cu mana la nivelul sumelor declarate prin D100.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nBonificatia se aplica la trim.I+II+III la ce ai declarat prin D100 si achitat inainte de scadenta. Pt.trim.IV nu beneficiezi de bonificatie.\nNu inteleg ce zici tu aici \"La luna a 9 m-am încadrat în ceea ce se platise deja (aveai platit mai mult?). Nu am completat si nu am beneficiat de bonificatie pt ca plata s-a făcut ulterior datei scadente\" : (ai platit dupa data scadenta?).\nOri aveai plata in avans, ori nu ai platit????",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nSi ai depus D100 fara bonificatie la trim.3?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nDin aceasta cauza iti pune bonificatie. Trebuia sa depui D100 cu bonificatie pt.ca aveai banii deja platiti : fa rectificativa pt.trim.III cu bonificatie.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "55941",
+    "title": "Eroare D100",
+    "date": "2024-04-25",
+    "text": "Eroare D100\nBuna ziua,\nAm depus D100 aferent trim I 2024 inaintea efectuarii update la Saga C.3.0.573 si a fost OK recipisa.\nAstazi, dupa update am retransmis D100 si recipisa a aparut cu eroare. E ok sa las D100 depusa cu versiunea veche si sa ignor mesajul de eroare de la ANAf?\n(eroare regula: R15: nu se accepta mai multe declaratii cu cod_oblig = 121 si avand aceeasi scadenta = 25.04.2024)\nMultumesc!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55941"
+   },
+   {
+    "tid": "55941",
+    "title": "Eroare D100",
+    "date": "2024-04-25",
+    "text": "Eu ma minunez cand vad asemenea postari : daca ai depus D100, de ce sa redepui?!!!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55941"
+   }
+  ],
+  "D394": [
+   {
+    "tid": "44711",
+    "title": "probleme 394",
+    "date": "2019-05-20",
+    "text": "Citează\nBuna ziua, am pe o factura de la Dedeman, atat materiale cu 19% cat si 4 pozitii cu: magnolii,azalee, vita de vie care au taxare inversa.Am impartit factura in 2,una cu tva si cealalta cu taxare inversa.Declaratia 394 da erori,respectiv: Eroare ! Codul de produs 21 de la inreg 1 este valabil doar pt centralizator!verificati inregistrarea partener:\n38 si Eroare! Codul de produs de la inreg 1 are valoare eronata! verificati inregistrare partener : 38\nCu stima, Violeta\nAm incercat sa bag pe cod 21,dar nu este bine.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=44711"
+   },
+   {
+    "tid": "56215",
+    "title": "EROARE D394",
+    "date": "2024-06-13",
+    "text": "EROARE D394\nLa validarea D394 generata cu versiunea 575 cu DUK integrator imi da urmatoarea eroare:\nF: validari globale\nva rugam sa verificati daca folositi versiunea corecta de PDF inteligent sau daca XML-ul creat contine namespace-ul conform schemei XSD (pentru perioada de raportare)\neroare structura: namespace ('') lipsa sau incorect la sectiunea form1. Valoarea corecta este xmlns='mfp:anaf:dgti:d394:declaratie:v1'",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56215"
+   },
+   {
+    "tid": "58489",
+    "title": "D406",
+    "date": "2026-04-29",
+    "text": "Citează\nBuna,\nVa rog, am nevoie de ajutor la d406, sagaweb sau saga desktop.\nMerge totul bine pana la validare+creare pdf semnat. Mentionez ca abia saptamana asta am migrat cu firmele pe saga web. Dar, indiferent de unde incerc sa generez d406, cand ajung la semnat acelasi mesaj.\ncand semnez imi da mesaj \"nu a putut fi detectat tipul SmartCard \"\nlas mai jos tot ce genereaza din dukintegrator\n\"Validare fara erori fisier: C:\\Users\\User\\Downloads\\SAF-T_xxxxxxxxx_martie2026 (1)\\D406_xxxxxxxxx_31-03-2026_Informativa.XML\nFisierul PDF a fost creat cu succes:\nC:\\Users\\User\\Downloads\\SAF-T_xxxxxxxxx_martie2026 (1)\\D406_xxxxxxxxx_31-03-2026_Informativa.pdf\nNu am putut detecta tipul SmartCardului!\nFie este un tip nou, necunoscut, fie pinul introdus nu este corect\"\nCu semnatura aceasta am depus si d394 si a fost ok, fara erori.\nam incercat si cu alta semnatura si pe alta firma, acelasi mesaj primesc.\nPoate gresesc undeva, ma poate ajuta cineva, va rog?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58489"
+   },
+   {
+    "tid": "59486",
+    "title": "Eroare D394",
+    "date": "2025-07-13",
+    "text": "Eroare D394\nBuna ziua ! Am si eu urmatoarea eroare si nu stiu cum sa o rezolv\nE: validari globale\neroare regula: R127: atributul incasari_i1 (114600) trebuie sa fie egal cu valoarea agregata din atributul total din Op2 pt. tip_op2 = I1 (114601)",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59486"
+   },
+   {
+    "tid": "59625",
+    "title": "Eroare D394 cod CAEN",
+    "date": "2025-07-25",
+    "text": "Eroare D394 cod CAEN\nBuna seara.\nNu inteleg de ce luna trecuta am putut depune D394 pe reclasificarea Rev3, iar luna asta imi da eroare atribut: caen: valoarea '4681' nu se afla in lista.\nMentionez ca D300 a fost depusa in aceleasi conditii si nu a dat eroare.\nA mai patit cineva?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59625"
+   },
+   {
+    "tid": "60034",
+    "title": "Eroare la DEC 394 pentru August 2025",
+    "date": "2025-09-16",
+    "text": "Eroare la DEC 394 pentru August 2025\nAti depus o declaratie tip D394 cu numarul de înregistrare [INTERNT-id]-2025 din data de\n16.09.2025 pentru perioada de raportare 8 2025 pentru CIF:\nAu fost identificate urmatoarele ERORI:\nE: informatii (1)\neroare regula: A32.1: Sunteti inregistrat ca permitand consultarea de catre o persoana impozabila a\ntranzactiilor derulate cu dumneavoastra prin intermediul aplicatiilor puse la dispozitie de ANAF si nu puteti\nreveni asupra acestei optiuni\nCe poate fi aceasa EROARE ?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60034"
+   },
+   {
+    "tid": "60034",
+    "title": "Eroare la DEC 394 pentru August 2025",
+    "date": "2025-09-16",
+    "text": "Am aceeasi eroare la D394. Bifa este pusa dar eroarea persista in continuare. Am bifat, debifat, etc, eroarea ramane.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60034"
+   },
+   {
+    "tid": "60034",
+    "title": "Eroare la DEC 394 pentru August 2025",
+    "date": "2025-09-16",
+    "text": "[CITAT]\nVedeti ca aveti o bifa de pus\nSAGA -&gt; Situatii-Listari -&gt; Jurnale de cumparari/vanzari -&gt; Declaratia 394 -&gt; Alte Informatii\n(langa Operatiuni) -&gt; AM bifa de ani de zile .... \"Doresc ca partenerii mei sa poata vizualiza operatiunile declarate\".",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60034"
+   }
+  ],
+  "D112": [
+   {
+    "tid": "48829",
+    "title": "eroare d112 salariati invoiti sau cfs",
+    "date": "2021-02-02",
+    "text": "eroare d112 salariati invoiti sau cfs\nCitează\nBuna ziua,\nla o firma la care salariatii au avut zile invoite (fara plata) intre 27-31 decembrie, in D112 apare data de 27 ca \"Dată iesire din categ. de asigurat (dataSf)\". daca zilele de cfs sunt in mijlocul lunii, nu mai apare aceasta anomalie.\nImplicit, salariatii nu mai figureaza asigurati la cnass. Ati mai intampinat problema aceasta? exista vreo rezolvare?\nCu stima!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48829"
+   },
+   {
+    "tid": "48829",
+    "title": "eroare d112 salariati invoiti sau cfs",
+    "date": "2021-02-02",
+    "text": "Citează\nIn cazul acesta nu este corect. Atata timp cand lichidarea contractului nu duce la incetarea calitatii de asigurat, aceasta incetand după 3 luni de la ultima plată a contribuţiei, cum se poate ca un concediu fara plata sa duca la incetarea calitatii de asigurat. este o forma fara fond! Exemplu: daca imi iau concediu fara salariu in perioada 27.12.2020 - 31.12.2020, completez declaratia 112 conform prevederilor \"lor\" si o depun in 25.01.2021, in data de 31.01.2021 eu figurez neasigurat la cnas incepind cu data de 27.12.2020! Desi societatea a platit contributii pentru mine in ianuarie 2021. urmatoarea d112, cu mine salariat activ se depune in februarie, probabil dupa 20. Este o perioada neacoperita in mod incorect.\nOameni buni, trebuie sa avem grija ca in ultima zi a lunii sa nu fim absenti, invoiti, etc?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48829"
+   },
+   {
+    "tid": "48829",
+    "title": "eroare d112 salariati invoiti sau cfs",
+    "date": "2021-02-12",
+    "text": "Citează\nBuna ziua,\nVa rog sa ma ajutati cu o eroare pe care o am la D112.\nAm un angajat care a fost in fara plata de pe 18.12.2020-05.01.2021, dupa care i-am incetat contractul in data de 27.01.2021. (ultima zi fiind 26.01.2021)\nConcediul fara plata este trecut in SAGA cu perioada de mai sus, iar data de 26.01.2021 am trecut-o in casuta cu \"Ultima zi de lucru\" din \"Salariati\".\nIn D112 imi apare la \"Dată intrare in categ. de asigurat: 06.01.2021\" (cand a iesit din fara plata) si la \"Iesire din categ. de asigurat: 26.01.2021\" (ultima zi)\nDupa ce dau Validare, imi da eroarea:\nASIGURAT 62:\n* EROARE - 'Data plecare' trebuie sa fie anterioara lunii de raportare (S8)!\nNu inteleg ce si unde am trecut gresit, de imi da aceasta eroare.\nVa rog sa ma ajutati daca aveti vreo explicatie sau daca aveti nevoie de mai multe informatii.\nMultumesc anticipat!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48829"
+   },
+   {
+    "tid": "48829",
+    "title": "eroare d112 salariati invoiti sau cfs",
+    "date": "2021-02-13",
+    "text": "Citează\nnu pot actualiza declaratia 112",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48829"
+   },
+   {
+    "tid": "48829",
+    "title": "eroare d112 salariati invoiti sau cfs",
+    "date": "2021-02-13",
+    "text": "Citează\nNici noi nu putem genera D112 pe ianuarie. Doar pe alte luni. Puteți căuta pe forum de ce. De fapt trebuia doar să citiți mesajele postate aici înainte de postarea dvs.\nNu mai postați același mesaj în secțiuni diferite ale forumului vă rog. Data viitoare vi le șterg pe toate cele dublate.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48829"
+   },
+   {
+    "tid": "48849",
+    "title": "actualizare Decl 112,  anul nu se poate modifica, ramne tot 2020, Cand actualizati programul, am trimis o declaratie laA",
+    "date": "2021-02-08",
+    "text": "Citează\n[CITAT]\n[CITAT]\nCand actualizati decl 112; nu se modifica anul de raportare ; ramanae 2020; am trimis la ANAF si am primit mesaj de eroare. Normal, anul pe declaratie e 2020\nhttp://static.anaf.ro/static/10/Anaf/De ... R/112.html\nDe aici puteti sa descarcati D112, direct de la ANAF, versiunea pdf, actualizat in 18.01.2021. Intocmiti cu datele necesare, salariati, cnp, etc si asa puteti sa trimiteti prin e-guvernare.ro.\nPoftim? Da eroare? Oare de ce?\nExact. Astia de la Saga nu-si fac treaba....\nO zi cu zambete (am furat sloganul).",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48849"
+   },
+   {
+    "tid": "51668",
+    "title": "Eroare D112 sector constructii",
+    "date": "2022-07-20",
+    "text": "Eroare D112 sector constructii\nBuna ziua. Am primit urmatoarea eroare la depunerea D112 pe e-guvernare: E: angajator (1), eroare atribut: pond1: atributul trebuie sa existe. Aceasta eroare a aparut si altor utilizatori ai programului SAGA. Din discutiile cu Anaf se pare ca eroarea provine din faptul ca in program s-a modificat cifra de afaceri care se introduce in declaratie (conform ultimei actualizari SAGA cifra de afaceri pe anul in curs, 2022, desi la luna iunie 2022 se foloseste cifra de afaceri pe anul 2021 pentru a aplica facilitati, daca cifra de afaceri din domeniu este de cel putin 80% din cifra de afaceri totala). Modificarile aparute la data de 15.07.2022, nu se aplica si lunii iunie 2022, putand-se folosi cifra de afaceri pe anul precedent. Mentionez ca am actualizat programul la data de 19.07.2022 si am dat actualizare angajator anterior validarii. Multumesc",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=51668"
+   },
+   {
+    "tid": "53057",
+    "title": "Eroare recipisa D112",
+    "date": "2023-02-22",
+    "text": "Eroare recipisa D112\nBuna ziua,\nAm primit aceasta eroare la recipisa\nE: asigurat (1) [idAsig = 1] sectiune asiguratA (1)\neroare regula: SP1A: A_13P(0) trebuie sa fie = 1400\nSalariatul are concediu fara plata jumatate de luna, cu salariul brut de 3000 lei.\nAti intalnit aceasta eroare?\nMultumesc",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53057"
+   }
+  ],
+  "wtp_pay": [
+   {
+    "tid": "48829",
+    "title": "eroare d112 salariati invoiti sau cfs",
+    "date": "2021-02-02",
+    "text": "Citează\nIn cazul acesta nu este corect. Atata timp cand lichidarea contractului nu duce la incetarea calitatii de asigurat, aceasta incetand după 3 luni de la ultima plată a contribuţiei, cum se poate ca un concediu fara plata sa duca la incetarea calitatii de asigurat. este o forma fara fond! Exemplu: daca imi iau concediu fara salariu in perioada 27.12.2020 - 31.12.2020, completez declaratia 112 conform prevederilor \"lor\" si o depun in 25.01.2021, in data de 31.01.2021 eu figurez neasigurat la cnas incepind cu data de 27.12.2020! Desi societatea a platit contributii pentru mine in ianuarie 2021. urmatoarea d112, cu mine salariat activ se depune in februarie, probabil dupa 20. Este o perioada neacoperita in mod incorect.\nOameni buni, trebuie sa avem grija ca in ultima zi a lunii sa nu fim absenti, invoiti, etc?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=48829"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nBonificatia se aplica la trim.I+II+III la ce ai declarat prin D100 si achitat inainte de scadenta. Pt.trim.IV nu beneficiezi de bonificatie.\nNu inteleg ce zici tu aici \"La luna a 9 m-am încadrat în ceea ce se platise deja (aveai platit mai mult?). Nu am completat si nu am beneficiat de bonificatie pt ca plata s-a făcut ulterior datei scadente\" : (ai platit dupa data scadenta?).\nOri aveai plata in avans, ori nu ai platit????",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nAdică la luna a 9 impozitul de platit era mai mic decât cel contabilizat deja.Si nu am mai plătit nimic atunci. Acum imi pune automat în declarație bonificatie si nu stiu de ce.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-10",
+    "text": "Citează\nSe pare ca pana la urma site-ul nu functioneaza.\nCa cetatean obisnuit lefegiu/salariat, cu certificat/semnatura electronica pe numele meu, mi-am incercat norocul sa creez un cont pe site sa vad si eu pe unde mai sunt/am fost angajat.\nDupa lupte asidue - conectare cu certificatul calificat, primesc urmatoarul email de la Echipa REGES ONLINE:\nBuna ziua,\nRevenim cu raspuns la solicitarea dumneavoastra inregistrata cu numarul 10445968.\nPână la deblocarea situației semnalate, vă recomandăm să utilizați autentificarea prin aplicația RoEID pentru a putea accesa și utiliza în continuare platforma.\nVom reveni către dumneavoastră imediat ce problema va fi remediată la nivel general pentru toți utilizatorii autentificați cu semnătură electronică.\nVă mulțumim pentru înțelegere și rămânem la dispoziția dumneavoastră pentru orice asistență suplimentară.\nCu stima,\nEchipa de Suport REGES Online\nDesi posed certificatul digital care este in termen, este valabil, si pe site mi se spune ca apot sa imi deschid/creez un cont online, nu se poate\nTrebuie sa ma vada cei de la ROeID la fata dupa care - daca tot insist - trebuie sa merg personal la sediul ITM Bucuresti (unde sunt niste doamne atat de amabile incat lamaia este miere de albine in comparatie) ca sa pot avea contul mult trambitat.\nATENTIE!\nNU INTREPRINDETI NICIUN DEMERS PENTRU A CREA UN CONT ONLINE INTRUCAT NU VA FUNCTIONA.\nCONFORM CELOR STATUATE DE EI: vechiul REVISAL online ramane valabil inca 6 luni. Pana atunci poate vor reface pe acei grei bani aplicatia (Doamne! au platit sute de mii de euro pentru aceasta aplicatie care da rateuri)\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58975",
+    "title": "EROARE D112",
+    "date": "2025-05-19",
+    "text": "Buna ziua. Intreb si aici, vad ca se discuta despre erori D112. Pentru salariatii din aprilie care au concediu medical partial platit din fondul de salarii si partial platit din FNUASS, imi da eroare la D112 - suma care reprezinta baza de calcul pentru partea concediilor din FNUASS se dubleaza. Nu stiu cum sa reglez acest lucru. Ma puteti sfatui cum sa fac, va rog frumos?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58975"
+   },
+   {
+    "tid": "59371",
+    "title": "Eroare conectare Saga licienta activa",
+    "date": "2025-07-18",
+    "text": "Citează\nExplicatia de mai sus nu are nici sens, nici logica.\nNU AM DE CE sa generez un nou ID SAGA&lt; cata vreme am dreptul (cfm. celor spuse de .. SAGA) la doar 2 schimbari de ID in cadrul unui abonament pe 1 an.\nPosibil sa fie o solutie, dar nu este o solutie corecta. In mod normal si LEGAL (foarte important - LEGAL!), cata vreme am platit licenta aferenta inchirierii dreptului de folosinta pe 1 an a programului SAGA, eu il pot instala si sterge si reinstala de cate ori vreau, pe oricate calculatoare vreau.\nOrice alta limitare este ilegala, de plin drept, ca sa zic asa.\nConcluzia: SAGA trebuie sa rezolve aceste sincope in recunoasterea calculatorului (dupa upgrade) fara nici un fel de \"penalizare\" sau ceva.\nAcea mentiune \"puteti schimba de 2 ori bla bla\" este ilegala - daca se ajunge la un proces, pierd.\nPentru cine va dori sa se contrazica: ganditi-va ca Microsoft a pierdut procesul in Europa legat de posibilitatea refolosirii licentelor lor, de pe cal;culatoare SH, daramite Saga ... care te limiteaza la doar 2 \"schimbari\" de calculatoare\nCa idee ..",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59371"
+   },
+   {
+    "tid": "59632",
+    "title": "eroare d406 TVA ERORI :urmatorele documente au valoarea eronata pentru taxa",
+    "date": "2025-07-27",
+    "text": "eroare d406 TVA ERORI :urmatorele documente au valoarea eronata pentru taxa\nEste o problema cu validarea tva in Saft\nProdus achzitionat din afara UE /GB si platit cu cardul online.\nLa posta se calculeaza TVA si alte taxe.\nFactura se introduce la achzitie in valuta ... nedefinit ..valoare produs platit la care se adauga taxele .\nPosta Romana a emis e-factura cu aceste valaori calculate si platite\nTVA calculat in vama este cu 2.7 lei diferit fata de formula matematica pe care o apalica programul la validare in d406\nsi din acest motiv nu se genereaza xml pentru D406\nDeclatatiile de tva au fost depuse si validate de ANAF fara probleme.\nCursul valutar la care se calculeaza taxele vamale si TVA-ul este unic lunar, nu zilnic, ca cel publicat de catre Banca Nationala a Romaniei.\nAceasta revalidare este ceruta de catre ANAF pt d406?\nCum generez xml in acest caz ?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59632"
+   },
+   {
+    "tid": "60715",
+    "title": "Cod fiscal pentru fiecare punctde lucru de la 1 salariat",
+    "date": "2025-12-30",
+    "text": "Cod fiscal pentru fiecare punctde lucru de la 1 salariat\nCitează\nLegea 245/23.12.2025 pentru modificarea art. 32 alin. 7 din Legea 273/2006\nArt. I. - La articolul 32 din Legea nr. 273/2006 privind finantele publice\nlocale, publicată în Monitorul Oficial al României, Partea I, nr. 618 din 18 iulie 2006,\ncu modificările și completările ulterioare, alineatul (7) se modifică și va avea\nurmătorul cuprins:\n„(7) Orice persoană subiect al unui raport juridic fiscal, inclusiv operatorul\neconomic, instituția publică și instituția publică locală, care are organizată o\nentitate, cu sau fără personalitate juridică, la altă adresă decât sediul social al\nsubiectului respectiv, cu cel puțin o persoană care realizează venituri din salarii, are\nobligația să solicite înregistrarea fiscală a entității respective, ca plătitoare de salarii\nși de venituri asimilate salariilor, la organul fiscal din subordinea Agenției Naționale\nde Administrare Fiscală în a cărui rază teritorială se află adresa unde se\ndesfășoară efectiv activitatea acelei entități. Solicitarea se face în termen de 30 de\nzile de la data înființării, pentru entitățile nou-înființate. Organul fiscal are obligația\nca, în termen de 5 zile de la înregistrarea fiscală, să transmită o copie de pe\ncertificatul de înregistrare fiscală primarului unității administrativ-teritoriale/\nsectorului municipiului București în a cărei/cărui rază teritorială își desfășoară\nefectiv activitatea entitatea respectivă. Plătitorii de salarii și de venituri asimilate\nsalariilor au obligația să organizeze și să conducă contabilitatea astfel încât\naceasta să reflecte impozitul aferent veniturilor fiecărei luni, calculat, reținut și virat,\npe fiecare entitate care intră sub incidența prezentului alineat.\"\nArt. Il .- Termenul de solicitare a înregistrării fiscale prevăzut la art. I pentru\nentitățile deja înființate la data intrării în vigoare a prezentei legi este de 30 de zile.\nAceastă lege a fost adoptată de Parlamentul României, cu respectarea\nprevederilor art. 75 și ale art. 76 alin. (2) din Constituția României, republicată.\n1. Care este noutatea? (Regula \"minim 1 angajat\")\nPână acum, exista o regulă generală (adesea ignorată sau aplicată doar la firme mari) conform căreia punctele de lucru cu peste 5 angajați trebuiau să aibă cod fiscal separat pentru plata impozitului.\nTextul din lege, acum, spune clar:\n\"Orice persoană... care are organizată o entitate... la altă adresă... cu cel puțin o persoană care realizează venituri din salarii, are obligația să solicite înregistrarea fiscală a entității respective...\"\nTraducere: Dacă aveți un punct de lucru (magazin, depozit, birou secundar) într-o altă locație decât sediul social și acolo lucrează chiar și un singur angajat, acel punct de lucru trebuie să aibă propriul Cod de Înregistrare Fiscală (CIF).\n2. Ce trebuie făcut (Pași practici)?\nAceasta este \"tema\" pentru departamentul de contabilitate și administrativ:\nPasul 1: Inventarierea punctelor de lucru. Verificați dacă aveți puncte de lucru declarate la Registrul Comerțului unde există activitate cu salariați.\nPasul 2: Obținerea CIF-ului (Codului Fiscal) pentru punctul de lucru. Trebuie depusă declarația (de obicei formularul 060 sau similar, în funcție de normele ANAF la momentul respectiv) pentru a obține un CIF dedicat acelui punct de lucru.\nAtenție: Solicitarea se face la organul fiscal în a cărui rază se află punctul de lucru, nu sediul social.\nPasul 3: Modificarea Contabilității și a Salarizării (Aici e de lucru pentru contabili). Legea spune explicit la finalul paragrafului (7): \"Plătitorii de salarii... au obligația să organizeze și să conducă contabilitatea astfel încât aceasta să reflecte Impozitul aferent veniturilor fiecărei luni... pe fiecare entitate.\"\nSoftware de salarii: Trebuie configurat softul de salarii astfel încât impozitul pe venit reținut angajaților de la punctul de lucru să fie evidențiat separat. (SAGA stie!)\nDeclarația 112: În declarația lunară, impozitul aferent angajaților de la punctul de lucru trebuie declarat pe acel CIF secundar.\nPlata efectivă: Când se face plata impozitului pe venit la stat, banii nu se mai virează toți în contul de Trezorerie al Sediului Social. Partea aferentă punctului de lucru trebuie virată în contul Trezoreriei de care aparține punctul de lucru.\n3. Care este termenul limită?\nConform Art. II din Lege:\nPentru punctele de lucru deja existente: Termenul este de 30 de zile de la intrarea în vigoare a legii (având în vedere data documentului, 29.XII.2025, termenul este sfârșitul lunii Ianuarie 2026).\nPentru punctele de lucru nou înființate: 30 de zile de la înființare.\nDe ce se face asta?\nScopul legii este ca impozitul pe venit plătit de angajați să rămână în comunitatea locală (la primăria unde este punctul de lucru), nu să meargă tot la primăria unde este sediul social al firmei.\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60715"
+   }
+  ],
+  "D101": [
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-23",
+    "text": "D101 / neconcordanta nota contab.-declaratie\nCitează\nBuna seara! Am urmatoarea situatie: impozit pe profit de plata / bonificatie aplicata, in T1,T2,T3.\nIn urma calculului la 31.12.2020, este de plata impozit ptr.2020, impozitul pe profit anual (rd.48 din D101) este mai mare decat bonificatiile.\nLa validarea impozitului, suma din nota contabila (implicit 4411 din balanta) nu este aceeasi cu diferenta de impozit pe profit datorat din D101. Mai are cineva aceasta situatie sau nu fac eu ceva corect? Multumesc.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\n\"impozitul pe profit anual (rd.48 din D101) este mai mare decat bonificatiile.\" - adica?!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\nMomentan am reusit sa rezolv situatia - am intocmit D101 manual, \"de la 0\". Rezultatul a confirmat nota contabila din program, ceea ce inseamna ca la mine este o inadvertenta la generarea automata a D101. Am sa incerc sa vad ce/cum se preia/calculeaza si de ce nu exista concordanta intre cele 2 sume. Multumesc de ajutor.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "49213",
+    "title": "D101 / neconcordanta nota contab.-declaratie",
+    "date": "2021-03-24",
+    "text": "Citează\n[CITAT]\nMomentan am reusit sa rezolv situatia - am intocmit D101 manual, \"de la 0\". Rezultatul a confirmat nota contabila din program, ceea ce inseamna ca la mine este o inadvertenta la generarea automata a D101. Am sa incerc sa vad ce/cum se preia/calculeaza si de ce nu exista concordanta intre cele 2 sume. Multumesc de ajutor.\nAm \"identificat\" neconcordanta: contul 7812 nu este adus in D101 (rd 1 sau rd 2 ). Am facut o actualizare, dar la fel, suma din 7812 nu este inclusa si de aici iese diferenta. Am modificat suma de la rd. 1 si acum suma de plata coincide cu nota contabila/balanta.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=49213"
+   },
+   {
+    "tid": "57682",
+    "title": "declaratia 101",
+    "date": "2025-01-15",
+    "text": "declaratia 101\nCitează\nBuna ziua!\nDin 2024 am revenit la impozitul pe profit dupa citiva ani.\nA ramas valabil faptul ca in D100 la decembrie 2024 se trece zero si se regularizeaza cu D101 ?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57682"
+   },
+   {
+    "tid": "57682",
+    "title": "declaratia 101",
+    "date": "2025-02-16",
+    "text": "Citează\nBuna ziua, la depunerea declaratiei 101 imi da urmatoarea eroare:\nAu fost identificate următoarele ERORI: F: validari globale va rugam sa verificati daca folositi versiunea corecta de PDF inteligent sau daca XML-ul creat contine namespace-ul conform schemei XSD (pentru perioada de raportare) eroare structura: namespace ('mfp:anaf:dgti:d101:declaratie:v9') lipsa sau incorect la sectiunea declaratie101. Valoarea corecta este xmlns='mfp:anaf:dgti:d101:declaratie:v10'",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57682"
+   },
+   {
+    "tid": "57682",
+    "title": "declaratia 101",
+    "date": "2025-02-16",
+    "text": "Citează\ncum pot remedia eroarea aparuta la declaratia 101?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57682"
+   },
+   {
+    "tid": "57682",
+    "title": "declaratia 101",
+    "date": "2025-02-16",
+    "text": "Citează\ncum pot remedia eroarea aparuta la declaratia 101?\nAu fost identificate următoarele ERORI: F: validari globale va rugam sa verificati daca folositi versiunea corecta de PDF inteligent sau daca XML-ul creat contine namespace-ul conform schemei XSD (pentru perioada de raportare) eroare structura: namespace ('mfp:anaf:dgti:d101:declaratie:v9') lipsa sau incorect la sectiunea declaratie101. Valoarea corecta este xmlns='mfp:anaf:dgti:d101:declaratie:v10'",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57682"
+   }
+  ],
+  "D406_SAFT": [
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2021-09-14",
+    "text": "SAF-T - declaratia 406\nCitează\nBuna ziua,\nIncepand cu 01.01.2022 marii contribuabili vor trebui sa depuna noua declaratie D406 (fisierul SAF-T), urmand ca apoi obligativitatea sa se extinda si asupra celorlalte categorii de contribuabili (mijlocii, mici). Va fi disponibila aceasta noua declaratia in SAGA? Se lucreaza deja la implementarea ei ?\nVa multumim",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2021-09-16",
+    "text": "Citează\nMomentan există atât de multe neclarități...\nSpre exemplu:\n- fișierul cere mișcările de stocuri cu coduri NC la fiecare linie din factură, dar sunt situații reglementate chiar de codul fiscal unde nu se trec produsele în sine - de exemplu emiterea unei facturi în baza unui bon fiscal sau situații de genul celor din farmacii unde factura se emite către CAS cu valoarea compensată de stat - caz în care deși vorbim de venit din vânzare e parte a unui preț și mișcarea de stoc e generată de alt document nu de factură în sine\n- tot legat de mișcările de stoc - apar probleme la gestiunile evaluate global-valoric\n- există probleme legate de situațiile în care evidența cantitativ-valorică e într-un program și în SAGA doar partea contabilă, caz în care anumite informații nu au cum să fie generate de SAGA în fișier\nProblema e că SAF-T în forma actuală e o mare bătaie de cap și asta pentru că sunt informații atât de analitice încât e o transferare a întregii contabilități către ANAF. Era mai simplu să spună că reglementează registrul jurnal și acela să fie trimis la ei.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2021-12-06",
+    "text": "Citează\nBuna ziua, se mai stie ceva de declaratia Saf-T?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2021-12-31",
+    "text": "Citează\nBuna ziua, as vrea sa stiu daca cei de la Saga vor face ceva pentru cei ce trebuie sa depuna declaratia saf-t.\nTrebuie schimbat ceva in modul de lucru pentru a se putea prelua datele in declaratie?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2022-01-03",
+    "text": "Citează\nBuna ziua, astept in continuare un raspuns de la Saga in legatura cu posibilitatea preluarii informatiilor din baza de date in declaratia Saf-t. Se pare ca in acest moment, cel putin asa mi s-a spus la telefon, nu se face nimic in acest sens.Normal ar fii sa stim acest lucru, eventual sa gasim solutii pentru aceast lucru.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2022-02-16",
+    "text": "Citează\nBuna ziua. Revin cu o intrebarea care a mai fost adresatea si mai sus. Saga va face ceva pentru cei ce trebuie sa depuna declaratia saf-t?\nEu sunt contribuabil mijlociu si depinde de aprobarea costurilor cu saf-t de catre cei din management, care habar nu au de legislatia din Romania.\nDaca Saga nu intentioneaza sa lucreze la Saf-t, macar sa stim sa ne organizam altfel.\nMultumesc anticipat!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2022-02-20",
+    "text": "Citează\n[CITAT]\nMomentan există atât de multe neclarități...\nSpre exemplu:\n- fișierul cere mișcările de stocuri cu coduri NC la fiecare linie din factură, dar sunt situații reglementate chiar de codul fiscal unde nu se trec produsele în sine - de exemplu emiterea unei facturi în baza unui bon fiscal sau situații de genul celor din farmacii unde factura se emite către CAS cu valoarea compensată de stat - caz în care deși vorbim de venit din vânzare e parte a unui preț și mișcarea de stoc e generată de alt document nu de factură în sine\n- tot legat de mișcările de stoc - apar probleme la gestiunile evaluate global-valoric\n- există probleme legate de situațiile în care evidența cantitativ-valorică e într-un program și în SAGA doar partea contabilă, caz în care anumite informații nu au cum să fie generate de SAGA în fișier\nProblema e că SAF-T în forma actuală e o mare bătaie de cap și asta pentru că sunt informații atât de analitice încât e o transferare a întregii contabilități către ANAF. Era mai simplu să spună că reglementează registrul jurnal și acela să fie trimis la ei.\nClar probleme mari la stoc. Probabil vom fi obligati sa renuntam la evidenta glogal-valorica pt minunatia de SAF-T. Pe partea de vanzari, nu cred ca ar fi o problema, insa pe partea de achizitii... Daca vorbim de societati care presteaza doar servicii, care isi cumpara diverse, pentru nevoile firmei, gen hartie coipator, capse, pix, agrafe, pana acum le bagam la gramada pe 604. Acum trebuie sa facem 4 pozitii pentru fiecare articol.\nTotusi, poate odata cu implementarea eFactura, se for putea importa de acolo codurile de produse, altfel va fi jale. Ma gandesc doar la cei cu restaurante, care au facturi de achizitie cu sute, daca nu mii de articole diferite (ingrediente).",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2022-03-10",
+    "text": "Citează\nBuna ziua, intrebarea era daca cei de la Saga au inceput sa lucreze pentru a se putea incarca din baza de date informatiile in declaratia SAF-T. Trebuie sa stim ce informatii trebuie sa mai introducem cand inregistram actele.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   }
+  ],
+  "eFactura": [
+   {
+    "tid": "50015",
+    "title": "SAF-T - declaratia 406",
+    "date": "2022-02-20",
+    "text": "Citează\n[CITAT]\nMomentan există atât de multe neclarități...\nSpre exemplu:\n- fișierul cere mișcările de stocuri cu coduri NC la fiecare linie din factură, dar sunt situații reglementate chiar de codul fiscal unde nu se trec produsele în sine - de exemplu emiterea unei facturi în baza unui bon fiscal sau situații de genul celor din farmacii unde factura se emite către CAS cu valoarea compensată de stat - caz în care deși vorbim de venit din vânzare e parte a unui preț și mișcarea de stoc e generată de alt document nu de factură în sine\n- tot legat de mișcările de stoc - apar probleme la gestiunile evaluate global-valoric\n- există probleme legate de situațiile în care evidența cantitativ-valorică e într-un program și în SAGA doar partea contabilă, caz în care anumite informații nu au cum să fie generate de SAGA în fișier\nProblema e că SAF-T în forma actuală e o mare bătaie de cap și asta pentru că sunt informații atât de analitice încât e o transferare a întregii contabilități către ANAF. Era mai simplu să spună că reglementează registrul jurnal și acela să fie trimis la ei.\nClar probleme mari la stoc. Probabil vom fi obligati sa renuntam la evidenta glogal-valorica pt minunatia de SAF-T. Pe partea de vanzari, nu cred ca ar fi o problema, insa pe partea de achizitii... Daca vorbim de societati care presteaza doar servicii, care isi cumpara diverse, pentru nevoile firmei, gen hartie coipator, capse, pix, agrafe, pana acum le bagam la gramada pe 604. Acum trebuie sa facem 4 pozitii pentru fiecare articol.\nTotusi, poate odata cu implementarea eFactura, se for putea importa de acolo codurile de produse, altfel va fi jale. Ma gandesc doar la cei cu restaurante, care au facturi de achizitie cu sute, daca nu mii de articole diferite (ingrediente).",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=50015"
+   },
+   {
+    "tid": "54767",
+    "title": "Eroare e-Factura",
+    "date": "2024-01-03",
+    "text": "Eroare e-Factura\nBuna ziua,\nIncerc sa deschid e-Factura din SAGA C si nu reusesc.\nMa poate ajuta cineva cu aceasta problema?\nThe remote server returned an error: (429) Too Many Requests.\nSTACK TRACE\nat System.Net.HttpWebRequest.GetResponse0\nControlLibrary2015.ANAF.SPV. &lt; Navigate&gt; d_31. MoveNext0\nFişiere ataşate\nCapture.PNG (5.93 KiB) Vizualizat de 6197 ori",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767"
+   },
+   {
+    "tid": "54767",
+    "title": "Eroare e-Factura",
+    "date": "2024-01-04",
+    "text": "Multumesc de sfat dar acuma am alta problema tot la e-factura.\nIncarca prima factura si imi apare acest mesaj.\nCe trebuie sa aleg?\nFişiere ataşate\nScreenshot 2024-01-04 144011.jpg (86.87 KiB) Vizualizat de 5890 ori",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-04",
+    "text": "Citează\nCel care factureaza in WEb ar trebui sa aiba semnatura electronica inregistrata la Anaf si tokenul atasat calculatorului din care factureaza?\nSau poate sa trimita in e-factura fara...?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-04",
+    "text": "Citează\nÎn e-Factura nu se pot trimite facturile fără să existe conexiune cu contul SPV al firmei, conexiune realizată prin certificat digital calificat.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-08",
+    "text": "Citează\nBuna ziua. Din saga web se pot transmite facturile in e-factura?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-08",
+    "text": "Citează\n... nu se pot descarca PDF facturile primite pe e-factura; ieri s-a putut...rabdare si... rabdare...",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "55264",
+    "title": "E-factura erori generare cod SPV",
+    "date": "2024-02-08",
+    "text": "E-factura erori generare cod SPV\nBuna ziua,\nva rog sa ma ajutati cu problema de mai jos:\n- de ieri dimineata nu mai reusesc sa ma conectez la E-factura, nu se mai genereaza cod SPV la nici una din firme, am actualizat programul in dimineata aceasta, am resetat codul SPV, am generat din nou cod si imi apar mesaje de eroare. Multumesc.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264"
+   }
+  ],
+  "concediu_medical": [
+   {
+    "tid": "51668",
+    "title": "Eroare D112 sector constructii",
+    "date": "2022-07-21",
+    "text": "buna ziua , pentru un concediu medical initial la primele celule ce sa introduc ca sa pot salva concediu introdus, ca serie si numar el este initial si nu ma lasa sa la salvez , mesajul este complectati seria si numarul .",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=51668"
+   },
+   {
+    "tid": "51668",
+    "title": "Eroare D112 sector constructii",
+    "date": "2022-07-21",
+    "text": "Casutele \"initial\" se completeaza doar in acele cazuri, cand introduci un concediu medical tip \"in continuare\".",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=51668"
+   },
+   {
+    "tid": "53057",
+    "title": "Eroare recipisa D112",
+    "date": "2023-02-22",
+    "text": "Buna ziua\nAm facut toate cele de mai sus cu descarcari si actualizari din nou azi. Dar tot am urmatoarea eroare la 112\nASIGURAT 6:\n* EROARE - Sectiunea B.3 - nu ati completat B3_7S !\n* EROARE - Sectiunea B.4 - B4_7C # B2_5C+B2_6C+B2_7C+B3_7C !\nMentionez ca am concediu medical la acest salariat 4 zile, ce ar trebui facut?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53057"
+   },
+   {
+    "tid": "54468",
+    "title": "Erori D112",
+    "date": "2023-11-21",
+    "text": "La salarii minime cu concediu medical se retine eronat cota de 10%sănătate. Din cei 200 lei neimpozabili doar doar partea aferenta zilelor efectiv lucrate se scade din baza de calcul sănătate cf D112. Saga nu știe să facă.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54468"
+   },
+   {
+    "tid": "58975",
+    "title": "EROARE D112",
+    "date": "2025-05-19",
+    "text": "Buna ziua. Intreb si aici, vad ca se discuta despre erori D112. Pentru salariatii din aprilie care au concediu medical partial platit din fondul de salarii si partial platit din FNUASS, imi da eroare la D112 - suma care reprezinta baza de calcul pentru partea concediilor din FNUASS se dubleaza. Nu stiu cum sa reglez acest lucru. Ma puteti sfatui cum sa fac, va rog frumos?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58975"
+   },
+   {
+    "tid": "60954",
+    "title": "recipisa D112 - CASS - mod de calcul eronat",
+    "date": "2026-01-21",
+    "text": "recipisa D112 - CASS - mod de calcul eronat\nCitează\nSalariata cu venituri din salarii 3.038 lei si din concediu medical (cod 08) venit 838 lei ( venit neimpozabil 300 lei) pe stat apare CASS 274 lei ok( 3038-300=2.738 lei) insa in declaratia 112 depusa am urmatoarea atentionare ;\nBaza contributiei individuale de sanatate - mod de calcul eronat\natentionare regula ; S71.1 : B4_5 (2738 ) &lt; B2_5 + B2_6 + B2_7 + suma ( B1_17) (3576)\nContributia individuala sanatate - mod de calcul eronat\natentionare regula : S72.1:B4_6 (274) &lt; B4_6 calculat cf.regulii (281)\nNu stiu cum sa remediez problema , daca eu depun la casa de sanatate dosarul cu aceasta atentionare precis ca o sa refuza dosarul. Cred ca este problema cu CASS din concediul medical ,pentru concediu medical nu se calculeaza CASS .\nCum modific statul sa fie 281 lei CASS in loc de 274 lei.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60954"
+   },
+   {
+    "tid": "61166",
+    "title": "concedii medicale ianuarie si februarie",
+    "date": "2026-02-06",
+    "text": "Citează\nAtentie! La certificatele de concediu medical care au completata data eliberarii: 1 februarie 2026 si ulterioare acesteia. Pentru acestea, calcularea si plata idemnizatiei sa face prin suprimarea cu o zi si se suporta, astfel:\n- de catre angajator, din a 2-a zi pana inclusiv in a 6-a si de ITM cauzata de boli obisnuite sau de accidente in afara muncii;\n- din bugetul FNUASS incepand cu ziua urmatoare celor suportate de angajator;\n- incepand cu a 2-a zi in cazul indemnizatiilor care se suporta integral din bugetul FNUASS.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61166"
+   },
+   {
+    "tid": "61166",
+    "title": "concedii medicale ianuarie si februarie",
+    "date": "2026-02-17",
+    "text": "Citează\nBuna, Daca nu se schimba ceva pana se fac salariile pe februarie, prima zi concediu medical neplatit o poti trece la concedii ca si suspendare",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61166"
+   }
+  ],
+  "DUK": [
+   {
+    "tid": "53057",
+    "title": "Eroare recipisa D112",
+    "date": "2023-02-24",
+    "text": "Generați XML pe care îl validați cu DUKIntegrator\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53057"
+   },
+   {
+    "tid": "53293",
+    "title": "EROARE D112 CONSTRUCTII,SALARIATI DETASATI FARA SCUTIRI",
+    "date": "2023-03-24",
+    "text": "Declaratia se poate valida si depune doar cu generare xml si validare cu dukintegrator : din ianuarie se intampla asa pt.firmele care au in aceeasi declaratie salariati cu facilitati constructii cat si salariati detasati in afara fara facilitati.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53293"
+   },
+   {
+    "tid": "53939",
+    "title": "eroare D406",
+    "date": "2023-07-28",
+    "text": "Nu. Nu asta vi s-a spus. În DUK verificați să nu fie la tip declarație D406T când validați XML pentru a-l semna și converti în pdf.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53939"
+   },
+   {
+    "tid": "53939",
+    "title": "eroare D406",
+    "date": "2023-07-31",
+    "text": "[CITAT]\nNu. Nu asta vi s-a spus. În DUK verificați să nu fie la tip declarație D406T când validați XML pentru a-l semna și converti în pdf.\nDa, aveti dreptate. Asa am procedat si am reusit. Multumesc!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53939"
+   },
+   {
+    "tid": "56215",
+    "title": "EROARE D394",
+    "date": "2024-06-13",
+    "text": "EROARE D394\nLa validarea D394 generata cu versiunea 575 cu DUK integrator imi da urmatoarea eroare:\nF: validari globale\nva rugam sa verificati daca folositi versiunea corecta de PDF inteligent sau daca XML-ul creat contine namespace-ul conform schemei XSD (pentru perioada de raportare)\neroare structura: namespace ('') lipsa sau incorect la sectiunea form1. Valoarea corecta este xmlns='mfp:anaf:dgti:d394:declaratie:v1'",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56215"
+   },
+   {
+    "tid": "57557",
+    "title": "Declaratia 406",
+    "date": "2025-01-30",
+    "text": "Citează\nAtunci când vă generează XML, SAGA deschide automat și DUKintegrator pentru validarea acelui xml și obținerea PDF ce se depune la ANAF.\nDacă nu vă deschide DUKintegrator instalați Java de la www.java.com\nDacă aveți deja Java instașat și nu vă deschide Dukintegrator, accesați www.sagasoft.ro secțiunea Linkuri și descărcați de acolo fișierul JarFix și după descărcare executați programul descărcat.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57557"
+   },
+   {
+    "tid": "57557",
+    "title": "Declaratia 406",
+    "date": "2025-02-19",
+    "text": "Citează\nBuna seara\nMa poate ajuta si pe mine cineva va rog? Am generat D 406 si imi apare urmatorul mesaj: Adobe Acrobat Reader nu a putut deschide,,DUKintegrator.jar \"pentru ca fie nu este un tipde fisier acceptat,fie pentru ca fisierul a fost deteriorat. E prima luna cand depun D 406.\nMultumesc",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57557"
+   },
+   {
+    "tid": "57557",
+    "title": "Declaratia 406",
+    "date": "2025-02-20",
+    "text": "Citează\n[CITAT]\nMultumesc. Am gasit instructiunile dar mi se par complicate.O sa incerc maine. Inca o data,multumesc.\nL-ai generat pdf sau xml?\nAdobe recunoaste fisiere. pdf\nPentru Duk trebuie fisier .xml\nAlegi la Duk pentru validare si semnara fisier .xml",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57557"
+   }
+  ],
+  "SAGA_Web": [
+   {
+    "tid": "53641",
+    "title": "Revenire la varianta Desktop",
+    "date": "2023-05-24",
+    "text": "Revenire la varianta Desktop\nCitează\nSalut!\nDaca am migrat pe Saga WEB, cum ar trebui sa fac sa revin doar la versiunea Desktop, offline?\nObserv ca pe web are un lag enervant uneori, plus ca intampin ceva erori de comunicare cu baza de date.\nMultumesc",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53641"
+   },
+   {
+    "tid": "53641",
+    "title": "Revenire la varianta Desktop",
+    "date": "2024-02-10",
+    "text": "Citează\nBuna ziua! Incerc sa deschid Saga din calculator pentru o alta firma care nu a emigrat in SAGA web dar imi cere user si parola si nu pot lucra intr-o alta firma. Cum ma ajuati sa trec de acel pas?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53641"
+   },
+   {
+    "tid": "53641",
+    "title": "Revenire la varianta Desktop",
+    "date": "2024-08-08",
+    "text": "saga web\nCitează\nbuna, am actualizat saga 3.0, dupa aceea am putut intra in program ,mesajul primit e ca nu e actualizata baza web\ncum si unde ar trebui sa intru sa o actualizez?\nmultumesc",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=53641"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-03",
+    "text": "migrare saga web\nCitează\nbuna seara\nam inregistrat un cui pentru licenta web in 29.12.2023. nu am primit mail cu user parola si fisierul cu care sa pot face migrarea in web.in tutorial se vorbea de 24h. este o intarziere din cauza vreunei probleme? am primit doar mesajul prin care mi se anunta prelungirea licentei....mai am eu ceva de facut sau trebuie sa astept mailul cu fisierul (cel specificat in tutorial..)atasat?\nmultumesc",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-04",
+    "text": "Citează\nBuna seara. Nu reusesc sa inregistrez a doua firma in saga web. Imi trebuie alt email de acces, ca nu inteleg.\nMentionez ca am 2 licente web, am primit un email cu user si parola, prima firma a putut fi inregistrata, doar ca pt a doua nu stiu care e procedura. Astept inca un email cu user si parola pt firma 2 ? Userul si parola de la prima firma nu functioneaza si pt a doua firma, programul imi zice ca e gresita. Va rog sa raspunda doar cei care stiu, rautati sau altele ,nu ma interseaza.O seara frumoasa.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-08",
+    "text": "Citează\nBuna ziua. Din saga web se pot transmite facturile in e-factura?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2025-07-14",
+    "text": "Citează\nBuna ziua,\nPatesc si eu acceasi treaba. Am migrat o firma, la cea de-a doua in Saga C cand ma duc la intretinere DB si la tab-ul WEB, introduc fisierul cu extensia .rsa nou primit pe email pentru cea de-a doua firma si cand pun contul si parola, imi zice ca nu e bun.\nDar pe Saga Web reusesc sa ma autentific cu aceleasi credentiale.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2025-07-14",
+    "text": "Citează\nDaca pe browserul de internet credentialele sunt corecte atunci de vina este cheia .RSA\nDescarcati din nou de pe mail acel fisier .RSA, sa nu fie corupt cel curent.\nMai verificati si codul fiscal, sa fie cu cel din sagaweb la care aveti credentialele.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   }
+  ],
+  "SPV": [
+   {
+    "tid": "54767",
+    "title": "Eroare e-Factura",
+    "date": "2024-01-03",
+    "text": "Eroare e-Factura\nBuna ziua,\nIncerc sa deschid e-Factura din SAGA C si nu reusesc.\nMa poate ajuta cineva cu aceasta problema?\nThe remote server returned an error: (429) Too Many Requests.\nSTACK TRACE\nat System.Net.HttpWebRequest.GetResponse0\nControlLibrary2015.ANAF.SPV. &lt; Navigate&gt; d_31. MoveNext0\nFişiere ataşate\nCapture.PNG (5.93 KiB) Vizualizat de 6197 ori",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767"
+   },
+   {
+    "tid": "54767",
+    "title": "Eroare e-Factura",
+    "date": "2024-01-04",
+    "text": "[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios este, ca si pentru facturi PRIMITE azi de la furnizori si descarcate din SPV, primesc aceeasi eroare la la verificarea prin validatorul anaf. Dar, repet, XML-ul a fost valid din moment ce l-am primit si descarcat din SPV.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767"
+   },
+   {
+    "tid": "54767",
+    "title": "Eroare e-Factura",
+    "date": "2024-01-04",
+    "text": "[CITAT]\n[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios este, ca si pentru facturi PRIMITE azi de la furnizori si descarcate din SPV, primesc aceeasi eroare la la verificarea prin validatorul anaf. Dar, repet, XML-ul a fost valid din moment ce l-am primit si descarcat din SPV.\n[CITAT]\n[CITAT]\nam reusit sa transmit factura, Anaf este problema\nCu ai reusit? Ai insistat de mai multe ori sau ai modificat ceva?\nEu am salvat XML-ul din SAGA si nu se valideaza nici pe validatorul de pe ANAF.\nEdit: Am luat XML-ul unei facturi trimisa cu succes ieri, si pe validatorul ANAF primesc aceeasi eroare. Probabil ca au modificat cei de la ANAF.\nEdit2: Curios este, ca si pentru facturi PRIMITE azi de la furnizori si descarcate din SPV, primesc aceeasi eroare la la verificarea prin validatorul anaf. Dar, repet, XML-ul a fost valid din moment ce l-am primit si descarcat din SPV.\nam reusit , am facut actualizare la saga si a mers. am avut aceeasi eroare.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54767"
+   },
+   {
+    "tid": "54778",
+    "title": "migrare saga web",
+    "date": "2024-01-04",
+    "text": "Citează\nÎn e-Factura nu se pot trimite facturile fără să existe conexiune cu contul SPV al firmei, conexiune realizată prin certificat digital calificat.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"
+   },
+   {
+    "tid": "55264",
+    "title": "E-factura erori generare cod SPV",
+    "date": "2024-02-08",
+    "text": "E-factura erori generare cod SPV\nBuna ziua,\nva rog sa ma ajutati cu problema de mai jos:\n- de ieri dimineata nu mai reusesc sa ma conectez la E-factura, nu se mai genereaza cod SPV la nici una din firme, am actualizat programul in dimineata aceasta, am resetat codul SPV, am generat din nou cod si imi apar mesaje de eroare. Multumesc.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264"
+   },
+   {
+    "tid": "55264",
+    "title": "E-factura erori generare cod SPV",
+    "date": "2024-02-09",
+    "text": "REVIN,\nAm discutat in dimineata aceasta cu cei de la ANAF referitor la erorile de generare cod SPV, am intrat impreuna cu ei pe platforma ANAF cu token-ul meu , direct din pagina de E-factura si pot sa vad facturile trimise si raspunsurile. De la ANAF au spus ca Saga trebuie sa faca logarea la E-factura NU prin SPV ( recent au scurtat calea de acces) , ci prin pagina de E-factura care se deschide cand accesam anaf.ro . Ei zic ca dvs. trebuie sa modificati in program , deoarece de aceea nu se poate genera cod. Va rog sa ma indrumati ce sa mai fac, ca nu stiu unde sa mai caut sau sa sun. Multumesc.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264"
+   },
+   {
+    "tid": "55264",
+    "title": "E-factura erori generare cod SPV",
+    "date": "2024-02-09",
+    "text": "@pavelescuc229 - nu știu cum să o spun politicos - ĂIA CU CARE AȚI VORBIT LA ANAF, vorbesc prostii! Habar nu au ce vorbesc.\nSpre știință: dacă sunați la asistență contribuabili nu mai puneți întrebări legate de chestiuni tehnice pentru că ăia de acolo nu cunosc așa ceva.\nTot spre știință, de această dată pentru a dvs știință - logarea pe anaf e una sau transmiterea prin portalul ANAF e una, transmiterea de către programe a facturilor folosind serviciile web (web services) de la ANAF e cu totul și cu totul altceva. Sunt două chestiuni distincte. Depunerea, MANUALĂ, prin portalul ANAF e posibilă pentru că portalul funcționa, dar trimiterea AUTOMATĂ prin web services nu este posibilă pentru că acele servicii web au fost oprite.\nTot acele servicii web sunt cele care permit obținerea, AUTOMATĂ, de către softurile înregistrate, a codului SPV! Dacă ele funcționează prost, acel cod SPV nu poate fi obținut.\nEu am tot spus - când nu ai cunoștințe tehnice sau nu pricepi ce se întâmplă tehnic legat de o problemă sau alta, stai în banca ta și nu te băga. Ăia de la asistență contribuabili nu vor să facă asta și pace. Și ce e deranjant, e faptul că oamenii care caută răspuns la ei, pe chestiuni tehnice, sunt evident atehnici și nu au noțiuni minim necesare pentru a înțelege de ce e o problemă și iau de bun răspunsul, stupid, pe care-l primesc apoi vin să se plângă că un program sau altul nu funcționează.\nCu cât știu mai multe cu atât îmi dau seama că știu prea puțin.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264"
+   },
+   {
+    "tid": "55264",
+    "title": "E-factura erori generare cod SPV",
+    "date": "2024-02-09",
+    "text": "@pavelescuc229 - erorile nu au nici o legatura cu faptul ca nu functioneaza serviciile din SPV, ci cu baza de date. Trimiteti-o arhivata din ecranul \"Intretinere BD\" din SAGA WEB, pentru rectificare.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=55264"
+   }
+  ],
+  "crash_loss": [
+   {
+    "tid": "56855",
+    "title": "Client Server Client",
+    "date": "2024-09-22",
+    "text": "Citează\nFals si adevarat! La ultima versiune (3.0.580) din ultima saptamana e suficient sa se instaleze fara a se introduce nici o firma.\nE suficient sa instalam aplicatia SetupC.exe si sa fim conectati la internet pt. a putea finaliza autoconfigurarea Firebird (folderul FbClient).\nE adevarat ca primul pas este sa introducem o firma iar apoi sa o setam ca client si apoi sa introducem datele serverului si daca serverul are in\nindex doar firme cu baza firebird atunci apare o alta optiune pt. a prelua toate datele firmelor.\nSe poate sarii peste acest pas (cel putin momentan), cand nu avem nici o firma introdusa. E suficient sa inchidem aplicatia imediat dupa instalare.\nIntram in folderul saga si adaugam un fisier text cu denumirea: configcs.txt\nEditam acest fisier cu IP-ul sau denumirea serverului si folderul unde este instalat saga pe server dupa cum urmeaza: &lt;NumePCServer&gt;:&lt;CaleinstalareSaga&gt;\nEx.1: 192.168.33.25:C:\\Saga C.3.0\nEx.2: &lt;myddnsdomain&gt;:C:\\Saga_FIRME1\nDaca totul este ok la redeschidere apar toate firmele \"client-server\" adica cele in format firebird.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56855"
+   },
+   {
+    "tid": "56855",
+    "title": "Client Server Client",
+    "date": "2024-09-23",
+    "text": "Citează\nAsigurati-va ca programul este instalat local pe client si actualizat la ultima versiune disponibila atat pe server cat si pe client. In sistemul Client server este necesar sa aveti licenta pentru fiecare calculator.\nPe calculatorul server accesati link-ul https://www.sagasoft.ro/linkuri.php, descarcati si instalati Componente Firebird 3.0 - SERVER.\nApoi, tot pe calculatorul server va rog sa adaugati serviciul Firebird in lista de exceptii a Firewall-ului Windowsului, astfel:\n- accesati Control Panel\\System and Security\\Windows Defender Firewall sau scrieti in start “Windows Defender Firewall”;\n- apasati “allow an app or feature through Windows Defender Firewall, “allow another app..” iar daca butonul este inactiv, in prealabil apasati sus butonul “change settings”;\n- apoi apasati “browse..”, alegeti calea catre firebird: C:\\Program Files\\Firebird\\Firebird30_Saga, selectati “firebird.exe” - Open - Add;\n- bifati toate optiunile disponibile: private, public, domain.\nDe asemenea, asigurati-va ca serverul bazei de date este pornit, accesati \"Task Manager\"-Services - Open Services - Firebird Server – DefaultInstace - trebuie sa aiba status-ul ‘Running’. In caz contrar, folositi optiunea ‘Start Service’ din bara de instrumente a ecranului.\nPe calculatorul client accesati link-ul: https://www.sagasoft.ro/linkuri.php , descarcati si instalati Componente Firebird 3.0 - CLIENT.\nIn cazul in care serverul este conectat la internet prin intermediul unui router, este necesar sa efectuati port-forwarding pe router pe portul 3060 catre IP-ul calculatorului server.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56855"
+   },
+   {
+    "tid": "56855",
+    "title": "Client Server Client",
+    "date": "2024-09-23",
+    "text": "Citează\nPt. administraotri (rulati cu drepturi depline urmatoarele shortcut-uri)\n\"Adaugare exceptie port TCP 3060 in firewall-ul de windows\"\ncmd /k netsh advfirewall firewall add rule name=\"Firebird SAGA BazaDate (sau orice alta descriere)\" dir=in action=allow protocol=TCP localport=3060\n\"Stergere exceptie port TCP 3060 in firewall-ul de windows\"\ncmd /k netsh advfirewall firewall delete rule name=\"Firebird SAGA BazaDate (sau orice alta descriere)\"\n\"Oprire Serviciu Firebird Saga\"\ncmd /k net stop FirebirdServerFirebird30_Saga\n\"Pornire Serviciu Firebird Saga\"\ncmd /k net start FirebirdServerFirebird30_Saga",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56855"
+   },
+   {
+    "tid": "56855",
+    "title": "Client Server Client",
+    "date": "2024-09-24",
+    "text": "Citează\nAJUTOR!!!!!!!!!!!!!!!!!!!buna ziua!\nam mai multe firme in saga c si astazi am vrut sa intru pe operatiuni /stocuri de pe o alta statie de lucru alta decat cea pe care e instalat serverul si am primit un mesaj de genul ca nu sunt client server si ca trebuie sa intru in administrare/ intretinere bd si sa aleg client-server-server ceea ce am si facut. dupa aceasta operatiune imi cand vreau sa intru pe firma respectiva de pe alt calculator apare mesajul \" pornire baza de date firebird\" si nu se intampla nimic dar nici nu pot intra. La aceasta firma mai lucreaza si alte colege si am nevoie si de celelalte 3 statii de lucru.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56855"
+   },
+   {
+    "tid": "56855",
+    "title": "Client Server Client",
+    "date": "2024-10-11",
+    "text": "Citează\n[CITAT]\nFals si adevarat! La ultima versiune (3.0.580) din ultima saptamana e suficient sa se instaleze fara a se introduce nici o firma.\nE suficient sa instalam aplicatia SetupC.exe si sa fim conectati la internet pt. a putea finaliza autoconfigurarea Firebird (folderul FbClient).\nE adevarat ca primul pas este sa introducem o firma iar apoi sa o setam ca client si apoi sa introducem datele serverului si daca serverul are in\nindex doar firme cu baza firebird atunci apare o alta optiune pt. a prelua toate datele firmelor.\nSe poate sarii peste acest pas (cel putin momentan), cand nu avem nici o firma introdusa. E suficient sa inchidem aplicatia imediat dupa instalare.\nIntram in folderul saga si adaugam un fisier text cu denumirea: configcs.txt\nEditam acest fisier cu IP-ul sau denumirea serverului si folderul unde este instalat saga pe server dupa cum urmeaza: &lt;NumePCServer&gt;:&lt;CaleinstalareSaga&gt;\nEx.1: 192.168.33.25:C:\\Saga C.3.0\nEx.2: &lt;myddnsdomain&gt;:C:\\Saga_FIRME1\nDaca totul este ok la redeschidere apar toate firmele \"client-server\" adica cele in format firebird.\nBuna,\nDaca mai am si un al doilea server ex. 192.168.33.30:C:\\Saga C.3.0 cum edittez acest fisier (configcs.txt).\nex. server1: 192.168.33.25:C:\\Saga C.3.0\nex. server2: 192.168.33.30:C:\\Saga C.3.0",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=56855"
+   },
+   {
+    "tid": "57457",
+    "title": "Migrare in cloud Saga Web si acces internet",
+    "date": "2024-12-13",
+    "text": "Citează\n1. trebuie sa aveti un pic mai multa incredere decat aveti in portalul anaf.\n2. chiar mai e nevoie de vpn criptat? Nu mai folositi smb. E suficient portul 3060 rerutat pe ipv4. Restul face firebird. (asta daca mai lucrati cu bazele stocate in pc de la server la client)\n3. Da poate ca interfata se va modifica si va ignora/bloca comenzile browserului de internet. Latenta nu mai exista in lucrul cu baza stocata in web. Munca grea se va muta pe serverele de stocare si mai exista si avantajul limitarii intervalului de timp.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57457"
+   },
+   {
+    "tid": "60010",
+    "title": "eroare comutare sistem client-server-client",
+    "date": "2025-09-12",
+    "text": "Citează\nDescrieti care este eroarea!? Este de retea, de port 3060, de serviciu firebird?\nConfgurati manual saga client. Daca nu aveti baze de date local pe acel pc si doriti doar conectarea la un anume server configurati un fisier text denumit configcs.txt pe care-l salvati in folderul de instalare saga.\nDe exemplu daca serverul dvs. este in reteaua locala si are ip-ul 192.168.100.100 si are instalat pe el saga cu bazele de date in folderul D:\\Saga C.3.0\\ scrieti in acest fisier de configurare urmatoarele:\n192.168.100.100:D:\\Saga C.3.0\\\nSalvati si porniti programul. Daca serverul e configurat corespunzator, are ip-ul fix si portul 3060 deblocat atunci ar trebui sa vedeti lista cu societatile din server.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60010"
+   },
+   {
+    "tid": "60010",
+    "title": "eroare comutare sistem client-server-client",
+    "date": "2025-09-13",
+    "text": "Citează\nVerifica IP urile la ambele calculatoare. Daca esti local, le poti pune manual, fixe. Faci o poza si o poti urca undeva online, gen: https://postimages.org/ apoi pui in postare link catre...\nIn afara de asta asa cum a spus si colegul @ciucam544 trebuie sa ai si portul 3060 deblocat, daca nu ai idee cum se face, deschizi CMD cu Run as administrator si pui comanda:\ncmd /k netsh advfirewall firewall add rule name=\"Firebird SAGA BazaDate\" dir=in action=allow protocol=TCP localport=3060\ncu asta adaugi exceptie port TCP 3060 in firewall-ul de windows. Si ar fi bine sa mai dai o comanda pentru pornire Serviciu Firebird:\ncmd /k net start FirebirdServerFirebird30_Saga\n\"Two things are infinite, the universe and human stupidity, and I’m not sure about the universe\" - Albert Einstein",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=60010"
+   }
+  ],
+  "D300": [
+   {
+    "tid": "57950",
+    "title": "declaratia 406",
+    "date": "2025-03-10",
+    "text": "Citează\nBună ziua!\nCum depun D406 în următoarea situație: AI bunuri în februarie, schimbat TVA la lună începând cu 01 martie.\nAm încercat să generez D406 la fel ca D300 (pentru ianuarie și februarie) și am primit următoarea eroare (la generare):\n” E: Header (1) sectiune HeaderComment (1)\neroare regula: HeaderComment: Tipul declaratiei T nu corespunde cu perioada declarata: 1.2025 - 2.2025”\nAți avut situația asta?\nMulțumesc!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=57950"
+   },
+   {
+    "tid": "59367",
+    "title": "D406 termen si cine depune",
+    "date": "2025-06-28",
+    "text": "D406 termen si cine depune\nCitează\nDeclarația D406 (SAF-T) – Cine Depune, Cine NU Depune și Termene de Depunere\nValabil pentru anul 2025\n1. Cine are obligația de a depune D406 (SAF-T)?\n• Persoane juridice române (S.A., S.R.L., SCS, SNC, SCA, regii autonome, institute naționale, companii naționale, organizații cooperatiste etc.)\n• Persoane juridice străine cu sediu permanent sau sediu permanent desemnat în România\n• Asociații și fundații (inclusiv ONG-uri), începând cu 2025\n• Societăți/entități nerezidente care desfășoară activitate economică în România\n• Instituții financiare și societăți de asigurare/reasigurare (conform calendarului ANAF)\n• Unități fără personalitate juridică aparținând unor persoane juridice cu sediul în străinătate, dacă desfășoară activitate în România\nObligația se aplică în funcție de categoria de contribuabil (mare, mijlociu, mic) și de calendarul ANAF.\n2. Cine NU are obligația de a depune D406 (SAF-T)?\n• Persoane fizice autorizate (PFA)\n• Întreprinderi individuale (II)\n• Întreprinderi familiale (IF)\n• Asociații familiale (ASF)\n• Cabinete individuale de avocat, notariat, executori judecătorești, cabinete medicale individuale (CMI)\n• Societăți profesionale de avocați, notari, practicieni în insolvență, medici etc.\n• Instituții publice și autorități administrative (indiferent de sursa de finanțare)\n• Firme fără activitate de la înființare (fără tranzacții, stocuri, facturi, operațiuni contabile sau fiscale)\n• Persoane juridice care gestionează informații clasificate sau derulează contracte clasificate, conform legii\n3. Termene de depunere D406 (SAF-T\nSituație contribuabil.................................................Termen depunere D406 (SAF-T)...................................................................................Observații\nPlătitori de TVA cu perioadă fiscală lunară.......................Lunar, până la termenul de depunere a decontului de TVA (D300) pentru luna respectivă.............Ex: dacă D300 se depune pe 25 ale lunii următoare, și D406 se depune atunci\nPlătitori de TVA cu perioadă fiscală trimestrială................Trimestrial, până la termenul de depunere a decontului de TVA (D300) pentru trimestrul respectiv\nNeplătitori de TVA....................................................Trimestrial, până la data de 25 a lunii următoare trimestrului raportat\nContribuabili cu an fiscal diferit de anul calendaristic.........Lunar sau trimestrial, în funcție de perioada fiscală proprie, până la termenul de depunere a decontului de TVA sau, dacă nu există această obligație, până la data de 25 a lunii următoare perioadei de raportare\nSAF-T Stocuri..........................................................Anual, până la termenul de depunere a situațiilor financiare anuale\nSAF-T Active...........................................................La solicitarea ANAF sau la modificări semnificative, conform instrucțiunilor ANAF\nImportant:\n• Pentru prima raportare (la intrarea în obligație), există o perioadă de grație de 6 luni pentru raportarea D406 General și de 12 luni pentru D406 Stocuri și Active (de la data la care devin obligați).\n• Termenele pot fi ajustate de ANAF prin ordine sau instrucțiuni suplimentare. Verificați periodic calendarul oficial ANAF SAF-T.\n4. Observații importante\n• Firmele fără activitate NU depun D406. Obligația începe din momentul în care apare prima operațiune relevantă (factură, stoc, tranzacție etc.).\n• Depunerea D406 se face exclusiv electronic, în format XML atașat unui PDF semnat electronic.\n• Nedepunerea la termen a D406 poate atrage sancțiuni contravenționale.\nCategoria entității........................................................Obligație D406.........Termen depunere................................Observații\nS.A., S.R.L., SCS, SNC, SCA, regii autonome etc....................DA........................Lunar/trimestrial, după caz...................Conform perioadei fiscale\nAsociații și fundații (ONG-uri)..........................................DA........................Lunar/trimestrial, după caz...................Depun din 2025 (contabilitate in partida dubla; cele in partida simpla NU depun)\nPersoane juridice străine cu sediu permanent.......................DA........................Lunar/trimestrial, după caz\nPFA, II, IF, ASF..............................................................NU -\nCabinete individuale/profesionale (avocați, notari, medici, practicieni insolvență)....NU -\nInstituții publice și autorități administrative........................NU -\nFirme fără activitate de la înființare.................................NU -........................................................................Până la apariția primei activități (cand se inregistreaza in contabilitate primul document)\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59367"
+   },
+   {
+    "tid": "59625",
+    "title": "Eroare D394 cod CAEN",
+    "date": "2025-07-25",
+    "text": "Eroare D394 cod CAEN\nBuna seara.\nNu inteleg de ce luna trecuta am putut depune D394 pe reclasificarea Rev3, iar luna asta imi da eroare atribut: caen: valoarea '4681' nu se afla in lista.\nMentionez ca D300 a fost depusa in aceleasi conditii si nu a dat eroare.\nA mai patit cineva?",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59625"
+   }
+  ],
+  "REGES": [
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-03",
+    "text": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE\nCitează\nPentru ca daca este sa avem un pic de timp liber nu ne putem bucura de el, si pentru ca guvernantii gasesc modalitati bizare de a ne imbunatatii viata (sic!), iata ce am pregatit pentru voi referitor la H.G. 295/27.03.2025 privind Registrul general de evidență a salariaților - REGES-ONLINE:\n1. Cerere către ITM (cu trimitere la HG 295/2025)\n[Antet firmă: Denumire, CUI, adresă, tel, email – opțional]\nCătre: Inspectoratul Teritorial de Muncă [Numele județului]\nSubsemnatul(a), ..................................., în calitate de reprezentant legal al societății ..........................................., cu sediul social în ................................., înregistrată la Registrul Comerțului sub nr. J...../....../...... și având codul unic de înregistrare CUI .........................,\nîn temeiul art. 5 alin. (1) și art. 6 alin. (2) din Hotărârea Guvernului nr. 295/2025 privind Registrul general de evidență a salariaților în format electronic (REGES-ONLINE),\nvă solicit respectuos atribuirea unui nume de utilizator și a unei parole pentru accesul în aplicația REGES-ONLINE, în vederea îndeplinirii obligației legale de transmitere a datelor privind contractele individuale de muncă.\nTotodată, în baza art. 6 alin. (2) din aceeași hotărâre, desemnăm ca utilizator al aplicației REGES-ONLINE următoarea persoană:\n- Nume și prenume: ..........................................\n- Funcția în cadrul firmei: .................................\n- CNP: ..............................................................\n- E-mail: ..........................................................\n- Telefon: .........................................................\nAnexăm documentele justificative prevăzute de reglementările în vigoare.\nVă mulțumim pentru sprijin și rămânem disponibili pentru detalii suplimentare.\nData: ..................\nSemnătura reprezentantului legal,\n................................................................\n[Opțional] Ștampila societății\n2. Împuternicire / Delegație internă\nÎMPUTERNICIRE\nSubsemnatul(a), ..........................................., în calitate de administrator/reprezentant legal al societății ..............................................., cu sediul în .............................................., înregistrată la ORC sub nr. J..... / .... / ..... și având CUI .........................\nîmputernicesc prin prezenta pe doamna / domnul ..........................................., având CNP .................................................., domiciliat(ă) în ..........................................., angajat(ă) al societății în funcția de ....................................,\nca, în temeiul art. 6 alin. (2) din Hotărârea Guvernului nr. 295/2025 privind Registrul general de evidență a salariaților în format electronic (REGES-ONLINE), să depună la Inspectoratul Teritorial de Muncă .................................. documentele necesare pentru atribuirea unui cont de utilizator și a unei parole pentru aplicația REGES-ONLINE, precum și să ridice credențialele respective și să gestioneze aplicația în numele angajatorului.\nAceastă împuternicire este valabilă de la data semnării și până la revocarea ei scrisă.\nData: ..................\nSemnătura reprezentantului legal,\n................................................................\n[Opțional] Ștampila firmei\n3. Opis al documentelor\nOPIS\nal documentelor depuse în vederea obținerii accesului în aplicația REGES-ONLINE\nAngajator: [Numele complet al firmei]\nCUI: [CUI firmă]\nReprezentant legal: [Nume + funcție]\nDocumente anexate:\n1. Cerere de eliberare utilizator și parolă REGES-ONLINE (cu referință legală)\n2. Împuternicire / Delegație internă pentru salariatul desemnat\n3. Copie carte de identitate a persoanei desemnate\n4. Copie certificat de înmatriculare al firmei (CUI)\n5. (Opțional) Copie contract individual de muncă al persoanei desemnate\nData: ...................\nSemnătura reprezentantului legal,\n............................................................\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-03",
+    "text": "Citează\nIn continuare - am vorbit cu prietenul meu Gepetto (ChatGPT), pe care l-am abordat referitor la prevederile din H.G. 295/2025 -redau explicatiile primite:\nDin partea angajatorului, utilizatorii care pot fi desemnați pentru a opera în platforma REGES-ONLINE sunt:\n________________________________________\n1. Reprezentantul legal al angajatorului\nEste, de regulă, prima persoană îndreptățită să aibă acces în REGES-ONLINE.\n• Exemple: Administratorul firmei (în cazul SRL), directorul general etc.\n• Poate solicita direct numele de utilizator și parola de la ITM.\n• Are acces complet în aplicație și poate desemna alți utilizatori.\n________________________________________\n2. Persoana împuternicită de angajator\nEste o persoană desemnată prin împuternicire scrisă semnată de reprezentantul legal.\n• Poate fi un angajat intern (ex: contabil, specialist HR, secretară).\n• Sau o persoană externă (ex: contabil extern, firmă de servicii HR, expert contabil, cabinet de contabilitate).\n• Împuternicirea trebuie însoțită de:\no copie CI a persoanei împuternicite\no copie CUI angajator\no cerere pentru cont REGES-ONLINE\no semnătură electronică (dacă se face online)\n________________________________________\n3. Utilizatori adăugați ulterior în platformă\nDupă ce s-a creat contul principal (de către reprezentant legal sau împuternicit), se pot crea conturi secundare (în aplicație) pentru:\n• Responsabil HR\n• Contabilul intern sau extern\n• Orice angajat care trebuie să opereze date în REGES\nAcești utilizatori pot avea roluri și drepturi diferite, în funcție de ce alege administratorul contului:\nRol Permisiuni\nAdministrator = acces complet, poate adăuga/modifica alți utilizatori\nOperator = poate introduce, modifica, vizualiza contracte\nVizualizare = poate doar consulta datele din REGES\n________________________________________\nImportant – Ce trebuie reținut:\n• Doar persoanele desemnate oficial de angajator pot opera în REGES.\n• Desemnarea se face prin împuternicire semnată, depusă la ITM.\n• Răspunderea legală pentru datele transmise în REGES rămâne în sarcina angajatorului, chiar dacă operațiunile sunt făcute de altcineva (ex: contabilul extern).\n• În cazul firmelor care externalizează serviciile de HR/contabilitate, este foarte frecvent ca firma colaboratoare să fie desemnată oficial și să opereze în REGES în numele angajatorului.\nSituația:\nAngajatorul are un salariat (ex: specialist HR, contabil etc.) care va fi desemnat să transmită și administreze datele în REGES-ONLINE în numele firmei.\n________________________________________\nCe trebuie să pregătească angajatorul pentru a împuternici acest salariat:\n1. Cerere tip pentru eliberarea credențialelor REGES-ONLINE\nAceasta este adresată Inspectoratului Teritorial de Muncă (ITM) și este semnată de reprezentantul legal al firmei (administratorul).\nCe conține cererea:\n• Datele firmei\n• Solicitarea unui nume de utilizator și parolă pentru REGES-ONLINE\n• Numele și datele salariatului desemnat (care va opera în platformă)\n________________________________________\n2. Împuternicire internă (sau delegație) către salariat\nUn document semnat de administratorul firmei, care precizează că împuternicește salariatul să depună documentele la ITM și să opereze în REGES-ONLINE în numele angajatorului.\nConținut minim al împuternicirii:\n• Denumirea completă a firmei\n• Numele complet și CNP-ul salariatului\n• Poziția în firmă (ex: specialist HR)\n• Obiectul: „îl/o împuternicesc să depună actele necesare pentru înregistrarea firmei în aplicația REGES-ONLINE, să preia userul și parola, și să gestioneze aplicația în numele angajatorului”\n• Semnătura reprezentantului legal + ștampila firmei (dacă există)\n________________________________________\n3. Copie după actul de identitate al salariatului\nObligatoriu – se anexează la cerere și la împuternicire.\n________________________________________\n4. Copie după certificatul de înmatriculare al firmei (CUI)\nSe anexează pentru a dovedi existența firmei.\n________________________________________\n5. (Opțional) Contractul de muncă al salariatului\nNu este întotdeauna cerut, dar unele ITM-uri pot solicita dovada că persoana desemnată este efectiv angajatul firmei.\n________________________________________\nScurt rezumat – Pachetul de depus la ITM:\nNr. Document......................Cine îl semnează\n1 Cerere REGES-ONLINE..........Reprezentantul legal\n2 Împuternicire / Delegație.....Reprezentantul legal\n3 Copie CI al salariatului —\n4 Copie CUI firmă —\n5 (Opțional) Contract individual muncă —\n________________________________________\nImportant:\n• Documentele se pot depune fizic la ITM sau online pe platforma oficială a ITM, dacă sunt semnate cu semnătură electronică calificată.\n• Odată eliberate, userul și parola vor fi asociate firmei, iar salariatul poate începe operarea în REGES-ONLINE.\na) Unde se depun online aceste documente?\nDacă dorești să depui online documentele pentru accesul în REGES-ONLINE, ai 2 opțiuni:\n1. Prin e-mail către ITM-ul de care aparține firma\n• Majoritatea ITM-urilor acceptă trimiterea documentelor prin e-mail oficial.\n• Exemplu: [email&#160;protected] sau [email&#160;protected] (depinde de județul în care are sediul firma).\nATENȚIE: toate documentele trimise prin e-mail trebuie să fie semnate cu semnătură electronică calificată de către reprezentantul legal al firmei sau de către persoana împuternicită.\n________________________________________\n2. Prin platforma e-guvernare / e-Direct\n• Adresa este: https://edirect.e-guvernare.ro\n• Selectezi județul, serviciul: „ITM – solicitare utilizator REGES”.\n• Încărcarea documentelor se face în format .PDF cu semnătură electronică aplicată.\n________________________________________\nb) Cine trebuie să semneze electronic documentele?\nSemnătura electronică calificată trebuie să aparțină:\nFie:\nReprezentantului legal al firmei (ex: administratorul SRL)\n→ dacă acesta semnează direct documentele.\nFie:\nPersoanei împuternicite (salariatul desemnat)\n→ dacă administratorul nu are semnătură electronică, atunci:\n• se semnează documentele fizic de către administrator (cererea + împuternicirea)\n• și se atașează copie scanată semnată\n• iar salariatul (care deține semnătură electronică) le transmite online, semnând cu propria semnătură doar transmiterea/declarația (nu cererea în numele administratorului)\nRecomandare oficială: Cel mai simplu este ca administratorul să semneze electronic documentele, dar dacă nu are, se poate merge și pe varianta cu salariatul desemnat + împuternicire semnată de mână.\n________________________________________\nc) Este suficientă o împuternicire simplă (internă) sau e nevoie de procură notarială?\nRăspuns clar:\nNU este nevoie de procură notarială!\nEste suficientă o împuternicire internă / delegație semnată de către angajator.\nProcurile notariale sunt cerute doar în cazuri excepționale (de ex. dacă o persoană fizică merge pentru o firmă fără legătură contractuală sau în cazuri în care nu există alt document oficial).\n________________________________________\nd) Dacă nu mai este obligatorie stampila, cum este \"oficializat\" documentul?\nPerfect adevărat: stampila nu mai este obligatorie din punct de vedere legal (Legea 316/2021 confirmă acest lucru).\nCe face documentul „oficial”?\nSemnătura olografă (de mână) a reprezentantului legal, dacă depui documentul fizic sau scanat.\nSemnătura electronică calificată, dacă îl depui digital.\nEventual: antetul firmei (logo, date firmă) – ajută la identificare, dar nu e obligatoriu.\nPoți include la finalul documentului o formulare precum:\n„Această împuternicire este emisă în conformitate cu prevederile legale în vigoare. Nu necesită ștampilă.”\n________________________________________\nConcluzie generală\nSituație.....................................Ce documente trebuie..........................Ce fel de semnătură.................................Alte observații\nAngajatorul depune fizic la ITM........Cerere, împuternicire, copii acte..............Semnătură de mână.................................Acceptat la ghișeu\nAngajatorul transmite online...........Toate documentele în PDF.......................Semnătură electronică a administratorului.......Ideal\nSalariatul depune online.................Cerere semnată de mână + împuternicire....Semnătură electronică a salariatului...............Valabil cu împuternicire\nText intocmit in colaborare cu ChatGPT conform prevederilor H.G. 295/27.03.2025 privind Registrul general de evidență a salariaților - REGES-ONLINE\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-03",
+    "text": "Citează\nREGE ONLINE - Conectare\nSa presupunem, ca ați ales conectare cu adresa de e-mail si parola.\nAsadar, introduceti o adresa de e-mail valida si parola, apasati pe conectare.\nDupa verificarea adresei de e-mail, primiti un mesaj cu link de confirmare.\nConfirmati si asteptati activarea contului unde va trebui introduse datelor de profil pentru angajator/salariat.\nDaca ati ales activarea prin folosirea unui certificat calificat, va trebui sa descarcati documentul de confirmare sa-l semnati si trimiteti furnizorului de certificat spre semnare. Exista modul on line de confirmare, in acest sens. Incarcati confirmarea si tastati trimitere. Platforma REGES ONLINE face verificarea si contul se activeaza, fiind afisat in bara din dreapta sus.\nVa conectati, sa presupunem, angajator, unde gasiti modalitatea de accces in registre (angajator, salariat) prin formularea unei cereri - direct de pe platforma, folosind una din modalitatile de reprezentare: reprezentant legal sau imputernicit. Pentru sectorul privat, daca cererea de acces in registre sa completeaza de reprezentatul legal, datele sunt preluat automat din evidenta ONRC. Daca dreptul de acces in registre este conferit imputernicitului, atunci validarea accesului se va obtine la sediul ITM prin prezentarea certificatului de Intregistrare la ONRC..... pct.d., de mai jos.\nIata, prevederi din platforma:\nSe vor atașa documente doveditoare a calității de reprezentant legal sau împuternicit pentru toți angajatorii care NU sunt înregistrați la ONRC.Adaugă documente\na. pentru reprezentantii legali ai angajatorilor inregistrati la ONRC autorizarea se face automat, din aplicatia REGES ONLINE.\nb. pentru reprezentantii legali ai sucursalelor fara personalitate juridica, dar care au primit drept de incheiere CIM si drept de transmitere date in REGES autorizarea se face cu prezentarea la ITM a urmatoarelor documente: acte care dovedesc calitatea solicitntului, CIF sucursala, certificat ONRC angajator parinte, delegarea de drepturi de transmitere in Reges.\nc. pentru reprezentantii legali ai angajatorilor neinregistrati la ONRC autorizarea se face cu prezentare la sediul ITM a urmatoarelor documente: hotarare judecatoreasca de infiintare sau alt act constitutiv , CIF, act care atesta calitatea\nd. pentru imputernicitii desemnati de reprezentantii legali ai angajatorilor cu capital privat, autorizarea se face cu prezentare la sediul ITM a urmatoarelor documente: certificat de inregistrare la ONRC sau cif, : hotarare judecatoreasca de infiintare sau alt act constitutiv, imputernicire notariala.\ne. pentru imputernicitii desemnati de reprezentantii legali ai angajatorilor cu capital de stat: act constitutiv, act care atesta calitatea reprezentantului legal, CIF si imputernicire semnata electronic sau imputernicire notariala pentru solcitant.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-03",
+    "text": "Citează\nTe plictisesti rau. Accesul se face foarte simplu, fara cereri si emailuri trimise sau mai stiu eu ce.\nDe astazi (sau cel putin eu asa am observat) ca daca accesezi https://reges.inspectiamuncii.ro/ deja apare Reges Online varianta noua si functionala.\nPasii necesari:\n1. Creare cont de persoana fizica cu user si parola si validare CNP prin incarcarea documentului de confirmare - modelul ANAF.\n1.1. Daca aveti cont pe ROEID, sariti peste pasul 1 si apasari doar conectare cu butonul ROEID. Se va creea automat un cont cu datele din ROEID.\n2. Se acceseaza Aplicatie Angajatori &gt; Registre &gt; Cerere Acces. Se alege calitatea Reprezentant legal si se completeaza CUI firma. Nu trebuie adaugat niciun document.\nAsta este tot.\nPentru alte calitati (imputernicit / prestator) se ataseaza documente justificative, gen procura sau contract delegare. Vedeti instructiunile din pagina lor.\nPartea mai nasoala este ca daca nu vom avea o integrare cu SAGA sau pana vom avea, va trebui sa introducem salariatii si contractele atat in Reges online cat si in SAGA.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-09",
+    "text": "Citează\nMultumim.\nDin pacate pentru firmele noi (sau cu prim salariat din aprilie), desi nu exista procedura, trebuie sa aplicam pentru Reges online si e util sa avem informatii care sa ne ajute. Ca reprezentant legal e usor de creat cont si adaugat firma, dar ca imputernicit eu cred, sper, sa nu innebuneasca sa ne oblige sa trimitem toti clientii la notar.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-10",
+    "text": "Citează\nSe pare ca pana la urma site-ul nu functioneaza.\nCa cetatean obisnuit lefegiu/salariat, cu certificat/semnatura electronica pe numele meu, mi-am incercat norocul sa creez un cont pe site sa vad si eu pe unde mai sunt/am fost angajat.\nDupa lupte asidue - conectare cu certificatul calificat, primesc urmatoarul email de la Echipa REGES ONLINE:\nBuna ziua,\nRevenim cu raspuns la solicitarea dumneavoastra inregistrata cu numarul 10445968.\nPână la deblocarea situației semnalate, vă recomandăm să utilizați autentificarea prin aplicația RoEID pentru a putea accesa și utiliza în continuare platforma.\nVom reveni către dumneavoastră imediat ce problema va fi remediată la nivel general pentru toți utilizatorii autentificați cu semnătură electronică.\nVă mulțumim pentru înțelegere și rămânem la dispoziția dumneavoastră pentru orice asistență suplimentară.\nCu stima,\nEchipa de Suport REGES Online\nDesi posed certificatul digital care este in termen, este valabil, si pe site mi se spune ca apot sa imi deschid/creez un cont online, nu se poate\nTrebuie sa ma vada cei de la ROeID la fata dupa care - daca tot insist - trebuie sa merg personal la sediul ITM Bucuresti (unde sunt niste doamne atat de amabile incat lamaia este miere de albine in comparatie) ca sa pot avea contul mult trambitat.\nATENTIE!\nNU INTREPRINDETI NICIUN DEMERS PENTRU A CREA UN CONT ONLINE INTRUCAT NU VA FUNCTIONA.\nCONFORM CELOR STATUATE DE EI: vechiul REVISAL online ramane valabil inca 6 luni. Pana atunci poate vor reface pe acei grei bani aplicatia (Doamne! au platit sute de mii de euro pentru aceasta aplicatie care da rateuri)\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "58657",
+    "title": "Cerere obtinere USER si PAROLA pentru REGES-ONLINE",
+    "date": "2025-04-10",
+    "text": "Citează\nNu contest ca altii au reusit (s-a intamplat la inceput, dintr-o eroare s-au putut conecta si primi dreptul de utilizare; DINTR-O EROARE)\nCum se explica facptul ca raspunsul oficial al Echipei REGES ONLINE isi pune cenusa in cap si spune ca deocamdata NU SE POATE si ca se va rezolva in viitor? (Vom reveni către dumneavoastră imediat ce problema va fi remediată la nivel general pentru toți utilizatorii autentificați cu semnătură electronică.)\nTehnologia nu înlocuiește omul, dar omul care folosește tehnologia îl înlocuiește pe cel care nu o folosește.\nNu trebuie sa fii primul dar trebuie să fii cel mai bun!",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"
+   },
+   {
+    "tid": "59439",
+    "title": "REGES ONLINE",
+    "date": "2025-07-07",
+    "text": "REGES ONLINE\nCitează\nAm o dilema,daca ma puteti ajuta.Ca sa ma conectez la REGES ONLINE pentru toti clientii mei,nu pot folosi semnatura mea electronica ,ca si imputernicit (contabil) ? Trebuie fiecare angajator ,sa aiba semnatura electronica?\nMultumesc !",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=59439"
+   }
+  ],
+  "D205": [
+   {
+    "tid": "61464",
+    "title": "D205 Rectificativa",
+    "date": "2026-03-12",
+    "text": "D205 Rectificativa\nCitează\nBuna seara ,\nAm depus D205 in februarie numai cu dividendele distribuite din 457 brute 500.000 lei platite 450.000 lei Iimpozit 50 000 si am uitat sa trec dividendele interimare distribuite la T3 2025 de 350.000 si platite 250.000 lei impozit am platit 35000 lei la 20 01 2026 ( sa beneficez de 10% impozit )\nAcum m am informat de la colegi ca in declaratia 205 se trec toate dividendele distribuite totale din 2025 (indiferent ca au fost interimare sau nu) si platite prin 456/457=5121 si impozitul aferent distribuitelor interimare.\nCe fac acum fac Rectificativa ? nu se dubleaza sumele ? primesc amenda de intarziere?\nDU inca nu am depus asa ca acolo o sa am grija .\nVa multumesc frumos de solutia oferita.",
+    "url": "https://www.sagasoft.ro/forum/viewtopic.php?t=61464"
+   }
+  ]
+ }
+}

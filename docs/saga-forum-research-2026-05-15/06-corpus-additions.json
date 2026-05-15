@@ -1,0 +1,226 @@
+[
+  {
+    "id": "issue-d406-dukintegrator-missing-files",
+    "title": "D406 SAF-T — DUKIntegrator: 'lipsesc fișiere din biblioteca programului'",
+    "tags": ["d406", "saf-t", "dukintegrator", "anaf", "validator", "eroare-validare"],
+    "body": "Eroarea 'lipsesc fișiere din biblioteca programului sau versiunea de validator instalată este incompletă/coruptă' apare frecvent la validarea D406 SAF-T. Cauze comune (în ordinea frecvenței observate pe forumul SAGA): (1) versiune DUKIntegrator învechită — descarcă cea mai nouă de pe site-ul ANAF, NU din SAGA; (2) instalare incompletă — șterge folderul %APPDATA%/DUK și reinstalează; (3) tip token nedetectat — în DUK alege manual SafeNet sau cryptoID; (4) dacă ai semnătură din cloud (fără dispozitiv USB), generează și validează PDF-ul din DUKIntegrator, apoi semnează direct PDF-ul din Adobe Reader. Versiunea validator trebuie să fie compatibilă cu schema ANAF curentă — în iulie 2025 și aprilie 2026 schema s-a actualizat, validatoare vechi dau această eroare chiar dacă datele sunt corecte.",
+    "sources": [
+      {"label": "SAGA Forum — eroare d406 active (apr 2026)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61656"},
+      {"label": "SAGA Forum — D406 cu semnătură cloud", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=58489"},
+      {"label": "SAGA Forum — Eroare D406 token Safenet", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=59136"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-d112-cm-2026-carenta-5zile",
+    "title": "D112 — Calcul concediu medical 2026 (carență + 5 zile angajator)",
+    "tags": ["d112", "concediu-medical", "cm", "2026", "oug", "salarii"],
+    "body": "Începând cu 2026, regulile concediului medical se modifică: (1) Se restabilește ziua de carență — pentru primele coduri 01 (boală obișnuită), ziua de carență NU se plătește. (2) Angajatorul plătește din nou primele 5 zile de CM din buzunarul propriu (regulă revenită după suspendarea anterioară). (3) Formula bazei: suma se obține multiplicând media zilnică cu numărul de zile lucrătoare din concediu, din care se scade obligatoriu o zi (NZLCM - 1). În SAGA, D112 nu generează corect câmpurile B1_5 (Bază de calcul CAM), B1_6 (Ore lucrate efectiv) și B1_10 (Bază șomaj) când există contract de mandat fără pontaj — soluția comunității este să le completezi MANUAL în D112 înainte de validare. Pentru contracte part-time cu schimbare 8h→6h în aceeași lună, salariul minim recalculat poate să apară ca 2120 lei în loc de 3750 — verifică proporțional zilele active.",
+    "sources": [
+      {"label": "SAGA Forum — CALCUL CM 2026 (71 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61222"},
+      {"label": "SAGA Forum — EROARE D112 dec 2025", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=60645"},
+      {"label": "SAGA Forum — concedii medicale ian-feb 2026", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61166"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-d112-validare-eroare-asigurati",
+    "title": "D112 — Eroare validare 'ATENȚIE ANGAJATOR ASIGURAȚI ASIGURAT' (martie 2026)",
+    "tags": ["d112", "eroare-validare", "anaf", "asigurati", "saga"],
+    "body": "Eroare repetată: 'ATENȚIE ANGAJATOR: ASIGURAȚI: ASIGURAT' fără mesaj concret. Apare după actualizare ANAF (constatare împărtășită martie 2026 cu varianta SAGA 602). Soluție comunitate verificată: (1) Devalidează statul în SAGA; (2) Actualizează programul la cea mai nouă versiune; (3) Intră pe Concedii Medicale și trece peste fiecare; (4) Actualizare pontaj; (5) Generare 112 cu actualizare date. Dacă tot nu funcționează: descarcă varianta de validator direct de pe site-ul ANAF în loc să folosești cel din SAGA. Acest pattern este recurent — la fiecare versiune ANAF nouă, primele 1-3 zile SAGA nu acoperă schimbarea, iar comunitatea trebuie să găsească workaround.",
+    "sources": [
+      {"label": "SAGA Forum — eroare D112 martie 2026", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61595"},
+      {"label": "SAGA Forum — EROARE D112 oct 2025", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=60125"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-d212-ibkr-tara-irlanda",
+    "title": "D212 — Venituri broker IBKR raportate ca 'Irlanda' (NU țara emitentului)",
+    "tags": ["d212", "declaratia-unica", "ibkr", "broker", "irlanda", "crs", "investitii"],
+    "body": "În 2025-2026, ANAF a început să trimită notificări masive bazate pe rapoarte CRS de la IBKR și alți brokeri irlandezi. Problema centrală: brokerul (IBKR) raportează țara SEDIULUI său (Irlanda), nu țara emitentului instrumentului (US, Indonezia etc.). Consecințe: (1) Dacă declari pe țara emitentului, ANAF te va trata ca evazionist când rapoartele CRS arată Irlanda. (2) Dacă declari pe Irlanda (cum face brokerul), poți pierde dreptul la dedubla impunere US Estate Tax (cont US-resident) — dar pentru deținători RO de ETF irlandeze, nu se aplică. Recomandare comunitate: declară pe țara brokerului (Irlanda) ca să fie concordant cu raportarea CRS, păstrează totuși extrase bancare cu transferurile către IBKR și Flex Query anuale pentru contestare. Pierderile se reportează pe 5 ani (art. 119 Cod Fiscal). Calculul: câștigul net anual impozabil = câștig brut declarat broker MINUS pierderea reportată din anii anteriori (secțiunea pierderi).",
+    "sources": [
+      {"label": "Reddit r/robursa — Declaratia 212 IBKR Irlanda", "ref": "https://reddit.com/r/robursa/comments/1qs2yrh/"},
+      {"label": "Reddit r/robursa — ANAF vrea sa ma omoare", "ref": "https://reddit.com/r/robursa/comments/1qnkj3n/"},
+      {"label": "Reddit r/robursa — Raportari eronate IBKR", "ref": "https://reddit.com/r/robursa/comments/1neuvxg/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-anaf-somatie-pfa-inchis",
+    "title": "Somație ANAF pentru PFA închis — cum o contești în 15 zile",
+    "tags": ["anaf", "somatie", "pfa", "contestatie", "decizie-din-oficiu"],
+    "body": "Pattern frecvent (2024-2026): primești somație ANAF cu termen 15 zile pentru obligații fiscale aferente unor ani când PFA-ul tău nu mai exista. Cauză: ANAF emite decizii din oficiu automate fără verificare anterioară. Pași: (1) Verifică în SPV mesajele anterioare — chiar dacă ANAF nu a trimis poștal, termenul curge de la data afișării. (2) Deschide proces la tribunal în 15 zile calendaristice — costă 50 RON taxă de timbru fără avocat (Codul de procedură fiscală art. 268+). (3) În paralel: depune contestație administrativă prin SPV (formular de contact) cu cerere de anulare a deciziei și dovezi (certificat ONRC închidere PFA, declarații zero depuse, etc.). (4) Mergi fizic la administrația fiscală — în multe cazuri se rezolvă cu un inspector dispus, fără proces. (5) NU lăsa termenul să treacă — devine executorie după 14 zile calendaristice. ATENȚIE: ANAF poate emite decizie din oficiu și pentru un PFA închis dacă nu ai depus declarația estimată pentru anul fiscal următor închiderii cu valoare zero — depune chiar dacă pare absurd.",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — Somatie ANAF 9500 lei", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/"},
+      {"label": "Reddit r/RoFiscalitate2 — Ați interacționat cu Ana", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1qndzvw/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-anaf-poprire-conturi",
+    "title": "Poprire ANAF pe cont — ce înseamnă și cum reacționezi",
+    "tags": ["anaf", "poprire", "executare-silita", "cont-bancar", "datorii"],
+    "body": "Pattern: ANAF poate institui poprire pe conturile firmei pentru datorii fiscale, iar prin extensie poate viza și conturile clienților tăi care îți datorează bani din facturi neîncasate. Conform formularului standard, ai obligația să înștiințezi organul de executare silită în 5 zile de la primirea adresei despre raporturile juridice existente. Pași: (1) Identifică numărul deciziei de poprire în SPV; (2) Verifică suma datorată reală pe ghiseul.ro și pe rolul tău fiscal; (3) Dacă suma e plătită deja sau eronată — depune contestație imediat (vezi termen 15 zile); (4) Pentru clienții afectați (poprire la terț) — explică-le că este eroare administrativă, nu falimentul tău. Important: contestația NU suspendă executarea automat — pentru suspendare ai nevoie de hotărâre judecătorească. Realitate observată: ANAF face datornicii 'de rușine în fața clienților' (citate utilizatori 2026-05).",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — Poprire what", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1t10351/"},
+      {"label": "Reddit r/RoFiscalitate2 — ANAF vrea sa-mi ia casa", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1pafexb/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-spv-notificari-fara-posta",
+    "title": "SPV — notificările NU vin prin poștă; verificare obligatorie zilnică",
+    "tags": ["spv", "anaf", "notificari", "comunicare", "termene"],
+    "body": "Toate notificările ANAF (somații, decizii din oficiu, popriri, controale, cereri documente) sunt comunicate exclusiv prin SPV (Spațiul Privat Virtual). Termenele curge de la data afișării în SPV, NU de la data citirii și NU de la primirea unei copii pe poștă. Pattern observat: utilizatorii intră în SPV o dată la câteva luni, descoperă o decizie de impunere veche de 3 săptămâni cu termen contestație de 15 zile deja expirat. Recomandare: verifică SPV cel puțin o dată pe săptămână; ideal — automat (tool FiscCopilot SPV watchdog). Pentru cei care emit/primesc e-Facturi: SPV trebuie verificat zilnic — un furnizor care nu a trimis e-Factura te poate amenda dacă tu accepți factura pe hârtie ca document principal.",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — ANAF vrea sa-mi ia casa (653 upvotes)", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1pafexb/"},
+      {"label": "Reddit r/RoFiscalitate2 — Somatie ANAF 9500 lei", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-penalitati-nedeclarare-formula",
+    "title": "Penalități ANAF — formulă: 0,08%/zi nedeclarare + 0,02%/zi dobândă",
+    "tags": ["anaf", "penalitati", "dobanda", "nedeclarare", "calcul"],
+    "body": "Formula penalităților fiscale RO: (1) Dobânda de întârziere: 0,02%/zi din suma datorată (≈7,3%/an). (2) Penalitate de nedeclarare: 0,08%/zi (≈29,2%/an) — se aplică pentru sume necomunicate la termen. Penalitatea de nedeclarare se REDUCE cu 75% dacă plătești integral suma datorată în termenul deciziei. Exemplu: 5000 RON nedeclarați 365 zile = ~365 RON dobândă + ~1460 RON penalitate (sau ~365 RON dacă plătești tot și beneficiezi de reducerea 75%). Praguri suplimentare: dacă veniturile din activități independente depășesc 6 salarii minime brute (22.500 RON la salariu minim 3750), datorezi CASS 10% — chiar dacă declari rectificativ. Peste 12 salarii minime apar și alte obligații. Recomandare: simulează scenariile 'plătesc azi vs peste 30 zile vs peste 6 luni' înainte de a alege strategia de regularizare.",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — Notificare ramburs olx (explicat de utilizator)", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1m6oe2a/"},
+      {"label": "Reddit r/RoFiscalitate2 — Somatie 9500 lei", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1rw348v/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-efactura-spv-watchdog",
+    "title": "e-Factura — facturi primite nu apar automat în SPV; verificare zilnică",
+    "tags": ["e-factura", "spv", "anaf", "facturi", "verificare"],
+    "body": "Pattern observat: chiar și utilizatorii cu programe moderne (Oblio, FGO) trebuie să intre zilnic în SPV pentru a verifica dacă o factură pe care un furnizor o ANUNȚĂ ca trimisă a ajuns efectiv în SPV. Probleme frecvente: (1) Furnizorul susține că a trimis dar XML-ul nu apare; (2) Factura apare în SPV cu sumă parțială (linii lipsă vs PDF tip); (3) Cota TVA neumplută la unele linii — utilizatorul trebuie să completeze manual. Recomandare proces: (a) la primirea oricărei facturi pe hârtie/PDF, verifică în SPV în 24-48h; (b) dacă nu apare în 5 zile lucrătoare de la data emisiei, contactează furnizorul cu cerere formală scrisă (păstrează dovada); (c) NU înregistra în contabilitate doar pe baza PDF dacă furnizorul are obligație e-Factura — ai risc de respingere TVA deductibil. Pentru utilizatori SAGA: feature-ul de 'robot auto-trimitere e-Factura după X zile' există în Oblio și FGO dar NU în SAGA — sugestie repetată pe forum din 2024.",
+    "sources": [
+      {"label": "SAGA Forum — e-factura sugestii (36 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=56299"},
+      {"label": "Reddit r/RoFiscalitate2 — utilizatori Oblio verifică SPV manual", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1dtsmup/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-d205-rectificativa-dividende-interimare",
+    "title": "D205 — Rectificativă cu dividende interimare (risc dublare)",
+    "tags": ["d205", "dividende", "rectificativa", "amenda"],
+    "body": "Speță 2026: contribuabil cu dividende distribuite final 500.000 RON brut (plătite 450.000) + impozit 50.000 RON depus în D205 inițială; ulterior descoperă că nu a trecut dividendele interimare T3 2025 (350.000 brut, plătite 250.000, impozit 35.000 RON achitat la 20-01-2026 pentru a beneficia de cota 10%). În D205 trebuie trecute TOATE dividendele distribuite din anul fiscal, indiferent că sunt interimare sau finale. Rectificativa D205: înlocuiește integral declarația inițială (NU se cumulează sumele). Risc dublare: dacă completezi rectificativa adăugând doar dividendele interimare la cele finale, în XML pot apărea sume duble. Recomandare: în formularul D205 rectificativ, recompune SUMA TOTALĂ corect, nu adăuga. Amendă: pentru rectificativă depusă spontan (înainte de control ANAF), NU se aplică amendă (înlocuiește inițială).",
+    "sources": [
+      {"label": "SAGA Forum — D205 Rectificativa", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61464"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-saga-web-export-excel-data",
+    "title": "SAGA Web — Export Excel cu format dată invers (LL-ZZ-AA în loc de ZZ-LL-AA)",
+    "tags": ["saga-web", "export", "excel", "data", "bug"],
+    "body": "Bug confirmat 2026 în SAGA Web: la export Excel din situația clienți/furnizori neîncasate, datele apar în format LL-ZZ-AA (American MM-DD-YY) în loc de ZZ-LL-AA (european). Exemplu: '10-3-2024' = de fapt 03-octombrie-2024, NU 10-martie-2024. Bug-ul NU apare la SAGA Desktop și NU apare la export PDF din SAGA Web. Workaround: (1) Folosește export PDF în loc de Excel; (2) Sau face conversie în Excel cu formulă =DATE(YEAR, MID(A1,1,2), MID(A1,4,2)); (3) Sau export direct din SAGA Desktop după migrare. SAGA nu a remediat încă (mai 2026). Pentru contabili cu firme migrate forțat pe Web — recomandă alocarea unei sesiuni dedicate pentru a verifica scadențele facturilor exportate.",
+    "sources": [
+      {"label": "SAGA Forum — Saga Web export Excel data", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61282"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-saga-client-server-firebird-port-3060",
+    "title": "SAGA — Erori conectare client-server (Firebird, port 3060)",
+    "tags": ["saga", "client-server", "firebird", "retea", "tehnic"],
+    "body": "Eroare frecventă: 'Programul nu s-a putut conecta la baza de date. DBNAME=192.168.x.x'. Cauze comune: (1) Port 3060 blocat de firewall — comanda fix: 'cmd /k netsh advfirewall firewall add rule name=\"Firebird SAGA BazaDate\" dir=in action=allow protocol=TCP localport=3060'. (2) IP server schimbat de la fix la automat — rezolvă în Windows Network Settings. (3) Serviciu Firebird oprit pe server — reinstalează din https://www.sagasoft.ro/programe/Utils/. (4) Saga client neconfigurat pentru a se conecta la server — creează fișier 'configcs.txt' în folderul instalării Saga cu linia 'SERVER=192.168.x.x'. (5) Format vechi firme.dbf vs format nou config.fdb — verifică dacă toate firmele sunt convertite. Recomandare: la setarea client-server, fixează IP-urile pe LAN și deblochează portul 3060 în firewall înainte de a porni programul.",
+    "sources": [
+      {"label": "SAGA Forum — eroare comutare client-server-client", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=60010"},
+      {"label": "SAGA Forum — Client Server Client (83 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=56855"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-reges-online-credentiale",
+    "title": "REGES Online — obținere credențiale și raportare paralelă cu SAGA",
+    "tags": ["reges", "salarii", "contracte", "anaf", "raportare"],
+    "body": "REGES Online (Registrul General de Evidență a Salariaților) este sistem separat de SAGA și de Revisal vechi. Procedura: (1) Cerere user/parolă REGES — formular online, aprobare în câteva zile; (2) În SAGA nu există sincronizare automată — trebuie să dublezi raportarea pentru contractele noi/modificate; (3) Modificările salariale, angajări noi, încetări de contract trebuie raportate ÎN AMBELE sisteme; (4) Pentru contracte de mandat (fără pontaj, fără Revisal) — atenție specială: REGES poate cere, SAGA generează cu zero ore. Pattern observat 2025-2026: thread 'REGES ONLINE' cu 202 replies arată că procesul este sursă majoră de frustrare pentru contabili. Recomandare: păstrează un checklist Excel separat cu data ultimei sincronizări per contract REGES vs SAGA.",
+    "sources": [
+      {"label": "SAGA Forum — REGES ONLINE (202 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=59439"},
+      {"label": "SAGA Forum — Cerere USER PAROLA REGES-ONLINE", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=58657"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-anaf-notificare-ramburs-olx",
+    "title": "Notificare ANAF venituri ramburs OLX/Vinted — ce să faci",
+    "tags": ["anaf", "olx", "vinted", "ramburs", "venituri-din-strainatate", "notificare"],
+    "body": "Pattern 2025-2026: ANAF trimite notificări masive pentru rambursurile primite prin OLX/Vinted/SkinPort interpretându-le ca venituri comerciale impozabile. Realitate juridică: vânzarea ocazională de bunuri personale (mobilă veche, haine purtate, jucării ale copiilor) NU este venit impozabil. Riscuri: (1) Dacă răspunzi cu depunere D212, recunoști implicit activitate comercială și pierzi dreptul la 'use personal'. (2) Dacă NU răspunzi în 30 zile, ANAF poate emite decizie din oficiu cu cotă 60% impozitare (vs 10% normal) pentru că nu poți dovedi prețul de achiziție. Strategie comunitate: (a) răspunde în 30 zile printr-o adresă formală care DECLARĂ natura personală a tranzacțiilor + atașează dovezi (extras OLX cu istoricul anunțurilor 'second-hand', factura inițială a obiectului); (b) NU recunoaște activitate comercială fără consultare juridică; (c) păstrează istoricul cumpărăturilor inițiale (Aliexpress, eMag, magazin fizic) — fără ele, ANAF poate aplica impozitare pe sumă brută integrală.",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — Notificare ramburs olx", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1m6oe2a/"},
+      {"label": "Reddit r/RoFiscalitate2 — Am primit raspuns ramburs", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1m6e3nn/"},
+      {"label": "Reddit r/RoFiscalitate2 — Notificare SPV ramburs", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1m2wdjr/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-declaratia-unica-precompletata-2026",
+    "title": "Declarația Unică precompletată 2026 — verificare obligatorie",
+    "tags": ["declaratia-unica", "212", "duf", "precompletat", "anaf", "2026"],
+    "body": "Începând cu 2026, ANAF a introdus Declarația Unică precompletată — accesibilă prin https://formularespv-pf.anaf.ro/declaratii/duf. La accesare apare un popup cu CPN-ul tău și o interfață de import date. Probleme observate: (1) Datele precompletate nu sunt întotdeauna complete sau corecte; (2) ANAF NU informează utilizatorul prin SPV că declarația a fost precompletată — utilizatorii s-au trezit cu D212 'pre-depusă' fără să știe; (3) Există utilizatori care raportează că li s-a generat declarație cu sume eronate, iar termenul de contestație începea înainte ca ei să afle. Recomandare: (a) verifică în mai-iulie (perioada de depunere) chiar dacă te aștepți ca ANAF să nu te contacteze; (b) compară fiecare poziție precompletată cu propriile evidențe; (c) păstrează backup PDF al variantei precompletate înainte de a o modifica/depune. Atenție: chiar și după precompletare, obligația finală de corectitudine îți aparține.",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — declaratia unica precompletata", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1s2rcv9/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-anaf-chatbot-ana-limitations",
+    "title": "ANA (chatbot ANAF) — limitări și riscuri de a urma sfaturile",
+    "tags": ["anaf", "ana", "chatbot", "ai", "support"],
+    "body": "Chatbotul ANA al ANAF este disponibil pe portal dar utilizatorii raportează: (1) Răspunsuri eronate la întrebări simple (ex: 'unde rezolv 070?' → 'duceți-vă la București' — fals); (2) NU există clauză 'am urmat sfatul AI-ului' pentru a justifica fapte fiscale ulterioare — ANAF NU acceptă AI-ul propriu ca sursă autoritativă; (3) Pentru spețe complexe (D212 broker, D406, dividende interimare), ANA recomandă să apelezi la jurist. Recomandare contribuabil: folosește ANA doar pentru întrebări procedurale simple (program de funcționare, adrese sedii, formulare standard). Pentru decizii fiscale: consultanță fiscală umană sau tool dedicat cu fundamentare normativă citată. ATENȚIE pentru utilizatorii Solo: chatbotul Solo are aceleași limitări — utilizatorii au raportat răspunsuri grave incorecte (mers la București pentru formular 070).",
+    "sources": [
+      {"label": "Reddit r/RoFiscalitate2 — Ați interacționat cu Ana", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1qndzvw/"},
+      {"label": "Reddit r/RoFiscalitate2 — ANA de la ANAF este ANALFABET", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1tba2ox/"},
+      {"label": "Reddit r/RoFiscalitate2 — Experienta Solo (chatbot greșit)", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1qh0ae0/"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-d394-bug-anaf-august-2025",
+    "title": "D394 — Bug ANAF August 2025 (eroare cont contabil)",
+    "tags": ["d394", "tva", "anaf", "bug-validator"],
+    "body": "În august 2025, validatorul ANAF pentru D394 a refuzat declarații corect generate cu mesaj 'Cont contabil corect' chiar și pentru conturi 4423/4424/4426/4427 standard. Bug-ul a fost cauzat de o actualizare în validatorul ANAF care nu sincroniza cu schema oficială. Soluție comunitate: (1) Așteaptă 24-48h pentru patch ANAF, NU re-genera la fiecare 5 minute; (2) Verifică conturile contabile vs SAF-T mapping (D406 a influențat indirect validarea D394); (3) Re-generează XML după update SAGA și încarcă MANUAL în DUKIntegrator (în loc de transmitere automată). Lecție generală: bug-urile ANAF de validator sunt frecvente și NU sunt anunțate de ANAF — singura sursă de info este comunitatea (forum SAGA, Reddit r/RoFiscalitate2). Recomandare: verifică forum-ul înainte de a presupune că eroarea e a ta.",
+    "sources": [
+      {"label": "SAGA Forum — Eroare DEC 394 August 2025 (36 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=60034"},
+      {"label": "SAGA Forum — Eroare SAF-T Cont contabil", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=58406"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-saga-vs-web-migration-data-loss",
+    "title": "SAGA Web migrare — riscuri pierdere date și revenire desktop",
+    "tags": ["saga", "saga-web", "migrare", "saas", "data-loss"],
+    "body": "Începând 2023-2024, SAGA a forțat migrarea de pe Desktop pe Web (SaaS). Probleme raportate de utilizatori în peste 100 thread-uri: (1) Datele din Excel exporturi își schimbă format (LL-ZZ-AA bug); (2) Funcționalități desktop nu sunt portate la web (gestiune complexă multi-punct, anumite importuri); (3) Tarifele Web pot crește în 2-3 ani fără posibilitatea reală de revenire la Desktop (pattern Intuit/QuickBooks); (4) Performanță mai lentă pentru contabili cu 30+ firme; (5) Nu poți automatiza operarea cu programe terțe — SAGA spune explicit 'obligatoriu o persoană să opereze și să salveze'. Recomandare migrare: (a) păstrează backup complet bază de date înainte; (b) testează 1 lună în paralel (desktop + web) pentru a identifica diferențe; (c) verifică exporturi Excel scadențe; (d) dacă ai >10 firme, evaluează costul de timp adăugat în primele 6 luni — poate justifica menținerea desktop până la stabilizare web.",
+    "sources": [
+      {"label": "SAGA Forum — Revenire la varianta Desktop (50 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=53641"},
+      {"label": "SAGA Forum — NOUL SAGA WEB", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=60565"},
+      {"label": "SAGA Forum — migrare saga web (54 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=54778"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "issue-cod-fiscal-punct-lucru-plata",
+    "title": "Plată impozite pentru punct de lucru — cod fiscal și trezorerie corecte",
+    "tags": ["punct-de-lucru", "trezorerie", "anaf", "d112", "plata"],
+    "body": "Procedură confuză pentru contabili la prima înregistrare punct de lucru: (1) Codul fiscal al punctului de lucru este DIFERIT de codul fiscal al firmei-mamă — primești un cod separat la înregistrare; (2) Plata se face la Trezoreria unde este ARONDATĂ firma-mamă, dar pe codul fiscal al PUNCTULUI de lucru; (3) Termenul de înregistrare: 30 zile de la înființare; ANAF trebuie să comunice primarului în 5 zile. Pași: solicitare înregistrare fiscală pentru punct de lucru → primire certificat înregistrare → plată impozite la Trezoreria firmei-mamă cu codul punctului. Confuzii frecvente: utilizatorii plătesc de două ori (ambele coduri) sau plătesc la trezoreria punctului de lucru în loc de cea a firmei-mamă. Tool potențial FiscCopilot: wizard 'plată impozite punct de lucru' cu generator OP corect.",
+    "sources": [
+      {"label": "SAGA Forum — ordin de plata pentru punctul de lucru D112", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=61163"},
+      {"label": "SAGA Forum — Cod fiscal pentru fiecare punct de lucru (106 replies)", "ref": "https://www.sagasoft.ro/forum/viewtopic.php?t=60715"}
+    ],
+    "last_verified": "2026-05-15"
+  },
+  {
+    "id": "insight-wtp-fisccopilot-pricing",
+    "title": "Insight pricing FiscCopilot — preț prag empiric 49-99 RON/lună",
+    "tags": ["pricing", "wtp", "competitor", "solo", "keez", "strategy"],
+    "body": "Analiza WTP din corpus 2024-2026: (1) Anchor explicit declarat: '15€/lună pentru tool care salvează 2-3h' (r/programare freelancer micro 2024); (2) Solo plătitor TVA = 1200 RON/an = 100 RON/lună; (3) Solo 119 RON/lună a fost ridiculizat public ('interfață mișto cu care nu fac nimic'); (4) Keez 500 RON/lună pentru plătitor TVA = considerat scump și exit-cost mare; (5) StartCo schimbare cod CAEN = 350 RON (vs Keez 204€ = 4x). Concluzie: prețuri 'safe' pentru FiscCopilot: Starter 49 RON (sub anchor 75 RON), Pro 99 RON (sub Solo 119), Studio 299-499 RON pentru contabili (10-30 firme). Diferențiator: 'NU sunt Ana ANAF / NU sunt Solo chatbot — răspund cu fundamentare normativă'. Tactic: prima depunere D406 sau primă reconciliere broker — gratuite pentru a converti pe pain real (utilizator care a primit somație).",
+    "sources": [
+      {"label": "Reddit r/programare — Sugestii facturare (15€)", "ref": "https://reddit.com/r/programare/comments/1gsjoeq/"},
+      {"label": "Reddit r/RoFiscalitate2 — Keez creste pretul (Solo 1200/an)", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1j35jb7/"},
+      {"label": "Reddit r/RoFiscalitate2 — Experienta Solo", "ref": "https://reddit.com/r/RoFiscalitate2/comments/1qh0ae0/"}
+    ],
+    "last_verified": "2026-05-15"
+  }
+]
