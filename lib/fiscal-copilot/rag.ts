@@ -15,11 +15,12 @@ import { FISCAL_CORPUS, type KnowledgeEntry } from "./corpus/seed-fiscal-ro";
 import { loadSagaManualCorpus } from "./corpus/saga-manual";
 import { loadForumInsightsCorpus } from "./corpus/forum-insights";
 import { loadCodFiscalCorpus } from "./corpus/cod-fiscal";
+import { loadPortalQuestionsCorpus } from "./corpus/portal-questions";
 
 export interface RetrievalResult {
   entry: KnowledgeEntry;
   score: number;
-  source: "seed" | "saga-manual" | "forum-insights" | "cod-fiscal";
+  source: "seed" | "saga-manual" | "forum-insights" | "cod-fiscal" | "portal-questions";
 }
 
 const STOP_WORDS = new Set([
@@ -211,7 +212,25 @@ export async function retrieveRelevantAsync(
     }))
     .filter((r) => r.score > 0);
 
-  return [...codFiscalResults, ...seedResults, ...forumResults, ...sagaResults]
+  // Portal questions — context examples (NU autoritate). Boost ×0.9 (intentional sub 1.0
+  // ca să apară doar când există match foarte specific — folosit ca "ai mai întrebat
+  // și alții, iată cum suna întrebarea").
+  const portal = await loadPortalQuestionsCorpus();
+  const portalResults: RetrievalResult[] = portal
+    .map((entry) => ({
+      entry,
+      score: scoreEntry(entry, tokens) * 0.9,
+      source: "portal-questions" as const,
+    }))
+    .filter((r) => r.score > 0);
+
+  return [
+    ...codFiscalResults,
+    ...seedResults,
+    ...forumResults,
+    ...sagaResults,
+    ...portalResults,
+  ]
     .sort((a, b) => b.score - a.score)
     .slice(0, topN);
 }
