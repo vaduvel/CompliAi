@@ -46,10 +46,24 @@ const STOP_WORDS = new Set([
 ]);
 
 /**
- * Normalizează un text: lowercase + diacritice (păstrăm ROfor că tag-urile sunt cu diacritice) + tokenize.
+ * Strip Romanian diacritics: ă/â→a, î→i, ș/ş→s, ț/ţ→t.
+ * Asta permite matching cross-diacritice ("inchiderea" matches "închiderea").
+ */
+function stripDiacritics(text: string): string {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/ş/g, "s")
+    .replace(/Ş/g, "S")
+    .replace(/ţ/g, "t")
+    .replace(/Ţ/g, "T");
+}
+
+/**
+ * Normalizează: lowercase + strip diacritics + remove punctuation + tokenize.
  */
 function tokenize(text: string): string[] {
-  return text
+  return stripDiacritics(text)
     .toLowerCase()
     .replace(/[.,;:!?()'"]/g, " ")
     .split(/\s+/)
@@ -57,30 +71,69 @@ function tokenize(text: string): string[] {
 }
 
 /**
- * Scor: 3 pt match exact tag (case-insensitive), 1 pt match in title, 0.3 pt match in body.
+ * Match cross-token cu stemming aproximativ:
+ * - "inchidere" ↔ "inchiderea" ↔ "inchiderii" (ignoră sufixul -a/-ea/-ii/-lor)
+ * - "luna" ↔ "lunii" ↔ "lunara"
+ * Reducem fiecare token la "stem" prin strip-uire sufixe scurte comune RO.
+ */
+const RO_SUFFIXES = ["urilor", "ilor", "ului", "elor", "ile", "lor", "ea", "ii", "ul", "ei", "a", "i", "e"];
+
+function stem(token: string): string {
+  if (token.length <= 4) return token;
+  for (const suffix of RO_SUFFIXES) {
+    if (token.length > suffix.length + 2 && token.endsWith(suffix)) {
+      return token.slice(0, -suffix.length);
+    }
+  }
+  return token;
+}
+
+function matchTagToken(tag: string, qToken: string): boolean {
+  // After diacritic+lowercase normalize
+  const tagNorm = stripDiacritics(tag.toLowerCase());
+  // Token-by-token comparison al tag-ului (multi-word tags)
+  const tagTokens = tagNorm.split(/[\s-_]+/);
+  const qStem = stem(qToken);
+  for (const tt of tagTokens) {
+    const ttStem = stem(tt);
+    if (ttStem === qStem) return true;
+    if (ttStem.length >= 4 && qStem.length >= 4) {
+      if (ttStem.includes(qStem) || qStem.includes(ttStem)) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Scor: 3 pt match tag, 1 pt match in title, 0.3 pt match in body.
+ * Diacritic + stem aware pentru cazul "inchidere" vs "închiderea".
  */
 function scoreEntry(entry: KnowledgeEntry, queryTokens: string[]): number {
   let score = 0;
-  const titleTokens = new Set(tokenize(entry.title));
-  const bodyTokens = new Set(tokenize(entry.body));
-  const tagLower = entry.tags.map((t) => t.toLowerCase());
+  const titleTokens = new Set(tokenize(entry.title).map(stem));
+  const bodyTokens = new Set(tokenize(entry.body).map(stem));
 
   for (const qt of queryTokens) {
-    // Tag match (case-insensitive substring within any tag)
-    if (tagLower.some((tag) => tag.toLowerCase().includes(qt))) {
+    const qStem = stem(qt);
+    // Tag match (multi-word, diacritic-aware, stem-aware)
+    if (entry.tags.some((tag) => matchTagToken(tag, qt))) {
       score += 3;
     }
     // Title match
-    if (titleTokens.has(qt)) {
+    if (titleTokens.has(qStem)) {
       score += 1;
     }
     // Body match
-    if (bodyTokens.has(qt)) {
+    if (bodyTokens.has(qStem)) {
       score += 0.3;
     }
     // Specific declaration ID match (D205, D300, D406, etc.)
-    if (/^d\d{3}$/i.test(qt) && (entry.title.toLowerCase().includes(qt) || tagLower.includes(qt))) {
-      score += 5; // Strong boost for declaration codes
+    if (
+      /^d\d{3}$/i.test(qt) &&
+      (entry.title.toLowerCase().includes(qt) ||
+        entry.tags.some((t) => t.toLowerCase() === qt))
+    ) {
+      score += 5;
     }
   }
   return score;

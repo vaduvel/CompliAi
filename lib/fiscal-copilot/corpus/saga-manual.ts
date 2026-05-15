@@ -35,7 +35,11 @@ let cache: KnowledgeEntry[] | null = null;
 let loadPromise: Promise<KnowledgeEntry[]> | null = null;
 
 /**
- * Convertește un raw SAGA entry la KnowledgeEntry compatible cu RAG.
+ * Convertește un raw entry la KnowledgeEntry compatible cu RAG.
+ *
+ * Corpus-ul a fost filtrat să elimine referințe UI vendor-specific (butoane,
+ * ecrane, casete). Conceptele fiscale rămân neutre — aplicabile oricărui
+ * program de contabilitate / cabinet care urmează reglementările RO.
  */
 function toKnowledgeEntry(raw: SagaRawEntry): KnowledgeEntry {
   return {
@@ -45,7 +49,7 @@ function toKnowledgeEntry(raw: SagaRawEntry): KnowledgeEntry {
     tags: raw.tags,
     sources: [
       {
-        label: `SAGA Manual — ${raw.title}`,
+        label: `Documentație fiscală RO — ${raw.title}`,
         ref: raw.source_url,
       },
     ],
