@@ -1049,4 +1049,592 @@ AMENZI (L 70/2015 cumulativ):
     ],
     last_verified: "2026-05-15",
   },
+  {
+    id: "corectare-erori-cont-1174-vs-1171",
+    tags: ["corectare erori", "1174", "1171", "rezultat reportat", "OMFP 1802", "erori contabile"],
+    title: "Cont 1174 vs 1171 — distincția canonică pentru corectarea erorilor",
+    body: `CONT 1174 = Rezultat reportat provenit din corectarea erorilor contabile
+CONT 1171 = Rezultat reportat — profit/pierdere din anii precedenți (NEDISTRIBUIT)
+
+REGULA DE BAZĂ (OMFP 1802/2014 art. 63-65):
+- Erori NESEMNIFICATIVE → trec pe CHELTUIALA/VENITUL anului curent (NU 1174)
+- Erori SEMNIFICATIVE aferente anilor precedenți cu bilanț DEPUS → cont 1174
+
+CÂND FOLOSEȘTI 1174:
+1. Factură veche neînregistrată descoperită în anul curent (suma SEMNIFICATIVĂ):
+   1174 = 401  (cheltuială istorică)
+   4426 = 401  (TVA aferentă — dacă există drept de deducere)
+
+2. Anulare venit eronat înregistrat în anul precedent:
+   4111 = 1174 (cu minus) sau 1174 = 4111 (în roșu)
+
+3. Storno facturi emise eronat în anii precedenți:
+   4111 = 1174 (storno venit istoric)
+   4427 = 1174 (storno TVA istoric)
+
+4. Decizie ANAF — TVA/impozit suplimentar pentru anii precedenți:
+   635 sau 1174 = 446 (impozit suplimentar)
+   4426 sau 1174 = 4423 (TVA suplimentar de plată)
+
+5. Amortizare neînregistrată în anii precedenți:
+   1174 = 281x (recuperare amortizare istorică)
+
+ÎNCHIDEREA CONTULUI 1174:
+La sfârșitul exercițiului în care s-a făcut corectarea:
+- Sold CREDITOR 1174 → trece la 1171 (rezultat reportat)
+  1174 = 1171 (transfer la profit/pierdere reportat)
+- Sold DEBITOR 1174 → tot 1171 (acoperire pierdere reportată)
+  1171 = 1174
+
+NU se închide pe 121 (rezultat curent)! Asta ar distorsiona profitul/pierderea anului curent.
+
+TRATAMENT FISCAL CRUCIAL:
+- Sumele înregistrate prin 1174 NU sunt deductibile/impozabile la calculul impozitului pe profit din anul curent
+- Se ajustează D101 (rectificativa) pentru anul cu eroarea, NU se modifică 101 din anul curent
+- EXCEPȚIE: dacă eroarea este nesemnificativă (sub prag), se trece pe cheltuiala curentă și este deductibilă în anul curent (justificare: principiul materialității)
+
+PRAG SEMNIFICATIVITATE:
+OMFP 1802/2014 NU stabilește un prag fix. În practică:
+- Sub 5% din profit brut → nesemnificativă (politică contabilă proprie)
+- Peste 5% sau peste 1% din cifră afaceri → semnificativă obligatoriu pe 1174
+- Erori care schimbă rezultatul din profit în pierdere sau invers → ÎNTOTDEAUNA semnificative
+
+ATENȚIE PIERDERE FISCALĂ:
+Dacă corectezi prin 1174 pe profit istoric, pierderea fiscală reportată trebuie recalculată în D101 rectificativă.`,
+    sources: [
+      { label: "OMFP 1802/2014 art. 63-65 (corectarea erorilor)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 19 (impozit profit — erori)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "erori-semnificative-vs-nesemnificative-prag",
+    tags: ["erori semnificative", "erori nesemnificative", "OMFP 1802", "materialitate", "corectare erori"],
+    title: "Erori contabile semnificative vs nesemnificative — prag și tratament",
+    body: `OMFP 1802/2014 art. 63-65 — TRATAMENT ERORI CONTABILE:
+
+ERORI NESEMNIFICATIVE (curente):
+- Înregistrare pe seama VENITULUI/CHELTUIELII anului curent
+- Conturi: 7x (venituri) sau 6x (cheltuieli) cu data constatării
+- TRATAMENT FISCAL: deductibilă/impozabilă în anul curent
+- D101 anul curent (NU rectificativă anteriori)
+- Justificare în Registru Inventar + notă explicativă
+
+ERORI SEMNIFICATIVE:
+- Înregistrare pe cont 1174 (Rezultat reportat din corectare erori)
+- D101 rectificativă pentru anul cu eroarea (cu accesorii: dobânzi 0.02%/zi + penalități 0.01%/zi)
+- Bilanț depus NU se modifică retroactiv (excepție: descoperire înainte de aprobarea AGA)
+- TRATAMENT FISCAL: NU deductibilă/impozabilă în anul curent — ajustare anul cu eroarea
+
+PRAG SEMNIFICATIVITATE (politică contabilă proprie):
+- Practica curentă: 5% din profit brut sau 1% din cifră afaceri
+- Erori cumulative: dacă suma erorilor depășește pragul → toate semnificative
+- Schimbarea rezultatului (profit→pierdere sau invers) = AUTOMAT semnificativă
+- Erori cu impact pe TVA recuperabilă/plată → de obicei semnificative (impact ANAF)
+
+EXEMPLE PRACTICE:
+EROARE NESEMNIFICATIVĂ (firma 5M cifră afaceri, profit 200K):
+- Factură 1.000 lei neînregistrată 2024 → 600/611 = 401 în 2025 (sub 0.5% profit)
+
+EROARE SEMNIFICATIVĂ (aceeași firmă):
+- Factură 50.000 lei neînregistrată 2024 → 1174 = 401 + D101 rectificativă 2024 (25% profit)
+- TVA 9.500 lei nededus 2024 → 4426 = 401 cu 1174 prin diferență
+
+DECIZIE PERMANENTĂ:
+Politica contabilă proprie a firmei TREBUIE să definească pragul de materialitate în scris (politica contabilă internă) — auditat de cenzori/auditori dacă este cazul.
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Notă explicativă în Registru Inventar
+2. Hotărâre administrator (decizie corectare)
+3. Calcul accesorii (dobânzi + penalități) pentru rectificative
+4. Anexă la situațiile financiare anuale (rezumat erori corectate)`,
+    sources: [
+      { label: "OMFP 1802/2014 art. 63-65", ref: "https://legislatie.just.ro" },
+      { label: "Cod Procedură Fiscală art. 173-174 (dobânzi/penalități)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "regularizare-tva-schimbare-cota-avans-livrare",
+    tags: ["TVA", "schimbare cotă", "avans", "regularizare", "21%", "11%", "OUG 156/2024"],
+    title: "Regularizare TVA — schimbare cotă între avans și livrare (2025: 19→21% și 9→11%)",
+    body: `OUG 156/2024 a modificat cotele TVA de la 01.07.2025:
+- Cota standard: 19% → 21%
+- Cota redusă: 9% → 11%
+- Cota redusă: 5% → 11% (alimentație, cărți, medicamente)
+
+PROBLEMA RECURENTĂ: avans facturat cu cota veche (înainte 01.07.2025), livrare după 01.07.2025.
+
+REGULA FUNDAMENTALĂ (Cod Fiscal art. 291):
+TVA datorată = cota la data FAPTULUI GENERATOR (livrarea bunului / prestarea efectivă a serviciului)
+NU cota la data facturii de avans.
+
+PROCEDURĂ REGULARIZARE:
+
+1. FACTURA AVANS emisă cu cota veche (ex. 9% în iunie 2025):
+   - Bază: 29.136 lei + TVA 9% = 2.622 lei
+   - Înregistrare 4111 = 419 + 4427 (TVA exigibilă la avans)
+
+2. FACTURA FINALĂ la livrare (ex. octombrie 2025, cotă nouă 11%):
+   Trei coloane:
+   a) STORNARE AVANS la cota veche (-29.136 + -2.622 TVA 9%)
+   b) FACTURARE LIVRARE TOTAL la cota nouă 11%
+   c) DIFERENȚĂ NET de încasat/restituit
+
+3. EXEMPLU CONCRET:
+   Avans iulie: 29.136 + 2.622 (9%) = 31.758 lei (deja achitat)
+   Livrare oct: 7.820 kg × 3.642 = 28.479 lei + TVA 11% = 3.133 lei = 31.612 lei
+
+   Factura finală conține:
+   - Storno avans: -29.136 lei + -2.622 TVA 9%
+   - Livrare totală: 28.479 lei + 3.133 TVA 11%
+   - Diferență netă: -657 lei (de restituit clientului) sau încasare diferență
+
+DECLARAȚII:
+- D300: stornare avans la rândul 12 (cota veche), facturare la rândul 9/10 (cota nouă)
+- D394: două rânduri separate (avans negativ + livrare pozitivă)
+- D406 (SAF-T): tip factură "388" (storno avans) + "380" (factură obișnuită)
+
+CAZ AVANS UE (achiziție intracomunitară):
+- Avans 2024 cu 19%, factură finală 2026 (după aplicare 21%):
+- Storno avans cu 19% (taxare inversă negativă pe cota veche)
+- Factură finală cu 21% (taxare inversă pe cota nouă)
+- Diferența 2% intră în TVA de plată în luna stornării
+- Conturi: 4426 = 4427 cu cota nouă, regularizare 4426 = 1174 cu diferența istorică (dacă semnificativă)`,
+    sources: [
+      { label: "OUG 156/2024 (modificare cote TVA)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 282, 291 (fapt generator + cote)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF (norme aplicare schimbare cotă)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "decizie-impunere-anaf-monografie",
+    tags: ["decizie impunere", "ANAF", "control fiscal", "monografie", "1174", "TVA suplimentar", "impozit suplimentar"],
+    title: "Decizie de impunere ANAF — monografie contabilă rezultat control fiscal",
+    body: `Rezultat control fiscal = decizie impunere cu TVA/impozit suplimentar + accesorii.
+
+PRINCIPIU GENERAL:
+- Sumele suplimentare = corectare retroactivă → cont 1174 (rezultat reportat din corectare erori)
+- Accesoriile (dobânzi + penalități) = cheltuială ANULUI deciziei (NU 1174) — sunt cheltuieli noi, nu corecții
+- NU se modifică rezultatul anilor controlați; ajustarea se face în 1174 + D101 rectificativă
+
+MONOGRAFIE COMPLETĂ:
+
+1. ÎNREGISTRARE DECIZIE PRIMITĂ (la data deciziei):
+   a) Impozit profit suplimentar:
+      1174 = 4411 (impozit profit suplimentar — anii anteriori)
+   b) TVA suplimentar de plată:
+      1174 = 4423 (TVA suplimentar; sau 4426 dacă era de recuperare anulată)
+   c) Impozit pe dividende suplimentar (rar):
+      1174 = 446 (impozit dividende suplimentar)
+   d) Accesorii (dobânzi + penalități):
+      6581 = 448 (cheltuieli — penalități nedeductibile fiscal!)
+      6588 = 448 (dobânzi de întârziere — nedeductibile)
+
+2. PLATA OBLIGAȚIILOR:
+   4411 = 5121 (plată impozit)
+   4423 = 5121 (plată TVA)
+   448 = 5121 (plată accesorii)
+
+3. STORNARE TVA NEDEDUCTIBIL ANULAT (când ANAF respinge TVA deductibil):
+   1174 = 4426 (anulare TVA deductibil aferent anilor controlați)
+   1174 = 4423 (TVA suplimentar de plată)
+
+4. ÎNCHIDERE 1174 LA SFÂRȘITUL ANULUI:
+   1174 = 1171 (transfer rezultat reportat din corectare erori la rezultat reportat)
+
+D101 RECTIFICATIVĂ:
+- Obligatoriu pentru anul/anii corectați
+- Termen: 5 ani de la data deciziei (prescripție drept rectificare)
+- Atenție: D101 rectificativă cu profit mai mare = recalcul amânat impozit + accesorii (deja achitate)
+
+ATENȚIE FISCAL:
+- Accesoriile (cont 6581/6588) sunt NEDEDUCTIBILE la calculul impozit profit anul curent
+- TVA suplimentar dat jos de ANAF din TVA deductibil = NU este cheltuială; trece direct pe 1174
+- Impozit profit suplimentar = NU este cheltuială deductibilă; trece pe 1174 (ajustare reportată)
+
+CONTESTAȚIE ANAF:
+Dacă firma contestă decizia (15 zile de la primire):
+- Înregistrare PROVIZORIE pe cont 168 sau 408 până la rezolvare contestație
+- 168/408 = 4423 (TVA suplimentar contestat)
+- Dacă contestația e admisă → storno înregistrare
+- Dacă contestația e respinsă → 1174 = 168/408 (definitivare datorie)`,
+    sources: [
+      { label: "Cod Procedură Fiscală art. 188, 268-270 (decizie impunere + contestație)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (cont 1174)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 25 alin. 4 lit. b (cheltuieli nedeductibile — penalități)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "preluare-evidenta-solduri-mostenite",
+    tags: ["preluare evidență", "solduri vechi", "461", "401", "5191", "casierie", "corectare", "due diligence"],
+    title: "Preluare evidență contabilă — solduri vechi neidentificabile (write-off canonic)",
+    body: `SCENARIU: contabil nou preia firmă cu solduri vechi în 461 (Debitori), 401 (Furnizori), 5191 (Credite bancare), 5311 (Casierie), 411 (Clienți) care nu au origine documentată.
+
+PROCEDURĂ DUE DILIGENCE OBLIGATORIE (înainte de orice write-off):
+
+1. INVENTARIERE ANALITICĂ:
+   - Listă toate soldurile pe analitice / persoană / contract
+   - Solicitare extrase de cont fiscă de la furnizori/clienți (confirmări sold)
+   - Verificare extrase bancare istorice (5191, 5121, 5311)
+   - Note explicative semnate de administrator pe fiecare sold
+
+2. ÎNCERCARE RECUPERARE/CLARIFICARE:
+   - Solduri creditoare 401 vechi (>3 ani) → solicitare furnizor confirmare
+   - Solduri debitoare 461/411 → demers recuperare (somație, instanță dacă >prag)
+   - Solduri 5191 nepotriviri vs extras → contact bancă pentru extras analitic
+
+3. PRESCRIPȚIE 3 ANI (Cod Civil art. 2517):
+   După 3 ani de la scadență:
+   - Datoria (cont 401) → prescriere → 401 = 7588 (venituri din prescriere)
+   - Creanța (cont 411/461) → write-off → 6588 = 411/461
+
+MONOGRAFII CANONICE:
+
+A) Sold creditor 5191 vechi (linie credit deja achitată — eroare 2023):
+   5191 = 1174 (corectare eroare retro — semnificativă)
+   Dacă nesemnificativ: 5191 = 7588 (venit din corectare anul curent)
+
+B) Sold creditor 461 (Debitori diversi — bani „dispăruți" din casierie):
+   ATENȚIE: ANAF impozitează ca venit din alte surse (10% conform Cod Fiscal art. 114-115)
+   Monografie după control ANAF:
+   1174 = 446 (impozit suplimentar pe venituri din alte surse)
+   461 = 1174 (închidere sold creditor)
+   sau 461 = 117x cu decizie administrator
+
+C) Sold furnizor 401 vechi (>3 ani, fără confirmare furnizor):
+   401 = 7588 (venit din prescriere — IMPOZABIL)
+   ATENȚIE: este venit impozabil → mărește profitul anului curent
+
+D) Sold client 411 vechi nerecuperabil:
+   - Dacă există provizion 491:
+     491 = 411 (anulare creanță + storno provizion 7814 = 491)
+   - Fără provizion: 6588 = 411 (cheltuială cu pierdere — DEDUCTIBILĂ doar dacă sunt îndeplinite condiții art. 25 alin. 3 lit. b Cod Fiscal: declarat în insolvență, instanță, sau dovadă imposibilitate)
+
+E) Plus/minus casierie inventariere:
+   PLUS casierie: 5311 = 7588 (venit impozabil)
+   MINUS casierie: 6588 = 5311 (cheltuială; nedeductibilă fără proces-verbal + decizie responsabilitate)
+   Acoperire de asociat: 5311 = 4551 (cont curent asociat — împrumut)
+
+DOCUMENTAȚIE OBLIGATORIE write-off:
+1. Proces-verbal inventariere semnat de comisia de inventar
+2. Demersuri documentate de recuperare (somații, scrisori — pentru deductibilitate)
+3. Hotărâre administrator pentru write-off (specifică suma, contul, justificarea)
+4. Notă explicativă în Registru Inventar
+5. Notificare AGA (asociați) dacă suma e materială
+
+ATENȚIE LITIGII:
+Solduri în litigiu (ex: 1174 din nepotriviri furnizor după control fiscal) NU se închid prin write-off — rămân până la sentință definitivă.`,
+    sources: [
+      { label: "OMFP 1802/2014 art. 63-65 (corectare erori)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Civil art. 2517 (prescripție 3 ani)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 25 alin. 3 lit. b (deductibilitate pierderi creanțe)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 114-115 (venituri din alte surse — impozit 10%)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "inventariere-plus-minus-monografie",
+    tags: ["inventariere", "plus marfă", "minus marfă", "casierie", "stoc", "diferențe inventar", "OMFP 2861"],
+    title: "Inventariere anuală — plus/minus marfă + casierie + implicații fiscale",
+    body: `OMFP 2861/2009 (norme inventariere) + OMFP 1802/2014.
+
+INVENTARIEREA OBLIGATORIE LA 31.12:
+- Stocuri (marfă, materii prime, produse finite)
+- Casierie + valori (timbre, tichete masă)
+- Imobilizări corporale + necorporale
+- Creanțe + datorii (cu confirmări extrase)
+
+REZULTATE POSIBILE LA INVENTAR:
+
+A) PLUS DE INVENTAR (faptic > scriptic):
+   1. Stoc marfă plus (eroare NIR sau intrări neînregistrate):
+      371 = 6588 (înregistrare plus stoc — cheltuială negativă/venit) — VARIANTA 1
+      sau 371 = 7588 (venit impozabil) — VARIANTA 2 (mai des folosită)
+      ATENȚIE: dacă plus din schimbarea cotei TVA → 4428 (TVA neexigibilă) trebuie ajustat
+
+   2. Plus casierie (rar — mai des minus):
+      5311 = 7588 (venit din plus inventariere)
+      IMPOZABIL la calcul profit + microîntreprindere
+
+   3. Plus mijloc fix (mij. fix neînregistrat):
+      213/214 = 117x (rezultat reportat) sau 7588 (dacă nesemnificativ)
+      Apoi se ia în amortizare cu data inventarului
+
+B) MINUS DE INVENTAR (faptic < scriptic):
+   1. Stoc marfă minus (lipsă inventar):
+      a) Vină responsabil → recuperare:
+         4282 = 7588 (debit angajat + venit)
+         5311/5121 = 4282 (recuperare prin reținere salariu)
+         NU este TVA colectat (nu e vânzare)
+
+      b) Cauze obiective (perisabilități în limite legale):
+         607 = 371 (descărcare stoc)
+         CHELTUIALĂ DEDUCTIBILĂ (Cod Fiscal art. 25 — în limitele norme perisabilități HG 831/2004)
+
+      c) Cauze nedovedite (furt nesancționat, lipsă fără responsabil):
+         607 = 371 (descărcare)
+         + TVA ajustare obligatorie: 4427 = 4426 (anulare TVA dedusă inițial — Cod Fiscal art. 304)
+         CHELTUIALĂ NEDEDUCTIBILĂ la calcul profit (Cod Fiscal art. 25 alin. 4)
+
+   2. Minus casierie:
+      6588 = 5311 (descărcare lipsă casierie)
+      ATENȚIE: nedeductibilă fără PV inventar + decizie responsabilitate
+      Acoperire prin asociat (creditare):
+      5311 = 4551 (împrumut asociat fără dobândă)
+
+C) MARFĂ DEPRECIATĂ / DEGRADATĂ:
+   a) Cu dovada (PV degradare, casare):
+      607 = 371 (descărcare)
+      TVA: NU se ajustează dacă există PV de la cauze obiective/calamitate
+      Cheltuială DEDUCTIBILĂ dacă proces verbal + cauze documentate
+
+   b) Fără dovadă (deteriorare de gestiune):
+      607 = 371 + 4427 = 4426 (ajustare TVA)
+      Cheltuială NEDEDUCTIBILĂ
+
+D) DIFERENȚE STOC între contabilitate și gestiune (soft eronat):
+   - Eroare nesemnificativă: ajustare cu 6588/7588 anul curent
+   - Eroare semnificativă: ajustare prin 1174 + D101 rectificativă
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Decizia administratorului de inventariere (comisie + termene)
+2. Listă inventar semnată pe fiecare gestiune
+3. Proces-verbal valorificare diferențe (comisie + administrator)
+4. Decizie încadrare cauze (perisabilități / vină / cauze obiective)
+5. Pentru perisabilități: aplicare norme HG 831/2004 (limite procente pe categorie)
+
+DECLARAȚII AFECTATE:
+- D300: ajustare TVA pe lipsuri (rând 31 — ajustări TVA dedus)
+- D101: cheltuieli deductibile/nedeductibile pe categorii
+- D406 (SAF-T): mișcări stoc cu tip "ADJ" (ajustare)`,
+    sources: [
+      { label: "OMFP 2861/2009 (norme inventariere)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (tratament rezultate inventar)", ref: "https://legislatie.just.ro" },
+      { label: "HG 831/2004 (norme perisabilități)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 25, 304 (deductibilitate + ajustare TVA)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "storno-facturi-anii-anteriori",
+    tags: ["storno", "facturi anii anteriori", "curs valutar", "TVA cota veche", "rectificative", "e-Factura"],
+    title: "Storno facturi anii anteriori — curs valutar, cotă TVA, rectificative",
+    body: `STORNAREA FACTURILOR EMISE ÎN ANII PRECEDENȚI:
+
+PRINCIPII FUNDAMENTALE:
+1. Storno se face cu DATA documentului inițial (NU data curentă) — Cod Fiscal art. 330
+2. Cota TVA aplicată = cota la data faptului generator inițial (NU cota curentă)
+3. Curs valutar = cursul din ziua facturii ORIGINALE
+4. Rectificative obligatorii pentru declarațiile lunilor inițiale (D300, D394, D406)
+
+MONOGRAFIE STORNO:
+
+A) Factură venit eronat 2023 (TVA 19%, prestare neefectuată):
+   Storno cu cotă originală 19%, curs original:
+   4111 = 1174 (anulare venit istoric)
+   4427 = 1174 (storno TVA colectat istoric)
+   sau pentru eroare nesemnificativă:
+   4111 = 707/704 (cu minus, în roșu) + 4427 cu minus
+
+   Dacă TVA la încasare:
+   4111 = 1174 (storno creanță)
+   4428 = 1174 (storno TVA neexigibilă)
+
+B) Factură valută stornată în luna ulterioară:
+   - Curs storno = CURS DATA FACTURII ORIGINALE (nu data stornării)
+   - Diferența de curs între facturare și storno = NU se calculează (e o anulare)
+   - Dacă factura a fost încasată parțial: diferența de curs realizată pe partea încasată rămâne în venituri/cheltuieli din diferențe curs (NU se stornează)
+
+C) Reemitere factură corectă valută:
+   - Curs reemitere = curs din ziua reemiterii (NOUĂ factură, NU continuarea celei vechi)
+   - Dacă pretul corect se aplică retroactiv la data inițială: diferența de curs se contabilizează la cheltuieli/venituri din diferențe curs
+
+D) Schimbare cotă TVA între facturare și storno:
+   - Factură emisă mai 2025 (19%) → storno august 2025 (după 21%):
+   - Storno cu COTA 19% (cota originală)
+   - Reemitere corectă tot cu 19% (dacă faptul generator e mai 2025) sau 21% (dacă faptul generator e după 01.07.2025)
+
+RECTIFICATIVE DECLARAȚII:
+- D300 luna originală: rectificativă cu valori negative la rândurile inițiale
+- D394 luna originală: rectificativă cu storno
+- D406 (SAF-T): tip „TipFactura: 388" (factură de stornare)
+- D101 anul cu eroarea: rectificativă dacă storno schimbă rezultatul
+
+CAZ FACTURĂ DUBLATĂ TRANSMISĂ SPV (e-Factura):
+Probleme dacă în 2025 retransmiteți eronat facturi din 2024:
+1. Comunicare imediată client (refuz prelucrare facturi)
+2. Înregistrare contabilă storno: 4111 = 1174 cu minus (anulare în contabilitate proprie)
+3. Notificare scrisă ANAF + administratori (deschidere ticket)
+4. NU se mai pot șterge din SPV — rămân ca facturi „dublate"
+5. Client va respinge factura ÎN SPV ("Factură primită cu obiecție" — mecanism nou ANAF din 2024)
+6. Documentar la procese verbale interne — protejare contestație
+
+ATENȚIE FACTURI VECHI 2018-2024 (înainte de e-Factura obligatoriu):
+- Pot fi încă înregistrate ÎN CONTABILITATE (NU mai pot fi transmise în SPV)
+- Tratament: 1174 = 401 (cheltuieli istorice semnificative)
+- TVA: 4426 = 401 (deductibil DOAR dacă nu s-a prescris dreptul de deducere — 5 ani de la facturare)
+- D300 rectificativă luna originală + D394`,
+    sources: [
+      { label: "Cod Fiscal art. 330 (stornarea facturilor)", ref: "https://legislatie.just.ro" },
+      { label: "OUG 120/2021 (e-Factura)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (1174 corectare erori)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "reclasificare-incadrare-eronata-mijloace-fixe",
+    tags: ["reclasificare", "obiecte inventar", "mijloace fixe", "marfă", "amortizare neînregistrată", "OUG 8/2026"],
+    title: "Reclasificare încadrare eronată — obiect inventar/marfă → mijloc fix (și invers)",
+    body: `SCENARII RECURENTE DE RECLASIFICARE:
+
+A) OBIECT INVENTAR (cont 303) → MIJLOC FIX (cont 213/214):
+   Justificare: depășește pragul de 2.500 lei (sau noul prag OUG 8/2026 → 3.500 lei din 2026)
+
+   MONOGRAFIE:
+   1. Casare obiect inventar (dacă încă în uz):
+      603 = 303 (descărcare obiect inventar)
+   2. Recunoaștere mijloc fix:
+      213/214 = 4754 (subvenții) sau 1174 (corectare eroare)
+      Mai uzual: 213/214 = 1174 (când vine din corectare istorică)
+   3. Calcul amortizare istoric (de la data achiziției originale):
+      1174 = 281x (amortizare cumulată retroactiv)
+   4. Amortizare curentă:
+      6811 = 281x (lunar)
+   5. Subvenții/surse finanțare (dacă există):
+      4754 = 7584 (rec. la profit/pierdere lunar conform amortizării)
+
+B) MARFĂ (cont 371) → MIJLOC FIX (213/214):
+   Scenariu: echipamente IT achiziționate ca marfă, fără să fi fost destinate revânzării
+
+   MONOGRAFIE:
+   1. Scoatere din stoc marfă:
+      6588 sau 1174 = 371 (cost istoric)
+   2. Recunoaștere mijloc fix:
+      213 = 1174 (sau venituri reportare dacă semnificativă)
+   3. Amortizare retroactivă:
+      1174 = 281x (cumulată de la data achiziției)
+   4. Curent: 6811 = 281x
+
+C) AMORTIZARE NEÎNREGISTRATĂ ANII PRECEDENȚI:
+   Scenariu: mijloc fix recunoscut corect, dar amortizare neînregistrată din 2023-2024
+
+   MONOGRAFIE:
+   - Amortizare istorică recuperată:
+     1174 = 281x (amortizare 2023-2024 cumulată)
+   - Amortizare curentă 2025+: 6811 = 281x normal
+   - D101 rectificativă pentru anii afectați (pierdere fiscală suplimentară din amortizare neînregistrată)
+   - Atenție: la calcul impozit profit anul curent, amortizarea fiscală este DEDUCTIBILĂ doar pe anul curent + reportul pierderii fiscale recalculate
+
+D) MIJLOC FIX → MARFĂ (rar):
+   Doar dacă administratorul decide vânzarea efectivă:
+   371 = 213/214 (valoare netă contabilă)
+   281x = 213/214 (descărcare amortizare cumulată)
+   Apoi: 4111 = 707 (vânzare) + 6583 = 371 (descărcare stoc)
+
+NORMA AMORTIZARE:
+Pentru reclasificări retroactive, amortizarea fiscală pe anii anteriori se ajustează în D101 rectificativă:
+- Anul recunoaștere: amortizare prorata (de la data achiziție efectivă)
+- Anii intermediari: amortizare 12 luni
+- Anul curent: continuă cu sold rămas
+
+PRAG AMORTIZARE (OUG 8/2026 — relevant pentru reclasificări 2026+):
+- Pragul pentru mijloc fix se majorează de la 2.500 lei la 3.500 lei începând cu 01.01.2026
+- Pentru bunuri achiziționate înainte: rămân la prag 2.500 lei (drept dobândit)
+- Reclasificările aplicate retroactiv folosesc pragul de la data achiziției
+
+DOCUMENTAȚIE:
+1. Notă constatare eroare semnată administrator
+2. Decizie reclasificare cu data și valorile
+3. Recalcul amortizare anex
+4. D101 rectificativă pentru anii afectați
+5. Calcul accesorii (dacă impozit profit suplimentar)`,
+    sources: [
+      { label: "OMFP 1802/2014 (clasificare imobilizări)", ref: "https://legislatie.just.ro" },
+      { label: "HG 2139/2004 (catalog mijloace fixe + durate amortizare)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 28 (amortizare fiscală)", ref: "https://legislatie.just.ro" },
+      { label: "OUG 8/2026 (prag mijloace fixe 3.500 lei)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "rectificative-declaratii-unified",
+    tags: ["rectificative", "D100", "D300", "D394", "D205", "D112", "D101", "D406", "accesorii", "termene"],
+    title: "Rectificative declarații fiscale — guide unificat (D100/D300/D394/D205/D112/D101)",
+    body: `REGULA GENERALĂ (Cod Procedură Fiscală art. 105):
+- Rectificativa poate fi depusă în orice moment până la expirarea termenului de prescripție (5 ani)
+- Calcul accesorii: dobânzi 0.02%/zi + penalități 0.01%/zi (de la termenul inițial al obligației)
+- Penalități de nedeclarare: 0.08%/zi pentru sume nedeclarate (peste rectificative)
+
+D100 — Declarație obligații lunare (impozit micro, salarii, impozit profit trimestrial):
+- Rectificativă: F1 = „T" + perioada corectată
+- Termen: oricând în 5 ani
+- Calcul accesorii dacă suma rezultantă e mai mare (de plată suplimentar)
+- Caz frecvent: impozit micro 1% calculat eronat ca 3% — rectificativă + cerere rambursare diferență
+- Procedură rambursare: cerere scrisă ANAF + extras D300/D100 corectate + decizie firmă
+
+D300 — Decont TVA:
+- Rectificativă: prin Spațiu Privat Virtual SPV, opțiunea „depune rectificativă"
+- Termen: în luna constatării (pentru erori în propria evidență); în 5 ani pentru erori cu impact
+- Atenție: rectificativă D300 modifică automat balanța TVA — verifică sold final cont 4423/4424
+- Caz: storno facturi anii anteriori → rectificativă D300 lunilor originale (cu valori negative la rândurile inițiale)
+
+D394 — Declarație informativă livrări/achiziții:
+- Rectificativă: în SPV, retransmite cu același număr ID, marcat rectificativă
+- Termen: lunar/trimestrial conform perioadei TVA
+- Caz frecvent: lipsă livrări cu taxare inversă (deșeuri) — rectificativă cu corespondență D300
+
+D205 — Declarație venituri câștigate de NR (nerezidenți) / persoane fizice:
+- Rectificativă: prin formular online (CNP greșit la beneficiar, sumă eronată)
+- Procedură CNP greșit:
+  1. D205 rectificativă cu valori 0 la CNP greșit
+  2. D205 nouă cu CNP corect + sumă corectă
+  3. Notificare beneficiar afectat (pentru fișa fiscală)
+  4. Nu există accesorii dacă suma rămâne aceeași (nu impozit suplimentar)
+
+D112 — Declarație contribuții salarii:
+- Rectificativă: pentru CO eronat, sume reținute eronat, lipsuri impozit
+- Caz: 4 zile concediu medical declarate în loc de 3 — rectificativă cu reducere o zi
+- Atenție SAGA: refacere stat plată în soft + retransmitere
+- Casa Sănătate poate solicita rectificativă pentru concedii medicale eronate
+
+D101 — Declarație anuală impozit profit / micro:
+- Rectificativă: oricând în 5 ani de la termen inițial
+- Termen inițial: 25 martie anul următor pentru impozit profit, 25 ianuarie pentru micro
+- Caz frecvent: nesocotire pierdere fiscală reportată — rectificativă cu pierdere recuperată
+- Pierderea fiscală: recuperabilă în 5 ani consecutivi (Cod Fiscal art. 25 alin. 14)
+- Exemplu: pierdere 2024 = 4.937 lei; profit 2025 = 2.626 lei → D101 2025 rectificativă cu pierdere recuperată; restul de 2.311 lei se reportează 2026 (max 5 ani)
+
+D406 — SAF-T (Standard Audit File for Tax):
+- Rectificativă: retransmitere fișier XML cu marcaj „rectificativă"
+- Termen: în 5 ani de la transmiterea inițială
+- Procesare ANAF: 1-5 zile; dacă rămâne „În prelucrare" >7 zile, contact departament tehnic
+- Atenție: rectificativă D406 poate forța recalcul D300 (corelație automată ANAF)
+
+CAZ COMPLEX: rectificative multiple corelate
+Scenariu: descoperit eronat venit 2024 → rectificativă D300, D394, D101 (toate corelate):
+1. ÎNTÂI rectificativă D300 + D394 luna originală
+2. APOI rectificativă D101 anul 2024 (cu noul profit)
+3. Plată diferență impozit + accesorii (calcul de la termen inițial)
+4. Înregistrare contabilă: 1174 = 4423 (TVA suplim) + 1174 = 4411 (impozit suplim) + 6581 = 448 (accesorii)
+5. D406 SAF-T pentru luna corectării (cu tip „AJ" — ajustare)
+
+CALCUL ACCESORII (dobânzi + penalități):
+- Dobândă: 0.02%/zi × suma × număr zile întârziere (de la termen inițial)
+- Penalitate: 0.01%/zi × suma × număr zile întârziere
+- Maxim cumulat: 100% din suma neachitată (după 13.9 ani fără plată)
+- Calculul se face în SPV automat la finalizare rectificativă
+
+ÎNREGISTRARE CONTABILĂ ACCESORII:
+6581 = 448 (cheltuieli cu dobânzi/penalități fiscale — NEDEDUCTIBILE)
+La plată: 448 = 5121`,
+    sources: [
+      { label: "Cod Procedură Fiscală art. 105, 173-174 (rectificative + accesorii)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 25 alin. 14 (pierdere fiscală recuperabilă 5 ani)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF (formulare D100, D300, D394, D101, D205, D112, D406)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
 ];
