@@ -3286,4 +3286,1042 @@ PROVIZIOANE SIMILARE recomandate (OMFP 1802):
     ],
     last_verified: "2026-05-15",
   },
+  {
+    id: "anc-negativ-legea-239-2025-art-153-24",
+    tags: ["ANC negativ", "activ net contabil", "Legea 239/2025", "art. 153^24", "capital social", "reîntregire", "dizolvare"],
+    title: "ANC negativ — Legea 239/2025 + art. 153^24 (reîntregire obligatorie)",
+    body: `LEGEA 239/2025 (publicată în M.O. 160/15.12.2025) — modificări la L 31/1990 referitor la ACTIV NET CONTABIL (ANC).
+
+DEFINIȚIE ANC (Activ Net Contabil):
+ANC = TOTAL ACTIVE - DATORII TOTALE = CAPITALURI PROPRII (cont 10x, 11x, 12x consolidat)
+
+Concret în bilanț:
+ANC = Capital social (1012) + Prime (104x) + Rezerve (106x, 1068, 1175) + Rezultat reportat (117x) + Profit/Pierdere curentă (121) ± Reevaluare (105) - Subvenții imobilizări (4751)
+
+ATENȚIE CALCUL: subvenții (4751) și reevaluare (105) — interpretări variate:
+- 4751 SUBVENȚII pentru imobilizări: NU se scad de obicei (sunt în capitalurile proprii dar cu obligație restituire)
+- 105 REZERVE din REEVALUARE: SE INCLUD ÎN ANC (cu rezerva că sunt nedistribuibile)
+
+REGULA FUNDAMENTALĂ (L 31/1990 art. 153^24, modificată de L 239/2025):
+
+PRAGURI CRITICE:
+1. ANC < 50% capital social subscris → AGA EXTRAORDINARĂ obligatorie (max 6 luni de la constatare)
+2. ANC < ZERO (negativ) → SITUAȚIE GRAVĂ + restricții puternice
+3. ANC < 50% capital social pentru DOI ANI consecutiv → posibilă DIZOLVARE de drept (Cod Civil art. 232)
+
+OBLIGAȚII ADMINISTRATOR la constatare ANC < 50% capital:
+1. Convocare AGA EXTRAORDINARĂ în max 6 luni
+2. AGA decide:
+   a) Reducere capital social până la nivel ANC (procedură ONRC + Monitor Oficial)
+   b) Majorare capital prin aport asociați (numerar sau în natură)
+   c) Dizolvare societate (lichidare voluntară)
+
+TERMEN REGLARE (art. 153^24 alin. 4 — modificat L 239/2025):
+Dacă AGA NU hotărăște dizolvarea, societatea este OBLIGATĂ ca până la încheierea exercițiului financiar ULTERIOR celui în care au fost constatate pierderile să procedeze la reducerea capitalului social cu un cuantum CEL PUȚIN egal cu pierderile care nu au putut fi acoperite din rezerve.
+
+INTERPRETARE PRACTICĂ:
+- Constatare la bilanț 2025 (depus aprilie 2026) → reglare obligatorie până la 31.12.2026
+- Constatare la bilanț 2024 (depus aprilie 2025) → reglare obligatorie până la 31.12.2025
+- IMPORTANT: termenul rulează din ANUL FINANCIAR în care s-a CONSTATAT pierderea, NU din anul depunerii bilanțului
+
+OPȚIUNI REGLARE ANC (cele mai des întâlnite):
+
+A) APORT ASOCIAT la CAPITAL SOCIAL (majorare):
+Procedura ONRC:
+1. Hotărâre AGA majorare capital
+2. Mențiune ONRC cu raport evaluator (dacă aport în natură)
+3. Mențiune în Monitor Oficial
+Monografie:
+5121 = 1012 (aport numerar)
+sau 4551 = 1012 (conversie împrumut în capital)
+Avantaj: NU este venit impozabil
+Dezavantaj: procedură lentă (30-60 zile) + costuri
+
+B) RENUNȚARE LA ÎMPRUMUT ASOCIAT (cont 1068 sau venit):
+Vezi entrie dedicate "renuntare-imprumut-asociat"
+Variante:
+- 4551 = 1068 (rezerve facultative — fără impact venituri)
+- 4551 = 7588 (venit impozabil — impact pe profit/cifra micro)
+
+C) APORT la REZERVE FACULTATIVE direct (NU prin majorare capital):
+5121 = 1068 (asociat depune bani direct în rezerve)
+Simplu, fără ONRC, fără impozit
+
+D) REDUCERE CAPITAL SOCIAL:
+- Capital subscris se reduce până la nivel ANC pozitiv
+- Procedură ONRC + Monitor Oficial (60-90 zile)
+- Util pentru companii vechi cu capital istoric foarte mare
+
+E) REEVALUARE IMOBILIZĂRI cu PLUS VALOARE:
+Dacă există active subevaluate (clădiri, terenuri vechi):
+Reevaluare ANEVAR → 213/214 = 105 (rezervă reevaluare) → crește ANC
+Atenție: reevaluarea efectivă necesită raport evaluator autorizat
+
+RESTRICȚII când ANC < 50% capital (Legea 239/2025 — NOU):
+
+1. DISTRIBUIRE DIVIDENDE — INTERZISĂ:
+Art. 691 (nou introdus): societățile cu ANC sub jumătate capital social NU pot distribui dividende (inclusiv interimare) din profitul curent.
+
+EXCEPȚIE: profitul curent (anul curent) poate fi distribuit DOAR pentru ACOPERIREA PIERDERILOR REPORTATE (NU către asociați).
+
+2. RESTITUIRE ÎMPRUMUTURI ASOCIAȚI — INTERZISĂ (art. 67 alin. 23-26 nou):
+Societățile cu ANC sub jumătate capital NU pot restitui împrumuturi acordate de asociați (numerar sau bunuri).
+
+Excepție: restituire prin conversie în capital (NU plată efectivă).
+
+3. ÎMPRUMUTURI NOI de la ASOCIAȚI — PERMISE:
+Asociații POT acorda noi împrumuturi (ajută la reîntregire ANC indirect prin creșterea activelor)
+
+4. RESTITUIRE ÎMPRUMUT TERȚ (NU asociat) — PERMISĂ:
+Restituirea împrumuturilor către bănci, alte societăți NE-AFILIATE rămâne permisă (Legea 239/2025 NU restricționează).
+
+SCENARIU TIPIC POST-2025:
+Bilanț 2025: ANC negativ -50.000 lei (capital 200 lei, creditare asociat 100.000 lei, pierdere -50.200 lei)
+Opțiuni:
+1. Renunțare creditare 50.200 lei → 4551 = 7588 (venit impozabil 16%)
+2. Conversie creditare în 1068: 4551 = 1068 (fără impozit imediat)
+3. Aport capital nou: 5121 = 1012 cu 100.000 lei (majorare ONRC)
+
+CAZ SUSPENDARE ACTIVITATE:
+Suspendarea la ONRC pe 3 ani NU SCUTEȘTE de obligația reîntregirii ANC. La revenirea din suspendare, obligația rămâne aplicabilă.
+
+CONSECINȚE NERESPECTARE:
+1. Amendă: 2.000 - 5.000 RON (Codul Civil + L 31/1990)
+2. ANAF poate solicita reglare prin acțiune în instanță
+3. POSIBILĂ DIZOLVARE de drept la ANC < 50% pentru 2 ani consecutiv
+4. Răspundere personală administrator pentru datoriile firmei (Codul Civil art. 222)
+
+BIFĂ ÎN BILANȚ:
+Formularul bilanț 2025 conține bifă specifică pentru declararea ANC < 50% capital — OBLIGATORIE bifare dacă situația se aplică.
+Nebifarea → posibil control fiscal + ajustare retroactivă (Cod Procedură Fiscală)
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Hotărâre AGA constatare ANC < 50% capital
+2. Decizie privind opțiune reglare (reducere/majorare capital sau dizolvare)
+3. Calcul ANC detaliat (anexă la AGA)
+4. Mențiune ONRC dacă reducere/majorare capital
+5. Pentru renunțare împrumut: declarație asociat + hotărâre AGA + monografie contabilă`,
+    sources: [
+      { label: "L 239/2025 (modificări L 31/1990 — ANC)", ref: "https://legislatie.just.ro" },
+      { label: "L 31/1990 art. 153^24, 67, 691 (capital + restricții)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (calcul capitaluri proprii)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "categorii-marime-entitati-tip-bilant",
+    tags: ["micro", "entitate mică", "entitate mijlocie", "entitate mare", "praguri bilant", "OMFP 1802", "S1001", "S1002"],
+    title: "Categorii mărime entități + tip bilanț — micro/mică/mijlocie/mare",
+    body: `OMFP 1802/2014 (cap. 1 secț. 2) + Directiva 2013/34/UE.
+
+CRITERIILE de MĂRIME (OMFP 1802/2014 pct. 9):
+
+MICROENTITĂȚI (max 2 din 3 criterii):
+- Total active: 2.250.000 LEI
+- Cifra de afaceri netă: 4.500.000 LEI
+- Număr mediu salariați: 10
+
+ENTITĂȚI MICI (max 2 din 3 criterii, peste micro):
+- Total active: 22.500.000 LEI
+- Cifra de afaceri netă: 45.000.000 LEI
+- Număr mediu salariați: 50
+
+ENTITĂȚI MIJLOCII (max 2 din 3 criterii, peste mici):
+- Total active: 75.000.000 LEI
+- Cifra de afaceri netă: 150.000.000 LEI
+- Număr mediu salariați: 250
+
+ENTITĂȚI MARI: depășesc 2 din 3 criterii mijlocii.
+
+REGULA DE TRANZIȚIE (OMFP 1802/2014 pct. 13):
+Entitatea schimbă categoria DOAR dacă, în DOUĂ EXERCIȚII FINANCIARE CONSECUTIVE, depășește/scade sub limitele a 2 din 3 criterii.
+
+EXEMPLU APLICARE REGULĂ DE TRANZIȚIE:
+Bilanț 2024: depășește 2 criterii peste micro
+Bilanț 2025: depășește 2 criterii peste micro
+→ În 2026 SE SCHIMBĂ la categoria "mici"
+
+Bilanț 2024: depășește 2 criterii peste micro
+Bilanț 2025: rămâne sub praguri micro
+→ Rămâne MICRO (nu se schimbă, fiindcă nu sunt 2 ani consecutivi peste)
+
+EXCEPȚIE primul an de activitate:
+- Societate înființată în 2024: aplică regula DIRECTĂ (chiar de la primul exercițiu)
+- Pentru 2024 și 2025: dacă în 2024 depășește 2 criterii → entitate mică în 2025
+
+PRIMUL AN DE ACTIVITATE: aplică regula de încadrare la categoria pe care o îndeplinește (fără regula de 2 ani consecutiv pentru FIRMELE NOI).
+
+PRAGURI ACTUALIZATE (OMFP 1802/2014 modificat 2024):
+- Micro: 2.250.000 / 4.500.000 / 10 (modificate de la 2024)
+- Mici: 22.500.000 / 45.000.000 / 50
+- Mijlocii: 75.000.000 / 150.000.000 / 250
+
+FORMULARE DE BILANȚ pe categorii:
+
+MICROENTITĂȚI: formular S1001 (Bilanț scurt micro)
+- Active circulante curente (rd 06-13)
+- Datorii curente (rd 16-23)
+- Capitaluri proprii (rd 24-35)
+- F30 simplificat
+- NU sunt obligate la note explicative detaliate
+
+ENTITĂȚI MICI: formular S1002 (Bilanț entitate mică)
+- Bilanț complet (active fixe + circulante + capitaluri detaliate)
+- Cont profit/pierdere complet (F20)
+- Note explicative obligatorii
+- F30 complet
+
+ENTITĂȚI MIJLOCII: formular S1002 (același cu entitate mică) + ANEXE SUPLIMENTARE:
+- Situația modificărilor capitalului propriu (obligatorie)
+- Situația fluxurilor de trezorerie (obligatorie)
+- Audit STATUTAR OBLIGATORIU (Legea 162/2017)
+
+ENTITĂȚI MARI: formular S1002 + IFRS pentru societățile listate:
+- Toate situațiile financiare complete (5 piese)
+- Audit statutar
+- Raport conducere
+- Raport sustenabilitate (CSRD pentru cele cu > 250 angajați și > 50 mil EUR cifră)
+- Consolidare grup obligatorie
+
+FORMULARE SPECIALE:
+
+S1014 = ONG cu activitate economică
+S1015 = ONG fără activitate economică
+S1039 = Bilanț LICHIDARE/DIZOLVARE (etapă I sau II)
+S1052 = Bilanț FUZIUNE/DIVIZARE
+
+ATENȚIE FORMULARE 2025+:
+ANAF publică anual modelele actualizate (de obicei în martie). Verifică la https://anaf.ro/declaratiionline pentru versiunea curentă.
+
+TERMENE DEPUNERE (OMFP 2861/2009 actualizat OUG 8/2026):
+1. Microîntreprinderi/Mici: 31 MAI anul următor (sau 31 martie pentru a rămâne micro — OUG 8/2026)
+2. Mijlocii/Mari: 31 MAI anul următor
+3. ONG: 30 APRILIE
+4. PFA/CMI/II: 31 IUNIE (declarație unică D212)
+5. Sucursale entități străine: 30 zile de la depunerea bilanțului mama
+6. An fiscal modificat: 31 mai după sfârșit an fiscal
+
+OBLIGAȚIE depunere micro RAMÂN LA MICRO (OUG 8/2026):
+Pentru a rămâne plătitor de impozit micro în 2026, situațiile financiare aferente 2025 trebuie depuse până la 31.03.2026.
+Depunere între 01.04.2026 și 31.05.2026: pierdere statutului de micro automatic (trecere la impozit profit din 01.01.2026).
+
+CONSECINȚE CATEGORII GREȘITE:
+- Bilanț depus pe categorie greșită (ex: micro în loc de mică) → BILANȚ NEVALID
+- Necesitate REDEPUNERE cu formular corect
+- Eventuale ajustări fiscale pentru anii afectați
+
+DETERMINARE INDICATORI:
+- Total active: bilanț ACTIV TOTAL la 31.12 (NU rulaje, NU media)
+- Cifra de afaceri: cont 70x rulaj anual (708-709 reduceri)
+- Salariați mediu: SUMA pontaje / 12 luni × COEFICIENT timp lucrat (ex: salariat 1/2 normă = 0.5)
+
+CASE EDGE: an cu activitate parțială
+- Societate înființată 01.07.2025: cifră anuală × (12/6) = anualizată pentru determinare categoriei`,
+    sources: [
+      { label: "OMFP 1802/2014 pct. 9-13 (categorii mărime)", ref: "https://legislatie.just.ro" },
+      { label: "Directiva 2013/34/UE (Accounting Directive)", ref: "https://eur-lex.europa.eu" },
+      { label: "OUG 8/2026 (termen 31.03 pentru micro)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "termen-depunere-bilant-oug-8-2026",
+    tags: ["termen bilant", "OUG 8/2026", "31 martie", "31 mai", "micro", "trecere profit"],
+    title: "Termen depunere bilanț 2025 + OUG 8/2026 (regulă specială micro)",
+    body: `OMFP 2861/2009 + OUG 8/2026 (regulă specială microîntreprinderi 2026).
+
+REGULA GENERALĂ:
+Situațiile financiare anuale se depun la ANAF/ONRC până la:
+- 30 APRILIE pentru ONG
+- 31 MAI pentru societăți comerciale, PFA, CMI
+
+EXCEPȚIE NOUĂ (OUG 8/2026):
+Pentru a păstra statutul de microîntreprindere în 2026, situațiile financiare aferente exercițiului 2025 TREBUIE depuse până la 31 MARTIE 2026.
+
+CONSECINȚE DEPUNERE DUPĂ 31.03.2026 (pentru micro):
+- Pierdere AUTOMATĂ statut micro de la 01.01.2026
+- Trecere la regim impozit profit (16%) începând cu 01.01.2026
+- Recalculare obligatorie D101 trimestre 1-2 2026 (cu impozit profit)
+- D100 trimestrial transformat în D101 anual cu trimestre
+
+EXCEPȚIE: depunere bilanț cu ÎNTÂRZIERE pentru anii 2023/2024:
+Dacă firma nu a depus bilanțurile pentru 2023 și 2024 la termen → automat plătitoare impozit profit (NU mai poate fi micro)
+Nu există posibilitate de "revenire la micro" prin depunerea retrospectivă a bilanțurilor.
+
+CINE TREBUIE SĂ DEPUNĂ BILANȚ:
+- Toate firmele active (cu activitate)
+- Microîntreprinderile, fără excepție
+- ONG-urile (chiar fără activitate economică)
+- Sucursalele de firme străine în RO
+
+CINE POATE DEPUNE DECLARAȚIE DE INACTIVITATE (în loc de bilanț):
+Societăți care în cursul anului fiscal:
+- NU au avut tranzacții (bancă, casierie)
+- NU au avut facturi emise sau primite
+- NU au avut salariați activi
+- NU au avut active sau datorii (sau le-au moștenit fără mișcare)
+
+Termen depunere declarație inactivitate: 25 IUNIE anul următor (extins de OPANAF)
+
+DACĂ EROARE — DEPUSĂ DECLARAȚIE INACTIVITATE în loc DE BILANȚ:
+Procedură corectare:
+1. Cerere la ANAF cu motivare eroare
+2. Anulare declarație inactivitate (formular 700 cu indicare)
+3. Depunere bilanț corect (cu rectificative dacă termen expirat)
+4. Recalcul accesorii (dobânzi, penalități) dacă impozit neplatit la termen
+
+DACĂ EROARE — DEPUSĂ BILANȚ în loc DE INACTIVITATE:
+Mai simplu: păstrează bilantul depus (cu valori 0 pe majoritatea liniilor) — nu e necesară corecție.
+
+REDEPUNERE BILANȚ (rectificativă):
+OMFP 450/2016 permite redepunere bilanț DOAR dacă:
+1. S-au descoperit erori MATERIALE care afectează indicatori cheie (active, capital, profit)
+2. Indicatorii raportați anterior diferă semnificativ
+3. Aprobat de AGA noua aprobare a situațiilor financiare rectificate
+
+Procedură rectificativă:
+1. Hotărâre AGA cu motivare rectificare
+2. Bilanț rectificativ (cu bifă rectificativă în PDF inteligent)
+3. Anexe corectate
+4. Depunere ONRC + ANAF în 60 zile de la AGA
+
+OBLIGAȚIE AGA pentru APROBARE BILANȚ:
+L 31/1990 art. 111-129: bilanțul TREBUIE aprobat de AGA înainte de depunere
+- AGA ordinară: maximum 5 luni de la sfârșitul exercițiului (până la 31 mai)
+- Termen depunere ONRC bilanț aprobat: maximum 6 luni de la sfârșit exercițiu (până la 30 iunie)
+- Termen ANAF: similar 30 iunie
+
+BILANȚ DEPUS FĂRĂ AGA — REGULARIZARE RETROACTIVĂ:
+Dacă s-a depus bilanț fără AGA prealabilă (situație frecventă în firme mici), se poate organiza AGA ULTERIOARĂ pentru aprobare retroactivă:
+- Hotărâre AGA care aprobă bilanțul deja depus
+- Mențiune motivare retroactivă
+- Anexare la depunere ONRC (chiar și după termen)
+
+DOCUMENTE OBLIGATORII ÎN ARHIVA ZIP BILANȚ:
+1. Formular bilanț PDF inteligent (semnat electronic)
+2. Anexele F10, F20, F30, F40 (corespunzător categoriei)
+3. Note explicative (pentru entitate mică+)
+4. Politici contabile (pentru entitate mijlocie+)
+5. Raport administrator (pentru entitate mică+)
+6. Raport audit (dacă audit obligatoriu)
+7. Raport cenzor (pentru SA + ONG cu cenzor obligatoriu)
+8. Pentru entitate mijlocie+: Situație modificări capital + Cash flow
+
+ATENȚIE SEMNĂTURĂ:
+- Reprezentant legal (administrator): semnătură ELECTRONICĂ CALIFICATĂ obligatorie
+- Întocmitor bilanț (contabil/expert contabil): semnătură electronică sau olografă (în funcție de role)
+- PDF inteligent permite DOAR DOUĂ semnături calificate (administrator + întocmitor)
+
+SANCȚIUNI NEDEPUNERE BILANȚ:
+- Nedepunere la termen: 1.000 - 10.000 RON (Legea 82/1991 art. 41)
+- Nedepunere repetată (3+ ani): inactivitate fiscală + dizolvare ONRC posibilă
+- Pentru entități mari: 10.000 - 30.000 RON + posibilă suspendare CAEN`,
+    sources: [
+      { label: "OMFP 2861/2009 (norme depunere situații financiare)", ref: "https://legislatie.just.ro" },
+      { label: "OUG 8/2026 (termen 31.03 micro)", ref: "https://legislatie.just.ro" },
+      { label: "L 82/1991 art. 41 (sancțiuni)", ref: "https://legislatie.just.ro" },
+      { label: "L 31/1990 art. 111-129 (AGA aprobare bilanț)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "semnare-situatii-financiare-2025",
+    tags: ["semnare bilant", "semnătură electronică", "calificată", "administrator", "contabil", "categorii 11 12 13"],
+    title: "Semnare situații financiare 2025 — calificată + roluri (11/12/13)",
+    body: `OMFP 2861/2009 + OPANAF (formular bilanț PDF inteligent).
+
+OBLIGAȚII SEMNARE (din 2024+):
+Situațiile financiare anuale TREBUIE semnate ELECTRONIC cu SEMNĂTURĂ CALIFICATĂ (eIDAS) de DOUĂ persoane:
+1. Reprezentant legal al entității (administrator)
+2. Persoană care întocmește bilanțul
+
+NU MAI SUNT ADMISE:
+- Semnături olografe (scrise de mână, scanate)
+- Semnături electronice avansate non-calificate (PAdES Basic)
+- Imagini de semnătură
+
+CATEGORIA ROL ÎNTOCMITOR (în formular PDF inteligent):
+
+COD 11 = EXPERT CONTABIL membru CECCAR (cu carnet + viză anuală)
+- Studii superioare ECONOMICE + stagiu CECCAR + examen
+- Numire prin contract servicii contabile cu firma
+- Răspundere profesională pentru semnătură
+
+COD 12 = CONTABIL ANGAJAT cu studii ECONOMICE SUPERIOARE (cod COR 121125)
+- Studii superioare în domeniul economic
+- Angajat al firmei (CIM)
+- Numit prin decizie administrator ca responsabil contabilitate
+
+COD 13 = CONTABIL ANGAJAT FĂRĂ studii superioare economice
+- Studii medii sau alte specializări
+- Angajat cu CIM la firmă
+- Permis pentru firmele MICRO și mici cu activitate redusă
+
+REGULA APLICARE:
+- Codul 11 (expert contabil): ÎNTOTDEAUNA acceptat
+- Codul 12 (contabil angajat economic): acceptat pentru orice categorie firma
+- Codul 13 (contabil fără studii economice): acceptat doar pentru micro/mici cu cifră < 4.500.000 lei
+
+CONTABIL la PROPRIA FIRMĂ:
+Administratorul firmei cu studii economice superioare + CIM la propria firmă POATE semna ambele roluri (reprezentant legal + întocmitor) — caz frecvent în micro.
+Codul în acest caz: 12 (în calitate de angajat economic) + bifă "administrator"
+
+CONTABILITATE EXTERNALIZATĂ (firmă servicii contabile):
+Persoana semnatară: expert contabil CECCAR (cod 11) cu împuternicire scrisă de la administratorul firmei beneficiar
+ATENȚIE: contractul de servicii TREBUIE să prevadă expres dreptul de semnătură electronică
+
+ÎMPUTERNICIRE NOTARIALĂ pentru DEPUNERE:
+Dacă semnatarul electronic NU este administrator, e necesară împuternicire notarială pentru:
+- Acces SPV firma client
+- Depunere declarații fiscale
+- Semnare bilanț în numele firmei
+
+PDF INTELIGENT — LIMITĂRI:
+- Permite EXACT 2 semnături calificate (administrator + întocmitor)
+- NU se pot adăuga semnături olografe (acestea se aplică pe documentele anexe DACĂ se solicită)
+- Semnăturile electronice se validează la DUK Integrator (online ANAF)
+
+VALIDARE DUK INTEGRATOR:
+Înainte de depunere, bilantul TREBUIE validat la DUK Integrator (formularul își generează automat un PDF semnat S1002 pentru transmitere prin e-guvernare).
+EROARE comună: DUK Integrator NU validează bilantul cu erori (corelații F10-F30 incorecte, lipsă semnături, etc.) — necesar corectare ÎNAINTE de depunere.
+
+EROARE TEHNICĂ la VALIDARE S1002:
+Cauze frecvente:
+1. Versiune browser/Java incompatibilă (recomandate IE 11 / Edge legacy / Firefox cu Java plugin)
+2. Semnătură expirată / nevalabilă la momentul validării
+3. PDF inteligent corupt (necesar redownload din SPV)
+4. Probleme conexiune la DUK Integrator (server ANAF)
+
+SOLUȚII:
+- Refresh browser + reîncărcare PDF
+- Verificare validitate semnătură electronică (panou de validare semnături)
+- Folosire formular alternativ (versiune offline)
+- Asistență departament tehnic ANAF
+
+PERSOANĂ ÎNTOCMITOR cu CIM PARȚIAL la FIRMĂ + LA ALTĂ FIRMĂ:
+Întocmitorul poate fi angajat cu CIM la firma respectivă (norma parțială) sau prestator extern.
+Pentru ONG fără salariați: contabilul de la altă firmă POATE întocmi bilantul (cu contract servicii + împuternicire pentru semnătură)
+
+RĂSPUNDERE LEGALĂ:
+- Administratorul: răspunde PENAL pentru veridicitate bilanț (Codul Penal art. 271-275)
+- Întocmitorul: răspunde CIVIL pentru erori procedurale (Cod Fiscal + L 31/1990)
+- Expertul contabil CECCAR: răspundere SUPLIMENTARĂ disciplinară (cod etic CECCAR)
+
+CAZUL: 2 ADMINISTRATORI ÎN SPV
+Dacă firma are 2 administratori cu drepturi depline, AMBII pot accesa SPV. Bilantul semnat de UNUL SINGUR este valid (NU e necesară semnătură ambilor).
+Atenție: fostul contabil neinrolat în SPV NU poate semna pentru administratorul actual fără împuternicire.
+
+ATENȚIE ROL "11/12/13" trebuie ales CORECT:
+- Greșeala în categoria rolului (ex: bifare 13 când persoana e expert contabil) → potențial control fiscal cu impunere bilanț recalificat
+- Recomandare: bifează cea mai înaltă categorie pe care o îndeplinește persoana semnatară`,
+    sources: [
+      { label: "OMFP 2861/2009 (semnare situații financiare)", ref: "https://legislatie.just.ro" },
+      { label: "Regulament eIDAS UE (semnături electronice)", ref: "https://eur-lex.europa.eu" },
+      { label: "OUG 75/1999 (CECCAR — experți contabili)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "audit-statutar-intern-praguri",
+    tags: ["audit statutar", "audit intern", "Legea 162/2017", "OUG 75/1999", "ASPAAS", "auditor", "cenzor"],
+    title: "Audit statutar + intern — praguri obligatorii + criterii",
+    body: `Legea 162/2017 (audit statutar) + OUG 75/1999 (organizare profesia auditor) + ASPAAS (autoritatea de supraveghere).
+
+AUDIT STATUTAR — OBLIGATORIU pentru (Legea 162/2017 art. 2):
+
+ENTITĂȚI MIJLOCII și MARI:
+- Depășire 2 din 3 criterii pentru 2 EXERCIȚII CONSECUTIVE:
+  - Total active: 22.500.000 LEI (NEW: pentru mijlocii 75M)
+  - Cifra afaceri netă: 45.000.000 LEI
+  - Număr mediu salariați: 50
+
+ENTITĂȚI MICI care DEPĂȘESC 2/3 CRITERII MICI:
+ATENȚIE: entitatea poate rămâne în categorie "mică" și totuși să fie OBLIGATĂ la audit dacă depășește 2 din 3 praguri "audit obligatoriu" (15.000.000 lei active / 33.000.000 lei CA / 25 angajați).
+
+PRAGURI AUDIT OBLIGATORIU (Legea 162/2017 specific):
+- Total active: 16.000.000 LEI (modificat)
+- Cifra afaceri netă: 32.000.000 LEI (modificat)
+- Număr mediu salariați: 50
+
+ÎNTÂLNIT 2 DIN 3 ÎN 2 ANI CONSECUTIVI → audit obligatoriu
+
+CATEGORII SPECIALE AUDIT OBLIGATORIU:
+1. Entități de interes public (PIE): bănci, asigurări, societăți listate la BVB
+2. Companii reglementate ASF (broker, fonduri investiții)
+3. Societăți cu acționari majoritari străini (în condiții specifice)
+4. Companii cu obiect activitate "audit"/"contabilitate" (CECCAR)
+5. Entități care au depășit pragurile audit obligatoriu
+
+AUDIT INTERN — OBLIGATORIU pentru (Legea 162/2017 + OUG 75/1999):
+
+CATEGORII OBLIGATORIU AUDIT INTERN:
+1. Companii de interes public (PIE): obligatoriu
+2. Companii listate la BVB: obligatoriu
+3. Entități SUPUSE AUDITULUI STATUTAR: opțional dar RECOMANDAT
+4. Companii grup cu departament audit intern central: poate fi externalizat la grup
+
+ENTITĂȚI MICI sau MIJLOCII AUDITATE:
+- Audit STATUTAR obligatoriu (dacă întâlnesc praguri)
+- Audit INTERN: NU obligatoriu (chiar dacă auditate statutar)
+- Bifă "audit intern organizat" în bilanț: NU (pentru entitățile fără obligație)
+
+ENTITATE MARE cu audit statutar:
+- Audit intern: OBLIGATORIU
+- Bifă "audit intern organizat" în bilanț: DA
+- Departament audit intern intern sau externalizat la firma autorizată ASPAAS
+
+CRITERIU "MARE CONTRIBUABIL":
+- Total active > 250M lei sau CA > 250M lei → poate fi calificat "Mare Contribuabil" de ANAF
+- Mare contribuabil = OBLIGATORIU audit intern (regulamente specifice ANAF)
+- Departament audit intern intern sau servicii externe (firme autorizate ASPAAS)
+
+CERINȚE PENTRU AUDITOR STATUTAR (Legea 162/2017):
+- Persoană fizică/juridică autorizată ASPAAS (registru public)
+- Independent față de entitatea auditată
+- NU poate fi simultan auditor și consultant (separare obligatorie)
+- NU poate audita o firmă care e client de servicii contabile a aceleiași firme
+
+CERINȚE PENTRU AUDITOR INTERN:
+- Studii superioare ÎN ECONOMIE/FINANȚE/AUDIT
+- Pregătire profesională specifică (CAFR, IIA International)
+- Pentru grupuri internaționale: pregătire CIA (Certified Internal Auditor)
+- Independent operațional față de departamentele auditate
+
+CENZOR vs AUDITOR — DIFERENȚE:
+CENZOR:
+- Aplicabil la SA și ONG (NU SRL)
+- Numit de AGA (3 cenzori titulari + 3 supleanți pentru SA)
+- Studii medii sau superioare în economie
+- Răspundere LIMITATĂ (verifică doar conformitate de bază)
+- Înlocuit de AUDITOR la SA care îndeplinesc praguri audit obligatoriu
+
+AUDITOR:
+- Profesionist autorizat ASPAAS (răspundere profesională mare)
+- Numit prin contract
+- Răspundere PROFESIONALĂ (asigurare profesională obligatorie)
+- Emite RAPORT AUDIT detaliat (opinia: fără rezerve / cu rezerve / contrară / abțineri)
+
+CENZOR la ONG fără utilitate publică:
+- NU este obligatoriu la fundații/asociații cu 7 sau mai puțini fondatori
+- Pot avea cenzor opțional din rândul asociaților
+- Bilanțul ONG NU necesită audit statutar (excepție: ONG de utilitate publică)
+
+ONG DE UTILITATE PUBLICĂ:
+- Audit statutar obligatoriu (chiar fără praguri financiare)
+- Cenzor SUPLIMENTAR la audit
+- Raportare specială la Min. Justiție
+
+INCOMPATIBILITĂȚI CENZOR/AUDITOR:
+- Persoană care e cenzor NU poate fi simultan auditor la aceeași entitate
+- Salariat firmă audit/contabilitate NU poate fi cenzor la o firmă auditată/asigurată servicii contabile de aceeași firmă (conflict interes)
+- Familie până în gradul 4 cu administrator/asociat — incompatibilitate cu auditor/cenzor
+
+REGULA "2 ANI CONSECUTIV" PENTRU AUDIT:
+Obligație audit statutar începe la al 2-LEA exercițiu consecutiv de depășire praguri.
+Exemplu:
+- 2024: depășire 2/3 criterii → încă fără obligație
+- 2025: depășire 2/3 criterii (al doilea an consecutiv) → AUDIT OBLIGATORIU pe 2025 (bilanț depus în 2026 cu raport auditor)
+
+INTRARE / IEȘIRE din audit obligatoriu:
+- INTRARE: 2 ani consecutiv peste praguri → audit obligatoriu din anul 2
+- IEȘIRE: 2 ani consecutiv sub praguri → poate renunța la audit (decizie AGA)
+
+DOCUMENTE ATAȘATE ÎN ARHIVA ZIP BILANȚ pentru AUDITATE:
+1. Raport audit statutar (semnat de auditor)
+2. Raport audit intern (dacă obligatoriu)
+3. Raport cenzori (pentru SA și ONG cu cenzor)
+4. Politici contabile detaliate
+5. Note explicative complete`,
+    sources: [
+      { label: "Legea 162/2017 (audit statutar)", ref: "https://legislatie.just.ro" },
+      { label: "OUG 75/1999 (organizare profesia auditor)", ref: "https://legislatie.just.ro" },
+      { label: "ASPAAS — registru auditori", ref: "https://aspaas.gov.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "bilant-lichidare-dizolvare-s1039",
+    tags: ["lichidare", "dizolvare", "S1039", "bilanț lichidare", "etape", "voluntară", "simultană"],
+    title: "Bilanț lichidare/dizolvare — S1039 + etape + monografie închidere",
+    body: `L 31/1990 art. 227-237 (dizolvare/lichidare) + OMFP 1376/2004 (norme bilanț lichidare).
+
+DEFINIȚII:
+DIZOLVARE = decizia oprire activitate firmă
+LICHIDARE = procedura efectivă închidere (după dizolvare)
+DIZOLVARE+LICHIDARE SIMULTANĂ = procedură rapidă (firme fără datorii/active complicate)
+
+CAUZE DIZOLVARE (L 31/1990 art. 227):
+1. Expirare durată firmei (rar)
+2. Decizie AGA (cea mai frecventă)
+3. Imposibilitate realizare obiect activitate
+4. Faliment / insolvență (procedură specială)
+5. Dizolvare de drept (ANC < 50% pentru 2 ani consecutivi nereglat — Legea 239/2025)
+
+FORMULARUL DE BILANȚ pentru LICHIDARE/DIZOLVARE:
+S1039 = Bilanț specific lichidare/dizolvare
+- Bifă etapă: I (la deschidere lichidare) sau II (la închidere)
+- Conține bilanț + cont profit/pierdere + note explicative
+
+ETAPE LICHIDARE VOLUNTARĂ:
+
+ETAPA 1 — DESCHIDERE LICHIDARE:
+1. Hotărâre AGA dizolvare (publicată în Monitor Oficial — Partea IV)
+2. Numire lichidator (poate fi administratorul existent sau alt lichidator autorizat)
+3. Bilanț LA DATA HOTĂRÂRII AGA (NU la 31.12)
+4. Depunere S1039 etapa I la ONRC + ANAF în 30 ZILE de la AGA
+5. Notificare creditorilor (Monitor Oficial)
+6. Publicare în 30 zile de la AGA
+
+ETAPA 2 — ÎNCHIDERE LICHIDARE:
+1. Recuperare creanțe + plată datorii
+2. Vânzare/distribuire active
+3. Calcul rezultat lichidare (profit/pierdere finală)
+4. Plata impozit lichidare (impozit profit pe rezultatul lichidării)
+5. Distribuire reziduu asociaților
+6. Bilanț FINAL DE LICHIDARE (S1039 etapa II)
+7. Radiere la ONRC (eliminarea din registrul comerțului)
+
+LICHIDARE SIMULTANĂ (procedură rapidă):
+- Aplicabilă firmelor FĂRĂ DATORII + FĂRĂ ACTIVE COMPLEXE
+- Hotărâre AGA cu mențiune "dizolvare simultană cu lichidare"
+- O SINGURĂ etapă (NU 2 etape)
+- Termen: 30 ZILE de la publicare Monitor Oficial pentru obiecții creditori
+- Dacă nu există obiecții → radiere directă
+
+MONOGRAFIE CONTABILĂ LICHIDARE (canonică):
+
+Situație inițială (de la balanță):
+- Cont 1012 (capital social) = creditor
+- Cont 1171/121 (profit/pierdere reportat/curent)
+- Cont 4551 (creditare asociat)
+- Cont 5311/5121 (numerar)
+- Cont 411/461 (creanțe)
+- Cont 401/421 (datorii)
+
+PAS 1 — Recuperare creanțe:
+5121 = 411 (încasare clienți)
+Dacă nu se recuperează: 6588 = 411 (pierdere)
+
+PAS 2 — Plată datorii:
+401 = 5121 (plată furnizori)
+421 = 5121 (plată salarii dacă există)
+
+PAS 3 — Vânzare active:
+5121 = 7583 (venit din vânzare imobilizări)
+6583 = 213/214 (descărcare valoare contabilă)
+281x = 213/214 (anulare amortizare)
+
+PAS 4 — Închidere conturi venituri/cheltuieli:
+121 = 6xx (preluare cheltuieli pe rezultat)
+7xx = 121 (preluare venituri pe rezultat)
+
+PAS 5 — Calcul impozit lichidare (dacă profit):
+691 = 4411 (impozit profit pe rezultat lichidare)
+4411 = 5121 (plată impozit)
+
+PAS 6 — Închidere rezultat curent:
+121 = 1171 sau invers (transfer rezultat reportat)
+
+PAS 7 — Distribuire reziduu către asociați:
+1171 = 5311/5121 (cu calculul impozit dividende 10% pe sume distribuite)
+1012 = 5311/5121 (restituire capital social)
+4551 = 5121 (rambursare împrumut asociat)
+
+CAZ SPECIFIC: ATRIBUIRE IMOBIL la ASOCIATUL UNIC:
+- Imobil din 212 (clădire) trece în proprietatea asociatului prin distribuire în natură
+- Monografie:
+  1012 = 212 (până la valoarea capital social — fără impozit)
+  117x = 212 (rest peste capital — IMPOZABIL ca dividend distribuit în natură)
+  Impozit pe dividende 10% pe partea peste capital
+- ATENȚIE: imobilul trece în proprietate prin act notarial (NU automat)
+
+IMPOZIT DIVIDENDE LA LICHIDARE:
+- Distribuire reziduu către asociați = DIVIDENDE (Cod Fiscal art. 91-97)
+- Cota: 10% (cota standard 2025) sau alte cote (asociați PJ — 0% în condiții specifice)
+- Plata: 25 a luni următoare distribuirii
+- D205: declarare beneficiari
+
+CAZ ONG la LICHIDARE:
+- Activele NU pot fi distribuite asociaților (statut ONG)
+- TREBUIE transferate către alte ONG sau către stat
+- Bilanț S1039 cu mențiune destinație active
+- NU se aplică impozit pe distribuire (este transfer non-profit)
+
+CAZ FALIMENT (procedură specială):
+- Bilanț ÎNTOCMIT de lichidator judiciar (NU de firma însăși)
+- Procedură guvernată de L 85/2014 (insolvență)
+- Bilanț FINAL după plata tuturor datoriilor (în ordinea legală: salariați, fisc, garantați, chirografari)
+- Reziduu eventual: către asociați (rar — de obicei nu rămâne)
+
+DECLARAȚII FINAL LICHIDARE:
+1. D101 anul lichidării (cu calcul impozit pe rezultat lichidare)
+2. D300 ultimul decont TVA (cu sold 0 sau de rambursare ANAF)
+3. D406 SAF-T anual (Active) pentru perioada anului lichidării
+4. Decont radiere TVA (formular 700 cu radiere cod TVA)
+
+DECONT DE TVA pentru RADIERE:
+- Stocuri rămase: ajustare TVA (dacă TVA fusese dedus la achiziție)
+- Imobilizări nedistribuite: ajustare TVA pe partea neamortizată (Cod Fiscal art. 305-306)
+- Cerere rambursare TVA dacă există sold TVA de recuperat
+
+EVALUARE CREANȚE/DATORII în VALUTĂ la LICHIDARE:
+- Suspendare activitate firmă → NU se mai reevaluează creanțele/datoriile (păstrare la cursul de pe data suspendării)
+- La închidere finală: reevaluare ultima la cursul BNR de la data radierii (diferența pe 765/665)
+
+BILANȚ DEPUS DUPĂ RADIERE:
+Dacă firma e deja radiată la ONRC (ex: ianuarie 2026), NU mai are obligație depunere bilanț pentru 2025 (ANAF nu mai are evidență firmă). Excepție: dacă există proceduri în curs (recuperări TVA, etc.).`,
+    sources: [
+      { label: "L 31/1990 art. 227-237 (dizolvare/lichidare)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1376/2004 (norme bilanț lichidare)", ref: "https://legislatie.just.ro" },
+      { label: "L 85/2014 (procedura insolvenței)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "dividende-interimare-regularizare-bilant",
+    tags: ["dividende interimare", "regularizare", "456", "457", "463", "T4", "710", "S1002", "bilanț interimar"],
+    title: "Dividende interimare — regularizare T4 + S1002 + activ net pozitiv",
+    body: `Cod Fiscal art. 67^1 + L 31/1990 art. 67 alin. 4 + L 239/2025 (restricții ANC).
+
+REGULA INTERIMARE (Cod Fiscal art. 67^1):
+Dividende interimare = distribuiri TRIMESTRIALE din profitul anului curent, pe baza unui BILANȚ INTERIMAR (S1002).
+
+CONDIȚII OBLIGATORII pentru distribuire interimară:
+1. Bilanț interimar întocmit + aprobat de AGA (S1002)
+2. Activ Net Contabil POZITIV (peste 50% capital social — Legea 239/2025 nou)
+3. Profit interimar SUFICIENT (peste rezerve legale obligatorii)
+4. Hotărâre AGA pentru distribuire (cu suma + beneficiari + dată plată)
+
+LIMITAREA NOUĂ (Legea 239/2025):
+Societățile cu ANC sub jumătate capital NU pot distribui dividende interimare (interdicție absolută).
+Doar acoperire pierderi reportate (profitul intern poate stinge pierderile, NU distribuit asociaților).
+
+PERIOADE STANDARD pentru BILANȚ INTERIMAR:
+- T1: 31.03 (depus cu raportarea semestrială 16.08)
+- T2: 30.06 (semestrial)
+- T3: 30.09 (cea mai frecventă pentru interimare)
+- T4: 31.12 → DIN bilanțul anual normal (NU interimar)
+
+IMPOZIT DIVIDENDE INTERIMARE:
+- Cotă: 10% (cota standard 2025+)
+- Reținut la sursă la plata efectivă
+- Declarat în D100 lunar (cont 4424 — Impozit dividende)
+- Plătit până la 25 luna următoare distribuirii
+- Declarat în D205 anuală (toate distribuirile)
+
+REGULARIZARE LA SFÂRȘIT AN (cel mai recurent topic):
+
+SCENARIU TIPIC:
+- T3 (30.09): distribuire interimară 310.000 lei (ridicare bani + impozit 31.000 reținut)
+- Net plătit: 279.000 lei
+- 31.12: bilanțul anual final arată profit NET = 273.987 lei
+- DIFERENȚĂ: 310.000 distribuit > 273.987 profit → restituire OBLIGATORIE de la asociat
+
+MONOGRAFIE INTERIMARĂ (T3 — distribuire):
+1. Constatare profit interimar:
+   121 = 1171 (preluare temporară profit interimar)
+2. Decizie distribuire:
+   463 = 456 (Decontări asociați conturi curente — 310.000 lei brut)
+3. Reținere impozit 10%:
+   456 = 4424 (impozit dividende — 31.000 lei)
+4. Plată netă către asociat:
+   456 = 5121 (279.000 lei)
+5. Plată impozit ANAF:
+   4424 = 5121 (31.000 lei)
+
+REGULARIZARE T4 (la 31.12 cu profit final < interimar):
+
+SCENARIU A) ASOCIAT RESTITUIE diferența:
+1. Calcul diferență: 310.000 - 273.987 = 36.013 lei (suma de restituit)
+2. Notă contabilă regularizare:
+   456 = 463 (storno parțial distribuire, cu minus)
+3. Restituire de la asociat:
+   5121 = 456 (asociat restituie net 32.412 lei după impozit 10%)
+4. Rectificare D100 (impozit dividende mai mic):
+   4424 = 456 (storno parțial impozit pe diferență — 3.601 lei)
+
+5. Rectificare D205 ANUALĂ:
+- Coloana valori distribuite: reduce cu 36.013 lei
+- Coloana impozit: reduce cu 3.601 lei
+
+SCENARIU B) Profit suficient (distribuire interimară < profit final):
+- 310.000 lei distribuit + 50.000 lei suplimentar din T4 → 360.000 lei total
+- Distribuire suplimentară: 456 = 463 (50.000 lei) + reținere 10% impozit
+- D205 raportează TOATĂ distribuirea (310.000 + 50.000)
+
+SCENARIU C) NICI O REGULARIZARE necesară:
+Dacă asociatul UNIC nu ridică banii efectiv (rămâne în 456 ca datorie):
+- Datoria 456 rămâne în bilanț
+- NU se mai face regularizare contabilă (banii nu au fost încasați)
+- IMPOZITUL deja plătit la T3 rămâne ca a fost (NU se cere rambursare)
+
+ATENȚIE LEGEA 239/2025 — restricții 2026:
+Dacă firma se află ÎN AN CU PROFIT (înainte de bilanț final) și constată ANC < 50% capital → INTERDICȚIE retrospectivă pe distribuirile deja efectuate?
+NU: distribuirile deja efectuate înainte de constatare RĂMÂN VALIDE. Doar distribuirile VIITOARE sunt interzise.
+
+DACĂ ASOCIATUL UNIC nu DOREȘTE să primească dividende:
+Opțiuni:
+1. Repartizare la rezerve facultative (1068):
+   121 = 1068 (transfer profit la rezerve)
+2. Repartizare la rezultat reportat (1171):
+   121 = 1171 (păstrare la dispoziție anilor următori)
+3. Distribuire dividende oricum + asociatul nu le ridică (rămân în 456)
+
+ATENȚIE: opțiunea 1 sau 2 sunt PREFERATE pentru economia de impozit pe dividende (10%).
+
+DIVIDENDE PREFERENȚIALE (Legea 239/2025):
+Asociatul A primește dividende, asociatul B preferă rezerve:
+Hotărâre AGA cu mențiune distribuire diferențiată:
+- Asociat A (50%): primește 50 lei dividende (cu reținere 10%)
+- Asociat B (50%): partea sa de 50 lei trece la 1068 (rezerve facultative)
+ATENȚIE: legalitatea depinde de actul constitutiv — unii experți consideră ilegală distribuirea diferențiată.
+
+BILANȚ INTERIMAR (S1002) — STRUCTURA:
+- Identic cu bilanț anual dar pentru perioada parțială (1.1 — 30.09)
+- Cont profit/pierdere parțial
+- F30 simplificat
+- Note explicative reduse
+
+DEPUNERE S1002 la ANAF:
+- OBLIGATORIE pentru distribuirea interimară
+- Termen depunere: în 30 zile de la AGA distribuire
+- Bilanț atașat la hotărârea AGA pentru ONRC dacă se cere
+
+DOCUMENTE OBLIGATORII:
+1. Bilanț interimar S1002 (semnat electronic)
+2. Cont profit/pierdere interimar
+3. Hotărâre AGA distribuire (cu sumă, beneficiari, dată)
+4. Document plată impozit ANAF
+5. Document plată dividende către asociat (extras bancar)
+6. D100 luna cu distribuire (impozit dividende inclus)
+7. D205 anuală (toate distribuirile cumulative)`,
+    sources: [
+      { label: "Cod Fiscal art. 67^1, 91-97 (dividende + impozit)", ref: "https://legislatie.just.ro" },
+      { label: "L 31/1990 art. 67 (dividende interimare)", ref: "https://legislatie.just.ro" },
+      { label: "L 239/2025 (restricții ANC distribuire)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (bilanț interimar)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "acoperire-pierdere-reportata",
+    tags: ["acoperire pierdere", "1171", "1068", "1175", "1041", "rezerve", "prime emisiune", "pierdere reportată"],
+    title: "Acoperire pierdere reportată — surse 1068, 1175, 1041, capital",
+    body: `L 31/1990 art. 69 + OMFP 1802/2014 (rezultatul reportat).
+
+ORDINEA LEGALĂ de ACOPERIRE PIERDERE REPORTATĂ (1171 debitor):
+
+PASUL 1 — REZULTAT CURENT POZITIV (cont 121 creditor):
+121 = 1171 (preluare profit curent pe acoperire pierdere)
+PRIORITATE: profitul anului curent acoperă întâi pierderile reportate (Cod Fiscal art. 25 alin. 14)
+
+PASUL 2 — REZERVE FACULTATIVE (1068):
+1068 = 1171 (acoperire din rezerve facultative)
+Aplicare: dacă există rezerve constituite voluntar din profit anterior
+
+PASUL 3 — REZERVE LEGALE (1061):
+ATENȚIE: rezerva legală 1061 NU se folosește direct pentru acoperire pierderi (rezerva legală este obligatorie minim 5% profit anual până la 20% capital).
+Dacă rezerva legală depășește 20% capital, surplusul poate trece pe 1068 și apoi la acoperire pierdere:
+1061 = 1068 (transfer surplus la rezerve facultative)
+1068 = 1171 (acoperire pierdere)
+
+PASUL 4 — REZERVE din REEVALUARE (1175):
+1175 = 1171 (acoperire pierdere din surplus realizat reevaluare)
+Aplicabil DOAR dacă rezerva s-a REALIZAT (active reevaluate vândute sau amortizate complet)
+Pentru rezerve 105 NEREALIZATE: NU se pot folosi direct (sunt neidstribuibile)
+
+PASUL 5 — PRIME DE EMISIUNE (1041):
+1041 = 1171 (acoperire din prime emisiune capital)
+Aplicare: dacă firma a primit prime la emisiunea/majorarea capital social (rar la SRL)
+
+PASUL 6 — REDUCERE CAPITAL SOCIAL (1012):
+1012 = 1171 (reducere capital social pentru acoperire pierdere)
+Procedură ONRC:
+1. Hotărâre AGA reducere capital
+2. Anunț Monitor Oficial (60 zile pentru obiecții creditori)
+3. Mențiune ONRC
+4. Reflectare contabilă în luna mențiunii ONRC
+
+SCENARIU TIPIC: ACTIV NET NEGATIV cu PIERDERI MARI
+Exemplu balanță:
+- 1012 = 200 lei (creditor)
+- 1061 = 40 lei (creditor)
+- 1068 = 139.427 lei (creditor)
+- 1171 = -461.924 lei (debitor — pierdere mare)
+- 121 = -119.466 lei (debitor — pierdere curentă)
+
+Pași acoperire:
+1. 1068 = 1171 (139.427 lei) → 1171 rămâne -322.497 lei
+2. 1061 = 1068 (40 lei) → 1068 = 0, 1061 = 0
+3. 1068 = 1171 (40 lei) → 1171 rămâne -322.457 lei
+4. Capital 1012 = 200 lei → reducere până la 0 prin acoperire:
+   1012 = 1171 (200 lei reducere capital)
+5. Rezultă 1171 = -322.257 lei (pierdere acoperită până la sursele disponibile)
+
+PROBLEMA: capital sub minim legal 200 lei (SRL):
+- L 31/1990 art. 11: SRL trebuie capital minim 200 lei
+- Dacă reducere capital ar scădea sub 200 lei → INTERZIS
+- Alternativă: dizolvare societate sau aport asociat capital
+
+ALTERNATIVĂ: aport asociat pentru acoperire pierdere (după reducere):
+1. Asociatul depune bani (creditare): 5121 = 4551
+2. Renunțare creditare în rezerve: 4551 = 1068
+3. Acoperire pierdere: 1068 = 1171
+Avantaj: NU este venit impozabil (NU 7588), NU afectează cifra de afaceri
+
+REZERVĂ LEGALĂ — CONSTITUIRE OBLIGATORIE (L 31/1990 art. 183):
+- Minim 5% din profitul anual TREBUIE constituit ca rezervă legală
+- Constituire până la 20% din capitalul social subscris
+- Monografie: 129 = 1061 (la închiderea anului)
+- Atenție: 129 este cont de profit care reflectă REPARTIZAREA profitului (NU cheltuială)
+
+DECIZIA de CONSTITUIRE — TIMING:
+- Calcul la 31.12 (în nota contabilă închidere)
+- Decizia AGA pentru constituire: în 5 luni de la închidere
+- Reflectare contabilă: la 31.12 anul anterior (NU la data AGA)
+
+REZERVĂ LEGALĂ deja CONSTITUITĂ ÎN ANI ANTERIORI:
+Dacă firma are sold creditor mare în 1061 (ex: 64.000 lei), poate folosi acest sold pentru acoperire pierderi:
+ATENȚIE: doar surplusul peste 20% capital social.
+Dacă capital 50.000 lei și rezervă legală 64.000 → surplus 54.000 lei poate trece la 1068 și apoi la 1171.
+
+PIERDERE FISCALĂ vs PIERDERE CONTABILĂ:
+- Pierderea CONTABILĂ (1171) este cea din evidența contabilă (după închidere conturi)
+- Pierderea FISCALĂ este cea din D101 (după ajustări cheltuieli ne/deductibile)
+- Pot fi DIFERITE (ex: cheltuieli nedeductibile mari → pierdere contabilă mică dar pierdere fiscală mare)
+- Recuperare pierdere fiscală: 5 ani consecutivi (Cod Fiscal art. 31)
+
+CAZ SPECIFIC: 1175 SURPLUS REALIZAT din REEVALUARE
+Dacă reevaluarea s-a realizat (active reevaluate amortizate/vândute):
+1175 = 1171 (acoperire pierdere din realizat reevaluare)
+
+EXEMPLU:
+- 1175 = 45.360.760 lei (sold creditor — surplus realizat)
+- 1171 = -29.586.165 lei (sold debitor — pierdere reportată)
+- Acoperire: 1175 = 1171 cu 29.586.165 lei → 1171 = 0, 1175 = 15.774.595 lei
+
+ACEASTĂ ACOPERIRE FACE FIRMA să aibă din nou ACTIV NET POZITIV (dacă pierderea era cauza ANC negativ).
+
+DOCUMENTE OBLIGATORII pentru ACOPERIRE PIERDERE:
+1. Hotărâre AGA aprobare metoda acoperire
+2. Calcul detaliat pe surse (notă explicativă)
+3. Monografie contabilă cu notele aferente
+4. Bilanț cu reflectare corectă (1171 redus, 1068/1175/1041 redus)
+5. Pentru reducere capital: mențiune ONRC + Monitor Oficial`,
+    sources: [
+      { label: "L 31/1990 art. 69, 183 (rezultatul reportat + rezerva legală)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (rezultate reportate)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 31 (pierdere fiscală recuperabilă)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "f30-corelatii-creante-neincasate",
+    tags: ["F30", "F10", "corelații bilanț", "creanțe neîncasate", "rd 57", "rd 185", "dividende"],
+    title: "F30 din bilanț — corelații + creanțe neîncasate + dividende",
+    body: `OMFP 2861/2009 + OPANAF (formulare F10/F20/F30/F40).
+
+FORMULAR F30 = "Date informative" din bilanț, conține informații analitice nu acoperite de F10 (bilanț) și F20 (cont profit/pierdere).
+
+STRUCTURA F30:
+- Rd 1-30: salariați (număr, plăți restante către salariați)
+- Rd 31-60: creanțe + datorii (analiza pe termene)
+- Rd 61-90: dividende + impozite + alte plăți
+- Rd 91-120: cifră afaceri + venituri detaliate
+- Rd 121-200: alte informații
+
+CORELAȚII OBLIGATORII F10 ↔ F30:
+
+RD 57 F30 = Creanțe neîncasate la termen:
+Suma celor din cont 4118 (clienți incerți), 4091 (avansuri pentru bunuri facturate), 4092 (avansuri pentru servicii prestate), 4282 (debite angajați), etc.
+
+CORELAȚIE RD 57 F30 + RD 06a F10:
+- RD 06a F10 (Total creanțe): 4111 + 4118 - 491 + 267 + 296 + 4092 + 411 + 413 + 418 + 425 + 4282 + 431 + 436 + 437 + 4382 + 441 + 4424 + 4428 + 444 + 445 + 446 + 447 + 4482 + 451 + 453 + 456 + 4582 + 461 + 4662 + 473 - 491 - 495 - 496
+
+- RD 57 F30 (Creanțe neîncasate): doar SUBSETUL CU SOLD VECHI/INCERT (4091, 4092, 411 vechi, 413 vechi, 4118)
+
+ATENȚIE: 4118 (clienți incerți) este DIFERIT de 411 (clienți obișnuiți):
+- 4118 = clienți cu probleme de încasare (litigioși, depășire 90 zile, etc.)
+- 411 = clienți normali în termenele standard
+
+RD 185 F30 = Dividende distribuite în perioada de raportare din profitul reportat:
+- Suma BRUTĂ a dividendelor distribuite în anul calendaristic (NU netă, NU impozit)
+- INCLUDE dividendele distribuite chiar dacă neîncasate de asociați
+- INCLUDE dividende interimare distribuite ÎN ANUL CURENT (chiar dacă regularizate ulterior)
+
+EXEMPLU calcul RD 185:
+- Distribuit T3 2025: 100.000 lei brut
+- Distribuit T4 2025: 50.000 lei brut
+- Total RD 185 = 150.000 lei (cu impozit brut, NU net)
+
+RD 165a F30 = Dividende distribuite din profitul REPORTAT (NU din profitul curent):
+- Sume distribuite din 1171/1175 (rezerve sau profit din ani anteriori)
+- NU include dividendele interimare din anul curent (acelea în RD 185)
+
+EXEMPLU SPECIFIC pentru RD 165a:
+- 1171 = 200.000 lei (profit reportat din 2024)
+- Distribuire 2025: 100.000 lei din 1171 → 4571 → asociați
+- RD 165a = 100.000 lei
+
+CORELAȚIE: RD 185 vs RD 165a:
+- RD 185 = total dividende în AN curent (interimare + reportate)
+- RD 165a = doar partea din profit REPORTAT distribuită în AN curent
+
+ALTE CORELAȚII F30 important:
+
+RD 21 = NUMĂRUL EFECTIV salariați la 31.12:
+- Salariați ACTIVI: DA
+- Salariați SUSPENDAȚI (CO, CIC, CDP, CFM, alte concedii): DA (sunt parte din efectivul firmei)
+- Salariați la SFÂRȘITUL contractului în decembrie: NU (au plecat)
+- Total: efectiv listat la 31.12 (cu suspendați incluși)
+
+RD 22-23 = NUMĂR MEDIU salariați:
+- Calcul: SUMA pontaje / 12 luni × COEFICIENT timp lucrat (norma parțială)
+- Exemplu: salariat plin 12 luni = 1.0, salariat 1/2 normă 12 luni = 0.5
+- Pentru calcul categorie firmă: media anuală (NU efectiv 31.12)
+
+RD 09 din F10 = TOTAL ACTIVE:
+- Active imobilizate (1-205, 26, 27) + Active circulante (3, 4 debitor, 5 debitor) + Cheltuieli avans (471, 473)
+- NU se scad amortizările (cont 28x) — acelea sunt deja înregistrate în cont 213 cu valoare netă
+
+CONT 508 (Alte investiții pe termen scurt + depozite colaterale):
+- ÎN BILANȚ apare la RD "Casa și conturi la bănci" SAU la "Alte investiții pe termen scurt"
+- DEPOZITELE COLATERALE: tratate ca investiții pe termen scurt (cont 508)
+- DEPOZITE LICHIDE pe overnight: tratate ca echivalent monetar (RD "Casa și conturi la bănci")
+
+CONT 4411 (impozit profit) — RAPORTARE F10:
+Dacă sold DEBITOR 4411 (impozit plătit în PLUS):
+- Raportare la CREANȚE (RD "Alte creanțe") NU la datorii negative
+- Mențiune în nota explicativă
+
+Dacă sold CREDITOR 4411 (impozit DE PLATĂ):
+- Raportare la DATORII (RD "Datorii curente")
+
+CAZ FRECVENT: an cu impozit micro plătit + bonificație 3%
+- 4411 sold creditor 50.000 lei (impozit din decizie)
+- Plată în an: 48.500 lei (cu bonificație)
+- Sold final 4411: 1.500 lei DEBITOR (creanță față de buget)
+- Raportare RD bilanț: creanță 1.500 lei
+
+CAZUL: SUBVENȚII APIA pentru AGRICULTURĂ (ce intră în cifra de afaceri F30?):
+- Subvenții pentru SUPRAFEȚE declarate (APIA): VENITURI DIN SUBVENȚII (cont 7411)
+- NU se include în cifra de afaceri (CA) — categorii separate
+- F30: rd specifică pentru "venituri din subvenții" (NU "cifră afaceri")
+
+CAZUL: REVENIRE DIN SUSPENDARE — primul bilanț cu activitate parțială:
+- Cifra de afaceri = doar perioada de activitate (luni)
+- Pentru praguri categorii firmă: anualizare (× 12/luni active)
+- Număr mediu salariați: per LUNI ACTIVE doar (NU pe an întreg)
+
+ATENȚIE RD 06a (CREANȚE) și RD 09 (TOTAL ACTIVE):
+Pentru CALCUL ANC trebuie să NU se scadă din 4111 încă o dată provizionul 491 (este DEJA scăzut în 4118).
+ANC = Active TOTALE (rd 09) - Datorii TOTALE
+NU SE SCAD din nou provizioane (sunt deja în calculul activelor nete).`,
+    sources: [
+      { label: "OMFP 2861/2009 (norme F10/F20/F30/F40)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (conturi 4111, 4118, 1171, 1175)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF (formulare bilanț anual)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
 ];
