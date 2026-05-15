@@ -1637,4 +1637,743 @@ La plată: 448 = 5121`,
     ],
     last_verified: "2026-05-15",
   },
+  {
+    id: "servicii-it-caen-6210-6220-facilitate-programatori",
+    tags: ["IT", "CAEN 6210", "CAEN 6220", "programatori", "scutire impozit", "creare software"],
+    title: "Servicii IT (CAEN 6210, 6220) — facilitate programatori + monografie creare software",
+    body: `CAEN 6210 = Activități de realizare a softului la comandă (software la comandă)
+CAEN 6220 = Activități de consultanță în tehnologia informației
+CAEN 6201 = Activități de realizare a softurilor orientate-client (similar 6210)
+
+FACILITATEA FISCALĂ "PROGRAMATORI" (Cod Fiscal art. 60 lit. b):
+
+SCUTIRE IMPOZIT VENIT salariu programatori:
+- Aplicabilă: salariați cu poziție creare programe pe calculator (programator, programator IT, analist, software developer, project manager IT etc.)
+- Sumă scutire: TOTAL impozit pe venit salarial (16%) — DOAR pe venit brut până la 10.000 lei lunar
+- Diferența peste 10.000 lei → impozit normal 16%
+- Plafonul 10.000 lei se aplică pe lună, nu cumulat
+
+CONDIȚII OBLIGATORII pentru scutire (Cod Fiscal art. 60 lit. b + OMFP-MMSS comun):
+1. Diplomă universitară / studii superioare confirmate (sau echivalent — diplomă bacalaureat + experiență 3 ani)
+2. Activitate efectivă de programare/dezvoltare softuri orientate-client (NU activități administrative)
+3. Angajator are venituri DIN realizarea programelor pe calculator (CAEN 6210/6220 ca activitate efectivă, NU doar declarată)
+4. Venituri din software ≥ 10.000 EUR/an pe fiecare salariat scutit (echivalent în RON la cursul BNR ultima zi lucr.)
+
+DOCUMENTAȚIE OBLIGATORIE (control ANAF):
+1. Diplomă studii fiecare salariat scutit
+2. Fișa post + atribuții programare
+3. Contract muncă cu specificare poziție programator/IT
+4. Demonstrare venituri minim 10K EUR/salariat (facturi clienți + corelare ore programate)
+5. Pontaj cu activități specifice (NU generice)
+
+CASS și CAS:
+- ATENȚIE: scutirea NU se aplică contribuțiilor sociale (CAS 25% + CASS 10%) → se calculează și se rețin normal
+- Numai impozitul pe venit (16% până la 10.000 lei) este scutit
+
+MONOGRAFIE CONTABILĂ FACTURARE SOFTWARE:
+A) Creare software la comandă (CAEN 6210):
+   1. Recunoaștere venit pe etape (procent îndeplinire):
+      4111 = 704 (venit servicii — pe fiecare livrare/sprint)
+      4111 = 4427 (TVA colectat — la fapt generator)
+   2. Acumulare costuri în 332 (lucrări în curs):
+      6xx = 401/421 (cheltuieli salariale + servicii)
+      Sfârșit lună: 332 = 711 (variație stoc — capitalizare costuri în curs)
+   3. La livrare finală: 332 = 711 (descărcare costuri) + 4111 = 704 (factură finală)
+
+B) Software propriu dezvoltat pentru revânzare:
+   1. Capitalizare: 203/208 = 711 (imobilizări necorporale)
+   2. Amortizare: 6811 = 280x (durată 1-3 ani sau pe baza estimării utilizării)
+
+C) Service/mentenanță software (CAEN 6220 - consultanță):
+   - Recunoaștere venit lunar pe baza contract: 4111 = 704
+
+DECLARAȚII SPECIALE (peste D100/D101/D112/D300):
+- D205: NU specifice IT (declarație generală venituri persoane fizice)
+- D406 SAF-T: obligatoriu de la 01.01.2025 pentru toate firmele (NU specific IT)
+- INCLUDE în D101: anexa scutire impozit programatori (sume scutite + condiții)
+
+ATENȚIE TVA EXPORT SERVICII IT:
+- Servicii IT către clienți UE non-PJ → cota TVA RO (21%)
+- Servicii IT către clienți UE PJ → SCUTITE de TVA (taxare inversă la beneficiar), declarare în D390 VIES
+- Servicii IT către clienți non-UE → SCUTITE de TVA (locul prestării e străinătate)`,
+    sources: [
+      { label: "Cod Fiscal art. 60 lit. b (scutire impozit programatori)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP-MMSS comun 1168/2017 (norme aplicare scutire)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1802/2014 (capitalizare software dezvoltat intern)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "punct-lucru-cif-distinct-legea-245-2025",
+    tags: ["punct lucru", "CIF distinct", "sediu secundar", "Legea 245/2025", "D060", "D700"],
+    title: "Punct de lucru CIF distinct — Legea 245/2025 (obligație 2026)",
+    body: `LEGEA 245/2025 a introdus de la 01.01.2026 obligația obținerii CIF distinct pentru punctele de lucru cu salariați.
+
+PRINCIPIU NOU 2026:
+- Punctele de lucru CU SALARIAȚI → obligat CIF distinct (chiar și în aceeași localitate cu sediul social)
+- Punctele de lucru FĂRĂ salariați → continuă cu CIF-ul societății principale
+
+PROCEDURĂ OBȚINERE CIF (D060):
+1. Depunere D060 la ANAF (sediul fiscal al sediului secundar)
+2. Anexe obligatorii la D060:
+   - Certificat înregistrare sediu secundar de la ONRC
+   - Document spațiu (contract chirie, comodat, proprietate)
+   - Decizie autorizare punct de lucru
+   - Listă salariați transferați la punct de lucru
+3. Termen: 30 zile de la deschidere punct de lucru
+4. CIF se obține în 5-10 zile lucrătoare
+
+UTILIZARE CIF PUNCT DE LUCRU:
+- NU are personalitate juridică (rămâne sub firma principală)
+- Salariații se declară în D112 sub CIF punctului de lucru (NU al sediului social)
+- Impozit salarii și contribuții → plătite separat pe CIF-ul punctului
+- Facturile către clienți → emise în general pe CIF-ul firmei principale (sediul social), cu mențiune punct de lucru pe factură
+- TVA → rămâne unitar pe CIF-ul firmei principale (un singur cont TVA)
+
+EXCEPȚII:
+- Punct de lucru fără salariați, fără emitere facturi proprii → NU necesită CIF distinct
+- Sucursale (înregistrate ca atare la ONRC) → CIF propriu obligatoriu indiferent de salariați
+- Filiale → societate distinctă, CIF propriu
+
+CAZURI SPECIALE:
+- Punct lucru cu CIF în AFP-uri diferite → impozit salarii se plătește la AFP-ul CIF-ului punctului
+- Punct lucru CMI/CMV (medic, veterinar) → CIF distinct DOAR dacă are salariați; altfel folosește CIF principal
+- Punct lucru entități culte → CIF distinct cu salariați, dar regim special (D060 cu anexă cult)
+
+ACTUALIZARE D700:
+După obținerea CIF la D060:
+- D700: secțiunea sediu secundar — completare cu noul CIF
+- Termen depunere D700: 30 zile de la modificare
+- Anexă: copie CIF eliberat de ANAF
+- Submisie online prin SPV (semnătură digitală administrator)
+
+CASA DE MARCAT (AMEF):
+- Casa de marcat se înregistrează pe CIF-ul punctului de lucru (NU al sediului)
+- C801 (cerere atribuire număr unic AMEF) → folosește CIF punctului
+- Bonurile fiscale conțin CIF-ul punctului
+
+SANCȚIUNI:
+- Nedepunere D060 la termen: 1.000 - 5.000 RON (OG 21/2026)
+- Activitate fără CIF distinct (salariați): activitate ascunsă → 5.000 - 10.000 RON + posibilă restituire impozite calculate eronat
+
+VECTOR FISCAL PUNCT DE LUCRU:
+- Impozit pe salarii: DA (pe CIF punct de lucru)
+- CAS/CASS: DA (pe CIF punct de lucru)
+- TVA: NU (rămâne pe firmă principală)
+- Impozit profit: NU (rămâne pe firmă principală)`,
+    sources: [
+      { label: "Legea 245/2025 (CIF puncte de lucru cu salariați)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF (D060, D700)", ref: "https://anaf.ro" },
+      { label: "Cod Procedură Fiscală art. 88 (înregistrare fiscală sedii secundare)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "arhivare-documente-legea-16-1996",
+    tags: ["arhivare", "Legea 16/1996", "termene arhivare", "documente contabile", "CMR", "DVI", "digitalizare"],
+    title: "Arhivare documente — Legea 16/1996 + termene canonice contabile",
+    body: `LEGEA 16/1996 (Arhive Naționale) + OMFP 2634/2015 (norme arhivare contabilă).
+
+TERMENE ARHIVARE OBLIGATORII (OMFP 2634/2015):
+
+10 ANI (după închidere exercițiu):
+- Registru jurnal
+- Registru inventar
+- Registru cartea mare
+- Balanță verificare lunară
+- Note contabile
+- Facturi emise + primite
+- Extrase de cont
+- Bonuri fiscale
+- State plată salarii
+- Contracte individuale muncă (10 ani de la încetare)
+- D112, D300, D394, D406, D101, D205 (după depunere)
+
+5 ANI:
+- Documente justificative auxiliare (note recepție, bonuri consum, fișe magazie)
+- CMR (după efectuare transport)
+- DVI (declarații vamale)
+- Procese verbale predare-primire
+- Cereri salariați (concedii, deplasări)
+- Ordin deplasare cu deconturi
+
+50 ANI:
+- Documente personal (carnete muncă, decizii salariale, dosare angajare)
+- Documente pensii (state, înregistrări CAS individuale)
+- Documente medicale ocupaționale
+
+PERMANENT:
+- Acte constitutive (statut, contract societate, modificări)
+- Hotărâri AGA și CA (decizii strategice)
+- Registru AGA + Registru asociați
+- Acte de proprietate imobile
+- Brevete + mărci
+
+ARHIVARE ELECTRONICĂ (OMFP 2861/2009 + Legea 161/2003):
+
+CONDIȚII OBLIGATORII pentru arhivare ELECTRONICĂ exclusivă:
+1. Sistem informatic CERTIFICAT pentru arhivare electronică (registru MCSI)
+2. Semnătură electronică calificată pe fiecare document
+3. Marca temporală pe documente (timestamp securizat)
+4. Procedură backup și recuperare disaster
+5. Politică acces controlat + jurnale audit
+6. Garantarea integrității + autenticității în timp
+
+DOCUMENTE care POT fi arhivate exclusiv electronic:
+- Facturi e-Factura (SPV) — original electronic
+- Documente generate intern (note contabile electronice)
+- Rapoarte SAF-T
+- Extrase bancare digitale (cu semnătură electronică bancă)
+
+DOCUMENTE care TREBUIE păstrate ÎN ORIGINAL (fizic):
+- CMR (în original — semnătură mâna conducător auto + ștampila clienților)
+- DVI (declarații vamale) — original cu ștampila vamă
+- Documente cu semnătură olografă manuală (note recepție, procese verbale)
+- Documente notariale (contracte, hotărâri AGA notarial)
+- Ordin de deplasare cu semnături și ștampile
+
+OBLIGAȚIE NUMIRE RESPONSABIL ARHIVĂ:
+- Firmă > 50 angajați: numire obligatorie responsabil arhivă cu formare specifică (curs 40 ore Arhive Naționale)
+- Firmă mică: poate fi cumulat cu administrator/contabil, dar cu instruire minimă
+
+DISTRUGERE DOCUMENTE LA EXPIRARE TERMEN:
+1. Inventariere documente expirat termen
+2. Proces verbal de distrugere (semnat de comisie)
+3. Notificare Arhive Naționale (dacă documente cu valoare istorică)
+4. Distrugere fizică (mărunțitor) + electronică (ștergere securizată)
+5. Păstrare PV distrugere 5 ani pentru audit
+
+ARHIVARE SOCIETATE RADIATĂ:
+- Documente preluate de lichidator/administrator desemnat
+- Termen păstrare: 50 ani după radiere (pentru documente personal) sau 10 ani (pentru contabile)
+- Depozitare: arhive proprii sau servicii arhivare specializate (firme autorizate Arhive Naționale)
+
+SANCȚIUNI:
+- Lipsă arhivare termen legal: 10.000 - 50.000 RON (Legea 16/1996 art. 60)
+- Distrugere documente înainte de termen: 50.000 - 100.000 RON + recuperare obligații fiscale prescrise`,
+    sources: [
+      { label: "Legea 16/1996 (Arhive Naționale)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 2634/2015 (norme arhivare contabilă)", ref: "https://legislatie.just.ro" },
+      { label: "Legea 161/2003 (semnătură electronică)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "sponsorizare-d107-declaratie-informativa",
+    tags: ["sponsorizare", "D107", "Legea 32/1994", "mecenat", "burse", "contract sponsorizare"],
+    title: "Sponsorizare — D107 declarație informativă + condiții deductibilitate",
+    body: `LEGEA 32/1994 (Sponsorizare) + Cod Fiscal art. 25 alin. 4 lit. i.
+
+DEDUCTIBILITATE SPONSORIZARE:
+Sponsorizările sunt CHELTUIELI NEDEDUCTIBILE la calculul impozit profit, DAR se scad direct din impozit (credit fiscal) în limita:
+- 0.75% din cifra afaceri SAU
+- 20% din impozit profit datorat
+(se aplică limita MAI MICĂ)
+
+CONDIȚII OBLIGATORII (Cod Fiscal art. 25 alin. 4 lit. i):
+1. Contract scris de sponsorizare (semnat + datat)
+2. Beneficiar = entitate non-profit (ONG, fundație, asociație, biserică) ÎNSCRISĂ în Registrul Entităților Non-Profit (ANAF)
+3. Bani plătiți prin BANCĂ (NU numerar peste 5.000 RON — Legea 70/2015)
+4. Sponsorizare în BUNURI: factură + proces verbal predare-primire
+5. Declarare beneficiar în D107 (informativă)
+
+DECLARAȚIA 107 (declarație informativă sponsorizări):
+- Cine depune: societățile care au efectuat sponsorizări în anul precedent
+- Cine NU depune: societăți pe pierdere fiscală (fără credit fiscal aplicabil)
+- Termen depunere: 25 IUNIE anul următor (pentru anul calendaristic închis) sau 25 luna 6 după închidere exercițiu (an fiscal modificat)
+- Conținut: beneficiari + sume + scop sponsorizare
+
+SPONSORIZARE PE PIERDERE FISCALĂ:
+- Permite acordare sponsorizare (Legea 32/1994 NU interzice)
+- DAR NU se poate aplica credit fiscal (nu există impozit profit datorat)
+- Sponsorizarea rămâne cheltuială NEDEDUCTIBILĂ
+- Pierderea fiscală rămâne nemodificată
+
+SPONSORIZARE ÎN BUNURI:
+- TVA: sponsorizarea în bunuri NU este livrare către sine — NU se colectează TVA suplimentar
+- Dacă bunul a fost achiziționat cu TVA dedus, ajustare TVA dacă scop este DIFERIT de cel inițial declarat
+- Pentru bunuri achiziționate special pentru sponsorizare: TVA NU este deductibilă (Cod Fiscal art. 297)
+
+MONOGRAFIE CONTABILĂ:
+A) Sponsorizare în bani:
+   6582 = 5121 (cheltuieli sponsorizare — NEDEDUCTIBILE la profit)
+   La D101: scădere din impozit profit limita 0.75% CA sau 20% impozit (mai mic)
+
+B) Sponsorizare în bunuri:
+   6582 = 371 (cost contabil bunuri sponsorizate)
+   PV predare-primire ca document justificativ
+   FACTURĂ obligatorie către beneficiar (Cod Fiscal art. 319) — cu mențiune "sponsorizare", fără TVA
+
+REPORT SUMĂ NEUTILIZATĂ (Cod Fiscal art. 25 alin. 4 lit. i):
+- Sume necheltuite (peste limita 0.75% / 20%) → REPORT max 7 ANI consecutivi
+- Pierdere fiscală NU împiedică reportul (rămân pentru aplicare în anii cu profit)
+- Atenție: prima utilizare se face din suma cea mai veche (FIFO)
+
+BURSĂ PRIVATĂ (Legea 376/2004):
+- Bursă acordată elevilor/studenților → cheltuială deductibilă în limita 1.500 RON/lună/bursier
+- Tratament D107: DA — beneficiarii burselor private se declară în D107
+- Documentație: contract bursă + procese verbale plată lunare
+
+DIRECȚIONARE 3.5% MICROÎNTREPRINDERI:
+Spre deosebire de sponsorizare clasică, microîntreprinderile pot redirecționa 3.5% din impozitul micro (1% sau 3%) către ONG (acord în D177 — declarație nominativă).`,
+    sources: [
+      { label: "Legea 32/1994 (sponsorizare)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 25 alin. 4 lit. i + art. 56 alin. 1^1 lit. b (credit fiscal sponsorizare)", ref: "https://legislatie.just.ro" },
+      { label: "OPANAF (formular D107)", ref: "https://anaf.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "foi-parcurs-deductibilitate-combustibil",
+    tags: ["foi parcurs", "combustibil", "TVA 50%", "TVA 100%", "auto", "deductibilitate", "test drive"],
+    title: "Foi de parcurs — deductibilitate combustibil + TVA 50% vs 100%",
+    body: `Cod Fiscal art. 25 alin. 3 lit. l + art. 298 (deductibilitate auto):
+
+REGULĂ GENERALĂ (autovehicule mixt — folosite parțial business):
+- TVA combustibil + reparații + amortizare: 50% DEDUCTIBIL
+- Cheltuieli combustibil + reparații + amortizare: 50% DEDUCTIBIL la profit
+- Aplicabil: orice autovehicul utilizat și în scop personal (asumat)
+
+EXCEPȚII — DEDUCERE 100%:
+1. Vehicule utilizate EXCLUSIV pentru activitate economică (cu DOVEDIRE)
+2. Vehicule transport marfă (CAEN 4941 — transport rutier marfă)
+3. Vehicule transport persoane (CAEN 4931, 4939 — taxi, transport persoane)
+4. Vehicule școală auto (CAEN 8553)
+5. Vehicule curse de taxiuri și închiriere
+6. Vehicule poliție, jandarmerie, ambulanță, intervenții (utilitate publică)
+7. Vehicule destinate test drive (dealer auto)
+
+DOCUMENTUL CHEIE: FOAIA DE PARCURS
+
+Pentru deducere 100% (vehicul mixt → demonstrare utilizare exclusivă business):
+Foaia parcurs OBLIGATORIE (model OMFP 2861/2009 sau model propriu cu informații minime):
+1. Data + ora plecare + ora retur
+2. Persoană conducătoare (nume + funcție)
+3. Itinerar precis (de la-la, locații cu denumire)
+4. Scop deplasare (specific — NU "diverse")
+5. Km parcurși la plecare + retur
+6. Diferență km utilizați pentru deplasarea respectivă
+7. Semnătură conducător + ștampila/semnătura persoanei vizitate (când e cazul)
+8. Atașare bon combustibil cu km confirmate
+
+FĂRĂ FOAIA DE PARCURS — DEDUCERE LIMITATĂ:
+- TVA: 50% maxim (regulă auto mixt)
+- Cheltuieli: 50% maxim
+- Bonuri combustibil cu cod fiscal firmă: deductibilitate combustibil + TVA 50%
+
+VEHICULE TEST DRIVE (dealer auto):
+- Imobilizare corporală (cont 214) — destinată EXPRES test drive
+- Documentație: procese verbale predare-primire (client test drive) + foi de parcurs interne
+- TVA deductibil 100% (utilizare exclusivă activitate economică — comercializare)
+- Cheltuieli combustibil deductibile 100% pe foi parcurs
+
+LEASING AUTO:
+- Pentru auto operațional (mixt): TVA 50% + cheltuieli 50%
+- Pentru auto exclusiv business cu foi parcurs: TVA 100% + cheltuieli 100%
+- Atenție: schimbarea regimului mid-contract necesită justificare ANAF (foi parcurs din momentul aplicării 100%)
+
+DECONTARE COMBUSTIBIL DELEGAȚII (salariați):
+Cod Fiscal art. 76 alin. 4 + HG 714/2018:
+- 7.5 litri/100 km (pentru autoturism normal)
+- Document justificativ: ordin deplasare + bon combustibil
+- Bonul NU trebuie să aibă valoarea exactă decontată — se decontează KM × 7.5 litri × preț mediu
+- Bonul certifică doar achiziție efectivă, NU valoarea decontată
+
+ATENȚIE FACTURĂ vs BON pentru combustibil:
+- Bon fiscal cu COD FISCAL firmă tipărit: deductibil până la 100 EUR (echivalent RON, fără factură)
+- Bon fără cod fiscal: NU deductibil (necesar factură suplimentară)
+- Peste 100 EUR per bon: OBLIGATORIE factură (Cod Fiscal art. 319)
+
+DECLARAȚII:
+- D300: TVA deductibil rândul 23 (50% sau 100%)
+- D101: anexa cheltuieli auto (50% sau 100%)
+- D406 SAF-T: cont 6022 (combustibil), 6024 (alte cheltuieli auto)`,
+    sources: [
+      { label: "Cod Fiscal art. 25 alin. 3 lit. l, art. 298 (deductibilitate auto)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 319 (facturare obligatorie peste prag)", ref: "https://legislatie.just.ro" },
+      { label: "HG 714/2018 (decontare combustibil delegații)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 2861/2009 (model foaie parcurs)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "reevaluare-imobilizari-monografie",
+    tags: ["reevaluare", "imobilizări", "cont 105", "cont 6813", "rezervă reevaluare", "raport evaluare"],
+    title: "Reevaluare imobilizări — monografie + tratament fiscal (creștere/diminuare)",
+    body: `OMFP 1802/2014 (cap. III — reevaluare) + Cod Fiscal art. 28 (amortizare după reevaluare).
+
+REGULĂ GENERALĂ:
+- Reevaluarea NU este obligatorie, dar este recomandată dacă valoarea contabilă diferă SEMNIFICATIV de valoarea de piață
+- Se face de evaluator autorizat (ANEVAR) prin raport de evaluare
+- Aplică la TOATE imobilizările aceleași categorii (NU selectiv pe câteva)
+
+CREȘTERE DE VALOARE (valoare reevaluată > valoare contabilă):
+
+A) Prima reevaluare cu plus valoare:
+   213/214 = 105 (Rezerve din reevaluare)
+   Suma = diferența (val. reevaluată - val. netă contabilă curentă)
+   IMPOZIT PROFIT: NU se impozitează (rezerva 105 — neimpozabilă până la realizare)
+
+B) Reevaluări ulterioare cu plus valoare (după o reducere anterioară):
+   213/214 = 105 până la nivelul reducerii anterioare anulate
+   213/214 = 7813 (venit din reluare provizion) DACĂ depășește reducerea anterioară
+   IMPOZIT: doar venitul 7813 este impozabil
+
+DIMINUARE DE VALOARE (valoare reevaluată < valoare contabilă):
+
+A) Prima reevaluare cu minus valoare:
+   6813 = 213/214 (cheltuială amortizare/diminuare)
+   IMPOZIT: NEDEDUCTIBILĂ la calcul profit (Cod Fiscal art. 28 — amortizarea contabilă diferă de cea fiscală)
+
+B) Diminuare după o reevaluare ANTERIOARĂ cu plus (utilizare rezerva existentă):
+   105 = 213/214 (până la nivelul rezervei existente — reducere rezervă)
+   6813 = 213/214 (depășire — pentru partea peste rezerva existentă)
+   IMPOZIT: doar 6813 este nedeductibil
+
+SCENARIU SPECIFIC: clădire cu reevaluare 2025 mai mică decât amortizarea cumulată:
+
+Date exemplu:
+- Valoare inițială: 306.809 lei
+- Amortizare la 31.12.2025: 204.539 lei
+- Valoare reevaluată 31.12.2025: 144.989 lei
+- Valoare netă contabilă: 306.809 - 204.539 = 102.270 lei
+- Reevaluare mai MARE decât valoare netă (144.989 > 102.270) → CREȘTERE 42.719 lei
+
+Monografie 31.12.2025:
+1. Stornare amortizare cumulată (metoda 1 — reset):
+   281x = 213 (204.539 lei — anulare amortizare cumulată)
+2. Plus valoare:
+   213 = 105 (42.719 lei — rezervă reevaluare)
+3. Amortizare nouă de la 2026 pe baza valorii reevaluate (144.989 lei) pe restul duratei
+
+REGULA RELUARE 105 LA REZULTAT REPORTAT:
+La data SCOATERII DIN GESTIUNE a imobilizării (vânzare, casare, dispariție):
+105 = 1175 (transfer rezervă la rezultat reportat)
+IMPOZIT: suma transferată la 1175 este IMPOZABILĂ la momentul realizării (Cod Fiscal art. 25)
+
+LA AMORTIZARE LUNARĂ DUPĂ REEVALUARE:
+Practica recomandată: transfer treptat al 105 la 1175 PROPORȚIONAL cu amortizarea:
+105 = 1175 (parte rezervă proporțional cu amortizarea consumată)
+Asta evită impozit profit BRUSC la realizare; se eșalonează.
+
+AMORTIZARE FISCALĂ vs CONTABILĂ după reevaluare:
+- Amortizarea contabilă = pe noua valoare reevaluată
+- Amortizarea fiscală = continuă pe valoarea ORIGINALĂ de achiziție (Cod Fiscal art. 28 alin. 12)
+- Diferență: ANEXĂ FISCALĂ în D101 (recalcul amortizare fiscală vs contabilă)
+
+ATENȚIE REPRODUCERE:
+- Imobilizările reevaluate NU pot fi re-reevaluate retrocedat pe ani anteriori (NUMAI prospectiv)
+- O reevaluare odată făcută se aplică TOATE imobilizările categoriei (nu selectiv)
+- Frecvență: o dată la 3-5 ani (recomandare profesională) sau ad-hoc dacă fluctuație piață > 20%`,
+    sources: [
+      { label: "OMFP 1802/2014 cap. III (reevaluare imobilizări)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 28 (amortizare fiscală + tratament reevaluare)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 1746/2015 (reguli ANEVAR pentru evaluatori)", ref: "https://anevar.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "bonuri-fiscale-cod-firma-deductibilitate",
+    tags: ["bon fiscal", "cod firmă", "deductibilitate", "TVA dedus", "factură", "prag 100 EUR"],
+    title: "Bonuri fiscale cu cod firmă — deductibilitate cheltuieli + TVA",
+    body: `Cod Fiscal art. 319 + OMFP 2634/2015 (reguli documente justificative).
+
+REGULA FUNDAMENTALĂ:
+- Bonul fiscal este document justificativ pentru cheltuieli + TVA dedus DOAR dacă conține CODUL FISCAL al firmei beneficiare (tipărit pe bon de casa de marcat)
+
+PRAG 100 EUR (echivalent RON la curs BNR ziua tranzacției):
+- SUB 100 EUR pe bon: bonul fiscal cu cod firmă tipărit = DOCUMENT JUSTIFICATIV COMPLET (deducere cheltuieli + TVA)
+- PESTE 100 EUR pe bon: NECESARĂ factură suplimentară (bonul singur nu mai este suficient)
+
+CONDIȚII OBLIGATORII pe bon fiscal pentru deductibilitate:
+1. Cod fiscal firmă TIPĂRIT (NU scris manual)
+2. Denumire firmă beneficiară (sau cel puțin CIF clar)
+3. Data emiterii
+4. Numele articolelor achiziționate (cu specificare TVA pe rând)
+5. Suma totală + TVA detaliat
+6. Semnătura/identificarea casierului (la dimensiuni mai mari)
+
+CATEGORII DE CHELTUIELI ADMISE PE BON CU COD FIRMĂ:
+- Combustibil + uleiuri (până la 100 EUR/bon)
+- Consumabile birou (până la 100 EUR/bon)
+- Reparații + piese auto (până la 100 EUR/bon)
+- Alimente protocol (până la 100 EUR/bon)
+- Servicii salon, materiale curățenie (până la 100 EUR/bon)
+
+LIMITĂRI DEDUCTIBILITATE (chiar dacă bon valid):
+- Cheltuieli auto mixt: deducere 50% TVA + 50% cheltuieli (vezi entrie foi parcurs)
+- Cheltuieli protocol: limită 2% din profit (vezi entrie protocol)
+- Cheltuieli reprezentare angajat: plafoane HG 1860/2006
+
+BONURI FĂRĂ COD FIRMĂ:
+- NU sunt documente justificative pentru firmă
+- Pot fi acceptate DOAR pentru cheltuieli minore (< 50 RON) cu document suplimentar (decont angajat + bon)
+- Pentru control fiscal: ANAF poate respinge total deducerea TVA fără bon cu cod firmă
+
+BONURI ELECTRONICE (bon fiscal e-Bon):
+- Din 2025+, bonurile pot fi emise în format electronic prin sistem ANAF "e-Bon"
+- Conțin QR cod pentru verificare în SPV
+- Tratament fiscal IDENTIC cu bonurile fiscale fizice tipărite
+- Arhivare: format electronic suficient
+
+CAZ FRECVENT: PLATA CU CARDUL PERSONAL SALARIAT
+Dacă bonul are codul firmei dar plata e cu cardul personal al angajatului:
+- Bonul rămâne valid pentru firmă (cod firmă = beneficiar real)
+- Decontare salariat prin cont 542 (avansuri spre decontare) sau 461 (debitori)
+- Monografie:
+  6xx = 401 (cheltuială + TVA)
+  401 = 542 (stingere prin avans angajat)
+  542 = 5311 (restituire angajat)
+
+INTERZICERE EXPRESĂ (Cod Fiscal art. 319):
+- Bonurile fiscale NU pot fi folosite pentru tranzacții B2B peste 100 EUR — ÎNTOTDEAUNA factură
+- Bonurile pentru cheltuieli salariu/dividende → NU acceptate (necesare contracte + state plată)
+- Bonuri achiziții pentru asociat persoană fizică → NU sunt deductibile pentru firmă (cheltuială personală a asociatului)
+
+DOCUMENTAȚIE SUPLIMENTARĂ recomandată:
+1. Notă internă cu scopul achiziției (justificare cheltuială deductibilă)
+2. Referat avizat de administrator pentru cheltuieli ne-clar legate de activitatea economică
+3. Pentru cheltuieli protocol/alimentație: listă participanți + scop`,
+    sources: [
+      { label: "Cod Fiscal art. 319 (documente justificative)", ref: "https://legislatie.just.ro" },
+      { label: "OMFP 2634/2015 (norme documente)", ref: "https://legislatie.just.ro" },
+      { label: "Legea 70/2015 (disciplina numerar)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "cheltuieli-protocol-plafon-tva",
+    tags: ["protocol", "plafon 2%", "TVA protocol", "cheltuieli reprezentare", "art. 25"],
+    title: "Cheltuieli protocol — plafon 2% profit + TVA tratament",
+    body: `Cod Fiscal art. 25 alin. 3 lit. b + art. 297 (TVA protocol).
+
+DEFINIȚIE PROTOCOL:
+Cheltuieli efectuate pentru întâlniri de afaceri cu clienți, parteneri, autorități (NU pentru angajați proprii — acelea sunt cheltuieli de personal):
+- Hrană și băuturi la întâlniri business
+- Cazare oaspeți business
+- Cadouri pentru parteneri (limite specifice)
+- Materiale promoționale cu logo firma
+
+PLAFON DEDUCTIBILITATE (Cod Fiscal art. 25 alin. 3 lit. b):
+- Cheltuieli protocol: DEDUCTIBILE în limita 2% din DIFERENȚA dintre venituri impozabile și cheltuieli aferente
+- Formula simplificată: 2% × (Venituri impozabile - Cheltuieli aferente)
+- Cheltuielile protocol care depășesc 2% → NEDEDUCTIBILE
+
+EXEMPLU CALCUL:
+- Venituri impozabile 2025: 5.000.000 lei
+- Cheltuieli aferente: 4.500.000 lei
+- Bază protocol: 5.000.000 - 4.500.000 = 500.000 lei
+- Plafon protocol deductibil: 500.000 × 2% = 10.000 lei
+- Dacă cheltuieli protocol = 15.000 lei → 10.000 deductibile + 5.000 nedeductibile
+
+TVA PROTOCOL (Cod Fiscal art. 297 + 301):
+- TVA pentru cheltuieli protocol: NEDEDUCTIBIL în GENERAL
+- EXCEPȚIE: materiale promoționale (mostre, samples) cu logo firmă → TVA deductibil dacă scopul este promovarea
+- Cadouri către clienți: TVA deductibil dacă valoare individuală ≤ 100 RON (publicitate) — peste prag, TVA nedeductibil
+
+CAZURI SPECIFICE:
+
+A) Hrană și băuturi la evenimente proprii (târguri, expoziții):
+   Cod Fiscal NU consideră protocol în sens strict — cheltuieli marketing/publicitate
+   Deductibilitate 100% dacă: factură + scop comercial documentat + participanți listați
+   TVA deductibil 100%
+
+B) Cadouri partenerilor:
+   - Sub 100 RON valoare individuală: cheltuială publicitate (deductibilă 100%, TVA deductibil)
+   - 100 - 500 RON: cheltuială protocol (în limita 2%, TVA nedeductibil)
+   - Peste 500 RON: posibil considerată plată în natură partener (impozit nerezident pentru străini)
+
+C) Cheltuieli pentru angajații proprii:
+   - NU sunt protocol — sunt cheltuieli personal (salarii, beneficii, deplasări)
+   - Plafoane specifice (HG 1860/2006 pentru deplasări, Cod Fiscal art. 76 pentru beneficii)
+
+D) Aliniament management (district managers + store managers):
+   - Cheltuieli de FORMARE/instruire — DEDUCTIBILE 100% (Cod Fiscal art. 25 alin. 1)
+   - NU se încadrează la protocol
+   - Documentație: agendă întâlnire + participanți + materiale formare
+
+MONOGRAFIE CONTABILĂ:
+A) Achiziție cu factură (TVA inclus):
+   623 = 401 (cheltuială protocol)
+   4426 = 401 (TVA — NEDEDUCTIBIL, dar înregistrat pentru calcul)
+
+B) Înregistrare TVA nedeductibil la sfârșit perioadă:
+   623 = 4426 (transfer TVA nedeductibil la cheltuială)
+   Sau direct: 623 = 401 (cu TVA inclus la cheltuială)
+
+C) La calcul impozit profit:
+   Cheltuieli protocol peste 2% plafon → ADAUS LA PROFITUL FISCAL (D101 anexa cheltuieli nedeductibile)
+
+DOCUMENTAȚIE OBLIGATORIE:
+1. Factura/bon fiscal cu beneficiar firma
+2. Listă participanți (cu funcție + firma asociată)
+3. Scop întâlnire (negociere contract, semnătură proiect, conferință)
+4. Aprobată administrator (sumar internal pentru control fiscal)
+5. Pentru cadouri: PV predare-primire (la valoare > 100 RON)
+
+ATENȚIE PROVISIOANE:
+Cheltuielile protocol NU pot fi capitalizate (NU se trec pe imobilizări) — sunt cheltuieli ale perioadei.
+Provizioanele pentru protocol planificat sunt POSIBILE doar pentru sume EXACT determinate (rar acceptat de ANAF).`,
+    sources: [
+      { label: "Cod Fiscal art. 25 alin. 3 lit. b (plafon protocol 2%)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 297, 301 (TVA protocol)", ref: "https://legislatie.just.ro" },
+      { label: "HG 1860/2006 (diurna + deplasări — nu protocol)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "indemnizatie-mobilitate-clauza-mobilitate",
+    tags: ["mobilitate", "clauză mobilitate", "delegație", "diurnă", "plafon neimpozitare", "salariu"],
+    title: "Indemnizație de mobilitate (clauza mobilitate) — plafon + tratament fiscal",
+    body: `Codul Muncii art. 25-26 (clauza mobilitate) + Cod Fiscal art. 76 alin. 2 lit. k.
+
+DEFINIȚIE CLAUZA MOBILITATE:
+Clauză inclusă în contract muncă prin care salariatul se obligă să presteze activitatea în mai multe locuri (NU un singur loc fix). Compensare: indemnizație mobilitate (NU este diurnă/delegație).
+
+DIFERENȚE FAȚĂ DE DELEGAȚIE (HG 1860/2006):
+- Delegație = trimitere TEMPORARĂ la un alt loc (cu ordin deplasare) — primește diurnă
+- Mobilitate = activitate permanentă pe mai multe locuri (CIM prevede aceasta) — primește indemnizație mobilitate
+
+PLAFON NEIMPOZITARE (Cod Fiscal art. 76 alin. 2 lit. k — actualizat 2024+):
+Indemnizația mobilitate NEIMPOZABILĂ (fără impozit venit + CAS + CASS) în limita:
+- 2.5 × nivel salariu minim brut pe țară × număr zile lucrătoare cu mobilitate
+- 2025: salariu minim brut = 4.050 RON / 21 zile lucrătoare = ~193 RON/zi
+- 2.5 × 193 = ~482 RON/zi maxim neimpozabil
+
+PESTE PLAFON → IMPOZABIL ca SALARIU (16% impozit venit + 25% CAS + 10% CASS).
+
+EXEMPLU CALCUL:
+Salariat cu clauză mobilitate, 22 zile lucrătoare luna iulie 2025:
+- Indemnizație acordată: 600 RON/zi × 22 zile = 13.200 RON
+- Plafon neimpozabil: 482 × 22 = 10.604 RON
+- Depășire plafon: 13.200 - 10.604 = 2.596 RON
+- Tratament: 10.604 RON neimpozabil (cheltuială deductibilă fără contribuții)
+- 2.596 RON impozabil ca salariu (+ contribuții CAS, CASS, impozit)
+
+DEDUCTIBILITATE LA FIRMĂ:
+Toată indemnizația mobilitate (atât neimpozabilă cât și impozabilă) = CHELTUIALĂ DEDUCTIBILĂ la profit (Cod Fiscal art. 25 alin. 1).
+
+MONOGRAFIE CONTABILĂ:
+A) Plată indemnizație mobilitate:
+   625 = 421 (cheltuieli mobilitate — partea neimpozabilă)
+   641 = 421 (cheltuieli salariale — partea impozabilă peste plafon)
+
+B) Contribuții pe partea impozabilă (2.596 RON din exemplu):
+   421 = 4431 (CAS 25% × 2.596 = 649 RON)
+   421 = 4432 (CASS 10% × 2.596 = 260 RON)
+   421 = 4441 (impozit venit 16% × 2.596 = 415 RON)
+   6451 = 4431 (CAS angajator)
+
+C) Plată netă către salariat:
+   421 = 5121 / 5311 (suma rămasă după rețineri)
+
+DOCUMENTAȚIE OBLIGATORIE pentru control fiscal:
+1. Clauza mobilitate scrisă în CIM (semnată salariat + angajator)
+2. Decizia administrator privind suma indemnizație + frecvență
+3. Pontaj cu locurile efective de muncă pe zi
+4. Listă activități prestate la fiecare locație
+5. State plată cu calcul detaliat (neimpozabil vs impozabil)
+
+DIFERENȚE FAȚĂ DE DIURNĂ (Cod Fiscal art. 76 alin. 2 lit. l):
+- Diurna delegație internă: 2.5 × salariu minim/zi neimpozabilă (cu plafon HG 1860/2006 — 17.5 RON/zi minimul)
+- Diurnă delegație externă: 2.5 × diurna externă pe țară neimpozabilă (HG 518/1995)
+- Mobilitate: aplicabilă DOAR cu clauză în CIM (NU se poate aplica retroactiv)
+
+CAZ SPECIAL: PROPAGARE DIURNĂ ÎN D112
+Indemnizațiile mobilitate se declară SEPARAT în D112:
+- Secțiunea F1: indemnizație mobilitate (neimpozabilă)
+- Secțiunea G: dacă există depășire plafon (parte impozabilă)
+- Notă: NU se declară la rubrica "diurnă" (acolo doar pentru delegații)
+
+ATENȚIE LIMITĂRI:
+- Clauza mobilitate NU se poate aplica la salariați cu loc fix de muncă (programator la birou, vânzător la magazin)
+- Profesii cu mobilitate naturală: conductoare auto, instalatori, consultanți teren, agenți comerciali
+- ANAF poate respinge mobilitate dacă în pontaj salariatul a fost mai mult de 80% în același loc`,
+    sources: [
+      { label: "Codul Muncii art. 25-26 (clauza mobilitate)", ref: "https://legislatie.just.ro" },
+      { label: "Cod Fiscal art. 76 alin. 2 lit. k (plafon mobilitate)", ref: "https://legislatie.just.ro" },
+      { label: "HG 1860/2006 (diurnă delegație)", ref: "https://legislatie.just.ro" },
+    ],
+    last_verified: "2026-05-15",
+  },
+  {
+    id: "n408-pillar-2-impozit-suplimentar",
+    tags: ["N408", "Pillar 2", "impozit suplimentar", "GloBE", "multinationale", "OUG 107/2024"],
+    title: "N408 — notificare impozit suplimentar Pillar 2 (multinaționale)",
+    body: `OUG 107/2024 (Pillar 2 — GloBE) + Directiva (UE) 2022/2523.
+
+REGULA IMPOZIT SUPLIMENTAR (Pillar 2):
+- Aplicabilă: grupurilor multinationale cu venituri consolidate ≥ 750 milioane EUR/an
+- Cotă efectivă minimă: 15% pe profit în fiecare jurisdicție unde grupul operează
+- Dacă cota efectivă într-o jurisdicție < 15% → impozit suplimentar (Top-up Tax) datorat
+
+ENTITĂȚI OBLIGATE ÎN ROMÂNIA:
+1. Filială UPE (Ultimate Parent Entity) din străinătate — filiala din RO declară top-up tax dacă RO are cota < 15%
+2. Filială intermediară IPE (Intermediate Parent Entity) — dacă desemnată
+3. Sucursală a unei UPE — desemnată automat pentru declarare în RO
+
+NOTIFICAREA N408 (formular nou 2025+):
+Conținut obligatoriu:
+- Identificare grup (denumire UPE, jurisdicție UPE, CIF UPE)
+- Identificare entitate raportoare în RO
+- An fiscal aplicabil (atenție: poate diferi între UPE și filiala RO)
+- Calcul cota efectivă în RO (impozit pe profit / profit contabil ajustat)
+- Impozit suplimentar datorat (dacă < 15%)
+
+SECȚIUNEA E (an fiscal modificat):
+Dacă societatea-mamă are AN FISCAL DIFERIT de cel calendaristic al sucursalei RO:
+- Sucursală: an fiscal 01.01 - 31.12.2026
+- UPE: an fiscal 01.04.2025 - 31.03.2026
+- În N408 se completează AMBELE intervale + specificare an de raportare aplicabil
+
+TERMENE DEPUNERE N408:
+- Notificare inițială: 15 luni după sfârșitul anului fiscal grupului (UPE)
+- Notificare anuală: 15 luni pentru primul an, apoi anual la fiecare exercițiu
+- Plata impozit suplimentar: până la 15 luni de la sfârșitul anului UPE
+
+CALCUL COTĂ EFECTIVĂ (Cod Fiscal art. 401^2):
+Cota efectivă RO = (Impozit profit datorat + impozit suplimentar deja plătit) / Profit contabil ajustat × 100
+
+DACĂ COTĂ EFECTIVĂ < 15%:
+Impozit suplimentar (Top-up Tax) = (15% - cota efectivă) × Profit contabil ajustat - Substance Carve-Out
+
+SUBSTANCE CARVE-OUT (reducere top-up tax pentru entități cu activitate reală):
+- 5% (declină gradual la 8% în 10 ani) × Valoarea bunurilor materiale
+- 5% (declină) × Cheltuielile salariale brute
+Sumă SCAZUTĂ din baza top-up tax (dacă rezultat negativ → 0 top-up tax).
+
+EXEMPTIONS SAFE HARBOUR (entități scutite în primii 5 ani):
+1. Activitate transfrontalieră < 50 milioane EUR/an
+2. Venituri totale grup < 750 milioane EUR (sub prag general)
+3. Tranzitorie 2024-2026: aplicarea Country-by-Country Reporting safe harbour (cota efectivă din CBCR > 15%)
+
+MONOGRAFIE CONTABILĂ TOP-UP TAX:
+A) Provizionare la sfârșit an:
+   698 = 4419 (impozit suplimentar — cheltuială NEDEDUCTIBILĂ în RO)
+B) La plată:
+   4419 = 5121
+
+ATENȚIE COMPLEXITATE:
+- Calculul efectiv presupune date detaliate consolidate (audit grup obligatoriu)
+- Recomandare: consultanță fiscală internațională specializată (PWC, EY, KPMG, Deloitte Big4)
+- DTA (Deferred Tax Asset/Liability) impact pe top-up tax
+
+DECLARAȚII LEGATE:
+- D107 — informativă sponsorizări (NU este legat de Pillar 2)
+- D406 SAF-T — date analitice grup (poate fi solicitate)
+- D101 — calcul cota efectivă în anexă specifică (de la 2025+)
+- N408 — notificare anuală obligatorie
+
+SANCȚIUNI NEDEPUNERE N408:
+- Amendă: 70.000 - 100.000 RON per an de raportare nedepus
+- Calcul automat din oficiu cu prezumție cota 0% în RO (top-up tax maxim posibil)
+- Penalități de întârziere conform Cod Procedură Fiscală art. 173-174`,
+    sources: [
+      { label: "OUG 107/2024 (Pillar 2 — Romania)", ref: "https://legislatie.just.ro" },
+      { label: "Directiva (UE) 2022/2523 (GloBE — Pillar 2)", ref: "https://eur-lex.europa.eu" },
+      { label: "OPANAF (formular N408)", ref: "https://anaf.ro" },
+      { label: "OECD GloBE Model Rules", ref: "https://www.oecd.org/tax/beps/" },
+    ],
+    last_verified: "2026-05-15",
+  },
 ];
