@@ -14,11 +14,12 @@
 import { FISCAL_CORPUS, type KnowledgeEntry } from "./corpus/seed-fiscal-ro";
 import { loadSagaManualCorpus } from "./corpus/saga-manual";
 import { loadForumInsightsCorpus } from "./corpus/forum-insights";
+import { loadCodFiscalCorpus } from "./corpus/cod-fiscal";
 
 export interface RetrievalResult {
   entry: KnowledgeEntry;
   score: number;
-  source: "seed" | "saga-manual" | "forum-insights";
+  source: "seed" | "saga-manual" | "forum-insights" | "cod-fiscal";
 }
 
 const STOP_WORDS = new Set([
@@ -175,6 +176,16 @@ export async function retrieveRelevantAsync(
   const tokens = tokenize(query);
   if (tokens.length === 0) return [];
 
+  // Cod Fiscal — AUTORITATE MAXIMĂ (lege oficială). Boost ×1.5.
+  const codFiscal = await loadCodFiscalCorpus();
+  const codFiscalResults: RetrievalResult[] = codFiscal
+    .map((entry) => ({
+      entry,
+      score: scoreEntry(entry, tokens) * 1.5,
+      source: "cod-fiscal" as const,
+    }))
+    .filter((r) => r.score > 0);
+
   const seedResults: RetrievalResult[] = FISCAL_CORPUS.map((entry) => ({
     entry,
     score: scoreEntry(entry, tokens) * 1.2, // 20% boost for curated seed
@@ -200,7 +211,7 @@ export async function retrieveRelevantAsync(
     }))
     .filter((r) => r.score > 0);
 
-  return [...seedResults, ...forumResults, ...sagaResults]
+  return [...codFiscalResults, ...seedResults, ...forumResults, ...sagaResults]
     .sort((a, b) => b.score - a.score)
     .slice(0, topN);
 }
